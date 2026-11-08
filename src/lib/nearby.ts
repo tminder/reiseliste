@@ -81,12 +81,14 @@ out center tags ${limit};`
     .map(({ rank: _rank, ...shop }) => shop)
 }
 
-/** Suchradius ausserhalb eines Ladens. TESTWEISE 20 km (S-024), vorgesehen sind 3 km. */
-export const FAR_RADIUS_M = 20_000
+/** Suchstufen ausserhalb eines Ladens: klein anfangen, nur bei zu wenig Treffern weiter suchen. */
+export const FAR_STEPS_M = [1_000, 3_000, 10_000, 20_000]
+export const FAR_RADIUS_M = FAR_STEPS_M[FAR_STEPS_M.length - 1]
+const ENOUGH = 3
 
 /**
  * Läden in der Nähe. `inside` = true: Läden im Umkreis der GPS-Genauigkeit (man ist wohl drin).
- * Sonst die nächsten Supermärkte bis FAR_RADIUS_M Entfernung.
+ * Sonst die nächsten Supermärkte, Suche stufenweise bis FAR_RADIUS_M, bis mindestens 3 gefunden sind.
  */
 export async function findNearbyShops(): Promise<{ shops: Shop[]; inside: boolean }> {
   const pos = await getPosition()
@@ -95,8 +97,13 @@ export async function findNearbyShops(): Promise<{ shops: Shop[]; inside: boolea
   const radius = Math.min(400, Math.max(75, Math.round(accuracy * 1.5)))
   const close = await overpass(lat, lon, radius, 'supermarket|convenience|greengrocer|chemist', 30)
   if (close.length) return { shops: close, inside: true }
-  const far = await overpass(lat, lon, FAR_RADIUS_M, 'supermarket', 200)
-  return { shops: far.slice(0, 5), inside: false }
+
+  let found: Shop[] = []
+  for (const step of FAR_STEPS_M) {
+    found = await overpass(lat, lon, step, 'supermarket', 100)
+    if (found.length >= ENOUGH) break
+  }
+  return { shops: found.slice(0, 5), inside: false }
 }
 
 function formatDistance(m: number) {
