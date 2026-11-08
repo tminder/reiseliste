@@ -42,68 +42,93 @@ export async function locationAlreadyAllowed(): Promise<boolean> {
   }
 }
 
-async function overpass(lat: number, lon: number, radius: number, shopTypes: string, limit: number) {
-  const query = `[out:json][timeout:25];
-nwr(around:${radius},${lat},${lon})["shop"~"^(${shopTypes})$"];
-out center tags ${limit};`
-  let res: Response
-  try {
-    res = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: new URLSearchParams({ data: query }),
-    })
-  } catch {
-    throw new NearbyError('Keine Verbindung zu OpenStreetMap.')
-  }
-  if (res.status === 429 || res.status === 504) throw new NearbyError('OpenStreetMap ist gerade ausgelastet. Bitte gleich nochmal.')
-  if (!res.ok) throw new NearbyError(`OpenStreetMap antwortet nicht (${res.status}).`)
+// Öffentliche Overpass-Server; fällt einer aus oder ist ausgelastet, wird der nächste versucht.
+const ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+]
 
-  const data = (await res.json()) as {
-    elements: { type: string; id: number; lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }[]
+type OsmElement = { type: string; id: number; lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }
+
+async function runQuery(query: string): Promise<OsmElement[]> {
+  let lastError = 'Keine Verbindung zu OpenStreetMap.'
+  for (const url of ENDPOINTS) {
+    try {
+      const res = await fetch(url, { method: 'POST', body: new URLSearchParams({ data: query }) })
+      if (res.ok) return ((await res.json()) as { elements: OsmElement[] }).elements
+      lastError =
+        res.status === 429 || res.status === 504
+          ? 'OpenStreetMap ist gerade ausgelastet. Bitte gleich nochmal.'
+          : `OpenStreetMap antwortet nicht (${res.status}).`
+    } catch {
+      // Netzwerkfehler – oder Überlastung: Overpass schickt bei 429 keine CORS-Header, der Browser meldet dann nur „failed to fetch“
+      lastError = 'OpenStreetMap ist nicht erreichbar oder ausgelastet. Bitte gleich nochmal.'
+    }
   }
-  return data.elements
-    .map((el): (Shop & { rank: number }) | null => {
-      const p = el.center ?? (el.lat != null && el.lon != null ? { lat: el.lat, lon: el.lon } : null)
-      const tags = el.tags ?? {}
-      const name: string | undefined = tags.name ?? tags.brand
-      if (!p || !name) return null
-      return {
-        id: `${el.type}/${el.id}`,
-        name,
-        brand: (tags.brand as string | undefined) ?? null,
-        distance: meters(lat, lon, p.lat, p.lon),
-        // Supermärkte vor Kiosken, Drogerien usw.
-        rank: tags.shop === 'supermarket' ? 0 : 1,
-      }
-    })
-    .filter((s): s is Shop & { rank: number } => !!s)
-    .sort((a, b) => a.rank - b.rank || a.distance - b.distance)
-    .map(({ rank: _rank, ...shop }) => shop)
+  throw new NearbyError(lastError)
 }
 
-/** Suchstufen ausserhalb eines Ladens: klein anfangen, nur bei zu wenig Treffern weiter suchen. */
+/** Suchstufen ausserhalb eines Ladens: der nächste Supermarkt wird bis FAR_RADIUS_M gesucht. */
 export const FAR_STEPS_M = [1_000, 3_000, 10_000, 20_000]
 export const FAR_RADIUS_M = FAR_STEPS_M[FAR_STEPS_M.length - 1]
-const ENOUGH = 3
+
+const CACHE_MS = 5 * 60 * 1000
+let lastResult: { at: number; lat: number; lon: number; result: { shops: Shop[]; inside: boolean } } | null = null
 
 /**
- * Läden in der Nähe. `inside` = true: Läden im Umkreis der GPS-Genauigkeit (man ist wohl drin).
- * Sonst die nächsten Supermärkte, Suche stufenweise bis FAR_RADIUS_M, bis mindestens 3 gefunden sind.
+ * Läden in der Nähe – eine einzige Anfrage an OpenStreetMap (schont die Server, vermeidet Sperren).
+ * `inside` = true: Läden im Umkreis der GPS-Genauigkeit (man ist wohl drin), alle Ladenarten, Supermärkte zuerst.
+ * Sonst die nächsten Supermärkte; pro Stufe (1, 3, 10, 20 km) höchstens 40 Treffer, damit die Antwort klein bleibt.
  */
 export async function findNearbyShops(): Promise<{ shops: Shop[]; inside: boolean }> {
   const pos = await getPosition()
   const { latitude: lat, longitude: lon, accuracy } = pos.coords
-  // GPS ist in Gebäuden ungenau: Suchradius an die Genauigkeit anpassen (mind. 75 m, höchstens 400 m)
-  const radius = Math.min(400, Math.max(75, Math.round(accuracy * 1.5)))
-  const close = await overpass(lat, lon, radius, 'supermarket|convenience|greengrocer|chemist', 30)
-  if (close.length) return { shops: close, inside: true }
 
-  let found: Shop[] = []
-  for (const step of FAR_STEPS_M) {
-    found = await overpass(lat, lon, step, 'supermarket', 100)
-    if (found.length >= ENOUGH) break
-  }
-  return { shops: found.slice(0, 5), inside: false }
+  // Gleiche Stelle (< 50 m) innerhalb von 5 Minuten: letztes Ergebnis wiederverwenden
+  if (lastResult && Date.now() - lastResult.at < CACHE_MS && meters(lat, lon, lastResult.lat, lastResult.lon) < 50)
+    return lastResult.result
+
+  // GPS ist in Gebäuden ungenau: Radius an die Genauigkeit anpassen (mind. 75 m, höchstens 400 m)
+  const radius = Math.min(400, Math.max(75, Math.round(accuracy * 1.5)))
+  const at = `${lat},${lon}`
+  const query = `[out:json][timeout:25];
+nwr(around:${radius},${at})["shop"~"^(supermarket|convenience|greengrocer|chemist)$"];out center tags 30;
+${FAR_STEPS_M.map((r) => `nwr(around:${r},${at})["shop"="supermarket"];out center tags 40;`).join('\n')}`
+
+  const seen = new Set<string>()
+  const all = (await runQuery(query))
+    .map((el): (Shop & { rank: number }) | null => {
+      const id = `${el.type}/${el.id}`
+      const p = el.center ?? (el.lat != null && el.lon != null ? { lat: el.lat, lon: el.lon } : null)
+      const tags = el.tags ?? {}
+      const name: string | undefined = tags.name ?? tags.brand
+      if (!p || !name || seen.has(id)) return null
+      seen.add(id)
+      return {
+        id,
+        name,
+        brand: (tags.brand as string | undefined) ?? null,
+        distance: meters(lat, lon, p.lat, p.lon),
+        rank: tags.shop === 'supermarket' ? 0 : 1, // Supermärkte vor Kiosken, Drogerien usw.
+      }
+    })
+    .filter((s): s is Shop & { rank: number } => !!s)
+
+  const strip = ({ rank: _rank, ...shop }: Shop & { rank: number }): Shop => shop
+  const close = all.filter((s) => s.distance <= radius).sort((a, b) => a.rank - b.rank || a.distance - b.distance)
+  const result = close.length
+    ? { shops: close.map(strip), inside: true }
+    : {
+        shops: all
+          .filter((s) => s.rank === 0)
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 5)
+          .map(strip),
+        inside: false,
+      }
+  lastResult = { at: Date.now(), lat, lon, result }
+  return result
 }
 
 function formatDistance(m: number) {
