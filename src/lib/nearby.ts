@@ -9,7 +9,14 @@ export interface Shop {
   distance: number // Meter
 }
 
-export class NearbyError extends Error {}
+/** retry = true: vorübergehendes Problem (Server ausgelastet, kein Netz, GPS-Timeout) – später nochmal versuchen */
+export class NearbyError extends Error {
+  readonly retry: boolean
+  constructor(message: string, retry = false) {
+    super(message)
+    this.retry = retry
+  }
+}
 
 function getPosition(): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
@@ -17,7 +24,7 @@ function getPosition(): Promise<GeolocationPosition> {
     navigator.geolocation.getCurrentPosition(resolve, (err) => {
       if (err.code === err.PERMISSION_DENIED)
         reject(new NearbyError('Standort nicht freigegeben. Du kannst ihn in den Browser-Einstellungen erlauben.'))
-      else reject(new NearbyError('Standort konnte nicht bestimmt werden.'))
+      else reject(new NearbyError('Standort konnte nicht bestimmt werden.', true))
     }, { enableHighAccuracy: true, timeout: 15_000, maximumAge: 60_000 })
   })
 }
@@ -59,14 +66,14 @@ async function runQuery(query: string): Promise<OsmElement[]> {
       if (res.ok) return ((await res.json()) as { elements: OsmElement[] }).elements
       lastError =
         res.status === 429 || res.status === 504
-          ? 'OpenStreetMap ist gerade ausgelastet. Bitte gleich nochmal.'
-          : `OpenStreetMap antwortet nicht (${res.status}).`
+          ? 'OpenStreetMap ist ausgelastet.'
+          : `OpenStreetMap antwortet nicht (Fehler ${res.status}).`
     } catch {
       // Netzwerkfehler – oder Überlastung: Overpass schickt bei 429 keine CORS-Header, der Browser meldet dann nur „failed to fetch“
-      lastError = 'OpenStreetMap ist nicht erreichbar oder ausgelastet. Bitte gleich nochmal.'
+      lastError = 'OpenStreetMap ist nicht erreichbar oder ausgelastet.'
     }
   }
-  throw new NearbyError(lastError)
+  throw new NearbyError(lastError, true)
 }
 
 /** Suchstufen ausserhalb eines Ladens: der nächste Supermarkt wird bis FAR_RADIUS_M gesucht. */

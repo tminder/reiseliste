@@ -3,7 +3,7 @@ import QRCode from 'qrcode'
 import { CATEGORY_LABEL, CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
-import { FAR_RADIUS_M, findNearbyShops, formatDistance, getChosenShop, locationAlreadyAllowed, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
+import { FAR_RADIUS_M, findNearbyShops, formatDistance, getChosenShop, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
 import { ListStore, forgetList, knownLists, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
@@ -426,34 +426,57 @@ function ItemRow({
   )
 }
 
+// Wartezeiten zwischen automatischen neuen Versuchen, wenn OpenStreetMap ausgelastet ist (danach alle 5 Min.)
+const RETRY_S = [15, 30, 60, 120, 300]
+
 function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | null) => void }) {
   // Nach einem Neuladen den letzten Vorschlag (bis 30 Min.) direkt wieder zeigen
-  const [state, setState] = useState<{ loading?: boolean; shops?: Shop[]; inside?: boolean; error?: string; more?: boolean; dismissed?: boolean }>(
-    () => recentSuggestion() ?? {},
-  )
+  const [state, setState] = useState<{
+    loading?: boolean
+    shops?: Shop[]
+    inside?: boolean
+    error?: string
+    retryIn?: number
+    more?: boolean
+    dismissed?: boolean
+  }>(() => recentSuggestion() ?? {})
+  const [attempt, setAttempt] = useState(0)
 
-  async function detect() {
-    setState({ loading: true })
+  async function detect(manual = false) {
+    if (manual) setAttempt(0)
+    setState((s) => ({ loading: true, error: s.error }))
     try {
       const { shops, inside } = await findNearbyShops()
+      setAttempt(0)
       setState({ shops, inside })
     } catch (e) {
-      setState({ error: e instanceof NearbyError ? e.message : 'Laden nicht erkannt.' })
+      const err = e instanceof NearbyError ? e : new NearbyError('Laden nicht erkannt.', true)
+      if (err.retry) {
+        const wait = RETRY_S[Math.min(attempt, RETRY_S.length - 1)]
+        setAttempt((a) => a + 1)
+        setState({ error: err.message, retryIn: wait })
+      } else setState({ error: err.message })
     }
   }
 
-  // Ist der Standort schon freigegeben, beim Öffnen direkt vorschlagen (ohne Nachfrage)
+  // Automatisch suchen, sobald die Liste offen ist und noch kein Laden gewählt/vorgeschlagen ist
   useEffect(() => {
     if (shop || state.shops) return
-    let alive = true
-    void locationAlreadyAllowed().then((ok) => {
-      if (ok && alive) void detect()
-    })
-    return () => {
-      alive = false
-    }
+    void detect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [shop])
+
+  // Countdown und automatischer neuer Versuch bei überlastetem Server
+  useEffect(() => {
+    if (state.retryIn == null || shop) return
+    if (state.retryIn <= 0) {
+      void detect()
+      return
+    }
+    const t = window.setTimeout(() => setState((s) => (s.retryIn != null ? { ...s, retryIn: s.retryIn - 1 } : s)), 1000)
+    return () => window.clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.retryIn, shop])
 
   // Gewählt: nur der Name, dezent
   if (shop)
@@ -472,8 +495,9 @@ function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | n
     return (
       <div className="shopline muted" title={state.error}>
         📍 {state.error}
-        <button className="link" onClick={detect}>
-          nochmal
+        {state.retryIn != null && <span>Neuer Versuch in {state.retryIn} s</span>}
+        <button className="link" onClick={() => void detect(true)}>
+          jetzt
         </button>
       </div>
     )
@@ -524,7 +548,7 @@ function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | n
   // Noch nichts gesucht (oder ausgeblendet): nur ein kleiner Link
   return (
     <div className="shopline">
-      <button className="link" onClick={detect}>
+      <button className="link" onClick={() => void detect(true)}>
         📍 Laden erkennen
       </button>
     </div>
