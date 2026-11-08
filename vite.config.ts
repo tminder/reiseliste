@@ -11,6 +11,20 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: false, // Registrierung in src/main.tsx (mit Update-Prüfung)
       includeAssets: ['favicon.svg'],
+      workbox: {
+        // Einmal angesehene Produktfotos bleiben offline verfügbar
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/images\.openfoodfacts\.org\//,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'off-images',
+              expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
+      },
       manifest: {
         name: 'Reiseliste – Einkaufsliste in der Landessprache',
         short_name: 'Reiseliste',

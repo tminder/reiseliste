@@ -370,3 +370,54 @@ button.link {
   margin-top: 4px;
   word-break: break-word;
 }
+
+button.active {
+  background: var(--accent-soft);
+}
+.photos {
+  margin-top: 8px;
+}
+.photo-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+.photo {
+  flex: none;
+  width: 84px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.7rem;
+}
+.photo img {
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.photo span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.photos-note,
+.photos-credit {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.photos-credit a {
+  color: inherit;
+}
+.shop .photo,
+.shop .photo img {
+  width: 110px;
+}
+.shop .photo img {
+  height: 110px;
+}

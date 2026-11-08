@@ -11,6 +11,7 @@ Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im L
 - Übersetzung über ein eingebautes Wörterbuch mit 132 Grundbegriffen, ohne KI und ohne laufende Kosten
 - Vorschläge beim Tippen. Unbekannte Artikel können mit einem eigenen Landesbegriff ergänzt werden
 - Sortierung nach Abteilungen, Abhaken, „Ladenansicht“ mit grosser Schrift
+- Produktfotos pro Reiseland aus [Open Food Facts](https://world.openfoodfacts.org) (📷 am Artikel, CC BY-SA)
 - Teilen per Link, QR-Code oder Teilen-Menü des Handys, Live-Sync über Supabase
 - Offline nutzbar (PWA). Änderungen werden synchronisiert, sobald wieder Netz da ist
 - Ohne Supabase läuft die App im **Demo-Modus** nur auf dem Gerät

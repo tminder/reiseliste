@@ -3,6 +3,7 @@ import QRCode from 'qrcode'
 import { CATEGORY_LABEL, CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
+import { loadPhotos, PhotoError, type Photo } from './lib/photos'
 import { ListStore, forgetList, knownLists, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
 // ---------- Routing über den Hash (funktioniert auf GitHub Pages ohne Server) ----------
@@ -313,7 +314,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           <section key={cat} className="group">
             <h3>{cat === 'sonstiges' ? 'Sonstiges' : CATEGORY_LABEL[cat]}</h3>
             {groups.get(cat)!.map((item) => (
-              <ItemRow key={item.id} item={item} store={store} target={target} viewer={profile.lang} shopMode={shopMode} />
+              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} viewer={profile.lang} shopMode={shopMode} />
             ))}
           </section>
         ))}
@@ -322,7 +323,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         <section className="group done">
           <h3>Im Wagen</h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} viewer={profile.lang} shopMode={shopMode} />
+            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} viewer={profile.lang} shopMode={shopMode} />
           ))}
         </section>
       )}
@@ -336,16 +337,19 @@ function ItemRow({
   item,
   store,
   target,
+  country,
   viewer,
   shopMode,
 }: {
   item: Item
   store: ListStore
   target: Lang
+  country: string
   viewer: Lang
   shopMode: boolean
 }) {
   const [editing, setEditing] = useState(false)
+  const [showPhotos, setShowPhotos] = useState(false)
   const [override, setOverride] = useState(item.localOverride ?? '')
   const local = item.localOverride || nameIn(item.conceptId, target)
   // Gross: der Artikel in der Sprache des Betrachters (sonst wie eingegeben). Klein: Landessprache.
@@ -389,12 +393,56 @@ function ItemRow({
           </form>
         )}
         {hint && !item.checked && <div className="hint">💡 {hint}</div>}
+        {showPhotos && local && <PhotoStrip country={country} term={local} />}
       </div>
+      {local && !item.checked && (
+        <button
+          className={`ghost small ${showPhotos ? 'active' : ''}`}
+          aria-label="Produktfotos"
+          onClick={() => setShowPhotos(!showPhotos)}
+        >
+          📷
+        </button>
+      )}
       {!shopMode && (
         <button className="ghost small" aria-label="Löschen" onClick={() => void store.updateItem(item.id, { deleted: true })}>
           ✕
         </button>
       )}
+    </div>
+  )
+}
+
+function PhotoStrip({ country, term }: { country: string; term: string }) {
+  const [state, setState] = useState<{ photos?: Photo[]; error?: string }>({})
+  useEffect(() => {
+    let alive = true
+    setState({})
+    loadPhotos(country, term).then(
+      (photos) => alive && setState({ photos }),
+      (e) => alive && setState({ error: e instanceof PhotoError ? e.message : 'Fotos konnten nicht geladen werden.' }),
+    )
+    return () => {
+      alive = false
+    }
+  }, [country, term])
+
+  if (state.error) return <div className="photos-note">{state.error}</div>
+  if (!state.photos) return <div className="photos-note">Fotos werden geladen …</div>
+  if (state.photos.length === 0) return <div className="photos-note">Keine Fotos gefunden.</div>
+  return (
+    <div className="photos">
+      <div className="photo-row">
+        {state.photos.map((p) => (
+          <a key={p.code} href={p.url} target="_blank" rel="noreferrer" className="photo" title={`${p.name} ${p.brand}`.trim()}>
+            <img src={p.image} alt={p.name || term} loading="lazy" />
+            <span>{p.brand || p.name}</span>
+          </a>
+        ))}
+      </div>
+      <div className="photos-credit">
+        Fotos: <a href="https://world.openfoodfacts.org" target="_blank" rel="noreferrer">Open Food Facts</a>, CC BY-SA
+      </div>
     </div>
   )
 }

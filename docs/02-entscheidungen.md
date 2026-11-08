@@ -56,11 +56,10 @@ Stand: 2026-11-08 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Rund 95 % des Codes lassen sich wiederverwenden, der Aufwand liegt bei Tagen statt Wochen. Geofencing, Kamera und Push kommen über Plugins.
 - **Folgen:** Das Apple Developer Program kostet 99 $ pro Jahr, Google Play einmalig 25 $. Für iOS braucht es einen Mac oder einen Build-Dienst in der Cloud. Der Zeitpunkt ist offen (F-006).
 
-## D-010 · Produktfotos nur echte Fotos, keine KI-Bilder
+## D-010 · Produktfotos aus Open Food Facts, nur auf Antippen
 
-- **Gilt für:** Ausbaustufe 2/4
-- **Entscheidung:** Produktfotos kommen aus Open Food Facts (Lizenz CC BY-SA, die Quelle wird genannt) und von Nutzern. Es gibt keine KI-generierten Bilder und keine Fotos aus Online-Shops von Supermärkten oder Herstellern.
-- **Begründung:** KI-Bilder zeigen keine echten Packungen und führen in die Irre. Shops und Hersteller verbieten die Weiterverwendung ihrer Fotos meist.
+- **Entscheidung:** Unter jedem übersetzten Artikel zeigt ein 📷-Knopf bis zu 4 Packungsfotos aus Open Food Facts. Gesucht wird mit dem Begriff in der Landessprache, beschränkt auf Produkte, die im Reiseland verkauft werden. Zuerst kommen Produkte, deren Name mit dem Begriff beginnt, danach die meistgescannten. Die Fotos werden erst beim Antippen geladen, 30 Tage lokal gespeichert und bleiben offline verfügbar. Die Quelle wird genannt (CC BY-SA). Es gibt keine KI-generierten Bilder und keine Fotos aus Online-Shops von Supermärkten oder Herstellern. Fotos pro Supermarktkette und eigene Fotos der Nutzer kommen später (Ausbaustufe 4).
+- **Begründung:** Eine Packung erkennt man im Laden schneller als ein fremdes Wort. Open Food Facts ist frei nutzbar, erlaubt aber nur wenige Suchanfragen pro Minute. Deshalb wird nur auf Antippen geladen, die Anfragen laufen nacheinander und werden zwischengespeichert. KI-Bilder zeigen keine echten Packungen.
 
 ## D-011 · Supermarkterkennung nur als Vorschlag über OpenStreetMap
 
