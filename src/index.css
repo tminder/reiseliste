@@ -266,12 +266,16 @@ button.link {
   flex-direction: column;
   gap: 3px;
 }
-.local {
+.main {
   font-size: 1.15rem;
   font-weight: 650;
 }
-.local.missing {
+.local {
+  color: var(--text);
   font-weight: 500;
+}
+.missing {
+  font-style: italic;
 }
 .orig {
   font-size: 0.85rem;
@@ -282,8 +286,9 @@ button.link {
   color: var(--text);
   border-radius: 6px;
   padding: 1px 6px;
-  margin-right: 6px;
-  font-weight: 600;
+  margin-right: 8px;
+  font-weight: 700;
+  font-size: 0.9em;
 }
 .hint {
   font-size: 0.8rem;
@@ -302,7 +307,7 @@ button.link {
 .checked .check {
   background: var(--accent);
 }
-.checked .local,
+.checked .main,
 .checked .orig {
   text-decoration: line-through;
   opacity: 0.55;
@@ -317,8 +322,11 @@ button.link {
 }
 
 /* Ladenansicht: grosse Schrift, nur das Nötigste */
-.shop .local {
-  font-size: 1.6rem;
+.shop .main {
+  font-size: 1.5rem;
+}
+.shop .orig {
+  font-size: 1rem;
 }
 .shop .item {
   padding: 16px;

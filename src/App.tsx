@@ -246,7 +246,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         <div className="title">
           <h1>{list.name}</h1>
           <span className="sub">
-            {country?.flag} {country?.name} · Landessprache: {LANG_LABEL[target]}
+            {country?.flag} {country?.name} · {LANG_LABEL[target]}
           </span>
         </div>
         <button className="ghost" onClick={() => setShowShare(true)}>
@@ -348,7 +348,8 @@ function ItemRow({
   const [editing, setEditing] = useState(false)
   const [override, setOverride] = useState(item.localOverride ?? '')
   const local = item.localOverride || nameIn(item.conceptId, target)
-  const inViewerLang = item.lang !== viewer ? nameIn(item.conceptId, viewer) : null
+  // Gross: der Artikel in der Sprache des Betrachters (sonst wie eingegeben). Klein: Landessprache.
+  const own = (item.lang !== viewer && nameIn(item.conceptId, viewer)) || item.text
   const hint = item.conceptId && viewer === 'de' ? HINTS[item.conceptId] : undefined
 
   return (
@@ -361,20 +362,17 @@ function ItemRow({
         {item.checked ? '✓' : ''}
       </button>
       <div className="body">
-        {local ? (
-          <div className="local">{local}</div>
-        ) : (
-          <div className="local missing">{item.text}</div>
-        )}
+        <div className="main">
+          {item.qty && <span className="qty">{formatQty(item.qty)}</span>}
+          {own}
+        </div>
         <div className="orig">
-          {item.qty && <span className="qty">{item.qty}</span>}
-          {item.text}
-          {inViewerLang && <span className="muted"> · {inViewerLang}</span>}
+          {local ? <span className="local">{local}</span> : <span className="missing">keine Übersetzung</span>}
           {!shopMode && <span className="muted"> · {item.author}</span>}
         </div>
         {!local && !shopMode && !editing && (
           <button className="link" onClick={() => setEditing(true)}>
-            Keine Übersetzung – Landesbegriff selbst eintragen
+            Landesbegriff selbst eintragen
           </button>
         )}
         {editing && (
@@ -399,6 +397,11 @@ function ItemRow({
       )}
     </div>
   )
+}
+
+/** "2" → "2x", "500 g" bleibt "500 g" */
+function formatQty(qty: string): string {
+  return /^\d+(?:[.,]\d+)?$/.test(qty.trim()) ? `${qty.trim()}x` : qty
 }
 
 function ShareSheet({ id, name, onClose }: { id: string; name: string; onClose: () => void }) {

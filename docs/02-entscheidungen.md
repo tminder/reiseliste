@@ -85,3 +85,9 @@ Stand: 2026-11-08 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Die Project URL und der Publishable Key des Supabase-Projekts `evglhiivucccditqtjkm` stehen in `.env.production` im Repo. GitHub-Variablen werden dafür nicht genutzt.
 - **Begründung:** Der Publishable Key ist laut Supabase öffentlich, er steckt ohnehin in der ausgelieferten App. Der Schutz der Daten läuft über die Zugriffsregeln (D-005). So lässt sich die App ohne manuelle Einstellungen in GitHub bauen.
 - **Folgen:** Der secret- bzw. service_role-Key darf nie ins Repo. Wer das Projekt wechselt, ändert `.env.production`.
+
+## D-015 · Eigene Sprache gross, Landessprache klein
+
+- **Entscheidung:** Jeder Artikel zeigt gross den Namen in der Sprache des Betrachters, wie eingegeben oder aus dem Wörterbuch übersetzt. Darunter steht klein der Begriff in der Landessprache. Reine Zahlen werden als Anzahl angezeigt („2x“), Mengen mit Einheit bleiben unverändert („500 g“). Im Kopf der Liste stehen nur Land und Sprache, z. B. „Spanien · Español“.
+- **Begründung:** Wunsch des Inhabers: Die eigene Sprache ist schneller lesbar, und die Ansicht wird kompakter.
+- **Folgen:** Das gilt auch für die Ladenansicht.
