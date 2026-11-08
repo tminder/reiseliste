@@ -96,3 +96,6 @@ do $$ begin
   alter publication supabase_realtime add table public.lists, public.items;
 exception when duplicate_object then null;
 end $$;
+
+-- API-Schema-Cache neu laden, damit neue Tabellen sofort erreichbar sind
+notify pgrst, 'reload schema';
