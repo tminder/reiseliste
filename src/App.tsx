@@ -3,6 +3,7 @@ import QRCode from 'qrcode'
 import { CATEGORY_LABEL, CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
+import { findNearbyShops, getChosenShop, locationAlreadyAllowed, NearbyError, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { loadPhotos, PhotoError, type Photo } from './lib/photos'
 import { ListStore, forgetList, knownLists, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
@@ -192,6 +193,11 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   const [input, setInput] = useState('')
   const [shopMode, setShopMode] = useState(false)
   const [showShare, setShowShare] = useState(false)
+  const [shop, setShop] = useState<Shop | null>(() => getChosenShop(id))
+  const chooseShop = (s: Shop | null) => {
+    setChosenShop(id, s)
+    setShop(s)
+  }
 
   const list = store.list
   const country = list ? COUNTRY_BY_CODE.get(list.country) : undefined
@@ -255,6 +261,8 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         </button>
       </header>
 
+      <ShopBar shop={shop} onChoose={chooseShop} />
+
       <div className={`sync sync-${store.sync}`}>
         {SYNC_LABEL[store.sync]}
         {store.sync === 'error' && lastSyncError && <div className="sync-detail">{lastSyncError}</div>}
@@ -314,7 +322,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           <section key={cat} className="group">
             <h3>{cat === 'sonstiges' ? 'Sonstiges' : CATEGORY_LABEL[cat]}</h3>
             {groups.get(cat)!.map((item) => (
-              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} viewer={profile.lang} shopMode={shopMode} />
+              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={shop ? shopTag(shop) : undefined} shopName={shop?.brand ?? shop?.name} viewer={profile.lang} shopMode={shopMode} />
             ))}
           </section>
         ))}
@@ -323,7 +331,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         <section className="group done">
           <h3>Im Wagen</h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} viewer={profile.lang} shopMode={shopMode} />
+            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={shop ? shopTag(shop) : undefined} shopName={shop?.brand ?? shop?.name} viewer={profile.lang} shopMode={shopMode} />
           ))}
         </section>
       )}
@@ -338,6 +346,8 @@ function ItemRow({
   store,
   target,
   country,
+  shopTag,
+  shopName,
   viewer,
   shopMode,
 }: {
@@ -345,6 +355,8 @@ function ItemRow({
   store: ListStore
   target: Lang
   country: string
+  shopTag?: string
+  shopName?: string
   viewer: Lang
   shopMode: boolean
 }) {
@@ -393,7 +405,7 @@ function ItemRow({
           </form>
         )}
         {hint && !item.checked && <div className="hint">💡 {hint}</div>}
-        {showPhotos && local && <PhotoStrip country={country} term={local} />}
+        {showPhotos && local && <PhotoStrip country={country} term={local} store={shopTag} storeName={shopName} />}
       </div>
       {local && !item.checked && (
         <button
@@ -413,19 +425,106 @@ function ItemRow({
   )
 }
 
-function PhotoStrip({ country, term }: { country: string; term: string }) {
-  const [state, setState] = useState<{ photos?: Photo[]; error?: string }>({})
+function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | null) => void }) {
+  const [state, setState] = useState<{ loading?: boolean; shops?: Shop[]; error?: string; open?: boolean }>({})
+
+  async function detect() {
+    setState({ loading: true })
+    try {
+      const shops = await findNearbyShops()
+      setState({ shops, open: true })
+    } catch (e) {
+      setState({ error: e instanceof NearbyError ? e.message : 'Supermarkt konnte nicht erkannt werden.' })
+    }
+  }
+
+  // Ist der Standort schon freigegeben, beim Öffnen direkt vorschlagen (ohne Nachfrage)
+  useEffect(() => {
+    if (shop) return
+    let alive = true
+    void locationAlreadyAllowed().then((ok) => {
+      if (ok && alive) void detect()
+    })
+    return () => {
+      alive = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  if (shop)
+    return (
+      <div className="shopbar">
+        <span>
+          🏪 <strong>{shop.name}</strong>
+        </span>
+        <button className="link" onClick={() => onChoose(null)}>
+          ändern
+        </button>
+      </div>
+    )
+
+  if (state.open && state.shops) {
+    const [first, ...rest] = state.shops
+    if (!first)
+      return (
+        <div className="shopbar">
+          <span className="muted">Kein Supermarkt in der Nähe gefunden.</span>
+          <button className="link" onClick={detect}>
+            nochmal
+          </button>
+        </div>
+      )
+    return (
+      <div className="shopbar column">
+        <div className="row-between">
+          <span>
+            Bist du bei <strong>{first.name}</strong>? <span className="muted">({first.distance} m)</span>
+          </span>
+          <span className="row">
+            <button className="primary small" onClick={() => onChoose(first)}>
+              Ja
+            </button>
+            <button className="ghost small" aria-label="Nein" onClick={() => setState({})}>
+              ✕
+            </button>
+          </span>
+        </div>
+        {rest.length > 0 && (
+          <div className="shop-alts">
+            {rest.slice(0, 4).map((s) => (
+              <button key={s.id} className="ghost small" onClick={() => onChoose(s)}>
+                {s.name} <span className="muted">{s.distance} m</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="shopbar">
+      {state.error ? <span className="muted small-text">{state.error}</span> : <span className="muted">In welchem Laden bist du?</span>}
+      <button className="ghost small" onClick={detect} disabled={state.loading}>
+        {state.loading ? 'Suche …' : '📍 Erkennen'}
+      </button>
+    </div>
+  )
+}
+
+function PhotoStrip({ country, term, store, storeName }: { country: string; term: string; store?: string; storeName?: string }) {
+  const [state, setState] = useState<{ photos?: Photo[]; fromStore?: boolean; error?: string }>({})
   useEffect(() => {
     let alive = true
     setState({})
-    loadPhotos(country, term).then(
-      (photos) => alive && setState({ photos }),
+    loadPhotos(country, term, store).then(
+      (photos) => alive && setState({ photos, fromStore: photos.fromStore }),
       (e) => alive && setState({ error: e instanceof PhotoError ? e.message : 'Fotos konnten nicht geladen werden.' }),
     )
     return () => {
       alive = false
     }
-  }, [country, term])
+  }, [country, term, store])
 
   if (state.error) return <div className="photos-note">{state.error}</div>
   if (!state.photos) return <div className="photos-note">Fotos werden geladen …</div>
@@ -441,6 +540,7 @@ function PhotoStrip({ country, term }: { country: string; term: string }) {
         ))}
       </div>
       <div className="photos-credit">
+        {store && (state.fromStore ? `Bei ${storeName} · ` : `Keine Treffer für ${storeName}, übliche Produkte im Land · `)}
         Fotos: <a href="https://world.openfoodfacts.org" target="_blank" rel="noreferrer">Open Food Facts</a>, CC BY-SA
       </div>
     </div>

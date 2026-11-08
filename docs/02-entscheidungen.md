@@ -61,11 +61,11 @@ Stand: 2026-11-08 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Unter jedem übersetzten Artikel zeigt ein 📷-Knopf bis zu 4 Packungsfotos aus Open Food Facts. Gesucht wird mit dem Begriff in der Landessprache, beschränkt auf Produkte, die im Reiseland verkauft werden. Zuerst kommen Produkte, deren Name mit dem Begriff beginnt, danach die meistgescannten. Die Fotos werden erst beim Antippen geladen, 30 Tage lokal gespeichert und bleiben offline verfügbar. Die Quelle wird genannt (CC BY-SA). Es gibt keine KI-generierten Bilder und keine Fotos aus Online-Shops von Supermärkten oder Herstellern. Fotos pro Supermarktkette und eigene Fotos der Nutzer kommen später (Ausbaustufe 4).
 - **Begründung:** Eine Packung erkennt man im Laden schneller als ein fremdes Wort. Open Food Facts ist frei nutzbar, erlaubt aber nur wenige Suchanfragen pro Minute. Deshalb wird nur auf Antippen geladen, die Anfragen laufen nacheinander und werden zwischengespeichert. KI-Bilder zeigen keine echten Packungen.
 
-## D-011 · Supermarkterkennung nur als Vorschlag über OpenStreetMap
+## D-011 · Supermarkt erkennen: Vorschlag über OpenStreetMap, Bestätigung durch den Nutzer
 
-- **Gilt für:** Ausbaustufe 4
-- **Entscheidung:** Beim Öffnen der App wird der Supermarkt im Umkreis von etwa 50 m aus OpenStreetMap vorgeschlagen („Bist du bei Mercadona?“), der Nutzer bestätigt ihn. Der Standort wird nur abgefragt, solange die App offen ist, und nicht auf dem Server gespeichert.
-- **Begründung:** OpenStreetMap ist kostenlos. Das GPS ist in Gebäuden ungenau, und eine Bestätigung vermeidet falsche Treffer. So bleibt der Datenschutzaufwand gering.
+- **Entscheidung:** In der Liste fragt eine Zeile „In welchem Laden bist du?“. Mit „📍 Erkennen“ wird der Standort bestimmt und über die Overpass API von OpenStreetMap nach Läden in der Nähe gesucht. Der Radius richtet sich nach der GPS-Genauigkeit, er liegt zwischen 75 und 400 m. Vorgeschlagen werden zuerst Supermärkte, danach Kioske, Drogerien und Gemüseläden, jeweils der nächste zuerst: „Bist du bei Mercadona? (20 m)“, dazu bis zu 4 Alternativen. Ist der Standort im Browser schon freigegeben, erscheint der Vorschlag beim Öffnen der Liste automatisch. Der gewählte Laden gilt 3 Stunden, nur auf diesem Gerät und pro Liste. Mit gewähltem Laden zeigen die Produktfotos zuerst Produkte dieser Kette, laut Angabe in Open Food Facts. Gibt es dort nichts, kommen die üblichen Produkte im Land.
+- **Begründung:** Wunsch des Inhabers. OpenStreetMap ist kostenlos. GPS ist in Gebäuden ungenau, deshalb wird bestätigt statt still gewählt. Den Standort fragt die App erst auf Knopfdruck ab, damit nicht schon beim Öffnen eine Erlaubnis-Abfrage erscheint.
+- **Folgen:** Die Koordinaten gehen an die Overpass API (FOSSGIS-Server) und werden in der App nicht gespeichert. Das muss in die Datenschutzerklärung (F-007). Die Benachrichtigung beim Betreten des Ladens gibt es erst in nativen Apps (D-009).
 
 ## D-012 · Gelöschte Artikel nur als gelöscht markieren
 
