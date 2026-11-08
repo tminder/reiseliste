@@ -355,3 +355,10 @@ button.link {
   border-radius: 8px;
   background: #fff;
 }
+
+.sync-detail {
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  margin-top: 4px;
+  word-break: break-word;
+}

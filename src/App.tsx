@@ -3,7 +3,7 @@ import QRCode from 'qrcode'
 import { CATEGORY_LABEL, CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
-import { ListStore, forgetList, knownLists, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
+import { ListStore, forgetList, knownLists, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
 // ---------- Routing über den Hash (funktioniert auf GitHub Pages ohne Server) ----------
 
@@ -254,7 +254,10 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         </button>
       </header>
 
-      <div className={`sync sync-${store.sync}`}>{SYNC_LABEL[store.sync]}</div>
+      <div className={`sync sync-${store.sync}`}>
+        {SYNC_LABEL[store.sync]}
+        {store.sync === 'error' && lastSyncError && <div className="sync-detail">{lastSyncError}</div>}
+      </div>
 
       {!shopMode && (
         <form

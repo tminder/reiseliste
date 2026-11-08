@@ -38,6 +38,13 @@ const URL = import.meta.env.VITE_SUPABASE_URL as string | undefined
 const KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
 export const supabase: SupabaseClient | null = URL && KEY ? createClient(URL, KEY) : null
 
+/** Letzte Fehlermeldung von Supabase – wird in der App angezeigt, um Probleme zu finden. */
+export let lastSyncError: string | null = null
+const setError = (where: string, msg: string) => {
+  lastSyncError = `${where}: ${msg}`
+  console.warn('[reiseliste]', lastSyncError)
+}
+
 let authReady: Promise<boolean> | null = null
 /** Anonyme Anmeldung – nötig, damit die Zugriffsregeln (RLS) greifen. */
 function ensureAuth(): Promise<boolean> {
@@ -47,7 +54,7 @@ function ensureAuth(): Promise<boolean> {
     if (data.session) return true
     const { error } = await supabase.auth.signInAnonymously()
     if (error) {
-      console.warn('[reiseliste] Anonyme Anmeldung fehlgeschlagen:', error.message)
+      setError('Anmeldung', error.message)
       authReady = null
       return false
     }
@@ -164,13 +171,14 @@ export function flushQueue(): Promise<boolean> {
             ? await supabase.from('lists').upsert(toRemoteList(op.row))
             : await supabase.from('items').upsert(toRemoteItem(op.row))
         if (error) {
-          console.warn('[reiseliste] Sync-Fehler:', error.message)
+          setError(`Speichern (${op.table})`, error.message)
           return false
         }
         queue.remove(op)
       }
       return true
-    } catch {
+    } catch (e) {
+      setError('Speichern', String(e))
       return false
     } finally {
       flushing = null
@@ -224,7 +232,8 @@ export class ListStore {
     if (!supabase) return
     if (!(await ensureAuth())) return this.setSync('error')
     // Beitreten (Mitgliedschaft anlegen) – nötig, wenn die Liste per Link geöffnet wurde
-    await supabase.rpc('join_list', { p_list_id: this.id })
+    const join = await supabase.rpc('join_list', { p_list_id: this.id })
+    if (join.error) setError('Beitreten', join.error.message)
     this.channel = supabase
       .channel(`list-${this.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: `list_id=eq.${this.id}` }, (p) => {
@@ -251,11 +260,15 @@ export class ListStore {
       supabase.from('lists').select('*').eq('id', this.id).maybeSingle(),
       supabase.from('items').select('*').eq('list_id', this.id),
     ])
-    if (listRes.error || itemsRes.error) return this.setSync(navigator.onLine ? 'error' : 'offline')
+    if (listRes.error || itemsRes.error) {
+      setError('Laden', (listRes.error ?? itemsRes.error)!.message)
+      return this.setSync(navigator.onLine ? 'error' : 'offline')
+    }
     if (listRes.data) this.applyList(fromRemoteList(listRes.data), false)
     else if (!this.list) this.notFound = true
     for (const row of itemsRes.data ?? []) this.applyItem(fromRemoteItem(row), false)
     this.emit()
+    if (pushed) lastSyncError = null
     this.setSync(pushed ? 'synced' : 'error')
   }
 
