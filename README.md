@@ -28,16 +28,15 @@ npm run dev
 1. Kostenloses Projekt auf [supabase.com](https://supabase.com) anlegen.
 2. **SQL Editor** öffnen, den Inhalt von [`supabase/schema.sql`](supabase/schema.sql) einfügen und ausführen.
 3. **Authentication → Sign In / Providers**: „Allow anonymous sign-ins“ einschalten.
-4. **Project Settings → API**: `Project URL` und `anon public` Key kopieren.
-5. Lokal in `.env` eintragen (siehe `.env.example`).
+4. **Project Settings → API Keys**: `Project URL` und den **Publishable Key** (früher „anon public“) kopieren.
+5. In `.env.production` eintragen. Diese Datei ist im Repo und wird für die veröffentlichte App verwendet. Für die lokale Entwicklung gegen eine andere Datenbank `.env.local` anlegen (siehe `.env.example`).
 
 Zugriff: Jedes Gerät meldet sich anonym an. Eine Liste sehen nur Personen, die sie erstellt oder über den Link geöffnet haben. Wer den Link kennt, kann beitreten.
 
 ## Auf GitHub Pages veröffentlichen
 
 1. Repo → **Settings → Pages** → Source: **GitHub Actions**.
-2. Repo → **Settings → Secrets and variables → Actions → Variables**: `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` anlegen. Der anon-Key ist öffentlich und darf in die App, deshalb reicht hier „Variables“.
-3. Push auf `main`. Die App ist danach unter `https://<user>.github.io/reiseliste/` erreichbar.
+2. Push auf `main`. Die App ist danach unter `https://<user>.github.io/reiseliste/` erreichbar.
 
 ## Aufbau
 
