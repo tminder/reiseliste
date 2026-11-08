@@ -200,6 +200,12 @@ export class ListStore {
   private listeners = new Set<() => void>()
   private channel: RealtimeChannel | null = null
   private onOnline = () => void this.pushAndPull()
+  // Handys trennen die Echtzeit-Verbindung im Hintergrund: beim Zurückkehren sofort abgleichen,
+  // und solange die Liste sichtbar ist, alle 20 Sekunden als Absicherung.
+  private onVisible = () => {
+    if (document.visibilityState === 'visible') void this.pushAndPull(true)
+  }
+  private poll: number | undefined
 
   readonly id: string
 
@@ -229,6 +235,11 @@ export class ListStore {
   async start() {
     if (this.list) rememberList(this.id)
     window.addEventListener('online', this.onOnline)
+    document.addEventListener('visibilitychange', this.onVisible)
+    if (supabase)
+      this.poll = window.setInterval(() => {
+        if (document.visibilityState === 'visible' && this.sync !== 'syncing') void this.pushAndPull(true)
+      }, 20_000)
     if (!supabase) return
     if (!(await ensureAuth())) return this.setSync('error')
     // Beitreten (Mitgliedschaft anlegen) – nötig, wenn die Liste per Link geöffnet wurde
@@ -248,13 +259,16 @@ export class ListStore {
 
   stop() {
     window.removeEventListener('online', this.onOnline)
+    document.removeEventListener('visibilitychange', this.onVisible)
+    window.clearInterval(this.poll)
     if (this.channel && supabase) void supabase.removeChannel(this.channel)
   }
 
-  async pushAndPull() {
+  /** silent: Anzeige nicht auf „Synchronisiere …“ setzen (Hintergrund-Abgleich) */
+  async pushAndPull(silent = false) {
     if (!supabase) return
     if (!navigator.onLine) return this.setSync('offline')
-    this.setSync('syncing')
+    if (!silent) this.setSync('syncing')
     const pushed = await flushQueue()
     const [listRes, itemsRes] = await Promise.all([
       supabase.from('lists').select('*').eq('id', this.id).maybeSingle(),

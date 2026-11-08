@@ -91,3 +91,9 @@ Stand: 2026-11-08 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Jeder Artikel zeigt gross den Namen in der Sprache des Betrachters, wie eingegeben oder aus dem Wörterbuch übersetzt. Darunter steht klein der Begriff in der Landessprache. Reine Zahlen werden als Anzahl angezeigt („2x“), Mengen mit Einheit bleiben unverändert („500 g“). Im Kopf der Liste stehen nur Land und Sprache, z. B. „Spanien · Español“.
 - **Begründung:** Wunsch des Inhabers: Die eigene Sprache ist schneller lesbar, und die Ansicht wird kompakter.
 - **Folgen:** Das gilt auch für die Ladenansicht.
+
+## D-016 · Automatisch aktuell: neue App-Versionen und Listendaten
+
+- **Entscheidung:** Neue App-Versionen werden automatisch geladen. Geprüft wird beim Start, stündlich und jedes Mal, wenn die App wieder in den Vordergrund kommt, und bei einer neuen Version lädt die Seite selbst neu. Listendaten kommen per Echtzeit. Zusätzlich gleicht die App ab, wenn sie in den Vordergrund kommt, und alle 20 Sekunden, solange die Liste sichtbar ist.
+- **Begründung:** Wunsch des Inhabers. Handys trennen die Echtzeit-Verbindung im Hintergrund, der Abgleich fängt das auf.
+- **Folgen:** Ein Update kann die Seite mitten in der Eingabe neu laden. Bereits gespeicherte Artikel gehen dabei nicht verloren. Der Abgleich alle 20 Sekunden erzeugt mehr Anfragen an Supabase, im Gratis-Tarif ist das unkritisch.

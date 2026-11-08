@@ -9,6 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: false, // Registrierung in src/main.tsx (mit Update-Prüfung)
       includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Reiseliste – Einkaufsliste in der Landessprache',
