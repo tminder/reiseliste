@@ -74,7 +74,31 @@ export const FAR_STEPS_M = [1_000, 3_000, 10_000, 20_000]
 export const FAR_RADIUS_M = FAR_STEPS_M[FAR_STEPS_M.length - 1]
 
 const CACHE_MS = 5 * 60 * 1000
-let lastResult: { at: number; lat: number; lon: number; result: { shops: Shop[]; inside: boolean } } | null = null
+const SUGGESTION_MS = 30 * 60 * 1000
+type LastResult = { at: number; lat: number; lon: number; result: { shops: Shop[]; inside: boolean } }
+
+// Letztes Suchergebnis im lokalen Speicher – übersteht ein Neuladen der Seite
+function readLast(): LastResult | null {
+  try {
+    const raw = localStorage.getItem('rl:nearby')
+    return raw ? (JSON.parse(raw) as LastResult) : null
+  } catch {
+    return null
+  }
+}
+function writeLast(v: LastResult) {
+  try {
+    localStorage.setItem('rl:nearby', JSON.stringify(v))
+  } catch {
+    /* egal */
+  }
+}
+
+/** Vorschlag der letzten 30 Minuten (ohne neue Standortabfrage), z. B. nach einem Neuladen */
+export function recentSuggestion(): { shops: Shop[]; inside: boolean } | null {
+  const last = readLast()
+  return last && Date.now() - last.at < SUGGESTION_MS ? last.result : null
+}
 
 /**
  * Läden in der Nähe – eine einzige Anfrage an OpenStreetMap (schont die Server, vermeidet Sperren).
@@ -86,6 +110,7 @@ export async function findNearbyShops(): Promise<{ shops: Shop[]; inside: boolea
   const { latitude: lat, longitude: lon, accuracy } = pos.coords
 
   // Gleiche Stelle (< 50 m) innerhalb von 5 Minuten: letztes Ergebnis wiederverwenden
+  const lastResult = readLast()
   if (lastResult && Date.now() - lastResult.at < CACHE_MS && meters(lat, lon, lastResult.lat, lastResult.lon) < 50)
     return lastResult.result
 
@@ -127,7 +152,7 @@ ${FAR_STEPS_M.map((r) => `nwr(around:${r},${at})["shop"="supermarket"];out cente
           .map(strip),
         inside: false,
       }
-  lastResult = { at: Date.now(), lat, lon, result }
+  writeLast({ at: Date.now(), lat, lon, result })
   return result
 }
 
