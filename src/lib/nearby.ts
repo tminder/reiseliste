@@ -12,9 +12,12 @@ export interface Shop {
 /** retry = true: vorübergehendes Problem (Server ausgelastet, kein Netz, GPS-Timeout) – später nochmal versuchen */
 export class NearbyError extends Error {
   readonly retry: boolean
-  constructor(message: string, retry = false) {
+  /** Standort verweigert (oder in iOS für Safari-Websites ausgeschaltet) */
+  readonly permission: boolean
+  constructor(message: string, retry = false, permission = false) {
     super(message)
     this.retry = retry
+    this.permission = permission
   }
 }
 
@@ -23,7 +26,7 @@ export function getPosition(): Promise<GeolocationPosition> {
     if (!('geolocation' in navigator)) return reject(new NearbyError('Dieses Gerät kann den Standort nicht bestimmen.'))
     navigator.geolocation.getCurrentPosition(resolve, (err) => {
       if (err.code === err.PERMISSION_DENIED)
-        reject(new NearbyError('Standort nicht freigegeben. Du kannst ihn in den Browser-Einstellungen erlauben.'))
+        reject(new NearbyError('Standort nicht freigegeben.', false, true))
       else reject(new NearbyError('Standort konnte nicht bestimmt werden.', true))
     }, { enableHighAccuracy: true, timeout: 15_000, maximumAge: 60_000 })
   })

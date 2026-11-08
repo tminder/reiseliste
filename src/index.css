@@ -545,3 +545,21 @@ button.ghost.small,
 .flag {
   font-size: 0.95em;
 }
+
+.perm-help {
+  width: 100%;
+  font-size: 0.8rem;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-top: 4px;
+}
+.perm-help ol {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+.perm-help li {
+  margin-bottom: 4px;
+}

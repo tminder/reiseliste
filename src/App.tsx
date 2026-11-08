@@ -575,6 +575,8 @@ function ShopBar({
     shops?: Shop[]
     inside?: boolean
     error?: string
+    permission?: boolean
+    help?: boolean
     retryIn?: number
     more?: boolean
     dismissed?: boolean
@@ -594,7 +596,7 @@ function ShopBar({
         const wait = RETRY_S[Math.min(attempt, RETRY_S.length - 1)]
         setAttempt((a) => a + 1)
         setState({ error: err.message, retryIn: wait })
-      } else setState({ error: err.message })
+      } else setState({ error: err.message, permission: err.permission })
     }
   }
 
@@ -631,6 +633,29 @@ function ShopBar({
     return (
       <div className="shopline muted">
         <MapPin size={15} /> Suche Laden …
+      </div>
+    )
+
+  if (state.permission && !current)
+    return (
+      <div className="shopline muted">
+        <MapPin size={15} />
+        <button className="link" onClick={() => void detect(true)}>
+          Standort freigeben
+        </button>
+        <button className="link" onClick={() => setState((st) => ({ ...st, help: !st.help }))}>
+          Hilfe
+        </button>
+        {state.help && (
+          <div className="perm-help">
+            <strong>iPhone/Safari:</strong>
+            <ol>
+              <li>Einstellungen → Datenschutz &amp; Sicherheit → Ortungsdienste: eingeschaltet, und bei „Safari-Websites“ „Beim Verwenden der App“.</li>
+              <li>In Safari links in der Adressleiste auf „aA“ (bzw. das Seiten-Symbol) → Website-Einstellungen → Standort: „Erlauben“. Dann fragt Safari nicht mehr bei jedem Öffnen.</li>
+              <li>Seite neu laden.</li>
+            </ol>
+          </div>
+        )}
       </div>
     )
 
