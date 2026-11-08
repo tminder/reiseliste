@@ -7,6 +7,7 @@ create table if not exists public.lists (
   id uuid primary key,
   name text not null,
   country text not null,
+  created_by uuid default auth.uid(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -32,6 +33,9 @@ create table if not exists public.items (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+-- Für Datenbanken, die mit einer älteren Version dieses Skripts angelegt wurden
+alter table public.lists add column if not exists created_by uuid default auth.uid();
+
 create index if not exists items_list_id_idx on public.items(list_id);
 
 -- Hilfsfunktion: Ist der aktuelle Nutzer Mitglied der Liste?
@@ -71,9 +75,12 @@ alter table public.list_members enable row level security;
 alter table public.items enable row level security;
 
 drop policy if exists "lists: read as member" on public.lists;
-create policy "lists: read as member" on public.lists for select to authenticated using (public.is_member(id));
+-- created_by: Beim Anlegen (auch per Upsert) muss die neue Zeile schon lesbar sein,
+-- bevor der Trigger die Mitgliedschaft einträgt.
+create policy "lists: read as member" on public.lists for select to authenticated
+  using (created_by = auth.uid() or public.is_member(id));
 drop policy if exists "lists: create" on public.lists;
-create policy "lists: create" on public.lists for insert to authenticated with check (true);
+create policy "lists: create" on public.lists for insert to authenticated with check (created_by = auth.uid());
 drop policy if exists "lists: update as member" on public.lists;
 create policy "lists: update as member" on public.lists for update to authenticated using (public.is_member(id));
 
