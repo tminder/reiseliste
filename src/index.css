@@ -507,3 +507,41 @@ button.icon {
   font-size: 0.8rem;
   color: var(--accent);
 }
+
+button.icon-btn {
+  padding: 3px 6px;
+  border-radius: 6px;
+  color: var(--accent);
+  line-height: 0;
+}
+button.icon-btn.active {
+  background: var(--accent-soft);
+}
+.shopline svg,
+.menu svg,
+button svg,
+.hint-ok svg,
+.brand svg {
+  vertical-align: -0.15em;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toolbar button,
+.menu button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+button.ghost.small,
+.check,
+.add .primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.flag {
+  font-size: 0.95em;
+}

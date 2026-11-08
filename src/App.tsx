@@ -1,5 +1,22 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEvent } from 'react'
 import QRCode from 'qrcode'
+import {
+  ArrowLeft,
+  Camera,
+  Check,
+  Lightbulb,
+  List,
+  LocateFixed,
+  MapPin,
+  Menu,
+  Pencil,
+  Plus,
+  Share2,
+  ShoppingCart,
+  Store as StoreIcon,
+  Trash2,
+  X,
+} from 'lucide-react'
 import { CATEGORY_LABEL, CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
@@ -56,7 +73,9 @@ function ProfileSetup({ onDone }: { onDone: (p: Profile) => void }) {
   const [lang, setLang] = useState<Lang>(existing?.lang ?? guessLang())
   return (
     <main className="page narrow">
-      <h1 className="brand">🛒 Reiseliste</h1>
+      <h1 className="brand">
+        <ShoppingCart size={26} strokeWidth={2.2} /> Reiseliste
+      </h1>
       <p className="lead">Du schreibst in deiner Sprache – im Laden siehst du jeden Artikel in der Landessprache.</p>
       <form
         className="card stack"
@@ -120,7 +139,9 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
   return (
     <main className="page narrow">
       <header className="topbar">
-        <h1 className="brand">🛒 Reiseliste</h1>
+        <h1 className="brand">
+          <ShoppingCart size={26} strokeWidth={2.2} /> Reiseliste
+        </h1>
         <button className="ghost small" onClick={onEditProfile}>
           {profile.name} · {LANG_LABEL[profile.lang]}
         </button>
@@ -143,7 +164,9 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
               </option>
             ))}
           </select>
-          {detected && detected === country && <span className="hint-ok">📍 Dein aktueller Standort</span>}
+          {detected && detected === country && <span className="hint-ok">
+              <LocateFixed size={14} /> Dein aktueller Standort
+            </span>}
         </label>
         <label>
           Name (optional)
@@ -171,7 +194,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
                     location.reload()
                   }}
                 >
-                  ✕
+                  <X size={16} />
                 </button>
               </div>
             )
@@ -250,7 +273,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     return (
       <main className="page narrow">
         <a href="#/" className="back">
-          ← Listen
+          <ArrowLeft size={18} /> Listen
         </a>
         <div className="card">
           {store.notFound
@@ -275,8 +298,8 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   return (
     <main className={`page ${shopMode ? 'shop' : ''}`}>
       <header className="topbar">
-        <a href="#/" className="back">
-          ←
+        <a href="#/" className="back" aria-label="Alle Listen">
+          <ArrowLeft size={22} />
         </a>
         <div className="title">
           <h1>{list.name}</h1>
@@ -287,7 +310,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         </div>
         <div className="menu-wrap">
           <button className="ghost icon" aria-label="Menü" aria-expanded={showMenu} onClick={() => setShowMenu(!showMenu)}>
-            ☰
+            <Menu size={20} />
           </button>
           {showMenu && (
             <>
@@ -300,7 +323,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                     setShowShare(true)
                   }}
                 >
-                  🔗 Teilen
+                  <Share2 size={18} /> Teilen
                 </button>
                 <button
                   role="menuitem"
@@ -309,7 +332,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                     setShopMode(!shopMode)
                   }}
                 >
-                  🛒 {shopMode ? 'Ladenansicht beenden' : 'Ladenansicht'}
+                  <ShoppingCart size={18} /> {shopMode ? 'Ladenansicht beenden' : 'Ladenansicht'}
                 </button>
                 <button
                   role="menuitem"
@@ -318,10 +341,10 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                     setShowEdit(true)
                   }}
                 >
-                  ✏️ Name &amp; Reiseland
+                  <Pencil size={18} /> Name &amp; Reiseland
                 </button>
                 <button role="menuitem" onClick={() => go('/')}>
-                  📋 Alle Listen
+                  <List size={18} /> Alle Listen
                 </button>
                 <button
                   role="menuitem"
@@ -331,7 +354,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                     go('/')
                   }}
                 >
-                  🗑 Von diesem Gerät entfernen
+                  <Trash2 size={18} /> Von diesem Gerät entfernen
                 </button>
               </div>
             </>
@@ -358,8 +381,8 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
             placeholder={`Artikel auf ${LANG_LABEL[profile.lang]}, z. B. „2 Milch“`}
             aria-label="Artikel hinzufügen"
           />
-          <button className="primary" disabled={!input.trim()}>
-            +
+          <button className="primary" aria-label="Hinzufügen" disabled={!input.trim()}>
+            <Plus size={22} strokeWidth={2.5} />
           </button>
           {suggestions.length > 0 && (
             <ul className="suggestions">
@@ -383,7 +406,15 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
 
       <div className="toolbar">
         <button className={shopMode ? 'primary' : 'ghost'} onClick={() => setShopMode(!shopMode)}>
-          {shopMode ? 'Bearbeiten' : '🛒 Ladenansicht'}
+          {shopMode ? (
+            <>
+              <Pencil size={16} /> Bearbeiten
+            </>
+          ) : (
+            <>
+              <ShoppingCart size={16} /> Ladenansicht
+            </>
+          )}
         </button>
         <span className="muted">
           {open.length} offen · {done.length} erledigt
@@ -449,6 +480,7 @@ function ItemRow({
 }) {
   const [editing, setEditing] = useState(false)
   const [showPhotos, setShowPhotos] = useState(false)
+  const [showHint, setShowHint] = useState(false)
   const [override, setOverride] = useState(item.localOverride ?? '')
   const local = item.localOverride || nameIn(item.conceptId, target)
   // Gross: der Artikel in der Sprache des Betrachters (sonst wie eingegeben). Klein: Landessprache.
@@ -462,7 +494,7 @@ function ItemRow({
         aria-label={item.checked ? 'Als offen markieren' : 'Abhaken'}
         onClick={() => void store.updateItem(item.id, { checked: !item.checked })}
       >
-        {item.checked ? '✓' : ''}
+        {item.checked && <Check size={18} strokeWidth={3} />}
       </button>
       <div className="body">
         <div className="main">
@@ -470,7 +502,13 @@ function ItemRow({
           {own}
         </div>
         <div className="orig">
-          {local ? <span className="local">{local}</span> : <span className="missing">keine Übersetzung</span>}
+          {local ? (
+            <span className="local">
+              <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
+            </span>
+          ) : (
+            <span className="missing">keine Übersetzung</span>
+          )}
           {!shopMode && <span className="muted"> · {item.author}</span>}
         </div>
         {!local && !shopMode && !editing && (
@@ -491,23 +529,28 @@ function ItemRow({
             <button className="primary small">OK</button>
           </form>
         )}
-        {hint && !item.checked && <div className="hint">💡 {hint}</div>}
+        {shopMode && showHint && hint && !item.checked && <div className="hint">{hint}</div>}
         {showPhotos && local && (
           <PhotoStrip country={country} conceptId={item.localOverride ? null : item.conceptId} term={local} store={shopTag} storeName={shopName} />
         )}
       </div>
+      {shopMode && hint && !item.checked && (
+        <button className={`ghost small ${showHint ? 'active' : ''}`} aria-label="Tipp" onClick={() => setShowHint(!showHint)}>
+          <Lightbulb size={18} />
+        </button>
+      )}
       {local && !item.checked && hasPhotos(item.localOverride ? null : item.conceptId, item.localOverride) && (
         <button
           className={`ghost small ${showPhotos ? 'active' : ''}`}
           aria-label="Produktfotos"
           onClick={() => setShowPhotos(!showPhotos)}
         >
-          📷
+          <Camera size={18} />
         </button>
       )}
       {!shopMode && (
         <button className="ghost small" aria-label="Löschen" onClick={() => void store.updateItem(item.id, { deleted: true })}>
-          ✕
+          <X size={18} />
         </button>
       )}
     </div>
@@ -581,23 +624,20 @@ function ShopBar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.retryIn, shop])
 
-  // Gewählt: nur der Name, dezent
-  if (shop)
+  const current = shop ?? (state.dismissed ? null : (state.shops?.[0] ?? null))
+  const others = (state.shops ?? []).filter((x) => x.id !== current?.id).slice(0, 5)
+
+  if (state.loading && !current)
     return (
-      <div className="shopline">
-        🏪 {shop.name}
-        <button className="link" onClick={() => onChoose(null)}>
-          ändern
-        </button>
+      <div className="shopline muted">
+        <MapPin size={15} /> Suche Laden …
       </div>
     )
 
-  if (state.loading) return <div className="shopline muted">📍 Suche Laden …</div>
-
-  if (state.error)
+  if (state.error && !current)
     return (
       <div className="shopline muted" title={state.error}>
-        📍 {state.error}
+        <MapPin size={15} /> {state.error}
         {state.retryIn != null && <span>Neuer Versuch in {state.retryIn} s</span>}
         <button className="link" onClick={() => void detect(true)}>
           jetzt
@@ -605,55 +645,61 @@ function ShopBar({
       </div>
     )
 
-  if (state.shops && !state.dismissed) {
-    const [first, ...rest] = state.shops
-    if (!first)
-      return (
-        <div className="shopline muted">
-          📍 Kein Supermarkt bis {formatDistance(FAR_RADIUS_M)}
-          <button className="link" onClick={() => setState({ dismissed: true })}>
-            ok
-          </button>
-        </div>
-      )
-    // Erst nur ein Vorschlag; weitere hinter „andere“
+  if (!current)
     return (
-      <div className="shopline">
-        <span>
-          🏪 {state.inside ? '' : 'Nächster: '}
-          <strong>{first.name}</strong>
-          {state.inside ? '?' : ''} <span className="muted">{formatDistance(first.distance)}</span>
-        </span>
-        <button className="link strong" onClick={() => onChoose(first)}>
-          {state.inside ? 'Ja' : 'Wählen'}
+      <div className="shopline muted">
+        <MapPin size={15} />
+        {state.shops ? `Kein Supermarkt bis ${formatDistance(FAR_RADIUS_M)}` : 'Kein Laden'}
+        <button className="icon-btn" aria-label="Laden suchen" onClick={() => void detect(true)}>
+          <Pencil size={14} />
         </button>
-        {rest.length > 0 && !state.more && (
-          <button className="link" onClick={() => setState({ ...state, more: true })}>
-            andere
-          </button>
-        )}
-        <button className="link" aria-label="Ausblenden" onClick={() => setState({ dismissed: true })}>
-          ✕
-        </button>
-        {state.more && (
-          <div className="shop-alts">
-            {rest.slice(0, 4).map((s) => (
-              <button key={s.id} className="chip" onClick={() => onChoose(s)}>
-                {s.name} <span className="muted">{formatDistance(s.distance)}</span>
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     )
-  }
 
-  // Noch nichts gesucht (oder ausgeblendet): nur ein kleiner Link
+  // Ein Laden (gewählt oder vorgeschlagen) – nur ein Ändern-Symbol, Alternativen erst nach Antippen
   return (
     <div className="shopline">
-      <button className="link" onClick={() => void detect(true)}>
-        📍 Laden erkennen
+      <span>
+        <StoreIcon size={15} /> {current.name}
+        {!shop && <span className="muted"> {formatDistance(current.distance)}</span>}
+      </span>
+      <button
+        className={`icon-btn ${state.more ? 'active' : ''}`}
+        aria-label="Laden ändern"
+        aria-expanded={!!state.more}
+        onClick={() => {
+          if (!state.more && !state.shops) void detect(true)
+          setState((st) => ({ ...st, more: !st.more }))
+        }}
+      >
+        <Pencil size={14} />
       </button>
+      {state.more && (
+        <div className="shop-alts">
+          {state.loading && <span className="muted small-text">Suche …</span>}
+          {others.map((x) => (
+            <button
+              key={x.id}
+              className="chip"
+              onClick={() => {
+                onChoose(x)
+                setState((st) => ({ ...st, more: false }))
+              }}
+            >
+              {x.name} <span className="muted">{formatDistance(x.distance)}</span>
+            </button>
+          ))}
+          <button
+            className="chip"
+            onClick={() => {
+              onChoose(null)
+              void detect(true).then(() => setState((st) => ({ ...st, more: true })))
+            }}
+          >
+            <LocateFixed size={13} /> Neu suchen
+          </button>
+        </div>
+      )}
     </div>
   )
 }
