@@ -255,13 +255,12 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           <span className="sub">
             {country?.flag} {country?.name} · {LANG_LABEL[target]}
           </span>
+          <ShopBar shop={shop} onChoose={chooseShop} />
         </div>
         <button className="ghost" onClick={() => setShowShare(true)}>
           Teilen
         </button>
       </header>
-
-      <ShopBar shop={shop} onChoose={chooseShop} />
 
       <div className={`sync sync-${store.sync}`}>
         {SYNC_LABEL[store.sync]}
@@ -426,15 +425,15 @@ function ItemRow({
 }
 
 function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | null) => void }) {
-  const [state, setState] = useState<{ loading?: boolean; shops?: Shop[]; inside?: boolean; error?: string; open?: boolean }>({})
+  const [state, setState] = useState<{ loading?: boolean; shops?: Shop[]; inside?: boolean; error?: string; more?: boolean; dismissed?: boolean }>({})
 
   async function detect() {
     setState({ loading: true })
     try {
       const { shops, inside } = await findNearbyShops()
-      setState({ shops, inside, open: true })
+      setState({ shops, inside })
     } catch (e) {
-      setState({ error: e instanceof NearbyError ? e.message : 'Supermarkt konnte nicht erkannt werden.' })
+      setState({ error: e instanceof NearbyError ? e.message : 'Laden nicht erkannt.' })
     }
   }
 
@@ -451,66 +450,63 @@ function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | n
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Gewählt: nur der Name, dezent
   if (shop)
     return (
-      <div className="shopbar">
-        <span>
-          🏪 <strong>{shop.name}</strong>
-        </span>
+      <div className="shopline">
+        🏪 {shop.name}
         <button className="link" onClick={() => onChoose(null)}>
           ändern
         </button>
       </div>
     )
 
-  if (state.open && state.shops) {
+  if (state.loading) return <div className="shopline muted">📍 Suche Laden …</div>
+
+  if (state.error)
+    return (
+      <div className="shopline muted" title={state.error}>
+        📍 {state.error}
+        <button className="link" onClick={detect}>
+          nochmal
+        </button>
+      </div>
+    )
+
+  if (state.shops && !state.dismissed) {
     const [first, ...rest] = state.shops
     if (!first)
       return (
-        <div className="shopbar">
-          <span className="muted">Kein Supermarkt im Umkreis von {formatDistance(FAR_RADIUS_M)}.</span>
-          <button className="link" onClick={detect}>
-            nochmal
+        <div className="shopline muted">
+          📍 Kein Supermarkt bis {formatDistance(FAR_RADIUS_M)}
+          <button className="link" onClick={() => setState({ dismissed: true })}>
+            ok
           </button>
         </div>
       )
-    if (!state.inside)
-      return (
-        <div className="shopbar column">
-          <div className="row-between">
-            <span className="muted">Du bist in keinem Laden. Nächste Supermärkte:</span>
-            <button className="ghost small" aria-label="Schliessen" onClick={() => setState({})}>
-              ✕
-            </button>
-          </div>
-          <div className="shop-alts">
-            {state.shops.map((s) => (
-              <button key={s.id} className="ghost small" onClick={() => onChoose(s)}>
-                {s.name} <span className="muted">{formatDistance(s.distance)}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )
+    // Erst nur ein Vorschlag; weitere hinter „andere“
     return (
-      <div className="shopbar column">
-        <div className="row-between">
-          <span>
-            Bist du bei <strong>{first.name}</strong>? <span className="muted">({formatDistance(first.distance)})</span>
-          </span>
-          <span className="row">
-            <button className="primary small" onClick={() => onChoose(first)}>
-              Ja
-            </button>
-            <button className="ghost small" aria-label="Nein" onClick={() => setState({})}>
-              ✕
-            </button>
-          </span>
-        </div>
-        {rest.length > 0 && (
+      <div className="shopline">
+        <span>
+          🏪 {state.inside ? '' : 'Nächster: '}
+          <strong>{first.name}</strong>
+          {state.inside ? '?' : ''} <span className="muted">{formatDistance(first.distance)}</span>
+        </span>
+        <button className="link strong" onClick={() => onChoose(first)}>
+          {state.inside ? 'Ja' : 'Wählen'}
+        </button>
+        {rest.length > 0 && !state.more && (
+          <button className="link" onClick={() => setState({ ...state, more: true })}>
+            andere
+          </button>
+        )}
+        <button className="link" aria-label="Ausblenden" onClick={() => setState({ dismissed: true })}>
+          ✕
+        </button>
+        {state.more && (
           <div className="shop-alts">
             {rest.slice(0, 4).map((s) => (
-              <button key={s.id} className="ghost small" onClick={() => onChoose(s)}>
+              <button key={s.id} className="chip" onClick={() => onChoose(s)}>
                 {s.name} <span className="muted">{formatDistance(s.distance)}</span>
               </button>
             ))}
@@ -520,11 +516,11 @@ function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | n
     )
   }
 
+  // Noch nichts gesucht (oder ausgeblendet): nur ein kleiner Link
   return (
-    <div className="shopbar">
-      {state.error ? <span className="muted small-text">{state.error}</span> : <span className="muted">In welchem Laden bist du?</span>}
-      <button className="ghost small" onClick={detect} disabled={state.loading}>
-        {state.loading ? 'Suche …' : '📍 Erkennen'}
+    <div className="shopline">
+      <button className="link" onClick={detect}>
+        📍 Laden erkennen
       </button>
     </div>
   )
