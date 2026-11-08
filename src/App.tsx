@@ -3,7 +3,7 @@ import QRCode from 'qrcode'
 import { CATEGORY_LABEL, CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
-import { findNearbyShops, getChosenShop, locationAlreadyAllowed, NearbyError, setChosenShop, shopTag, type Shop } from './lib/nearby'
+import { findNearbyShops, formatDistance, getChosenShop, locationAlreadyAllowed, NearbyError, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { loadPhotos, PhotoError, type Photo } from './lib/photos'
 import { ListStore, forgetList, knownLists, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
@@ -426,13 +426,13 @@ function ItemRow({
 }
 
 function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | null) => void }) {
-  const [state, setState] = useState<{ loading?: boolean; shops?: Shop[]; error?: string; open?: boolean }>({})
+  const [state, setState] = useState<{ loading?: boolean; shops?: Shop[]; inside?: boolean; error?: string; open?: boolean }>({})
 
   async function detect() {
     setState({ loading: true })
     try {
-      const shops = await findNearbyShops()
-      setState({ shops, open: true })
+      const { shops, inside } = await findNearbyShops()
+      setState({ shops, inside, open: true })
     } catch (e) {
       setState({ error: e instanceof NearbyError ? e.message : 'Supermarkt konnte nicht erkannt werden.' })
     }
@@ -468,17 +468,35 @@ function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | n
     if (!first)
       return (
         <div className="shopbar">
-          <span className="muted">Kein Supermarkt in der Nähe gefunden.</span>
+          <span className="muted">Kein Supermarkt im Umkreis von 3 km.</span>
           <button className="link" onClick={detect}>
             nochmal
           </button>
+        </div>
+      )
+    if (!state.inside)
+      return (
+        <div className="shopbar column">
+          <div className="row-between">
+            <span className="muted">Du bist in keinem Laden. Nächste Supermärkte:</span>
+            <button className="ghost small" aria-label="Schliessen" onClick={() => setState({})}>
+              ✕
+            </button>
+          </div>
+          <div className="shop-alts">
+            {state.shops.map((s) => (
+              <button key={s.id} className="ghost small" onClick={() => onChoose(s)}>
+                {s.name} <span className="muted">{formatDistance(s.distance)}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )
     return (
       <div className="shopbar column">
         <div className="row-between">
           <span>
-            Bist du bei <strong>{first.name}</strong>? <span className="muted">({first.distance} m)</span>
+            Bist du bei <strong>{first.name}</strong>? <span className="muted">({formatDistance(first.distance)})</span>
           </span>
           <span className="row">
             <button className="primary small" onClick={() => onChoose(first)}>
@@ -493,7 +511,7 @@ function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | n
           <div className="shop-alts">
             {rest.slice(0, 4).map((s) => (
               <button key={s.id} className="ghost small" onClick={() => onChoose(s)}>
-                {s.name} <span className="muted">{s.distance} m</span>
+                {s.name} <span className="muted">{formatDistance(s.distance)}</span>
               </button>
             ))}
           </div>

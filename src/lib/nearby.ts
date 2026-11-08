@@ -42,15 +42,10 @@ export async function locationAlreadyAllowed(): Promise<boolean> {
   }
 }
 
-export async function findNearbyShops(): Promise<Shop[]> {
-  const pos = await getPosition()
-  const { latitude: lat, longitude: lon, accuracy } = pos.coords
-  // GPS ist in Gebäuden ungenau: Suchradius an die Genauigkeit anpassen (mind. 75 m, höchstens 400 m)
-  const radius = Math.min(400, Math.max(75, Math.round(accuracy * 1.5)))
+async function overpass(lat: number, lon: number, radius: number, shopTypes: string, limit: number) {
   const query = `[out:json][timeout:15];
-nwr(around:${radius},${lat},${lon})["shop"~"^(supermarket|convenience|greengrocer|chemist)$"];
-out center tags 30;`
-
+nwr(around:${radius},${lat},${lon})["shop"~"^(${shopTypes})$"];
+out center tags ${limit};`
   let res: Response
   try {
     res = await fetch('https://overpass-api.de/api/interpreter', {
@@ -85,6 +80,26 @@ out center tags 30;`
     .sort((a, b) => a.rank - b.rank || a.distance - b.distance)
     .map(({ rank: _rank, ...shop }) => shop)
 }
+
+/**
+ * Läden in der Nähe. `inside` = true: Läden im Umkreis der GPS-Genauigkeit (man ist wohl drin).
+ * Sonst die nächsten Supermärkte bis 3 km Entfernung.
+ */
+export async function findNearbyShops(): Promise<{ shops: Shop[]; inside: boolean }> {
+  const pos = await getPosition()
+  const { latitude: lat, longitude: lon, accuracy } = pos.coords
+  // GPS ist in Gebäuden ungenau: Suchradius an die Genauigkeit anpassen (mind. 75 m, höchstens 400 m)
+  const radius = Math.min(400, Math.max(75, Math.round(accuracy * 1.5)))
+  const close = await overpass(lat, lon, radius, 'supermarket|convenience|greengrocer|chemist', 30)
+  if (close.length) return { shops: close, inside: true }
+  const far = await overpass(lat, lon, 3000, 'supermarket', 60)
+  return { shops: far.slice(0, 5), inside: false }
+}
+
+function formatDistance(m: number) {
+  return m < 1000 ? `${m} m` : `${(m / 1000).toFixed(1).replace('.', ',')} km`
+}
+export { formatDistance }
 
 // ---------- Gewählter Laden pro Liste (nur auf diesem Gerät, 3 Stunden gültig) ----------
 
