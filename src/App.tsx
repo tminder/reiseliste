@@ -3,7 +3,7 @@ import QRCode from 'qrcode'
 import { CATEGORY_LABEL, CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
-import { findNearbyShops, formatDistance, getChosenShop, locationAlreadyAllowed, NearbyError, setChosenShop, shopTag, type Shop } from './lib/nearby'
+import { FAR_RADIUS_M, findNearbyShops, formatDistance, getChosenShop, locationAlreadyAllowed, NearbyError, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { loadPhotos, PhotoError, type Photo } from './lib/photos'
 import { ListStore, forgetList, knownLists, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
@@ -468,7 +468,7 @@ function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | n
     if (!first)
       return (
         <div className="shopbar">
-          <span className="muted">Kein Supermarkt im Umkreis von 3 km.</span>
+          <span className="muted">Kein Supermarkt im Umkreis von {formatDistance(FAR_RADIUS_M)}.</span>
           <button className="link" onClick={detect}>
             nochmal
           </button>
