@@ -194,6 +194,9 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   const [shopMode, setShopMode] = useState(false)
   const [showShare, setShowShare] = useState(false)
   const [shop, setShop] = useState<Shop | null>(() => getChosenShop(id))
+  // Für die Fotos zählt der gewählte Laden, sonst der angezeigte Vorschlag
+  const [suggested, setSuggested] = useState<Shop | null>(null)
+  const photoShop = shop ?? suggested
   const chooseShop = (s: Shop | null) => {
     setChosenShop(id, s)
     setShop(s)
@@ -255,7 +258,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           <span className="sub">
             {country?.flag} {country?.name} · {LANG_LABEL[target]}
           </span>
-          <ShopBar shop={shop} onChoose={chooseShop} />
+          <ShopBar shop={shop} onChoose={chooseShop} onSuggest={setSuggested} />
         </div>
         <button className="ghost" onClick={() => setShowShare(true)}>
           Teilen
@@ -321,7 +324,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           <section key={cat} className="group">
             <h3>{cat === 'sonstiges' ? 'Sonstiges' : CATEGORY_LABEL[cat]}</h3>
             {groups.get(cat)!.map((item) => (
-              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={shop ? shopTag(shop) : undefined} shopName={shop?.brand ?? shop?.name} viewer={profile.lang} shopMode={shopMode} />
+              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} />
             ))}
           </section>
         ))}
@@ -330,7 +333,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         <section className="group done">
           <h3>Im Wagen</h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={shop ? shopTag(shop) : undefined} shopName={shop?.brand ?? shop?.name} viewer={profile.lang} shopMode={shopMode} />
+            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} />
           ))}
         </section>
       )}
@@ -429,7 +432,15 @@ function ItemRow({
 // Wartezeiten zwischen automatischen neuen Versuchen, wenn OpenStreetMap ausgelastet ist (danach alle 5 Min.)
 const RETRY_S = [15, 30, 60, 120, 300]
 
-function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | null) => void }) {
+function ShopBar({
+  shop,
+  onChoose,
+  onSuggest,
+}: {
+  shop: Shop | null
+  onChoose: (s: Shop | null) => void
+  onSuggest: (s: Shop | null) => void
+}) {
   // Nach einem Neuladen den letzten Vorschlag (bis 30 Min.) direkt wieder zeigen
   const [state, setState] = useState<{
     loading?: boolean
@@ -458,6 +469,13 @@ function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | n
       } else setState({ error: err.message })
     }
   }
+
+  // Den angezeigten Vorschlag nach oben melden (für die Fotos)
+  const suggestion = !shop && !state.dismissed ? (state.shops?.[0] ?? null) : null
+  useEffect(() => {
+    onSuggest(suggestion)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [suggestion?.id])
 
   // Automatisch suchen, sobald die Liste offen ist und noch kein Laden gewählt/vorgeschlagen ist
   useEffect(() => {
@@ -590,7 +608,7 @@ function PhotoStrip({
         {state.photos.map((p) => (
           <a key={p.code} href={p.url} target="_blank" rel="noreferrer" className="photo" title={`${p.name} ${p.brand}`.trim()}>
             <img src={p.image} alt={p.name || term} loading="lazy" />
-            <span>{p.brand || p.name}</span>
+            <span>{p.name || p.brand}</span>
           </a>
         ))}
       </div>
