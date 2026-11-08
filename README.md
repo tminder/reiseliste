@@ -2,7 +2,7 @@
 
 Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im Laden steht jeder Artikel zusätzlich in der **Landessprache des Reiselands**.
 
-> MVP. Das Konzept liegt im Claude-Projekt „Einkaufsliste Travel App“.
+> MVP. Das Konzept liegt im Claude-Projekt „Einkaufsliste Travel App“. Ziele, Entscheidungen, offene Fragen und technische Schulden stehen in [`docs/`](docs/README.md).
 
 ## Funktionen (MVP)
 
