@@ -45,10 +45,11 @@ Stand: 2026-11-08 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Erfüllt Z-4 bei minimaler Komplexität.
 - **Folgen:** Gleichzeitige Änderungen am selben Artikel können sich überschreiben (S-004, S-005).
 
-## D-008 · Landessprache über das Reiseland der Liste
+## D-008 · Landessprache über das Reiseland der Liste, Vorschlag per Standort
 
-- **Entscheidung:** Jede Liste hat ein Reiseland, und daraus folgt die Landessprache. Der Standort wird im MVP nicht ausgewertet. Länder mit mehreren Sprachen erscheinen als einzelne Einträge, z. B. Belgien (Flandern) und Belgien (Wallonie).
-- **Begründung:** Planbar schon vor der Reise. Keine Standortfreigabe nötig, kein Datenschutzaufwand.
+- **Entscheidung:** Jede Liste hat ein Reiseland, daraus folgt die Landessprache. Beim Anlegen schlägt die App das Land des aktuellen Standorts vor, sofern es unterstützt wird. Dafür werden die Koordinaten über Nominatim (OpenStreetMap) einem Land zugeordnet. Das Ergebnis gilt 6 Stunden. Zu Hause, z. B. in Deutschland oder der Deutschschweiz, bleibt die Auswahl von Hand. Bestehende Listen ändern ihr Land nicht automatisch. Name und Land lassen sich über das Menü ändern (D-017). Länder mit mehreren Sprachen sind als einzelne Einträge auswählbar, z. B. Belgien (Flandern/Wallonie) oder die Schweiz (Romandie/Tessin). Der Vorschlag ordnet sie über die Region zu.
+- **Begründung:** Man kann die Liste vor der Reise anlegen, das Land bleibt also wählbar. Ist man schon vor Ort, spart der Vorschlag einen Schritt (Wunsch des Inhabers).
+- **Folgen:** Auf der Startseite fragt der Browser nach dem Standort. Die Koordinaten gehen an Nominatim (F-007).
 
 ## D-009 · Native Apps später mit Capacitor
 
@@ -96,3 +97,9 @@ Stand: 2026-11-08 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Neue App-Versionen werden automatisch geladen. Geprüft wird beim Start, stündlich und jedes Mal, wenn die App wieder in den Vordergrund kommt, und bei einer neuen Version lädt die Seite selbst neu. Listendaten kommen per Echtzeit. Zusätzlich gleicht die App ab, wenn sie in den Vordergrund kommt, und alle 20 Sekunden, solange die Liste sichtbar ist.
 - **Begründung:** Wunsch des Inhabers. Handys trennen die Echtzeit-Verbindung im Hintergrund, der Abgleich fängt das auf.
 - **Folgen:** Ein Update kann die Seite mitten in der Eingabe neu laden. Bereits gespeicherte Artikel gehen dabei nicht verloren. Der Abgleich alle 20 Sekunden erzeugt mehr Anfragen an Supabase, im Gratis-Tarif ist das unkritisch.
+
+## D-017 · Menü (☰) in der Liste
+
+- **Entscheidung:** Oben rechts in der Liste sitzt ein Menü-Knopf ☰ statt des Knopfs „Teilen“. Das Menü enthält: Teilen, Ladenansicht an/aus, Name & Reiseland bearbeiten, Alle Listen, Von diesem Gerät entfernen. Der Knopf für die Ladenansicht bleibt zusätzlich über der Liste.
+- **Begründung:** Wunsch des Inhabers. Der Kopf bleibt kompakt, und weitere Funktionen haben Platz.
+- **Folgen:** „Von diesem Gerät entfernen“ entfernt die Liste nur lokal. Die anderen Mitglieder behalten sie (S-010).

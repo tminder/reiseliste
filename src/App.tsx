@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState, useSyncExternalStore, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEvent } from 'react'
 import QRCode from 'qrcode'
 import { CATEGORY_LABEL, CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
 import { FAR_RADIUS_M, findNearbyShops, formatDistance, getChosenShop, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
+import { detectCountry } from './lib/country'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
 import { ListStore, forgetList, knownLists, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
@@ -91,7 +92,22 @@ function ProfileSetup({ onDone }: { onDone: (p: Profile) => void }) {
 function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () => void }) {
   const [name, setName] = useState('')
   const [country, setCountry] = useState('ES')
+  const [detected, setDetected] = useState<string | null>(null)
+  const touched = useRef(false)
   const lists = knownLists()
+
+  // Bist du schon im Ausland, wird das aktuelle Land vorgeschlagen (änderbar)
+  useEffect(() => {
+    let alive = true
+    void detectCountry().then((code) => {
+      if (!alive || !code) return
+      setDetected(code)
+      if (!touched.current) setCountry(code)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   function create(e: FormEvent) {
     e.preventDefault()
@@ -114,13 +130,20 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
         <h2>Neue Liste</h2>
         <label>
           Reiseland
-          <select value={country} onChange={(e) => setCountry(e.target.value)}>
+          <select
+            value={country}
+            onChange={(e) => {
+              touched.current = true
+              setCountry(e.target.value)
+            }}
+          >
             {COUNTRIES.map((c) => (
               <option key={c.code} value={c.code}>
                 {c.flag} {c.name} – {LANG_LABEL[c.lang]}
               </option>
             ))}
           </select>
+          {detected && detected === country && <span className="hint-ok">📍 Dein aktueller Standort</span>}
         </label>
         <label>
           Name (optional)
@@ -193,6 +216,8 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   const [input, setInput] = useState('')
   const [shopMode, setShopMode] = useState(false)
   const [showShare, setShowShare] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const [showEdit, setShowEdit] = useState(false)
   const [shop, setShop] = useState<Shop | null>(() => getChosenShop(id))
   // Für die Fotos zählt der gewählte Laden, sonst der angezeigte Vorschlag
   const [suggested, setSuggested] = useState<Shop | null>(null)
@@ -260,9 +285,58 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           </span>
           <ShopBar shop={shop} onChoose={chooseShop} onSuggest={setSuggested} />
         </div>
-        <button className="ghost" onClick={() => setShowShare(true)}>
-          Teilen
-        </button>
+        <div className="menu-wrap">
+          <button className="ghost icon" aria-label="Menü" aria-expanded={showMenu} onClick={() => setShowMenu(!showMenu)}>
+            ☰
+          </button>
+          {showMenu && (
+            <>
+              <div className="menu-backdrop" onClick={() => setShowMenu(false)} />
+              <div className="menu" role="menu">
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setShowMenu(false)
+                    setShowShare(true)
+                  }}
+                >
+                  🔗 Teilen
+                </button>
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setShowMenu(false)
+                    setShopMode(!shopMode)
+                  }}
+                >
+                  🛒 {shopMode ? 'Ladenansicht beenden' : 'Ladenansicht'}
+                </button>
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setShowMenu(false)
+                    setShowEdit(true)
+                  }}
+                >
+                  ✏️ Name &amp; Reiseland
+                </button>
+                <button role="menuitem" onClick={() => go('/')}>
+                  📋 Alle Listen
+                </button>
+                <button
+                  role="menuitem"
+                  className="danger"
+                  onClick={() => {
+                    forgetList(id)
+                    go('/')
+                  }}
+                >
+                  🗑 Von diesem Gerät entfernen
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </header>
 
       <div className={`sync sync-${store.sync}`}>
@@ -339,6 +413,17 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
       )}
 
       {showShare && <ShareSheet id={id} name={list.name} onClose={() => setShowShare(false)} />}
+      {showEdit && (
+        <EditSheet
+          name={list.name}
+          country={list.country}
+          onSave={(name, country) => {
+            void store.updateList({ name, country })
+            setShowEdit(false)
+          }}
+          onClose={() => setShowEdit(false)}
+        />
+      )}
     </main>
   )
 }
@@ -623,6 +708,56 @@ function PhotoStrip({
 /** "2" → "2x", "500 g" bleibt "500 g" */
 function formatQty(qty: string): string {
   return /^\d+(?:[.,]\d+)?$/.test(qty.trim()) ? `${qty.trim()}x` : qty
+}
+
+function EditSheet({
+  name,
+  country,
+  onSave,
+  onClose,
+}: {
+  name: string
+  country: string
+  onSave: (name: string, country: string) => void
+  onClose: () => void
+}) {
+  const [n, setN] = useState(name)
+  const [c, setC] = useState(country)
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <form
+        className="sheet"
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={(e) => {
+          e.preventDefault()
+          onSave(n.trim() || name, c)
+        }}
+      >
+        <h2>Liste bearbeiten</h2>
+        <label>
+          Name
+          <input value={n} onChange={(e) => setN(e.target.value)} />
+        </label>
+        <label>
+          Reiseland
+          <select value={c} onChange={(e) => setC(e.target.value)}>
+            {COUNTRIES.map((x) => (
+              <option key={x.code} value={x.code}>
+                {x.flag} {x.name} – {LANG_LABEL[x.lang]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <p className="muted small-text">Ändert das Land für alle, mit denen die Liste geteilt ist.</p>
+        <div className="row">
+          <button className="primary">Speichern</button>
+          <button type="button" className="ghost" onClick={onClose}>
+            Abbrechen
+          </button>
+        </div>
+      </form>
+    </div>
+  )
 }
 
 function ShareSheet({ id, name, onClose }: { id: string; name: string; onClose: () => void }) {

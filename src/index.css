@@ -465,3 +465,45 @@ button.chip {
 .topbar:has(.shopline) > button {
   margin-top: 2px;
 }
+
+.menu-wrap {
+  position: relative;
+}
+button.icon {
+  font-size: 1.2rem;
+  padding: 6px 12px;
+}
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+}
+.menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 9;
+  min-width: 230px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.18);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+.menu button {
+  text-align: left;
+  padding: 11px 12px;
+  border-radius: 8px;
+}
+.menu button:hover {
+  background: var(--accent-soft);
+}
+.menu .danger {
+  color: #dc2626;
+}
+.hint-ok {
+  font-size: 0.8rem;
+  color: var(--accent);
+}

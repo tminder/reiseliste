@@ -18,7 +18,7 @@ export class NearbyError extends Error {
   }
 }
 
-function getPosition(): Promise<GeolocationPosition> {
+export function getPosition(): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
     if (!('geolocation' in navigator)) return reject(new NearbyError('Dieses Gerät kann den Standort nicht bestimmen.'))
     navigator.geolocation.getCurrentPosition(resolve, (err) => {
