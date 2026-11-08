@@ -1,0 +1,323 @@
+import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js'
+import type { Lang } from '../data/dictionary'
+
+// ---------- Typen ----------
+
+export interface ShoppingList {
+  id: string
+  name: string
+  country: string
+  updatedAt: string
+}
+
+export interface Item {
+  id: string
+  listId: string
+  text: string
+  qty: string | null
+  lang: Lang
+  conceptId: string | null
+  localOverride: string | null
+  checked: boolean
+  deleted: boolean
+  author: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Profile {
+  name: string
+  lang: Lang
+}
+
+export type SyncState = 'local-only' | 'offline' | 'syncing' | 'synced' | 'error'
+
+// ---------- Supabase (optional) ----------
+
+const URL = import.meta.env.VITE_SUPABASE_URL as string | undefined
+const KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+export const supabase: SupabaseClient | null = URL && KEY ? createClient(URL, KEY) : null
+
+let authReady: Promise<boolean> | null = null
+/** Anonyme Anmeldung – nötig, damit die Zugriffsregeln (RLS) greifen. */
+function ensureAuth(): Promise<boolean> {
+  if (!supabase) return Promise.resolve(false)
+  authReady ??= (async () => {
+    const { data } = await supabase.auth.getSession()
+    if (data.session) return true
+    const { error } = await supabase.auth.signInAnonymously()
+    if (error) {
+      console.warn('[reiseliste] Anonyme Anmeldung fehlgeschlagen:', error.message)
+      authReady = null
+      return false
+    }
+    return true
+  })()
+  return authReady
+}
+
+// ---------- Lokaler Speicher ----------
+
+const LS = {
+  get<T>(key: string, fallback: T): T {
+    try {
+      const raw = localStorage.getItem(key)
+      return raw ? (JSON.parse(raw) as T) : fallback
+    } catch {
+      return fallback
+    }
+  },
+  set(key: string, value: unknown) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value))
+    } catch {
+      /* Speicher voll oder gesperrt – App läuft im Speicher weiter */
+    }
+  },
+}
+
+export const profileStore = {
+  get: () => LS.get<Profile | null>('rl:profile', null),
+  set: (p: Profile) => LS.set('rl:profile', p),
+}
+
+export function knownLists(): ShoppingList[] {
+  const ids = LS.get<string[]>('rl:lists', [])
+  return ids
+    .map((id) => LS.get<{ list: ShoppingList | null }>(`rl:list:${id}`, { list: null }).list)
+    .filter((l): l is ShoppingList => !!l)
+}
+
+function rememberList(id: string) {
+  const ids = LS.get<string[]>('rl:lists', [])
+  if (!ids.includes(id)) LS.set('rl:lists', [id, ...ids])
+}
+
+export function forgetList(id: string) {
+  LS.set('rl:lists', LS.get<string[]>('rl:lists', []).filter((x) => x !== id))
+  localStorage.removeItem(`rl:list:${id}`)
+}
+
+// ---------- Warteschlange für Änderungen (offline-fähig) ----------
+
+type Op = { table: 'lists'; row: ShoppingList } | { table: 'items'; row: Item }
+
+const queue = {
+  all: () => LS.get<Op[]>('rl:queue', []),
+  push(op: Op) {
+    // Pro Zeile nur die neueste Version behalten
+    const ops = this.all().filter((o) => !(o.table === op.table && o.row.id === op.row.id))
+    ops.push(op)
+    LS.set('rl:queue', ops)
+  },
+  remove(op: Op) {
+    LS.set(
+      'rl:queue',
+      this.all().filter((o) => !(o.table === op.table && o.row.id === op.row.id && o.row.updatedAt === op.row.updatedAt)),
+    )
+  },
+}
+
+const toRemoteList = (l: ShoppingList) => ({ id: l.id, name: l.name, country: l.country, updated_at: l.updatedAt })
+const toRemoteItem = (i: Item) => ({
+  id: i.id,
+  list_id: i.listId,
+  text: i.text,
+  qty: i.qty,
+  lang: i.lang,
+  concept_id: i.conceptId,
+  local_override: i.localOverride,
+  checked: i.checked,
+  deleted: i.deleted,
+  author: i.author,
+  created_at: i.createdAt,
+  updated_at: i.updatedAt,
+})
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const fromRemoteList = (r: any): ShoppingList => ({ id: r.id, name: r.name, country: r.country, updatedAt: r.updated_at })
+const fromRemoteItem = (r: any): Item => ({
+  id: r.id,
+  listId: r.list_id,
+  text: r.text,
+  qty: r.qty,
+  lang: r.lang,
+  conceptId: r.concept_id,
+  localOverride: r.local_override,
+  checked: r.checked,
+  deleted: r.deleted,
+  author: r.author ?? '',
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+})
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
+let flushing: Promise<boolean> | null = null
+/** Schickt alle offenen Änderungen an Supabase. Liefert true, wenn die Warteschlange leer ist. */
+export function flushQueue(): Promise<boolean> {
+  if (!supabase) return Promise.resolve(true)
+  flushing ??= (async () => {
+    try {
+      if (!(await ensureAuth())) return false
+      for (const op of queue.all()) {
+        const { error } =
+          op.table === 'lists'
+            ? await supabase.from('lists').upsert(toRemoteList(op.row))
+            : await supabase.from('items').upsert(toRemoteItem(op.row))
+        if (error) {
+          console.warn('[reiseliste] Sync-Fehler:', error.message)
+          return false
+        }
+        queue.remove(op)
+      }
+      return true
+    } catch {
+      return false
+    } finally {
+      flushing = null
+    }
+  })()
+  return flushing
+}
+
+// ---------- Store für eine Liste ----------
+
+const newer = (a: { updatedAt: string }, b: { updatedAt: string }) => a.updatedAt >= b.updatedAt
+const now = () => new Date().toISOString()
+
+export class ListStore {
+  list: ShoppingList | null
+  items: Item[]
+  sync: SyncState
+  notFound = false
+  private listeners = new Set<() => void>()
+  private channel: RealtimeChannel | null = null
+  private onOnline = () => void this.pushAndPull()
+
+  readonly id: string
+
+  constructor(id: string) {
+    this.id = id
+    const cached = LS.get<{ list: ShoppingList | null; items: Item[] }>(`rl:list:${id}`, { list: null, items: [] })
+    this.list = cached.list
+    this.items = cached.items
+    this.sync = supabase ? (navigator.onLine ? 'syncing' : 'offline') : 'local-only'
+  }
+
+  subscribe(fn: () => void) {
+    this.listeners.add(fn)
+    return () => this.listeners.delete(fn)
+  }
+
+  private emit() {
+    LS.set(`rl:list:${this.id}`, { list: this.list, items: this.items })
+    this.listeners.forEach((fn) => fn())
+  }
+
+  private setSync(s: SyncState) {
+    this.sync = s
+    this.listeners.forEach((fn) => fn())
+  }
+
+  async start() {
+    if (this.list) rememberList(this.id)
+    window.addEventListener('online', this.onOnline)
+    if (!supabase) return
+    if (!(await ensureAuth())) return this.setSync('error')
+    // Beitreten (Mitgliedschaft anlegen) – nötig, wenn die Liste per Link geöffnet wurde
+    await supabase.rpc('join_list', { p_list_id: this.id })
+    this.channel = supabase
+      .channel(`list-${this.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: `list_id=eq.${this.id}` }, (p) => {
+        if (p.new && 'id' in p.new) this.applyItem(fromRemoteItem(p.new))
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'lists', filter: `id=eq.${this.id}` }, (p) => {
+        if (p.new && 'id' in p.new) this.applyList(fromRemoteList(p.new))
+      })
+      .subscribe()
+    await this.pushAndPull()
+  }
+
+  stop() {
+    window.removeEventListener('online', this.onOnline)
+    if (this.channel && supabase) void supabase.removeChannel(this.channel)
+  }
+
+  async pushAndPull() {
+    if (!supabase) return
+    if (!navigator.onLine) return this.setSync('offline')
+    this.setSync('syncing')
+    const pushed = await flushQueue()
+    const [listRes, itemsRes] = await Promise.all([
+      supabase.from('lists').select('*').eq('id', this.id).maybeSingle(),
+      supabase.from('items').select('*').eq('list_id', this.id),
+    ])
+    if (listRes.error || itemsRes.error) return this.setSync(navigator.onLine ? 'error' : 'offline')
+    if (listRes.data) this.applyList(fromRemoteList(listRes.data), false)
+    else if (!this.list) this.notFound = true
+    for (const row of itemsRes.data ?? []) this.applyItem(fromRemoteItem(row), false)
+    this.emit()
+    this.setSync(pushed ? 'synced' : 'error')
+  }
+
+  private applyList(remote: ShoppingList, emit = true) {
+    if (!this.list || newer(remote, this.list)) {
+      this.list = remote
+      this.notFound = false
+      rememberList(this.id)
+    }
+    if (emit) this.emit()
+  }
+
+  private applyItem(remote: Item, emit = true) {
+    const idx = this.items.findIndex((i) => i.id === remote.id)
+    if (idx === -1) this.items = [...this.items, remote]
+    else if (newer(remote, this.items[idx])) this.items = this.items.map((i, k) => (k === idx ? remote : i))
+    if (emit) this.emit()
+  }
+
+  private async write(op: Op) {
+    queue.push(op)
+    this.emit()
+    if (!supabase) return
+    if (!navigator.onLine) return this.setSync('offline')
+    this.setSync('syncing')
+    const ok = await flushQueue()
+    this.setSync(ok ? 'synced' : navigator.onLine ? 'error' : 'offline')
+  }
+
+  create(name: string, country: string) {
+    this.list = { id: this.id, name, country, updatedAt: now() }
+    rememberList(this.id)
+    return this.write({ table: 'lists', row: this.list })
+  }
+
+  updateList(patch: Partial<Pick<ShoppingList, 'name' | 'country'>>) {
+    if (!this.list) return
+    this.list = { ...this.list, ...patch, updatedAt: now() }
+    return this.write({ table: 'lists', row: this.list })
+  }
+
+  addItem(data: Pick<Item, 'text' | 'qty' | 'lang' | 'conceptId' | 'author'>) {
+    const t = now()
+    const item: Item = {
+      id: crypto.randomUUID(),
+      listId: this.id,
+      localOverride: null,
+      checked: false,
+      deleted: false,
+      createdAt: t,
+      updatedAt: t,
+      ...data,
+    }
+    this.items = [...this.items, item]
+    return this.write({ table: 'items', row: item })
+  }
+
+  updateItem(id: string, patch: Partial<Pick<Item, 'checked' | 'deleted' | 'localOverride' | 'qty'>>) {
+    const current = this.items.find((i) => i.id === id)
+    if (!current) return
+    const updated = { ...current, ...patch, updatedAt: now() }
+    this.items = this.items.map((i) => (i.id === id ? updated : i))
+    return this.write({ table: 'items', row: updated })
+  }
+}
