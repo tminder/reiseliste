@@ -4,7 +4,7 @@ import { CATEGORY_LABEL, CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, typ
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
 import { FAR_RADIUS_M, findNearbyShops, formatDistance, getChosenShop, locationAlreadyAllowed, NearbyError, setChosenShop, shopTag, type Shop } from './lib/nearby'
-import { loadPhotos, PhotoError, type Photo } from './lib/photos'
+import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
 import { ListStore, forgetList, knownLists, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
 // ---------- Routing über den Hash (funktioniert auf GitHub Pages ohne Server) ----------
@@ -404,9 +404,11 @@ function ItemRow({
           </form>
         )}
         {hint && !item.checked && <div className="hint">💡 {hint}</div>}
-        {showPhotos && local && <PhotoStrip country={country} term={local} store={shopTag} storeName={shopName} />}
+        {showPhotos && local && (
+          <PhotoStrip country={country} conceptId={item.localOverride ? null : item.conceptId} term={local} store={shopTag} storeName={shopName} />
+        )}
       </div>
-      {local && !item.checked && (
+      {local && !item.checked && hasPhotos(item.localOverride ? null : item.conceptId, item.localOverride) && (
         <button
           className={`ghost small ${showPhotos ? 'active' : ''}`}
           aria-label="Produktfotos"
@@ -526,23 +528,35 @@ function ShopBar({ shop, onChoose }: { shop: Shop | null; onChoose: (s: Shop | n
   )
 }
 
-function PhotoStrip({ country, term, store, storeName }: { country: string; term: string; store?: string; storeName?: string }) {
+function PhotoStrip({
+  country,
+  conceptId,
+  term,
+  store,
+  storeName,
+}: {
+  country: string
+  conceptId: string | null
+  term: string
+  store?: string
+  storeName?: string
+}) {
   const [state, setState] = useState<{ photos?: Photo[]; fromStore?: boolean; error?: string }>({})
   useEffect(() => {
     let alive = true
     setState({})
-    loadPhotos(country, term, store).then(
-      (photos) => alive && setState({ photos, fromStore: photos.fromStore }),
+    loadPhotos({ country, conceptId, term, store }).then(
+      (r) => alive && setState({ photos: r.photos, fromStore: r.fromStore }),
       (e) => alive && setState({ error: e instanceof PhotoError ? e.message : 'Fotos konnten nicht geladen werden.' }),
     )
     return () => {
       alive = false
     }
-  }, [country, term, store])
+  }, [country, conceptId, term, store])
 
   if (state.error) return <div className="photos-note">{state.error}</div>
   if (!state.photos) return <div className="photos-note">Fotos werden geladen …</div>
-  if (state.photos.length === 0) return <div className="photos-note">Keine Fotos gefunden.</div>
+  if (state.photos.length === 0) return <div className="photos-note">Keine passenden Fotos gefunden.</div>
   return (
     <div className="photos">
       <div className="photo-row">
