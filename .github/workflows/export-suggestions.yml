@@ -1,0 +1,57 @@
+# Exportiert die Zusammenfassung der Korrekturvorschläge (D-024) aus Supabase nach docs/korrekturvorschlaege.csv,
+# damit sie im Repo ausgewertet und ins Wörterbuch übernommen werden können.
+# Exportiert wird nur die Zusammenfassung (Begriff, Sprache, Anzahl, Beispiele) – keine Nutzer- oder Listen-IDs.
+#
+# Einrichtung: Repo → Settings → Secrets and variables → Actions → New repository secret
+#   Name: SUPABASE_SECRET_KEY   Wert: Secret key aus Supabase (Project Settings → API Keys, sb_secret_…)
+
+name: Korrekturvorschläge exportieren
+
+on:
+  schedule:
+    - cron: '17 5 * * 1' # montags 05:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: export-suggestions
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Zusammenfassung aus Supabase holen
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          if [ -z "$SUPABASE_SECRET_KEY" ]; then
+            echo "::warning::Secret SUPABASE_SECRET_KEY fehlt – Export übersprungen."
+            exit 0
+          fi
+          # Projekt-URL aus der Konfiguration der App
+          URL=$(grep '^VITE_SUPABASE_URL=' .env.production | cut -d= -f2-)
+          # Neue Secret Keys nur im apikey-Header senden (nicht als Bearer, sie sind kein JWT)
+          curl --fail --silent --show-error \
+            -H "apikey: $SUPABASE_SECRET_KEY" \
+            -H "Accept: text/csv" \
+            "$URL/rest/v1/term_suggestions_summary?select=concept_id,target_lang,new_term,old_term,users,total,last_at,examples" \
+            -o docs/korrekturvorschlaege.csv
+          echo "Zeilen (inkl. Kopfzeile): $(wc -l < docs/korrekturvorschlaege.csv)"
+
+      - name: Änderungen committen
+        run: |
+          if git diff --quiet -- docs/korrekturvorschlaege.csv && git ls-files --error-unmatch docs/korrekturvorschlaege.csv >/dev/null 2>&1; then
+            echo "Keine neuen Vorschläge."
+            exit 0
+          fi
+          [ -f docs/korrekturvorschlaege.csv ] || exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/korrekturvorschlaege.csv
+          git commit -m "Korrekturvorschläge exportieren (automatisch)"
+          git push

@@ -48,7 +48,7 @@ Nutzer können Begriffe in der Landessprache korrigieren (Tipp auf den Begriff).
 select * from term_suggestions_summary;  -- im Supabase SQL Editor
 ```
 
-Gute Vorschläge in `src/data/dictionary.ts` übernehmen, z. B. das Ergebnis als CSV exportieren und Claude geben.
+Automatisch: Der Job „Korrekturvorschläge exportieren“ (`.github/workflows/export-suggestions.yml`) schreibt die Zusammenfassung montags und auf Knopfdruck nach `docs/korrekturvorschlaege.csv`. Dafür einmalig das Repo-Secret `SUPABASE_SECRET_KEY` anlegen (Supabase → Project Settings → API Keys → Secret key). Danach Claude sagen: „übernimm die Korrekturen“.
 
 ## Aufbau
 
