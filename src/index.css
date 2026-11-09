@@ -563,3 +563,19 @@ button.ghost.small,
 .perm-help li {
   margin-bottom: 4px;
 }
+
+button.sync-badge {
+  color: var(--muted);
+  padding: 8px;
+}
+button.sync-badge.warn {
+  color: var(--warn);
+}
+.sync-pop {
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  min-width: 240px;
+}
+.sync-pop p {
+  margin: 0 0 4px;
+}

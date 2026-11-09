@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEv
 import QRCode from 'qrcode'
 import {
   ArrowLeft,
+  CloudAlert,
+  CloudOff,
   Camera,
   Check,
   Lightbulb,
@@ -226,12 +228,37 @@ function useStore(id: string) {
   return { store, version }
 }
 
-const SYNC_LABEL: Record<SyncState, string> = {
-  'local-only': 'Nur auf diesem Gerät',
-  offline: 'Offline – wird später synchronisiert',
-  syncing: 'Synchronisiere …',
-  synced: 'Synchronisiert',
-  error: 'Sync-Fehler – neuer Versuch bei Verbindung',
+/** Sync-Zustand: im Normalfall unsichtbar, nur bei offline/Fehler ein kleines Symbol mit Erklärung auf Antippen */
+function SyncBadge({ state, error }: { state: SyncState; error: string | null }) {
+  const [open, setOpen] = useState(false)
+  if (state === 'synced' || state === 'syncing') return null
+  const isError = state === 'error'
+  const text =
+    state === 'offline'
+      ? 'Offline – Änderungen werden gespeichert und übertragen, sobald wieder Netz da ist.'
+      : state === 'local-only'
+        ? 'Nur auf diesem Gerät – Teilen ist nicht verbunden.'
+        : 'Synchronisieren fehlgeschlagen – neuer Versuch automatisch.'
+  return (
+    <div className="menu-wrap">
+      <button
+        className={`icon-btn sync-badge ${isError ? 'warn' : ''}`}
+        aria-label={isError ? 'Sync-Fehler' : 'Offline'}
+        onClick={() => setOpen(!open)}
+      >
+        {isError ? <CloudAlert size={20} /> : <CloudOff size={20} />}
+      </button>
+      {open && (
+        <>
+          <div className="menu-backdrop" onClick={() => setOpen(false)} />
+          <div className="menu sync-pop" role="status">
+            <p>{text}</p>
+            {isError && error && <p className="sync-detail">{error}</p>}
+          </div>
+        </>
+      )}
+    </div>
+  )
 }
 
 function ListView({ id, profile }: { id: string; profile: Profile }) {
@@ -308,6 +335,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           </span>
           <ShopBar shop={shop} onChoose={chooseShop} onSuggest={setSuggested} />
         </div>
+        <SyncBadge state={store.sync} error={lastSyncError} />
         <div className="menu-wrap">
           <button className="ghost icon" aria-label="Menü" aria-expanded={showMenu} onClick={() => setShowMenu(!showMenu)}>
             <Menu size={20} />
@@ -361,11 +389,6 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           )}
         </div>
       </header>
-
-      <div className={`sync sync-${store.sync}`}>
-        {SYNC_LABEL[store.sync]}
-        {store.sync === 'error' && lastSyncError && <div className="sync-detail">{lastSyncError}</div>}
-      </div>
 
       {!shopMode && (
         <form
@@ -539,7 +562,7 @@ function ItemRow({
           <Lightbulb size={18} />
         </button>
       )}
-      {local && !item.checked && hasPhotos(item.localOverride ? null : item.conceptId, item.localOverride) && (
+      {local && !item.checked && shopTag && hasPhotos(item.localOverride ? null : item.conceptId, item.localOverride) && (
         <button
           className={`ghost small ${showPhotos ? 'active' : ''}`}
           aria-label="Produktfotos"

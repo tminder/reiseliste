@@ -59,7 +59,7 @@ Stand: 2026-11-08 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-010 · Produktfotos aus Open Food Facts, über die Produktkategorie
 
-- **Entscheidung:** Ein 📷-Knopf am Artikel zeigt bis zu 4 Packungsfotos aus Open Food Facts. Gesucht wird über die **Produktkategorie** (z. B. Milch → `en:milks`), nicht per Freitext. Die Suche ist auf Produkte im Reiseland beschränkt, die meistgescannten kommen zuerst. Ist ein Laden gewählt oder vorgeschlagen (D-011), kommen zuerst Produkte dieser Kette. Für lose Ware (Obst, Gemüse, Frischfleisch, Fisch) und für Non-Food (Haushalt, Drogerie, Baby) gibt es keinen Foto-Knopf. Für eigene Landesbegriffe ohne Eintrag im Wörterbuch wird per Freitext gesucht. Dabei zählen nur Produkte, deren Name mit dem Begriff beginnt oder ihn als ganzes Wort enthält. Die Fotos werden nur auf Antippen geladen, 30 Tage lokal gespeichert und bleiben offline verfügbar. Die Quelle wird genannt (CC BY-SA). Es gibt keine KI-Bilder und keine Fotos aus Online-Shops von Supermärkten oder Herstellern.
+- **Entscheidung:** Ein Kamera-Knopf am Artikel zeigt bis zu 4 Packungsfotos aus Open Food Facts. Den Knopf gibt es nur, wenn ein Laden gefunden oder gewählt ist (D-011). Ohne Laden sind allgemeine Landesfotos wenig hilfreich. Gesucht wird über die **Produktkategorie** (z. B. Milch → `en:milks`), nicht per Freitext. Die Suche ist auf Produkte im Reiseland beschränkt, die meistgescannten kommen zuerst. Zuerst kommen Produkte der Kette dieses Ladens, sonst die üblichen Produkte im Land. Für lose Ware (Obst, Gemüse, Frischfleisch, Fisch) und für Non-Food (Haushalt, Drogerie, Baby) gibt es keinen Foto-Knopf. Für eigene Landesbegriffe ohne Eintrag im Wörterbuch wird per Freitext gesucht. Dabei zählen nur Produkte, deren Name mit dem Begriff beginnt oder ihn als ganzes Wort enthält. Die Fotos werden nur auf Antippen geladen, 30 Tage lokal gespeichert und bleiben offline verfügbar. Die Quelle wird genannt (CC BY-SA). Es gibt keine KI-Bilder und keine Fotos aus Online-Shops von Supermärkten oder Herstellern.
 - **Begründung:** Die Freitextsuche lieferte oft Unpassendes, z. B. bei „tomates“ Ketchup und Pastasauce (Rückmeldung des Inhabers). Kategorien sind deutlich treffsicherer. Open Food Facts kennt fast nur verpackte Lebensmittel, ein Knopf ohne sinnvolle Treffer wäre schlechter als gar keiner. Es sind nur wenige Suchanfragen pro Minute erlaubt, deshalb wird nur auf Antippen geladen und zwischengespeichert.
 
 ## D-011 · Supermarkt erkennen: Vorschlag über OpenStreetMap, Bestätigung durch den Nutzer
@@ -107,3 +107,8 @@ Stand: 2026-11-08 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Die Bedienelemente nutzen einheitliche Linien-Symbole aus `lucide-react`, z. B. Kamera, Menü, Stift, Laden, Standort, Glühbirne, Teilen, Papierkorb. Emojis bleiben nur für Länderflaggen.
 - **Begründung:** Wunsch des Inhabers: moderner und schöner. Emojis sehen je nach Gerät anders aus, Symbole passen sich an Farbe und Dunkelmodus an.
+
+## D-019 · Sync-Status nur bei Problemen sichtbar
+
+- **Entscheidung:** Es gibt keine Statuszeile „Synchronisiert“ mehr. Läuft alles normal, ist nichts zu sehen. Offline erscheint im Kopf eine Wolke mit Strich, bei einem Fehler eine orange Wolke mit Ausrufezeichen. Ein Tipp darauf erklärt den Zustand, bei Fehlern mit der Meldung von Supabase. Während des Abgleichs wird nichts angezeigt.
+- **Begründung:** Wunsch des Inhabers, die Zeile störte. Synchron ist der Normalzustand, nur Abweichungen sind für den Nutzer relevant.
