@@ -7,6 +7,7 @@ export interface Shop {
   name: string
   brand: string | null
   distance: number // Meter
+  supermarket?: boolean
 }
 
 /** retry = true: vorübergehendes Problem (Server ausgelastet, kein Netz, GPS-Timeout) – später nochmal versuchen */
@@ -85,7 +86,8 @@ export const FAR_RADIUS_M = FAR_STEPS_M[FAR_STEPS_M.length - 1]
 
 const CACHE_MS = 5 * 60 * 1000
 const SUGGESTION_MS = 30 * 60 * 1000
-type LastResult = { at: number; lat: number; lon: number; result: { shops: Shop[]; inside: boolean } }
+export type NearbyResult = { shops: Shop[]; inside: boolean; accuracy?: number }
+type LastResult = { at: number; lat: number; lon: number; result: NearbyResult }
 
 // Letztes Suchergebnis im lokalen Speicher – übersteht ein Neuladen der Seite
 function readLast(): LastResult | null {
@@ -105,7 +107,7 @@ function writeLast(v: LastResult) {
 }
 
 /** Vorschlag der letzten 30 Minuten (ohne neue Standortabfrage), z. B. nach einem Neuladen */
-export function recentSuggestion(): { shops: Shop[]; inside: boolean } | null {
+export function recentSuggestion(): NearbyResult | null {
   const last = readLast()
   return last && Date.now() - last.at < SUGGESTION_MS ? last.result : null
 }
@@ -115,14 +117,14 @@ export function recentSuggestion(): { shops: Shop[]; inside: boolean } | null {
  * `inside` = true: Läden im Umkreis der GPS-Genauigkeit (man ist wohl drin), alle Ladenarten, Supermärkte zuerst.
  * Sonst die nächsten Supermärkte; pro Stufe (1, 3, 10, 20 km) höchstens 40 Treffer, damit die Antwort klein bleibt.
  */
-export async function findNearbyShops(): Promise<{ shops: Shop[]; inside: boolean }> {
+export async function findNearbyShops(): Promise<NearbyResult & { fresh: boolean }> {
   const pos = await getPosition()
   const { latitude: lat, longitude: lon, accuracy } = pos.coords
 
   // Gleiche Stelle (< 50 m) innerhalb von 5 Minuten: letztes Ergebnis wiederverwenden
   const lastResult = readLast()
   if (lastResult && Date.now() - lastResult.at < CACHE_MS && meters(lat, lon, lastResult.lat, lastResult.lon) < 50)
-    return lastResult.result
+    return { ...lastResult.result, accuracy, fresh: true }
 
   // GPS ist in Gebäuden ungenau: Radius an die Genauigkeit anpassen (mind. 75 m, höchstens 400 m)
   const radius = Math.min(400, Math.max(75, Math.round(accuracy * 1.5)))
@@ -150,7 +152,7 @@ ${FAR_STEPS_M.map((r) => `nwr(around:${r},${at})["shop"="supermarket"];out cente
     })
     .filter((s): s is Shop & { rank: number } => !!s)
 
-  const strip = ({ rank: _rank, ...shop }: Shop & { rank: number }): Shop => shop
+  const strip = ({ rank, ...shop }: Shop & { rank: number }): Shop => ({ ...shop, supermarket: rank === 0 })
   const close = all.filter((s) => s.distance <= radius).sort((a, b) => a.rank - b.rank || a.distance - b.distance)
   const result = close.length
     ? { shops: close.map(strip), inside: true }
@@ -163,7 +165,7 @@ ${FAR_STEPS_M.map((r) => `nwr(around:${r},${at})["shop"="supermarket"];out cente
         inside: false,
       }
   writeLast({ at: Date.now(), lat, lon, result })
-  return result
+  return { ...result, accuracy, fresh: true }
 }
 
 function formatDistance(m: number) {
@@ -205,4 +207,32 @@ export function shopTag(shop: Shop): string {
     .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
+}
+
+// ---------- Automatischer Wechsel in die Ladenansicht ----------
+
+/** Supermarkt sehr nahe und GPS genau genug → man ist wohl drin */
+export function isInsideSupermarket(r: NearbyResult): Shop | null {
+  const first = r.shops[0]
+  if (!r.inside || !first?.supermarket) return null
+  if (first.distance > 50 || (r.accuracy ?? 999) > 60) return null
+  return first
+}
+
+const NO_AUTO_MS = 3 * 60 * 60 * 1000
+/** Nutzer hat „zurück“ getippt: bei diesem Laden 3 Stunden nicht mehr automatisch wechseln */
+export function autoShopModeBlocked(shopId: string): boolean {
+  try {
+    const at = Number(localStorage.getItem(`rl:noauto:${shopId}`) ?? 0)
+    return Date.now() - at < NO_AUTO_MS
+  } catch {
+    return false
+  }
+}
+export function blockAutoShopMode(shopId: string) {
+  try {
+    localStorage.setItem(`rl:noauto:${shopId}`, String(Date.now()))
+  } catch {
+    /* egal */
+  }
 }

@@ -23,7 +23,7 @@ import {
 import { CATEGORY_LABEL, CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
-import { FAR_RADIUS_M, findNearbyShops, formatDistance, getChosenShop, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
+import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, isInsideSupermarket, formatDistance, getChosenShop, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
 import { ListStore, forgetList, knownLists, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
@@ -265,7 +265,11 @@ function SyncBadge({ state, error }: { state: SyncState; error: string | null })
 function ListView({ id, profile }: { id: string; profile: Profile }) {
   const { store } = useStore(id, profile)
   const [input, setInput] = useState('')
-  const [shopMode, setShopMode] = useState(false)
+  const [shopMode, setShopModeState] = useState(false)
+  const setShopMode = (v: boolean) => {
+    if (!v) setAutoShop(null)
+    setShopModeState(v)
+  }
   const [showShare, setShowShare] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
@@ -274,6 +278,20 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   // Für die Fotos zählt der gewählte Laden, sonst der angezeigte Vorschlag
   const [suggested, setSuggested] = useState<Shop | null>(null)
   const photoShop = shop ?? suggested
+
+  // Automatisch in die Ladenansicht, wenn beim Öffnen ein Supermarkt sehr nahe ist (D-020)
+  const [mountedAt] = useState(() => Date.now())
+  const [autoShop, setAutoShop] = useState<Shop | null>(null)
+  const inputRef = useRef('')
+  const shopModeRef = useRef(false)
+  inputRef.current = input
+  shopModeRef.current = shopMode
+  const onArrived = (s: Shop) => {
+    if (Date.now() - mountedAt > 30_000) return // nur direkt nach dem Öffnen der Liste
+    if (inputRef.current.trim() || shopModeRef.current || autoShopModeBlocked(s.id)) return
+    setShopMode(true)
+    setAutoShop(s)
+  }
   const chooseShop = (s: Shop | null) => {
     setChosenShop(id, s)
     setShop(s)
@@ -335,7 +353,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           <span className="sub">
             {country?.flag} {country?.name} · {LANG_LABEL[target]}
           </span>
-          <ShopBar shop={shop} onChoose={chooseShop} onSuggest={setSuggested} />
+          <ShopBar shop={shop} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
         </div>
         <SyncBadge state={store.sync} error={lastSyncError} />
         <div className="menu-wrap">
@@ -400,6 +418,21 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           )}
         </div>
       </header>
+
+      {shopMode && autoShop && (
+        <div className="toast">
+          <ShoppingCart size={16} /> Ladenansicht – du bist bei <strong>{autoShop.name}</strong>
+          <button
+            className="link"
+            onClick={() => {
+              blockAutoShopMode(autoShop.id)
+              setShopMode(false)
+            }}
+          >
+            zurück
+          </button>
+        </div>
+      )}
 
       {!shopMode && (
         <form
@@ -599,10 +632,12 @@ function ShopBar({
   shop,
   onChoose,
   onSuggest,
+  onArrived,
 }: {
   shop: Shop | null
   onChoose: (s: Shop | null) => void
   onSuggest: (s: Shop | null) => void
+  onArrived: (s: Shop) => void
 }) {
   // Nach einem Neuladen den letzten Vorschlag (bis 30 Min.) direkt wieder zeigen
   const [state, setState] = useState<{
@@ -620,11 +655,13 @@ function ShopBar({
 
   async function detect(manual = false) {
     if (manual) setAttempt(0)
-    setState((s) => ({ loading: true, error: s.error }))
+    setState((s) => ({ ...s, loading: true, more: false })) // bisherigen Laden während der Suche weiter zeigen
     try {
-      const { shops, inside } = await findNearbyShops()
+      const result = await findNearbyShops()
       setAttempt(0)
-      setState({ shops, inside })
+      setState({ shops: result.shops, inside: result.inside })
+      const here = isInsideSupermarket(result)
+      if (here) onArrived(here)
     } catch (e) {
       const err = e instanceof NearbyError ? e : new NearbyError('Laden nicht erkannt.', true)
       if (err.retry) {
@@ -643,8 +680,9 @@ function ShopBar({
   }, [suggestion?.id])
 
   // Automatisch suchen, sobald die Liste offen ist und noch kein Laden gewählt/vorgeschlagen ist
+  // (auch wenn noch ein Vorschlag von vorhin da ist – man könnte inzwischen woanders sein)
   useEffect(() => {
-    if (shop || state.shops) return
+    if (shop) return
     void detect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shop])

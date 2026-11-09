@@ -605,3 +605,17 @@ button.sync-badge.warn {
   justify-content: center;
   font-weight: 700;
 }
+
+.toast {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.9rem;
+  background: var(--accent-soft);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+.toast .link {
+  margin-left: auto;
+}
