@@ -1,6 +1,6 @@
 # Entscheidungen
 
-Stand: 2026-11-08 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
+Stand: 2026-11-09 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
 
 ---
 

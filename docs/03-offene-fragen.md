@@ -1,6 +1,6 @@
 # Offene Fragen
 
-Stand: 2026-11-08 · Nur Fragen, die aktuell offen sind.
+Stand: 2026-11-09 · Nur Fragen, die aktuell offen sind.
 
 | ID | Frage | Warum wichtig |
 | --- | --- | --- |
