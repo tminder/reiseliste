@@ -118,3 +118,8 @@ Stand: 2026-11-09 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Ergibt die Ladensuche **beim Öffnen einer Liste** (innerhalb von 30 s), dass ein **Supermarkt** höchstens 50 m entfernt ist, bei einer GPS-Genauigkeit von höchstens 60 m, wechselt die App in die Ladenansicht. Ein Hinweis erscheint: „Ladenansicht – du bist bei Spar · zurück“. Kein Wechsel, wenn im Eingabefeld Text steht, die Ladenansicht schon aktiv ist, es nur ein Kiosk, eine Drogerie o. ä. ist, oder der Nutzer bei diesem Laden in den letzten 3 Stunden „zurück“ getippt hat. Während der Bearbeitung wird nie gewechselt.
 - **Begründung:** Wunsch des Inhabers. Im Laden sind große Schrift und Tipps sofort da, ohne Tippen. Die Leitplanken verhindern ungewollte Wechsel durch ungenaues GPS, z. B. wenn man neben einem Supermarkt wohnt oder vorbeigeht.
 - **Folgen:** Eine Web-App kann den Standort nicht im Hintergrund prüfen. Der Wechsel passiert also nur beim Öffnen der Liste, nicht beim Betreten des Ladens. Das ginge erst mit nativen Apps (D-009).
+
+## D-021 · App-Symbol
+
+- **Entscheidung:** Das App-Symbol zeigt einen weißen Einkaufswagen auf petrolfarbenem Verlauf, dazu eine Sprechblase mit „A→á“ für die Übersetzung. Es gibt PNG-Dateien für den iPhone-Home-Bildschirm (`apple-touch-icon.png`, 180 px), für Android/PWA (192 und 512 px), eine „maskable“ Variante mit Rand für runde Android-Symbole und das SVG als Browser-Symbol. Quelle ist ein SVG, die PNGs werden mit `rsvg-convert` daraus erzeugt.
+- **Begründung:** iOS zeigt auf dem Home-Bildschirm nur PNG-Symbole. Das Motiv verbindet Einkauf und Übersetzung.
