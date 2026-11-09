@@ -152,7 +152,14 @@ function writeCache(key: string, result: PhotoResult) {
   }
 }
 
-export class PhotoError extends Error {}
+/** retry = true: vorübergehendes Problem (Server ausgelastet, kein Netz) – später automatisch nochmal */
+export class PhotoError extends Error {
+  readonly retry: boolean
+  constructor(message: string, retry = false) {
+    super(message)
+    this.retry = retry
+  }
+}
 
 type OffProduct = { code: string; product_name?: string; brands?: string; image_front_small_url?: string }
 
@@ -161,10 +168,10 @@ async function fetchJson(url: string): Promise<OffProduct[]> {
   try {
     res = await fetch(url)
   } catch {
-    throw new PhotoError('Open Food Facts ist nicht erreichbar oder ausgelastet. Bitte gleich nochmal.')
+    throw new PhotoError('Open Food Facts ist nicht erreichbar oder ausgelastet.', true)
   }
-  if (res.status === 429 || res.status === 503) throw new PhotoError('Open Food Facts ist gerade ausgelastet. Bitte gleich nochmal.')
-  if (!res.ok) throw new PhotoError(`Open Food Facts antwortet nicht (${res.status}).`)
+  if (res.status === 429 || res.status >= 500) throw new PhotoError(`Open Food Facts ist ausgelastet (Fehler ${res.status}).`, true)
+  if (!res.ok) throw new PhotoError(`Open Food Facts antwortet nicht (Fehler ${res.status}).`)
   return ((await res.json()) as { products?: OffProduct[] }).products ?? []
 }
 

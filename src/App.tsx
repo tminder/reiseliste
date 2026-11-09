@@ -777,21 +777,64 @@ function PhotoStrip({
   store?: string
   storeName?: string
 }) {
-  const [state, setState] = useState<{ photos?: Photo[]; fromStore?: boolean; error?: string }>({})
+  const [state, setState] = useState<{ photos?: Photo[]; fromStore?: boolean; error?: string; retryIn?: number }>({})
+  const [attempt, setAttempt] = useState(0) // zählt Versuche; ändert sich → neue Suche
+  const [failures, setFailures] = useState(0)
+
+  useEffect(() => {
+    setFailures(0)
+    setAttempt(0)
+  }, [country, conceptId, term, store])
+
   useEffect(() => {
     let alive = true
     setState({})
     loadPhotos({ country, conceptId, term, store }).then(
-      (r) => alive && setState({ photos: r.photos, fromStore: r.fromStore }),
-      (e) => alive && setState({ error: e instanceof PhotoError ? e.message : 'Fotos konnten nicht geladen werden.' }),
+      (r) => {
+        if (!alive) return
+        setFailures(0)
+        setState({ photos: r.photos, fromStore: r.fromStore })
+      },
+      (e) => {
+        if (!alive) return
+        const err = e instanceof PhotoError ? e : new PhotoError('Fotos konnten nicht gesucht werden.', true)
+        if (err.retry) {
+          // gleiche Wartezeiten wie bei der Ladensuche: 15 s, 30 s, 1, 2, dann 5 Min.
+          setState({ error: err.message, retryIn: RETRY_S[Math.min(failures, RETRY_S.length - 1)] })
+          setFailures((f) => f + 1)
+        } else setState({ error: err.message })
+      },
     )
     return () => {
       alive = false
     }
-  }, [country, conceptId, term, store])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [country, conceptId, term, store, attempt])
 
-  if (state.error) return <div className="photos-note">{state.error}</div>
-  if (!state.photos) return <div className="photos-note">Fotos werden geladen …</div>
+  // Countdown bis zum automatischen neuen Versuch
+  useEffect(() => {
+    if (state.retryIn == null) return
+    if (state.retryIn <= 0) {
+      setAttempt((a) => a + 1)
+      return
+    }
+    const t = window.setTimeout(() => setState((s) => (s.retryIn != null ? { ...s, retryIn: s.retryIn - 1 } : s)), 1000)
+    return () => window.clearTimeout(t)
+  }, [state.retryIn])
+
+  if (state.error)
+    return (
+      <div className="photos-note">
+        {state.error}
+        {state.retryIn != null && ` Neuer Versuch in ${state.retryIn} s · `}
+        {state.retryIn != null && (
+          <button className="link" onClick={() => setAttempt((a) => a + 1)}>
+            jetzt
+          </button>
+        )}
+      </div>
+    )
+  if (!state.photos) return <div className="photos-note">Fotos werden gesucht …</div>
   if (state.photos.length === 0) return <div className="photos-note">Keine passenden Fotos gefunden.</div>
   return (
     <div className="photos">
