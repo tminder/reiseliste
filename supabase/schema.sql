@@ -35,6 +35,9 @@ create table if not exists public.items (
 );
 -- Für Datenbanken, die mit einer älteren Version dieses Skripts angelegt wurden
 alter table public.lists add column if not exists created_by uuid default auth.uid();
+-- Name und Sprache des Mitglieds (aus dem Profil in der App)
+alter table public.list_members add column if not exists name text;
+alter table public.list_members add column if not exists lang text;
 
 create index if not exists items_list_id_idx on public.items(list_id);
 
@@ -58,16 +61,22 @@ create trigger lists_add_creator after insert on public.lists
   for each row execute function public.add_creator_as_member();
 
 -- Beitreten über den geteilten Link (wer die ID kennt, darf beitreten)
-create or replace function public.join_list(p_list_id uuid)
+-- Beitreten über den geteilten Link (wer die ID kennt, darf beitreten).
+-- Speichert/aktualisiert dabei Name und Sprache des Mitglieds.
+drop function if exists public.join_list(uuid);
+create or replace function public.join_list(p_list_id uuid, p_name text default null, p_lang text default null)
 returns boolean language plpgsql security definer set search_path = public as $$
 begin
   if auth.uid() is null or not exists (select 1 from lists where id = p_list_id) then
     return false;
   end if;
-  insert into list_members(list_id, user_id) values (p_list_id, auth.uid()) on conflict do nothing;
+  insert into list_members(list_id, user_id, name, lang) values (p_list_id, auth.uid(), p_name, p_lang)
+  on conflict (list_id, user_id) do update
+    set name = coalesce(excluded.name, list_members.name),
+        lang = coalesce(excluded.lang, list_members.lang);
   return true;
 end $$;
-grant execute on function public.join_list(uuid) to authenticated;
+grant execute on function public.join_list(uuid, text, text) to authenticated;
 
 -- Zugriffsregeln (Row Level Security)
 alter table public.lists enable row level security;
@@ -84,8 +93,10 @@ create policy "lists: create" on public.lists for insert to authenticated with c
 drop policy if exists "lists: update as member" on public.lists;
 create policy "lists: update as member" on public.lists for update to authenticated using (public.is_member(id));
 
+-- Mitglieder einer Liste sehen sich gegenseitig (Name, Sprache)
 drop policy if exists "members: read own" on public.list_members;
-create policy "members: read own" on public.list_members for select to authenticated using (user_id = auth.uid());
+drop policy if exists "members: read same list" on public.list_members;
+create policy "members: read same list" on public.list_members for select to authenticated using (public.is_member(list_id));
 
 drop policy if exists "items: member access" on public.items;
 create policy "items: member access" on public.items for all to authenticated

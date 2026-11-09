@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEv
 import QRCode from 'qrcode'
 import {
   ArrowLeft,
+  Users,
   CloudAlert,
   CloudOff,
   Camera,
@@ -215,10 +216,10 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
 
 // ---------- Liste ----------
 
-function useStore(id: string) {
+function useStore(id: string, profile: Profile) {
   const store = useMemo(() => new ListStore(id), [id])
   useEffect(() => {
-    void store.start()
+    void store.start(profile)
     return () => store.stop()
   }, [store])
   const version = useSyncExternalStore(
@@ -262,12 +263,13 @@ function SyncBadge({ state, error }: { state: SyncState; error: string | null })
 }
 
 function ListView({ id, profile }: { id: string; profile: Profile }) {
-  const { store } = useStore(id)
+  const { store } = useStore(id, profile)
   const [input, setInput] = useState('')
   const [shopMode, setShopMode] = useState(false)
   const [showShare, setShowShare] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
+  const [showMembers, setShowMembers] = useState(false)
   const [shop, setShop] = useState<Shop | null>(() => getChosenShop(id))
   // Für die Fotos zählt der gewählte Laden, sonst der angezeigte Vorschlag
   const [suggested, setSuggested] = useState<Shop | null>(null)
@@ -352,6 +354,15 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                   }}
                 >
                   <Share2 size={18} /> Teilen
+                </button>
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setShowMenu(false)
+                    setShowMembers(true)
+                  }}
+                >
+                  <Users size={18} /> Mitglieder
                 </button>
                 <button
                   role="menuitem"
@@ -467,6 +478,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
       )}
 
       {showShare && <ShareSheet id={id} name={list.name} onClose={() => setShowShare(false)} />}
+      {showMembers && <MembersSheet store={store} profile={profile} onClose={() => setShowMembers(false)} />}
       {showEdit && (
         <EditSheet
           name={list.name}
@@ -802,6 +814,40 @@ function PhotoStrip({
 /** "2" → "2x", "500 g" bleibt "500 g" */
 function formatQty(qty: string): string {
   return /^\d+(?:[.,]\d+)?$/.test(qty.trim()) ? `${qty.trim()}x` : qty
+}
+
+function MembersSheet({ store, profile, onClose }: { store: ListStore; profile: Profile; onClose: () => void }) {
+  const [members, setMembers] = useState<{ name: string | null; lang: Lang | null; me: boolean }[] | null>(null)
+  useEffect(() => {
+    store.members().then(setMembers, () => setMembers([]))
+  }, [store])
+  const list = members?.length ? members : [{ name: profile.name, lang: profile.lang, me: true }]
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <h2>Mitglieder</h2>
+        {!members && <p className="muted">Wird geladen …</p>}
+        {members && (
+          <ul className="members">
+            {list.map((m, i) => (
+              <li key={i}>
+                <span className="avatar">{(m.name ?? '?').slice(0, 1).toUpperCase()}</span>
+                <span>
+                  {m.name ?? 'Unbekannt'}
+                  {m.me && <span className="muted"> (du)</span>}
+                </span>
+                <span className="muted">{m.lang ? LANG_LABEL[m.lang] : ''}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="muted small-text">Wer den Link zur Liste öffnet, wird Mitglied. Den eigenen Namen änderst du auf der Startseite.</p>
+        <button className="ghost" onClick={onClose}>
+          Schliessen
+        </button>
+      </div>
+    </div>
+  )
 }
 
 function EditSheet({

@@ -232,7 +232,27 @@ export class ListStore {
     this.listeners.forEach((fn) => fn())
   }
 
-  async start() {
+  private joined = false
+  private profile: Profile | null = null
+
+  /** Mitgliedschaft anlegen bzw. Name/Sprache aktualisieren. false, wenn die Liste online (noch) nicht existiert. */
+  private async join(): Promise<boolean> {
+    if (!supabase) return false
+    const { data, error } = await supabase.rpc('join_list', {
+      p_list_id: this.id,
+      p_name: this.profile?.name ?? null,
+      p_lang: this.profile?.lang ?? null,
+    })
+    if (error) {
+      setError('Beitreten', error.message)
+      return false
+    }
+    this.joined = data === true
+    return this.joined
+  }
+
+  async start(profile?: Profile) {
+    this.profile = profile ?? null
     if (this.list) rememberList(this.id)
     window.addEventListener('online', this.onOnline)
     document.addEventListener('visibilitychange', this.onVisible)
@@ -242,9 +262,8 @@ export class ListStore {
       }, 20_000)
     if (!supabase) return
     if (!(await ensureAuth())) return this.setSync('error')
-    // Beitreten (Mitgliedschaft anlegen) – nötig, wenn die Liste per Link geöffnet wurde
-    const join = await supabase.rpc('join_list', { p_list_id: this.id })
-    if (join.error) setError('Beitreten', join.error.message)
+    // Beitreten (Mitgliedschaft mit Name) – nötig, wenn die Liste per Link geöffnet wurde
+    await this.join()
     this.channel = supabase
       .channel(`list-${this.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: `list_id=eq.${this.id}` }, (p) => {
@@ -255,6 +274,22 @@ export class ListStore {
       })
       .subscribe()
     await this.pushAndPull()
+    // Neu erstellte Liste: erst nach dem Hochladen existiert sie online – dann Namen eintragen
+    if (!this.joined && this.list) await this.join()
+  }
+
+  /** Mitglieder der Liste (Name, Sprache). Ohne Supabase: leer. */
+  async members(): Promise<{ name: string | null; lang: Lang | null; me: boolean }[]> {
+    if (!supabase) return []
+    const [{ data }, { data: auth }] = await Promise.all([
+      supabase.from('list_members').select('user_id, name, lang, joined_at').eq('list_id', this.id).order('joined_at'),
+      supabase.auth.getUser(),
+    ])
+    return (data ?? []).map((m: { user_id: string; name: string | null; lang: Lang | null }) => ({
+      name: m.name,
+      lang: m.lang,
+      me: m.user_id === auth.user?.id,
+    }))
   }
 
   stop() {
