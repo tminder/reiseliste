@@ -611,9 +611,23 @@ function ItemRow({
         </div>
         <div className="orig">
           {local ? (
-            <span className="local">
-              <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
-            </span>
+            shopMode ? (
+              <span className="local">
+                <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
+              </span>
+            ) : (
+              // Antippen → Begriff korrigieren (gilt für die ganze Liste, wird als Vorschlag gesammelt)
+              <button
+                className="local term-btn"
+                title={t('correctTerm')}
+                onClick={() => {
+                  setOverride(local)
+                  setEditing(true)
+                }}
+              >
+                <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
+              </button>
+            )
           ) : (
             <span className="missing">{t('noTranslation')}</span>
           )}
@@ -629,17 +643,23 @@ function ItemRow({
             className="override"
             onSubmit={(e) => {
               e.preventDefault()
-              void store.updateItem(item.id, { localOverride: override.trim() || null })
+              void store.correctTerm(item, override, { targetLang: target, country, oldTerm: local })
               setEditing(false)
             }}
           >
             <input value={override} onChange={(e) => setOverride(e.target.value)} placeholder={t('localTermPlaceholder')} autoFocus />
             <button className="primary small">OK</button>
+            <button type="button" className="ghost small" aria-label={t('cancel')} onClick={() => setEditing(false)}>
+              <X size={16} />
+            </button>
           </form>
+        )}
+        {editing && (
+          <p className="muted small-text correction-hint">{t('correctionHint')}</p>
         )}
         {shopMode && showHint && hint && !item.checked && <div className="hint">{hint}</div>}
         {showPhotos && local && (
-          <PhotoStrip country={country} conceptId={item.localOverride ? null : item.conceptId} term={local} store={shopTag} storeName={shopName} />
+          <PhotoStrip country={country} conceptId={item.conceptId} term={local} store={shopTag} storeName={shopName} />
         )}
       </div>
       {shopMode && hint && !item.checked && (
@@ -647,7 +667,7 @@ function ItemRow({
           <Lightbulb size={18} />
         </button>
       )}
-      {local && !item.checked && shopTag && hasPhotos(item.localOverride ? null : item.conceptId, item.localOverride) && (
+      {local && !item.checked && shopTag && hasPhotos(item.conceptId, item.localOverride) && (
         <button
           className={`ghost small ${showPhotos ? 'active' : ''}`}
           aria-label={t('photos')}

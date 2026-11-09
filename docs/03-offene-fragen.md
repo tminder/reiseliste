@@ -10,7 +10,6 @@ Stand: 2026-11-09 · Nur Fragen, die aktuell offen sind.
 | F-004 | Wann kommt eine KI-Übersetzung für unbekannte Artikel dazu? Mit welchem Anbieter, zu welchen Kosten, und was ist mit dem Datenschutz? | Die Abdeckung des Wörterbuchs ist begrenzt (D-004). |
 | F-005 | Endgültiger Name und Marke? „Reiseliste“ ist ein Arbeitstitel. | Wichtig für Domain, Einträge in den Stores und die Suche danach. |
 | F-006 | Ab wann lohnen sich native Apps (D-009)? Was ist das Kriterium, z. B. eine bestimmte Zahl aktiver Gruppen oder der Bedarf an Geofencing? | Kostet Geld (99 $ pro Jahr für Apple) und Pflegeaufwand. |
-| F-008 | Wie fliessen Korrekturen von Nutzern („Falscher Begriff?“) ins Wörterbuch? Mit Moderation, automatisch ab einer Anzahl Bestätigungen, oder pro Liste lokal? | Damit das Wörterbuch besser wird, ohne Spam oder Fehler zu übernehmen. |
 | F-009 | Wie gehen wir mit mehrdeutigen Begriffen um, z. B. „lavavajillas“ (Spülmittel oder Spülmaschine)? Mit einem Zusatzhinweis, einem Foto oder einer genaueren Bezeichnung? | Führt im Laden sonst zum falschen Produkt. |
 | F-010 | Sollen Listen nach der Reise ablaufen oder automatisch gelöscht werden? Wie lange speichern wir Daten? | Datenhaltung, Datenschutz und Kosten bei Supabase. |
 | F-011 | Soll die Abteilungsreihenfolge pro Land oder pro Supermarktkette angepasst werden, und woher kommen die Daten? | Für die Sortierung im Laden (Z-5). Heute ist sie für alle Länder gleich (S-009). |

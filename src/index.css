@@ -653,3 +653,14 @@ button.sync-badge.warn {
 .privacy ul {
   padding-left: 18px;
 }
+
+button.term-btn {
+  padding: 0;
+  font: inherit;
+  color: var(--text);
+  text-decoration: underline dotted var(--muted);
+  text-underline-offset: 3px;
+}
+.correction-hint {
+  margin: 2px 0 0;
+}

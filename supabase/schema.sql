@@ -108,5 +108,35 @@ do $$ begin
 exception when duplicate_object then null;
 end $$;
 
+-- Korrekturvorschläge für das Wörterbuch (F-008 → D-024)
+-- Nutzer können nur eintragen, nicht lesen. Ausgewertet wird im Supabase-Dashboard (SQL Editor):
+--   select * from public.term_suggestions_summary;
+create table if not exists public.term_suggestions (
+  id uuid primary key default gen_random_uuid(),
+  concept_id text,            -- Wörterbuch-ID, leer bei Artikeln ohne Eintrag
+  item_text text not null,    -- wie eingegeben
+  item_lang text,             -- Sprache der Eingabe
+  target_lang text not null,  -- Landessprache
+  country text not null,
+  old_term text,              -- bisheriger Begriff (leer = keine Übersetzung)
+  new_term text not null,
+  list_id uuid,
+  user_id uuid not null default auth.uid(),
+  created_at timestamptz not null default now()
+);
+alter table public.term_suggestions enable row level security;
+drop policy if exists "suggestions: insert own" on public.term_suggestions;
+create policy "suggestions: insert own" on public.term_suggestions for insert to authenticated
+  with check (user_id = auth.uid() and length(new_term) between 1 and 80);
+
+create or replace view public.term_suggestions_summary as
+  select concept_id, target_lang, lower(trim(new_term)) as new_term, min(old_term) as old_term,
+         count(distinct user_id) as users, count(*) as total, max(created_at) as last_at,
+         array_agg(distinct item_text) as examples
+  from public.term_suggestions
+  group by concept_id, target_lang, lower(trim(new_term))
+  order by users desc, last_at desc;
+revoke all on public.term_suggestions_summary from anon, authenticated;
+
 -- API-Schema-Cache neu laden, damit neue Tabellen sofort erreichbar sind
 notify pgrst, 'reload schema';

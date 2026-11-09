@@ -40,6 +40,16 @@ Zugriff: Jedes Gerät meldet sich anonym an. Eine Liste sehen nur Personen, die 
 1. Repo → **Settings → Pages** → Source: **GitHub Actions**.
 2. Push auf `main`. Die App ist danach unter `https://<user>.github.io/reiseliste/` erreichbar.
 
+## Korrekturvorschläge auswerten
+
+Nutzer können Begriffe in der Landessprache korrigieren (Tipp auf den Begriff). Die Vorschläge landen in Supabase:
+
+```sql
+select * from term_suggestions_summary;  -- im Supabase SQL Editor
+```
+
+Gute Vorschläge in `src/data/dictionary.ts` übernehmen, z. B. das Ergebnis als CSV exportieren und Claude geben.
+
 ## Aufbau
 
 | Datei | Inhalt |
