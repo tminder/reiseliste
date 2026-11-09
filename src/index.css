@@ -619,3 +619,37 @@ button.sync-badge.warn {
 .toast .link {
   margin-left: auto;
 }
+
+.footer {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 0.8rem;
+}
+.footer a,
+.note a {
+  color: var(--muted);
+}
+.note.info {
+  color: var(--text);
+  background: var(--accent-soft);
+  display: block;
+}
+.note.info .link {
+  margin-left: 8px;
+  font-weight: 700;
+}
+.privacy h1 {
+  font-size: 1.4rem;
+}
+.privacy h2 {
+  font-size: 1rem;
+  margin: 18px 0 6px;
+}
+.privacy p,
+.privacy li {
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+.privacy ul {
+  padding-left: 18px;
+}

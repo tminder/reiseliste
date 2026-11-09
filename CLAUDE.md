@@ -34,3 +34,4 @@ Regeln (Details in `docs/README.md`):
 - `npm run build` muss fehlerfrei durchlaufen, bevor du pushst.
 - Wörterbuch: `src/data/dictionary.ts`, eine Zeile pro Artikel, Spalten in der Reihenfolge von `LANGS`.
 - Datenbank-Änderungen immer in `supabase/schema.sql` nachziehen. Das Skript muss mehrfach ausführbar bleiben (`if not exists`, `drop policy if exists`).
+- Datenschutz: Kommt ein neuer externer Dienst dazu oder ändert sich, welche Daten wohin gehen oder wie lange sie gespeichert werden, `src/Privacy.tsx` (DE und EN) im selben Commit anpassen.

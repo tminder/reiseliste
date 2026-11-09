@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEv
 import QRCode from 'qrcode'
 import {
   ArrowLeft,
+  Shield,
   Users,
   CloudAlert,
   CloudOff,
@@ -23,6 +24,7 @@ import {
 import { CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { categoryLabel, countryName, setUiLang, t } from './i18n'
+import Privacy from './Privacy'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, isInsideSupermarket, formatDistance, getChosenShop, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
@@ -38,6 +40,7 @@ function useRoute() {
     window.addEventListener('hashchange', on)
     return () => window.removeEventListener('hashchange', on)
   }, [])
+  if (hash.startsWith('#/datenschutz')) return { page: 'privacy' as const }
   const m = hash.match(/^#\/l\/([0-9a-f-]{36})/i)
   return m ? { page: 'list' as const, id: m[1] } : { page: 'home' as const }
 }
@@ -50,6 +53,7 @@ export default function App() {
   // Sprache der Oberfläche = Sprache aus dem Profil (vor der Einrichtung: Browsersprache)
   setUiLang(profile?.lang ?? guessLang())
 
+  if (route.page === 'privacy') return <Privacy />
   if (!profile)
     return (
       <ProfileSetup
@@ -59,7 +63,7 @@ export default function App() {
         }}
       />
     )
-  return route.page === 'list' ? (
+  return route.page === 'list' && 'id' in route ? (
     <ListView key={route.id} id={route.id} profile={profile} />
   ) : (
     <Home profile={profile} onEditProfile={() => setProfile(null)} />
@@ -114,6 +118,9 @@ function ProfileSetup({ onDone }: { onDone: (p: Profile) => void }) {
           {t('letsGo')}
         </button>
       </form>
+      <footer className="footer">
+        <a href="#/datenschutz">{t('privacy')}</a>
+      </footer>
     </main>
   )
 }
@@ -213,12 +220,42 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
           })}
         </section>
       )}
-      {!supabase && (
-        <p className="note">
-          {t('demoMode')}
-        </p>
-      )}
+      {!supabase && <p className="note">{t('demoMode')}</p>}
+      <LocationNotice />
+      <footer className="footer">
+        <a href="#/datenschutz">{t('privacy')}</a>
+      </footer>
     </main>
+  )
+}
+
+/** Einmaliger Hinweis zum Standort (bis „OK“ getippt) */
+function LocationNotice() {
+  const [seen, setSeen] = useState(() => {
+    try {
+      return localStorage.getItem('rl:locnotice') === '1'
+    } catch {
+      return true
+    }
+  })
+  if (seen) return null
+  return (
+    <div className="note info">
+      <MapPin size={15} /> {t('locationNotice')} <a href="#/datenschutz">{t('privacy')}</a>
+      <button
+        className="link"
+        onClick={() => {
+          try {
+            localStorage.setItem('rl:locnotice', '1')
+          } catch {
+            /* egal */
+          }
+          setSeen(true)
+        }}
+      >
+        {t('ok')}
+      </button>
+    </div>
   )
 }
 
@@ -402,6 +439,9 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                 </button>
                 <button role="menuitem" onClick={() => go('/')}>
                   <List size={18} /> {t('allLists')}
+                </button>
+                <button role="menuitem" onClick={() => go('/datenschutz')}>
+                  <Shield size={18} /> {t('privacy')}
                 </button>
                 <button
                   role="menuitem"
