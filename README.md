@@ -14,6 +14,7 @@ Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im L
 - Produktfotos pro Reiseland aus [Open Food Facts](https://world.openfoodfacts.org) (📷 am Artikel, CC BY-SA)
 - Teilen per Link, QR-Code oder Teilen-Menü des Handys, Live-Sync über Supabase
 - Offline nutzbar (PWA). Änderungen werden synchronisiert, sobald wieder Netz da ist
+- Oberfläche auf Deutsch und Englisch (folgt der Sprache im Profil, Texte in `src/i18n.ts`)
 - Ohne Supabase läuft die App im **Demo-Modus** nur auf dem Gerät
 
 ## Lokal starten

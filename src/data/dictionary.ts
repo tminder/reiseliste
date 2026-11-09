@@ -153,12 +153,24 @@ windeln;baby;Windeln;nappies/diapers;pañales;fraldas;couches;pannolini;luiers;p
 feuchttuecher;baby;Feuchttücher;wet wipes/baby wipes;toallitas húmedas;toalhitas húmidas;lingettes;salviette umidificate;vochtige doekjes;vlažne maramice;μωρομάντηλα
 `
 
-/** Zusätzliche Hinweise in der Sprache des Eingebenden (vorerst nur Deutsch). */
-export const HINTS: Record<string, string> = {
-  quark: 'Gibt es im Ausland oft nicht. Alternativen: griechischer Joghurt, Skyr, Frischkäse.',
-  hmilch: 'In Südeuropa ist H-Milch im Regal (nicht in der Kühlung) üblich.',
-  sahne: 'Kochsahne und Schlagsahne sind oft getrennt beschriftet.',
-  rohschinken: 'Spanien: jamón serrano · Italien: prosciutto crudo · Portugal: presunto.',
+/** Tipps zu Artikeln (nur in der Ladenansicht). Fehlt die Sprache des Betrachters, gilt Englisch. */
+export const HINTS: Record<string, Partial<Record<Lang, string>>> = {
+  quark: {
+    de: 'Gibt es im Ausland oft nicht. Alternativen: griechischer Joghurt, Skyr, Frischkäse.',
+    en: 'Often not available abroad. Alternatives: Greek yogurt, skyr, cream cheese.',
+  },
+  hmilch: {
+    de: 'In Südeuropa ist H-Milch im Regal (nicht in der Kühlung) üblich.',
+    en: 'In southern Europe UHT milk is usually on the shelf, not in the fridge.',
+  },
+  sahne: {
+    de: 'Kochsahne und Schlagsahne sind oft getrennt beschriftet.',
+    en: 'Cooking cream and whipping cream are often labelled separately.',
+  },
+  rohschinken: {
+    de: 'Spanien: jamón serrano · Italien: prosciutto crudo · Portugal: presunto.',
+    en: 'Spain: jamón serrano · Italy: prosciutto crudo · Portugal: presunto.',
+  },
 }
 
 export interface Entry {
@@ -180,6 +192,7 @@ export const DICTIONARY: Entry[] = RAW.trim()
 
 export const BY_ID = new Map(DICTIONARY.map((e) => [e.id, e]))
 
+/** Deutsche Namen der Abteilungen (Oberfläche: siehe categoryLabel in src/i18n.ts) */
 export const CATEGORY_LABEL: Record<Category, string> = {
   obst: 'Obst & Gemüse',
   milch: 'Milchprodukte & Eier',

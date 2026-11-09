@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 // Nächstgelegenen Supermarkt erkennen: Standort des Geräts + OpenStreetMap (Overpass API).
 // Der Standort wird nur auf Knopfdruck (oder bei bereits erteilter Erlaubnis beim Öffnen) abgefragt,
 // an die Overpass API geschickt und nirgends gespeichert. Gespeichert wird nur der gewählte Laden, lokal pro Liste.
@@ -24,11 +25,11 @@ export class NearbyError extends Error {
 
 export function getPosition(): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
-    if (!('geolocation' in navigator)) return reject(new NearbyError('Dieses Gerät kann den Standort nicht bestimmen.'))
+    if (!('geolocation' in navigator)) return reject(new NearbyError(t('errNoGeo')))
     navigator.geolocation.getCurrentPosition(resolve, (err) => {
       if (err.code === err.PERMISSION_DENIED)
-        reject(new NearbyError('Standort nicht freigegeben.', false, true))
-      else reject(new NearbyError('Standort konnte nicht bestimmt werden.', true))
+        reject(new NearbyError(t('errGeoDenied'), false, true))
+      else reject(new NearbyError(t('errGeoFailed'), true))
     }, { enableHighAccuracy: true, timeout: 15_000, maximumAge: 60_000 })
   })
 }
@@ -63,18 +64,18 @@ const ENDPOINTS = [
 type OsmElement = { type: string; id: number; lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }
 
 async function runQuery(query: string): Promise<OsmElement[]> {
-  let lastError = 'Keine Verbindung zu OpenStreetMap.'
+  let lastError = t('errOsmUnreachable')
   for (const url of ENDPOINTS) {
     try {
       const res = await fetch(url, { method: 'POST', body: new URLSearchParams({ data: query }) })
       if (res.ok) return ((await res.json()) as { elements: OsmElement[] }).elements
       lastError =
         res.status === 429 || res.status === 504
-          ? 'OpenStreetMap ist ausgelastet.'
-          : `OpenStreetMap antwortet nicht (Fehler ${res.status}).`
+          ? t('errOsmBusy')
+          : t('errOsmStatus', { status: res.status })
     } catch {
       // Netzwerkfehler – oder Überlastung: Overpass schickt bei 429 keine CORS-Header, der Browser meldet dann nur „failed to fetch“
-      lastError = 'OpenStreetMap ist nicht erreichbar oder ausgelastet.'
+      lastError = t('errOsmUnreachable')
     }
   }
   throw new NearbyError(lastError, true)

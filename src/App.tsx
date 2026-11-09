@@ -20,8 +20,9 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import { CATEGORY_LABEL, CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
+import { CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
+import { categoryLabel, countryName, setUiLang, t } from './i18n'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, isInsideSupermarket, formatDistance, getChosenShop, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
@@ -46,6 +47,8 @@ const go = (path: string) => (location.hash = path)
 export default function App() {
   const [profile, setProfile] = useState<Profile | null>(profileStore.get())
   const route = useRoute()
+  // Sprache der Oberfläche = Sprache aus dem Profil (vor der Einrichtung: Browsersprache)
+  setUiLang(profile?.lang ?? guessLang())
 
   if (!profile)
     return (
@@ -73,13 +76,19 @@ function guessLang(): Lang {
 function ProfileSetup({ onDone }: { onDone: (p: Profile) => void }) {
   const existing = profileStore.get()
   const [name, setName] = useState(existing?.name ?? '')
-  const [lang, setLang] = useState<Lang>(existing?.lang ?? guessLang())
+  const [lang, setLangState] = useState<Lang>(existing?.lang ?? guessLang())
+  const [, rerender] = useState(0)
+  const setLang = (l: Lang) => {
+    setUiLang(l) // Oberfläche wechselt sofort mit
+    setLangState(l)
+    rerender((n) => n + 1)
+  }
   return (
     <main className="page narrow">
       <h1 className="brand">
-        <ShoppingCart size={26} strokeWidth={2.2} /> Reiseliste
+        <ShoppingCart size={26} strokeWidth={2.2} /> {t('appName')}
       </h1>
-      <p className="lead">Du schreibst in deiner Sprache – im Laden siehst du jeden Artikel in der Landessprache.</p>
+      <p className="lead">{t('tagline')}</p>
       <form
         className="card stack"
         onSubmit={(e) => {
@@ -88,11 +97,11 @@ function ProfileSetup({ onDone }: { onDone: (p: Profile) => void }) {
         }}
       >
         <label>
-          Dein Name
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="z. B. Tobias" autoFocus />
+          {t('yourName')}
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('namePlaceholder')} autoFocus />
         </label>
         <label>
-          In welcher Sprache schreibst du?
+          {t('whichLanguage')}
           <select value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
             {LANGS.map((l) => (
               <option key={l} value={l}>
@@ -102,7 +111,7 @@ function ProfileSetup({ onDone }: { onDone: (p: Profile) => void }) {
           </select>
         </label>
         <button className="primary" disabled={!name.trim()}>
-          Los geht's
+          {t('letsGo')}
         </button>
       </form>
     </main>
@@ -135,7 +144,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
     e.preventDefault()
     const id = crypto.randomUUID()
     const store = new ListStore(id)
-    void store.create(name.trim() || `Einkauf ${COUNTRY_BY_CODE.get(country)?.name ?? ''}`, country)
+    void store.create(name.trim() || t('defaultListName', { country: countryName(country) }), country)
     go(`/l/${id}`)
   }
 
@@ -143,7 +152,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
     <main className="page narrow">
       <header className="topbar">
         <h1 className="brand">
-          <ShoppingCart size={26} strokeWidth={2.2} /> Reiseliste
+          <ShoppingCart size={26} strokeWidth={2.2} /> {t('appName')}
         </h1>
         <button className="ghost small" onClick={onEditProfile}>
           {profile.name} · {LANG_LABEL[profile.lang]}
@@ -151,9 +160,9 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
       </header>
 
       <form className="card stack" onSubmit={create}>
-        <h2>Neue Liste</h2>
+        <h2>{t('newList')}</h2>
         <label>
-          Reiseland
+          {t('travelCountry')}
           <select
             value={country}
             onChange={(e) => {
@@ -163,24 +172,24 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
           >
             {COUNTRIES.map((c) => (
               <option key={c.code} value={c.code}>
-                {c.flag} {c.name} – {LANG_LABEL[c.lang]}
+                {c.flag} {countryName(c.code)} – {LANG_LABEL[c.lang]}
               </option>
             ))}
           </select>
           {detected && detected === country && <span className="hint-ok">
-              <LocateFixed size={14} /> Dein aktueller Standort
+              <LocateFixed size={14} /> {t('currentLocation')}
             </span>}
         </label>
         <label>
-          Name (optional)
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="z. B. Ferienwohnung Lissabon" />
+          {t('nameOptional')}
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder')} />
         </label>
-        <button className="primary">Liste erstellen</button>
+        <button className="primary">{t('createList')}</button>
       </form>
 
       {lists.length > 0 && (
         <section className="stack">
-          <h2>Deine Listen</h2>
+          <h2>{t('yourLists')}</h2>
           {lists.map((l) => {
             const c = COUNTRY_BY_CODE.get(l.country)
             return (
@@ -190,7 +199,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
                 </a>
                 <button
                   className="ghost small"
-                  aria-label="Liste entfernen"
+                  aria-label={t('removeList')}
                   onClick={() => {
                     forgetList(l.id)
                     go('/')
@@ -206,8 +215,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
       )}
       {!supabase && (
         <p className="note">
-          Demo-Modus: Supabase ist nicht verbunden, Listen bleiben auf diesem Gerät. Siehe README, um Teilen in Echtzeit zu
-          aktivieren.
+          {t('demoMode')}
         </p>
       )}
     </main>
@@ -235,16 +243,12 @@ function SyncBadge({ state, error }: { state: SyncState; error: string | null })
   if (state === 'synced' || state === 'syncing') return null
   const isError = state === 'error'
   const text =
-    state === 'offline'
-      ? 'Offline – Änderungen werden gespeichert und übertragen, sobald wieder Netz da ist.'
-      : state === 'local-only'
-        ? 'Nur auf diesem Gerät – Teilen ist nicht verbunden.'
-        : 'Synchronisieren fehlgeschlagen – neuer Versuch automatisch.'
+    state === 'offline' ? t('syncOffline') : state === 'local-only' ? t('syncLocal') : t('syncError')
   return (
     <div className="menu-wrap">
       <button
         className={`icon-btn sync-badge ${isError ? 'warn' : ''}`}
-        aria-label={isError ? 'Sync-Fehler' : 'Offline'}
+        aria-label={isError ? t('syncErrorLabel') : t('offline')}
         onClick={() => setOpen(!open)}
       >
         {isError ? <CloudAlert size={20} /> : <CloudOff size={20} />}
@@ -320,14 +324,10 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     return (
       <main className="page narrow">
         <a href="#/" className="back">
-          <ArrowLeft size={18} /> Listen
+          <ArrowLeft size={18} /> {t('allLists')}
         </a>
         <div className="card">
-          {store.notFound
-            ? 'Diese Liste gibt es nicht (mehr).'
-            : supabase
-              ? 'Liste wird geladen …'
-              : 'Diese Liste ist auf diesem Gerät nicht gespeichert. Zum Teilen muss Supabase verbunden sein (siehe README).'}
+          {store.notFound ? t('listNotFound') : supabase ? t('listLoading') : t('listNotOnDevice')}
         </div>
       </main>
     )
@@ -345,19 +345,19 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   return (
     <main className={`page ${shopMode ? 'shop' : ''}`}>
       <header className="topbar">
-        <a href="#/" className="back" aria-label="Alle Listen">
+        <a href="#/" className="back" aria-label={t('allLists')}>
           <ArrowLeft size={22} />
         </a>
         <div className="title">
           <h1>{list.name}</h1>
           <span className="sub">
-            {country?.flag} {country?.name} · {LANG_LABEL[target]}
+            {country?.flag} {countryName(list.country)} · {LANG_LABEL[target]}
           </span>
           <ShopBar shop={shop} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
         </div>
         <SyncBadge state={store.sync} error={lastSyncError} />
         <div className="menu-wrap">
-          <button className="ghost icon" aria-label="Menü" aria-expanded={showMenu} onClick={() => setShowMenu(!showMenu)}>
+          <button className="ghost icon" aria-label={t('menu')} aria-expanded={showMenu} onClick={() => setShowMenu(!showMenu)}>
             <Menu size={20} />
           </button>
           {showMenu && (
@@ -371,7 +371,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                     setShowShare(true)
                   }}
                 >
-                  <Share2 size={18} /> Teilen
+                  <Share2 size={18} /> {t('share')}
                 </button>
                 <button
                   role="menuitem"
@@ -380,7 +380,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                     setShowMembers(true)
                   }}
                 >
-                  <Users size={18} /> Mitglieder
+                  <Users size={18} /> {t('members')}
                 </button>
                 <button
                   role="menuitem"
@@ -389,7 +389,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                     setShopMode(!shopMode)
                   }}
                 >
-                  <ShoppingCart size={18} /> {shopMode ? 'Ladenansicht beenden' : 'Ladenansicht'}
+                  <ShoppingCart size={18} /> {shopMode ? t('shopModeEnd') : t('shopMode')}
                 </button>
                 <button
                   role="menuitem"
@@ -398,10 +398,10 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                     setShowEdit(true)
                   }}
                 >
-                  <Pencil size={18} /> Name &amp; Reiseland
+                  <Pencil size={18} /> {t('editList')}
                 </button>
                 <button role="menuitem" onClick={() => go('/')}>
-                  <List size={18} /> Alle Listen
+                  <List size={18} /> {t('allLists')}
                 </button>
                 <button
                   role="menuitem"
@@ -411,7 +411,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                     go('/')
                   }}
                 >
-                  <Trash2 size={18} /> Von diesem Gerät entfernen
+                  <Trash2 size={18} /> {t('removeFromDevice')}
                 </button>
               </div>
             </>
@@ -421,7 +421,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
 
       {shopMode && autoShop && (
         <div className="toast">
-          <ShoppingCart size={16} /> Ladenansicht – du bist bei <strong>{autoShop.name}</strong>
+          <ShoppingCart size={16} /> {t('autoShopMode')} <strong>{autoShop.name}</strong>
           <button
             className="link"
             onClick={() => {
@@ -429,7 +429,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
               setShopMode(false)
             }}
           >
-            zurück
+            {t('back')}
           </button>
         </div>
       )}
@@ -445,10 +445,10 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={`Artikel auf ${LANG_LABEL[profile.lang]}, z. B. „2 Milch“`}
-            aria-label="Artikel hinzufügen"
+            placeholder={t('addPlaceholder', { lang: LANG_LABEL[profile.lang], example: t('addExample') })}
+            aria-label={t('addItem')}
           />
-          <button className="primary" aria-label="Hinzufügen" disabled={!input.trim()}>
+          <button className="primary" aria-label={t('add')} disabled={!input.trim()}>
             <Plus size={22} strokeWidth={2.5} />
           </button>
           {suggestions.length > 0 && (
@@ -475,26 +475,26 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         <button className={shopMode ? 'primary' : 'ghost'} onClick={() => setShopMode(!shopMode)}>
           {shopMode ? (
             <>
-              <Pencil size={16} /> Bearbeiten
+              <Pencil size={16} /> {t('edit')}
             </>
           ) : (
             <>
-              <ShoppingCart size={16} /> Ladenansicht
+              <ShoppingCart size={16} /> {t('shopMode')}
             </>
           )}
         </button>
         <span className="muted">
-          {open.length} offen · {done.length} erledigt
+          {t('counts', { open: open.length, done: done.length })}
         </span>
       </div>
 
-      {items.length === 0 && <p className="empty">Noch leer. Tippe oben einen Artikel in deiner Sprache ein.</p>}
+      {items.length === 0 && <p className="empty">{t('empty')}</p>}
 
       {order
         .filter((c) => groups.has(c))
         .map((cat) => (
           <section key={cat} className="group">
-            <h3>{cat === 'sonstiges' ? 'Sonstiges' : CATEGORY_LABEL[cat]}</h3>
+            <h3>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
             {groups.get(cat)!.map((item) => (
               <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} />
             ))}
@@ -503,7 +503,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
 
       {done.length > 0 && (
         <section className="group done">
-          <h3>Im Wagen</h3>
+          <h3>{t('inCart')}</h3>
           {done.map((item) => (
             <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} />
           ))}
@@ -553,13 +553,13 @@ function ItemRow({
   const local = item.localOverride || nameIn(item.conceptId, target)
   // Gross: der Artikel in der Sprache des Betrachters (sonst wie eingegeben). Klein: Landessprache.
   const own = (item.lang !== viewer && nameIn(item.conceptId, viewer)) || item.text
-  const hint = item.conceptId && viewer === 'de' ? HINTS[item.conceptId] : undefined
+  const hint = item.conceptId ? (HINTS[item.conceptId]?.[viewer] ?? HINTS[item.conceptId]?.en) : undefined
 
   return (
     <div className={`item ${item.checked ? 'checked' : ''}`}>
       <button
         className="check"
-        aria-label={item.checked ? 'Als offen markieren' : 'Abhaken'}
+        aria-label={item.checked ? t('markOpen') : t('check')}
         onClick={() => void store.updateItem(item.id, { checked: !item.checked })}
       >
         {item.checked && <Check size={18} strokeWidth={3} />}
@@ -575,13 +575,13 @@ function ItemRow({
               <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
             </span>
           ) : (
-            <span className="missing">keine Übersetzung</span>
+            <span className="missing">{t('noTranslation')}</span>
           )}
           {!shopMode && <span className="muted"> · {item.author}</span>}
         </div>
         {!local && !shopMode && !editing && (
           <button className="link" onClick={() => setEditing(true)}>
-            Landesbegriff selbst eintragen
+            {t('enterLocalTerm')}
           </button>
         )}
         {editing && (
@@ -593,7 +593,7 @@ function ItemRow({
               setEditing(false)
             }}
           >
-            <input value={override} onChange={(e) => setOverride(e.target.value)} placeholder="Begriff in Landessprache" autoFocus />
+            <input value={override} onChange={(e) => setOverride(e.target.value)} placeholder={t('localTermPlaceholder')} autoFocus />
             <button className="primary small">OK</button>
           </form>
         )}
@@ -603,21 +603,21 @@ function ItemRow({
         )}
       </div>
       {shopMode && hint && !item.checked && (
-        <button className={`ghost small ${showHint ? 'active' : ''}`} aria-label="Tipp" onClick={() => setShowHint(!showHint)}>
+        <button className={`ghost small ${showHint ? 'active' : ''}`} aria-label={t('tip')} onClick={() => setShowHint(!showHint)}>
           <Lightbulb size={18} />
         </button>
       )}
       {local && !item.checked && shopTag && hasPhotos(item.localOverride ? null : item.conceptId, item.localOverride) && (
         <button
           className={`ghost small ${showPhotos ? 'active' : ''}`}
-          aria-label="Produktfotos"
+          aria-label={t('photos')}
           onClick={() => setShowPhotos(!showPhotos)}
         >
           <Camera size={18} />
         </button>
       )}
       {!shopMode && (
-        <button className="ghost small" aria-label="Löschen" onClick={() => void store.updateItem(item.id, { deleted: true })}>
+        <button className="ghost small" aria-label={t('delete')} onClick={() => void store.updateItem(item.id, { deleted: true })}>
           <X size={18} />
         </button>
       )}
@@ -663,7 +663,7 @@ function ShopBar({
       const here = isInsideSupermarket(result)
       if (here) onArrived(here)
     } catch (e) {
-      const err = e instanceof NearbyError ? e : new NearbyError('Laden nicht erkannt.', true)
+      const err = e instanceof NearbyError ? e : new NearbyError(t('errShopUnknown'), true)
       if (err.retry) {
         const wait = RETRY_S[Math.min(attempt, RETRY_S.length - 1)]
         setAttempt((a) => a + 1)
@@ -705,7 +705,7 @@ function ShopBar({
   if (state.loading && !current)
     return (
       <div className="shopline muted">
-        <MapPin size={15} /> Suche Laden …
+        <MapPin size={15} /> {t('searchingShop')}
       </div>
     )
 
@@ -714,18 +714,18 @@ function ShopBar({
       <div className="shopline muted">
         <MapPin size={15} />
         <button className="link" onClick={() => void detect(true)}>
-          Standort freigeben
+          {t('allowLocation')}
         </button>
         <button className="link" onClick={() => setState((st) => ({ ...st, help: !st.help }))}>
-          Hilfe
+          {t('help')}
         </button>
         {state.help && (
           <div className="perm-help">
-            <strong>iPhone/Safari:</strong>
+            <strong>{t('helpIphone')}</strong>
             <ol>
-              <li>Einstellungen → Datenschutz &amp; Sicherheit → Ortungsdienste: eingeschaltet, und bei „Safari-Websites“ „Beim Verwenden der App“.</li>
-              <li>In Safari links in der Adressleiste auf „aA“ (bzw. das Seiten-Symbol) → Website-Einstellungen → Standort: „Erlauben“. Dann fragt Safari nicht mehr bei jedem Öffnen.</li>
-              <li>Seite neu laden.</li>
+              <li>{t('help1')}</li>
+              <li>{t('help2')}</li>
+              <li>{t('help3')}</li>
             </ol>
           </div>
         )}
@@ -736,9 +736,9 @@ function ShopBar({
     return (
       <div className="shopline muted" title={state.error}>
         <MapPin size={15} /> {state.error}
-        {state.retryIn != null && <span>Neuer Versuch in {state.retryIn} s</span>}
+        {state.retryIn != null && <span>{t('retryIn', { s: state.retryIn })}</span>}
         <button className="link" onClick={() => void detect(true)}>
-          jetzt
+          {t('now')}
         </button>
       </div>
     )
@@ -747,8 +747,8 @@ function ShopBar({
     return (
       <div className="shopline muted">
         <MapPin size={15} />
-        {state.shops ? `Kein Supermarkt bis ${formatDistance(FAR_RADIUS_M)}` : 'Kein Laden'}
-        <button className="icon-btn" aria-label="Laden suchen" onClick={() => void detect(true)}>
+        {state.shops ? t('noSupermarketWithin', { dist: formatDistance(FAR_RADIUS_M) }) : t('noShop')}
+        <button className="icon-btn" aria-label={t('searchShop')} onClick={() => void detect(true)}>
           <Pencil size={14} />
         </button>
       </div>
@@ -763,7 +763,7 @@ function ShopBar({
       </span>
       <button
         className={`icon-btn ${state.more ? 'active' : ''}`}
-        aria-label="Laden ändern"
+        aria-label={t('changeShop')}
         aria-expanded={!!state.more}
         onClick={() => {
           if (!state.more && !state.shops) void detect(true)
@@ -774,7 +774,7 @@ function ShopBar({
       </button>
       {state.more && (
         <div className="shop-alts">
-          {state.loading && <span className="muted small-text">Suche …</span>}
+          {state.loading && <span className="muted small-text">{t('searching')}</span>}
           {others.map((x) => (
             <button
               key={x.id}
@@ -794,7 +794,7 @@ function ShopBar({
               void detect(true).then(() => setState((st) => ({ ...st, more: true })))
             }}
           >
-            <LocateFixed size={13} /> Neu suchen
+            <LocateFixed size={13} /> {t('searchAgain')}
           </button>
         </div>
       )}
@@ -835,7 +835,7 @@ function PhotoStrip({
       },
       (e) => {
         if (!alive) return
-        const err = e instanceof PhotoError ? e : new PhotoError('Fotos konnten nicht gesucht werden.', true)
+        const err = e instanceof PhotoError ? e : new PhotoError(t('errPhotos'), true)
         if (err.retry) {
           // gleiche Wartezeiten wie bei der Ladensuche: 15 s, 30 s, 1, 2, dann 5 Min.
           setState({ error: err.message, retryIn: RETRY_S[Math.min(failures, RETRY_S.length - 1)] })
@@ -864,16 +864,16 @@ function PhotoStrip({
     return (
       <div className="photos-note">
         {state.error}
-        {state.retryIn != null && ` Neuer Versuch in ${state.retryIn} s · `}
+        {state.retryIn != null && ` ${t('retryIn', { s: state.retryIn })} · `}
         {state.retryIn != null && (
           <button className="link" onClick={() => setAttempt((a) => a + 1)}>
-            jetzt
+            {t('now')}
           </button>
         )}
       </div>
     )
-  if (!state.photos) return <div className="photos-note">Fotos werden gesucht …</div>
-  if (state.photos.length === 0) return <div className="photos-note">Keine passenden Fotos gefunden.</div>
+  if (!state.photos) return <div className="photos-note">{t('photosSearching')}</div>
+  if (state.photos.length === 0) return <div className="photos-note">{t('noPhotos')}</div>
   return (
     <div className="photos">
       <div className="photo-row">
@@ -885,8 +885,8 @@ function PhotoStrip({
         ))}
       </div>
       <div className="photos-credit">
-        {store && (state.fromStore ? `Bei ${storeName} · ` : `Keine Treffer für ${storeName}, übliche Produkte im Land · `)}
-        Fotos: <a href="https://world.openfoodfacts.org" target="_blank" rel="noreferrer">Open Food Facts</a>, CC BY-SA
+        {store && `${state.fromStore ? t('photosFromShop', { shop: storeName ?? '' }) : t('photosNotFromShop', { shop: storeName ?? '' })} · `}
+        {t('photosCredit')}: <a href="https://world.openfoodfacts.org" target="_blank" rel="noreferrer">Open Food Facts</a>, CC BY-SA
       </div>
     </div>
   )
@@ -906,25 +906,25 @@ function MembersSheet({ store, profile, onClose }: { store: ListStore; profile: 
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
-        <h2>Mitglieder</h2>
-        {!members && <p className="muted">Wird geladen …</p>}
+        <h2>{t('members')}</h2>
+        {!members && <p className="muted">{t('loading')}</p>}
         {members && (
           <ul className="members">
             {list.map((m, i) => (
               <li key={i}>
                 <span className="avatar">{(m.name ?? '?').slice(0, 1).toUpperCase()}</span>
                 <span>
-                  {m.name ?? 'Unbekannt'}
-                  {m.me && <span className="muted"> (du)</span>}
+                  {m.name ?? t('unknown')}
+                  {m.me && <span className="muted"> ({t('you')})</span>}
                 </span>
                 <span className="muted">{m.lang ? LANG_LABEL[m.lang] : ''}</span>
               </li>
             ))}
           </ul>
         )}
-        <p className="muted small-text">Wer den Link zur Liste öffnet, wird Mitglied. Den eigenen Namen änderst du auf der Startseite.</p>
+        <p className="muted small-text">{t('membersHint')}</p>
         <button className="ghost" onClick={onClose}>
-          Schliessen
+          {t('close')}
         </button>
       </div>
     </div>
@@ -954,26 +954,26 @@ function EditSheet({
           onSave(n.trim() || name, c)
         }}
       >
-        <h2>Liste bearbeiten</h2>
+        <h2>{t('editListTitle')}</h2>
         <label>
-          Name
+          {t('name')}
           <input value={n} onChange={(e) => setN(e.target.value)} />
         </label>
         <label>
-          Reiseland
+          {t('travelCountry')}
           <select value={c} onChange={(e) => setC(e.target.value)}>
             {COUNTRIES.map((x) => (
               <option key={x.code} value={x.code}>
-                {x.flag} {x.name} – {LANG_LABEL[x.lang]}
+                {x.flag} {countryName(x.code)} – {LANG_LABEL[x.lang]}
               </option>
             ))}
           </select>
         </label>
-        <p className="muted small-text">Ändert das Land für alle, mit denen die Liste geteilt ist.</p>
+        <p className="muted small-text">{t('countryChangeHint')}</p>
         <div className="row">
-          <button className="primary">Speichern</button>
+          <button className="primary">{t('save')}</button>
           <button type="button" className="ghost" onClick={onClose}>
-            Abbrechen
+            {t('cancel')}
           </button>
         </div>
       </form>
@@ -992,9 +992,9 @@ function ShareSheet({ id, name, onClose }: { id: string; name: string; onClose: 
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
-        <h2>Liste teilen</h2>
-        {!supabase && <p className="note">Demo-Modus: Ohne Supabase sehen andere die Liste nicht.</p>}
-        {qr && <img src={qr} alt="QR-Code zur Liste" className="qr" />}
+        <h2>{t('shareList')}</h2>
+        {!supabase && <p className="note">{t('demoShare')}</p>}
+        {qr && <img src={qr} alt={t('qrAlt')} className="qr" />}
         <input readOnly value={url} onFocus={(e) => e.target.select()} />
         <div className="row">
           <button
@@ -1011,10 +1011,10 @@ function ShareSheet({ id, name, onClose }: { id: string; name: string; onClose: 
               }
             }}
           >
-            {copied ? 'Kopiert ✓' : 'Link teilen'}
+            {copied ? t('copied') : t('shareLink')}
           </button>
           <button className="ghost" onClick={onClose}>
-            Schliessen
+            {t('close')}
           </button>
         </div>
       </div>

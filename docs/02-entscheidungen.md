@@ -123,3 +123,9 @@ Stand: 2026-11-09 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Das App-Symbol zeigt einen weißen Einkaufswagen auf petrolfarbenem Verlauf, dazu eine Sprechblase mit „A→á“ für die Übersetzung. Es gibt PNG-Dateien für den iPhone-Home-Bildschirm (`apple-touch-icon.png`, 180 px), für Android/PWA (192 und 512 px), eine „maskable“ Variante mit Rand für runde Android-Symbole und das SVG als Browser-Symbol. Quelle ist ein SVG, die PNGs werden mit `rsvg-convert` daraus erzeugt.
 - **Begründung:** iOS zeigt auf dem Home-Bildschirm nur PNG-Symbole. Das Motiv verbindet Einkauf und Übersetzung.
+
+## D-022 · Oberfläche mehrsprachig (Deutsch, Englisch)
+
+- **Entscheidung:** Alle Texte der Oberfläche stehen in `src/i18n.ts`, auf Deutsch und Englisch. Die Sprache der Oberfläche folgt der Sprache im Profil. Vor dem Anlegen des Profils gilt die Sprache des Browsers. Für Sprachen ohne eigene Texte wird Englisch verwendet. Ländernamen kommen in der Oberflächensprache vom Browser (`Intl.DisplayNames`), Abteilungen und Tipps sind übersetzt. Wechselt man im Profil die Sprache, wechselt die Oberfläche sofort mit.
+- **Begründung:** Mitreisende mit anderer Sprache sollen die App bedienen können (Ziel Z-2). Englisch deckt die meisten ab, weitere Sprachen lassen sich ohne Umbau ergänzen.
+- **Folgen:** Neue Texte immer in `de` und `en` anlegen. Die übrigen Sprachen sind offen (S-008).

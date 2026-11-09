@@ -8,6 +8,7 @@
 // Open Food Facts erlaubt nur wenige Suchanfragen pro Minute: Fotos werden nur auf Antippen geladen
 // und 30 Tage lokal zwischengespeichert.
 
+import { t } from '../i18n'
 import { normalize } from './translate'
 
 export interface Photo {
@@ -168,10 +169,10 @@ async function fetchJson(url: string): Promise<OffProduct[]> {
   try {
     res = await fetch(url)
   } catch {
-    throw new PhotoError('Open Food Facts ist nicht erreichbar oder ausgelastet.', true)
+    throw new PhotoError(t('errOffUnreachable'), true)
   }
-  if (res.status === 429 || res.status >= 500) throw new PhotoError(`Open Food Facts ist ausgelastet (Fehler ${res.status}).`, true)
-  if (!res.ok) throw new PhotoError(`Open Food Facts antwortet nicht (Fehler ${res.status}).`)
+  if (res.status === 429 || res.status >= 500) throw new PhotoError(t('errOffBusy', { status: res.status }), true)
+  if (!res.ok) throw new PhotoError(t('errOffStatus', { status: res.status }))
   return ((await res.json()) as { products?: OffProduct[] }).products ?? []
 }
 
