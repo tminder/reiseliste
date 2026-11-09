@@ -658,7 +658,7 @@ function ItemRow({
           <p className="muted small-text correction-hint">{t('correctionHint')}</p>
         )}
         {shopMode && showHint && hint && !item.checked && <div className="hint">{hint}</div>}
-        {showPhotos && local && (
+        {shopMode && showPhotos && local && (
           <PhotoStrip country={country} conceptId={item.conceptId} term={local} store={shopTag} storeName={shopName} />
         )}
       </div>
@@ -667,7 +667,7 @@ function ItemRow({
           <Lightbulb size={18} />
         </button>
       )}
-      {local && !item.checked && shopTag && hasPhotos(item.conceptId, item.localOverride) && (
+      {shopMode && local && !item.checked && shopTag && hasPhotos(item.conceptId, item.localOverride) && (
         <button
           className={`ghost small ${showPhotos ? 'active' : ''}`}
           aria-label={t('photos')}
