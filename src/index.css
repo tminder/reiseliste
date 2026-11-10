@@ -723,6 +723,7 @@ button.term-btn {
 .claim {
   color: var(--accent);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 /* Schon mal gekauft (D-030) */

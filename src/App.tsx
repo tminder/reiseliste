@@ -874,7 +874,10 @@ function ItemRow({
       <button
         className="check"
         aria-label={item.checked ? t('markOpen') : t('check')}
-        onClick={() => void store.updateItem(item.id, { checked: !item.checked })}
+        onClick={() =>
+          // Beim Abhaken wird „Ich hole das“ zurückgesetzt (D-031)
+          void store.updateItem(item.id, { checked: !item.checked, ...(item.claimedBy ? { claimedBy: null } : {}) })
+        }
       >
         {item.checked && <Check size={18} strokeWidth={3} />}
       </button>
