@@ -147,3 +147,10 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Der Name der App ist „Proviant“ (Oberfläche DE und EN, Manifest, Seitentitel, Datenschutz, README). Untertitel im Manifest: „Einkaufsliste für Reisen“. Der Markenname bekommt später einen Zusatz (F-005). Repo `tminder/reiseliste`, URL und interne Schlüssel (`rl:`) bleiben unverändert.
 - **Begründung:** Entscheidung des Inhabers. Positionierung als Einkaufsliste mit Reisebezug, Sprache zweitrangig, ohne „shop“. „Proviant“ verstehen viele Sprachen (DE, SV, DA, NO, NL „proviand“, EN/FR „provisions“). „Travel List“ wäre auf Englisch als Packliste missverstanden worden.
 - **Folgen:** „Proviant“ allein ist generisch und schon belegt, deshalb nicht als Marke schützbar (F-005). Bereits installierte PWAs zeigen den neuen Namen erst nach einem Update bzw. neuem Hinzufügen zum Home-Bildschirm.
+
+## D-026 · App-Icon: Einkaufswagen auf geschwungenem Weg
+
+- **Entscheidung:** Das Icon zeigt einen weissen Einkaufswagen auf einem türkisen Weg (#14b8a6), der unter dem Wagen gerade verläuft und am Ende in einem S nach oben ausläuft. Dunkler Grund (#1e293b), keine weiteren Details. Quelle ist `public/favicon.svg`. Daraus entstehen favicon-32, icon-192/512, apple-touch-icon (180, ohne Rundung) und icon-maskable-512 (Motiv auf 80 % verkleinert).
+- **Begründung:** Entscheidung des Inhabers (Variante „C3-2“). Einfach und auch in Home-Bildschirm-Grösse lesbar. Verbindet Einkaufen und Unterwegs-Sein.
+- **Folgen:** Bereits installierte PWAs zeigen das neue Icon erst nach dem Entfernen und erneuten Hinzufügen zum Home-Bildschirm.
+
