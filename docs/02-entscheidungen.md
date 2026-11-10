@@ -175,7 +175,7 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-030 · Nach dem Einkauf: Erledigte entfernen, schon Gekauftes wieder hinzufügen
 
-- **Entscheidung:** Über der Gruppe „Im Wagen“ steht der Knopf „Erledigte entfernen“. Er entfernt alle abgehakten Artikel (Soft-Delete) ohne Rückfrage. Unter dem Eingabefeld zeigt „Schon mal gekauft“ bis zu 8 entfernte Artikel dieser Liste, die gerade nicht auf der Liste stehen (neueste zuerst, ohne Doppelte). Ein Tipp setzt den Artikel ohne Menge wieder auf die Liste, in der Sprache des Tippenden. Nur in der Bearbeiten-Ansicht, nur bei leerem Eingabefeld und nur, solange man ins Eingabefeld getippt hat (Wunsch des Inhabers).
+- **Entscheidung:** Über der Gruppe „Im Wagen“ steht der Knopf „Erledigte entfernen“. Er entfernt alle abgehakten Artikel (Soft-Delete) ohne Rückfrage, danach ist „Rückgängig“ möglich (D-042). Unter dem Eingabefeld zeigt „Schon mal gekauft“ bis zu 8 entfernte Artikel dieser Liste, die gerade nicht auf der Liste stehen (neueste zuerst, ohne Doppelte). Ein Tipp setzt den Artikel ohne Menge wieder auf die Liste, in der Sprache des Tippenden. Nur in der Bearbeiten-Ansicht, nur bei leerem Eingabefeld und nur, solange man ins Eingabefeld getippt hat (Wunsch des Inhabers).
 - **Begründung:** Auf Reisen kauft man fast täglich ein, eine Liste wird immer wieder verwendet (Vorschlag „wenige, aber gute Funktionen“, vom Inhaber gewählt).
 - **Folgen:** Auch ohne Kauf gelöschte Artikel erscheinen unter „Schon mal gekauft“. Keine Datenbank-Änderung nötig.
 
@@ -241,4 +241,10 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Das Profil hat neben Name und Sprache ein Wohnland („Wo wohnst du?“, alle Länder der App oder „Anderes Land“). Es ist die Basis für „zu Hause“: Dort wechselt die App das Reiseland nicht automatisch (D-040), und beim Anlegen einer Liste wird das Wohnland nicht vorgeschlagen. Ältere Profile ohne Angabe bekommen einen geratenen Wert (Browsersprache mit Region, z. B. de-CH → Deutschschweiz, sonst aus der Sprache, z. B. Spanisch → Spanien), änderbar über den Namen oben rechts. Damit jedes Land Wohn- und Reiseland sein kann, sind die deutschsprachigen Länder (Deutschland, Österreich, Deutschschweiz, Liechtenstein) sowie Brasilien, Argentinien, Kanada, Australien und Neuseeland dazugekommen (jetzt 27 Länder). Die Ländererkennung liefert für die Deutschschweiz jetzt „Schweiz (Deutschschweiz)“.
 - **Begründung:** Wunsch des Inhabers: Die App soll international funktionieren, nicht nur für Reisende aus dem deutschsprachigen Raum. Ein Spanier auf Reisen in der Schweiz braucht Deutsch als Landessprache.
 - **Folgen:** Das Wohnland wird nur auf dem Gerät gespeichert, nicht bei der Mitgliedschaft. Bei „bestehendes Mitglied auswählen“ (D-029) wird es geraten. Die Oberfläche gibt es weiterhin nur auf Deutsch und Englisch (S-008).
+
+## D-042 · „Rückgängig“ nach dem Löschen statt Swipen
+
+- **Entscheidung:** Nach dem Löschen eines Artikels (✕) oder nach „Erledigte entfernen“ erscheint unten 5 Sekunden lang „„Milch“ gelöscht · Rückgängig“ bzw. „2 Artikel entfernt · Rückgängig“. „Rückgängig“ stellt die Artikel mit Menge, Autor und Status wieder her. Gelöscht wird weiterhin über das sichtbare ✕, Swipen gibt es vorerst nicht.
+- **Begründung:** Empfehlung von Claude, vom Inhaber bestätigt. Testpersonen sollen die App ohne Erklärung bedienen können, ein sichtbares ✕ ist dafür besser als eine versteckte Wischgeste. Das grössere Problem war, dass versehentlich Gelöschtes weg war.
+- **Folgen:** Ob die Zeilen ohne Swipen zu voll wirken, zeigt der Test mit Testpersonen. Swipen liesse sich dann mit wenig Aufwand ergänzen, das Rückgängig ist schon da.
 

@@ -913,3 +913,31 @@ button.scanner-alt {
 .warn-text {
   color: #b91c1c;
 }
+
+/* „Gelöscht · Rückgängig“ (D-042) */
+.undo-bar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: min(92vw, 480px);
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: #1e293b;
+  color: #fff;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.25);
+}
+.undo-bar span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.undo-bar .link {
+  color: #5eead4;
+  font-weight: 700;
+  white-space: nowrap;
+}

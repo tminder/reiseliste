@@ -452,8 +452,15 @@ export class ListStore {
   }
 
   /** Alle abgehakten Artikel entfernen (D-030) */
-  async removeChecked() {
-    for (const i of this.items.filter((x) => x.checked && !x.deleted)) await this.updateItem(i.id, { deleted: true })
+  async removeChecked(): Promise<string[]> {
+    const ids = this.items.filter((x) => x.checked && !x.deleted).map((x) => x.id)
+    for (const id of ids) await this.updateItem(id, { deleted: true })
+    return ids
+  }
+
+  /** Gelöschte Artikel wiederherstellen („Rückgängig“, D-042) */
+  async restore(ids: string[]) {
+    for (const id of ids) await this.updateItem(id, { deleted: false })
   }
 
   updateItem(id: string, patch: Partial<Pick<Item, 'checked' | 'deleted' | 'localOverride' | 'qty' | 'claimedBy'>>) {

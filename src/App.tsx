@@ -552,6 +552,15 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   const { store } = useStore(id, profile)
   useEffect(() => setLastList(id), [id])
   const [input, setInput] = useState('')
+  // „Gelöscht · Rückgängig“ für 5 Sekunden (D-042)
+  const [undo, setUndo] = useState<{ ids: string[]; label: string } | null>(null)
+  const undoTimer = useRef<number | undefined>(undefined)
+  const showUndo = (ids: string[], label: string) => {
+    window.clearTimeout(undoTimer.current)
+    setUndo({ ids, label })
+    undoTimer.current = window.setTimeout(() => setUndo(null), 5000)
+  }
+  useEffect(() => () => window.clearTimeout(undoTimer.current), [])
   // „Schon mal gekauft“ nur, solange das Eingabefeld aktiv ist (D-030)
   const [inputFocused, setInputFocused] = useState(false)
   const blurTimer = useRef<number | undefined>(undefined)
@@ -874,7 +883,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           <section key={cat} className="group">
             <h3>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
             {groups.get(cat)!.map((item) => (
-              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} />
+              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(i) => showUndo([i.id], t('deletedOne', { name: i.text }))} />
             ))}
           </section>
         ))}
@@ -883,14 +892,35 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         <section className="group done">
           <h3 className="done-head">
             {t('inCart')}
-            <button className="ghost small" onClick={() => void store.removeChecked()}>
+            <button
+              className="ghost small"
+              onClick={() =>
+                void store.removeChecked().then((ids) => ids.length && showUndo(ids, t('deletedMany', { n: ids.length })))
+              }
+            >
               <Trash2 size={16} /> {t('removeChecked')}
             </button>
           </h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} />
+            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(i) => showUndo([i.id], t('deletedOne', { name: i.text }))} />
           ))}
         </section>
+      )}
+
+      {undo && (
+        <div className="undo-bar" role="status">
+          <span>{undo.label}</span>
+          <button
+            className="link"
+            onClick={() => {
+              void store.restore(undo.ids)
+              window.clearTimeout(undoTimer.current)
+              setUndo(null)
+            }}
+          >
+            {t('undo')}
+          </button>
+        </div>
       )}
 
       {showShare && <ShareSheet id={id} name={list.name} onClose={() => setShowShare(false)} />}
@@ -941,6 +971,7 @@ function ItemRow({
   viewer,
   shopMode,
   me,
+  onDeleted,
 }: {
   item: Item
   store: ListStore
@@ -952,6 +983,8 @@ function ItemRow({
   shopMode: boolean
   /** Name aus dem Profil (für „Ich hole das“, D-031) */
   me: string
+  /** Für „Gelöscht · Rückgängig“ (D-042) */
+  onDeleted: (item: Item) => void
 }) {
   const [editing, setEditing] = useState(false)
   const [showCard, setShowCard] = useState(false)
@@ -1071,7 +1104,10 @@ function ItemRow({
         </button>
       )}
       {!shopMode && (
-        <button className="ghost small" aria-label={t('delete')} onClick={() => void store.updateItem(item.id, { deleted: true })}>
+        <button className="ghost small" aria-label={t('delete')} onClick={() => {
+          void store.updateItem(item.id, { deleted: true })
+          onDeleted(item)
+        }}>
           <X size={18} />
         </button>
       )}
