@@ -124,6 +124,42 @@ export async function memberProfiles(listId: string): Promise<Profile[]> {
     .map((m) => ({ name: m.name, lang: m.lang as Lang }))
 }
 
+/** Letzte Änderung pro Liste (D-036): aus dem Gerätespeicher, wenn möglich ergänzt durch Supabase */
+export function localLastChange(id: string): string | null {
+  const c = LS.get<{ list: ShoppingList | null; items?: Item[] }>(`rl:list:${id}`, { list: null })
+  const times = [c.list?.updatedAt, ...(c.items ?? []).map((i) => i.updatedAt)].filter((x): x is string => !!x)
+  return times.length ? times.reduce((a, b) => (a > b ? a : b)) : null
+}
+
+export async function remoteLastChanges(ids: string[]): Promise<Record<string, string>> {
+  const out: Record<string, string> = {}
+  if (!supabase || !ids.length || !navigator.onLine) return out
+  if (!(await ensureAuth())) return out
+  const [lists, items] = await Promise.all([
+    supabase.from('lists').select('id, updated_at').in('id', ids),
+    supabase.from('items').select('list_id, updated_at').in('list_id', ids).order('updated_at', { ascending: false }).limit(1000),
+  ])
+  const put = (id: string, at: string) => {
+    if (!out[id] || at > out[id]) out[id] = at
+  }
+  for (const l of (lists.data ?? []) as { id: string; updated_at: string }[]) put(l.id, l.updated_at)
+  for (const i of (items.data ?? []) as { list_id: string; updated_at: string }[]) put(i.list_id, i.updated_at)
+  return out
+}
+
+/** Liste aus „Deine Listen“ entfernen und austreten (D-036). Für die anderen Mitglieder bleibt sie bestehen. */
+export async function leaveList(id: string) {
+  forgetList(id)
+  if (!supabase || !navigator.onLine) return
+  try {
+    if (!(await ensureAuth())) return
+    const { data } = await supabase.auth.getUser()
+    if (data.user) await supabase.from('list_members').delete().eq('list_id', id).eq('user_id', data.user.id)
+  } catch {
+    /* Austritt ist optional – lokal ist die Liste schon weg */
+  }
+}
+
 export function forgetList(id: string) {
   if (LS.get<string | null>('rl:last', null) === id) localStorage.removeItem('rl:last')
   LS.set('rl:lists', LS.get<string[]>('rl:lists', []).filter((x) => x !== id))

@@ -203,3 +203,10 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Jeder Build bekommt eine Kennung (Commit-Hash auf GitHub, sonst Zeitstempel). Sie steckt im Code und in `version.json`. Beim Start und beim Zurückkehren in die App (höchstens jede Minute) lädt die App `version.json` am Service Worker vorbei. Weicht die Kennung ab, lädt sie hart neu: Service Worker abmelden, App-Cache leeren, Seite frisch laden. Offline gespeicherte Produktfotos bleiben. Gegen Schleifen gilt: pro Build höchstens ein Versuch alle 10 Minuten. Das bestehende automatische Update des Service Workers bleibt zusätzlich aktiv.
 - **Begründung:** Wunsch des Inhabers. Installierte PWAs zeigten nach einem Deployment teilweise noch altes CSS und alten Code.
 - **Folgen:** Jedes Deployment lädt alle offenen Apps beim nächsten Öffnen bzw. Zurückkehren einmal neu. Geräte mit einer Version ohne diese Prüfung bekommen sie erst mit dem nächsten normalen Update des Service Workers. Einen „Neu laden“-Link gibt es deshalb nicht mehr.
+
+## D-036 · Listenübersicht: letzte Änderung zeigen, Listen entfernen
+
+- **Entscheidung:** Unter jedem Listennamen in „Deine Listen“ steht die letzte Änderung („Geändert heute 10:58“, „gestern 18:20“ oder Datum mit Uhrzeit). Massgeblich ist die jüngste Änderung an der Liste oder an einem Artikel, zuerst aus dem Gerätespeicher, dann aktuell aus Supabase. Die Listen sind danach sortiert, die neueste oben. Das Papierkorb-Symbol fragt nach („Aus deinen Listen entfernen? Für die anderen Mitglieder bleibt sie bestehen.“) und entfernt die Liste dann vom Gerät und beendet die Mitgliedschaft in Supabase (Policy „members: leave“). Dasselbe macht „Aus meinen Listen entfernen“ im Menü der Liste. Mit dem Link kann man wieder beitreten. Für alle löschen lässt sich eine Liste nicht (S-010).
+- **Begründung:** Wunsch des Inhabers. Bisher wurde eine Liste nur vom Gerät „vergessen“, die Mitgliedschaft blieb bestehen.
+- **Folgen:** `supabase/schema.sql` muss erneut ausgeführt werden (neue Policy). Bis dahin wird die Liste nur lokal entfernt. Verlässt das letzte Mitglied eine Liste, bleibt sie verwaist in der Datenbank (F-010).
+

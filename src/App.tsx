@@ -25,7 +25,7 @@ import {
 } from 'lucide-react'
 import { CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
-import { categoryLabel, countryName, setUiLang, t } from './i18n'
+import { categoryLabel, countryName, setUiLang, t, uiLang } from './i18n'
 import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
@@ -33,7 +33,7 @@ import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
-import { ListStore, forgetList, knownLists, lastList, memberProfiles, setLastList, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
+import { ListStore, knownLists, lastList, leaveList, localLastChange, remoteLastChanges, memberProfiles, setLastList, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
 // ---------- Routing über den Hash (funktioniert auf GitHub Pages ohne Server) ----------
 
@@ -167,9 +167,29 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
   const [country, setCountry] = useState('ES')
   const [detected, setDetected] = useState<string | null>(null)
   const touched = useRef(false)
-  const lists = knownLists()
+  const [lists, setLists] = useState(knownLists)
   // „Neue Liste“ ist eingeklappt, sobald es Listen gibt; ohne Listen direkt offen
   const [showNew, setShowNew] = useState(lists.length === 0)
+  const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
+  // Letzte Änderung pro Liste (D-036): sofort aus dem Gerät, dann aktuell aus Supabase
+  const [changed, setChanged] = useState<Record<string, string>>(() =>
+    Object.fromEntries(lists.map((l) => [l.id, localLastChange(l.id)]).filter((e): e is [string, string] => !!e[1])),
+  )
+  useEffect(() => {
+    let alive = true
+    void remoteLastChanges(lists.map((l) => l.id)).then((remote) => {
+      if (!alive) return
+      setChanged((c) => {
+        const next = { ...c }
+        for (const [id, at] of Object.entries(remote)) if (!next[id] || at > next[id]) next[id] = at
+        return next
+      })
+    })
+    return () => {
+      alive = false
+    }
+  }, [lists])
+  const sorted = [...lists].sort((a, b) => (changed[b.id] ?? '').localeCompare(changed[a.id] ?? ''))
 
   // Bist du schon im Ausland, wird das aktuelle Land vorgeschlagen (änderbar)
   useEffect(() => {
@@ -206,24 +226,39 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
       {lists.length > 0 && (
         <section className="stack">
           <h2>{t('yourLists')}</h2>
-          {lists.map((l) => {
+          {sorted.map((l) => {
             const c = COUNTRY_BY_CODE.get(l.country)
             return (
-              <div key={l.id} className="card row-between">
-                <a href={`#/l/${l.id}`} className="list-link">
-                  <span className="flag">{c?.flag}</span> {l.name}
-                </a>
-                <button
-                  className="ghost small"
-                  aria-label={t('removeList')}
-                  onClick={() => {
-                    forgetList(l.id)
-                    go('/')
-                    location.reload()
-                  }}
-                >
-                  <X size={16} />
-                </button>
+              <div key={l.id} className="card list-card">
+                <div className="row-between">
+                  <a href={`#/l/${l.id}`} className="list-link">
+                    <span className="flag">{c?.flag}</span> {l.name}
+                    {changed[l.id] && <span className="list-changed">{t('lastChange', { when: formatWhen(changed[l.id]) })}</span>}
+                  </a>
+                  <button className="ghost small" aria-label={t('removeList')} onClick={() => setConfirmRemove(confirmRemove === l.id ? null : l.id)}>
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+                {confirmRemove === l.id && (
+                  <div className="confirm">
+                    <p className="small-text">{t('removeListConfirm')}</p>
+                    <div className="row-gap">
+                      <button
+                        className="danger-btn small"
+                        onClick={() => {
+                          void leaveList(l.id)
+                          setConfirmRemove(null)
+                          setLists(knownLists())
+                        }}
+                      >
+                        {t('removeYes')}
+                      </button>
+                      <button className="ghost small" onClick={() => setConfirmRemove(null)}>
+                        {t('cancel')}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )
           })}
@@ -509,7 +544,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                   role="menuitem"
                   className="danger"
                   onClick={() => {
-                    forgetList(id)
+                    void leaveList(id)
                     go('/')
                   }}
                 >
@@ -1136,6 +1171,21 @@ function PhotoStrip({
 }
 
 /** "2" → "2x", "500 g" bleibt "500 g" */
+/** „heute 10:58“, „gestern 18:20“ oder „3.11. 09:15“ (D-036) */
+function formatWhen(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const lang = uiLang()
+  const time = d.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' })
+  const day = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime()
+  const diff = Math.round((day(new Date()) - day(d)) / 86_400_000)
+  if (diff === 0) return `${t('today')} ${time}`
+  if (diff === 1) return `${t('yesterday')} ${time}`
+  const opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'numeric' }
+  if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric'
+  return `${d.toLocaleDateString(lang, opts)} ${time}`
+}
+
 function formatQty(qty: string): string {
   return /^\d+(?:[.,]\d+)?$/.test(qty.trim()) ? `${qty.trim()}x` : qty
 }

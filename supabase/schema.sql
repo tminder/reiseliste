@@ -100,6 +100,9 @@ create policy "lists: update as member" on public.lists for update to authentica
 drop policy if exists "members: read own" on public.list_members;
 drop policy if exists "members: read same list" on public.list_members;
 create policy "members: read same list" on public.list_members for select to authenticated using (public.is_member(list_id));
+-- Eigene Mitgliedschaft beenden (Liste aus „Deine Listen“ entfernen, D-036)
+drop policy if exists "members: leave" on public.list_members;
+create policy "members: leave" on public.list_members for delete to authenticated using (user_id = auth.uid());
 
 drop policy if exists "items: member access" on public.items;
 create policy "items: member access" on public.items for all to authenticated
