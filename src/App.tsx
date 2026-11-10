@@ -3,6 +3,7 @@ import QRCode from 'qrcode'
 import {
   ArrowLeft,
   Shield,
+  UserPlus,
   Users,
   CloudAlert,
   CloudOff,
@@ -172,7 +173,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
   const touched = useRef(false)
   const [lists, setLists] = useState(knownLists)
   // „Neue Liste“ ist eingeklappt, sobald es Listen gibt; ohne Listen direkt offen
-  const [panel, setPanel] = useState<'new' | 'link' | null>(lists.length === 0 ? 'new' : null)
+  const [panel, setPanel] = useState<'new' | 'join' | 'link' | null>(lists.length === 0 ? 'new' : null)
   const [scan, setScan] = useState(false)
   const showNew = panel === 'new'
   const setShowNew = (v: boolean) => setPanel(v ? 'new' : null)
@@ -234,9 +235,9 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
         <button className={`ghost ${panel === 'new' ? 'active' : ''}`} onClick={() => setPanel(panel === 'new' ? null : 'new')}>
           <Plus size={18} /> {t('newList')}
         </button>
-        {/* Beitreten: primär per QR-Code, Link einfügen als Alternative im Scanner (D-038) */}
-        <button className={`ghost ${panel === 'link' ? 'active' : ''}`} onClick={() => setScan(true)}>
-          <ScanLine size={18} /> {t('scanQr')}
+        {/* Beitreten: QR-Code scannen oder Link einfügen (D-037, D-038) */}
+        <button className={`ghost ${panel === 'join' || panel === 'link' ? 'active' : ''}`} onClick={() => setPanel(panel === 'join' || panel === 'link' ? null : 'join')}>
+          <UserPlus size={18} /> {t('joinList')}
         </button>
       </div>
       {scan && (
@@ -251,7 +252,9 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
           />
         </Suspense>
       )}
-      {panel === 'link' && <OpenByLink onClose={() => setPanel(null)} />}
+      {(panel === 'join' || panel === 'link') && (
+        <JoinList onClose={() => setPanel(null)} onScan={() => setScan(true)} focusLink={panel === 'link'} />
+      )}
       {showNew && (
         <form className="card stack" onSubmit={create}>
           <div className="row-between">
@@ -343,7 +346,8 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
 const QrScanner = lazy(() => import('./QrScanner'))
 
 /** Liste über einen eingefügten Link öffnen (D-037) */
-function OpenByLink({ onClose }: { onClose: () => void }) {
+/** „Liste beitreten“ (D-037/D-038): primär QR-Code scannen, alternativ Link einfügen */
+function JoinList({ onClose, onScan, focusLink }: { onClose: () => void; onScan: () => void; focusLink?: boolean }) {
   const [text, setText] = useState('')
   const [error, setError] = useState(false)
   const openId = (value: string) => {
@@ -360,12 +364,15 @@ function OpenByLink({ onClose }: { onClose: () => void }) {
       }}
     >
       <div className="row-between">
-        <h2>{t('openByLink')}</h2>
+        <h2>{t('joinList')}</h2>
         <button type="button" className="ghost small" aria-label={t('close')} onClick={onClose}>
           <X size={16} />
         </button>
       </div>
-      <p className="muted small-text">{t('openByLinkHint')}</p>
+      <button type="button" className="primary join-scan" onClick={onScan}>
+        <ScanLine size={20} /> {t('scanQr')}
+      </button>
+      <p className="join-or muted small-text">{t('orPasteLink')}</p>
       <input
         value={text}
         onChange={(e) => {
@@ -373,11 +380,11 @@ function OpenByLink({ onClose }: { onClose: () => void }) {
           setError(false)
         }}
         placeholder={t('linkPlaceholder')}
-        autoFocus
+        autoFocus={focusLink}
       />
       {error && <p className="small-text error-text">{t('linkInvalid')}</p>}
       <div className="row-gap">
-        <button className="primary" disabled={!text.trim()}>
+        <button className="ghost" disabled={!text.trim()}>
           {t('openList')}
         </button>
         {navigator.clipboard?.readText && (

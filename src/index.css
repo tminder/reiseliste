@@ -901,3 +901,12 @@ button.scanner-alt {
   background: var(--accent-soft);
   border-color: var(--accent);
 }
+.join-scan {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.join-or {
+  margin: 4px 0 -4px;
+}
