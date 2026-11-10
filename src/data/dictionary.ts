@@ -15,6 +15,7 @@ export type Category =
   | 'getraenke'
   | 'tk'
   | 'haushalt'
+  | 'kueche'
   | 'hygiene'
   | 'baby'
 
@@ -345,6 +346,37 @@ linsenmittel;hygiene;Kontaktlinsenflüssigkeit/Linsenmittel;contact lens solutio
 schnuller;baby;Schnuller/Nuggi;dummy/pacifier;chupete;chupeta;tétine/sucette;ciuccio;speen;duda;πιπίλα
 babyshampoo;baby;Babyshampoo/Kindershampoo;baby shampoo;champú para bebés/champú infantil;champô para bebé;shampooing bébé;shampoo per bambini;babyshampoo;šampon za bebe;βρεφικό σαμπουάν
 wundschutz;baby;Wundschutzcreme/Windelcreme;nappy rash cream/diaper cream;crema del pañal/crema para el culito;creme para a muda da fralda/pomada para assaduras;crème pour le change;crema per il cambio/pasta per il cambio;billencrème;krema protiv pelenskog osipa;κρέμα για συγκάματα
+topf;kueche;Topf/Kochtopf;pot/saucepan;olla/cazo;panela/tacho;casserole/marmite;pentola;pan/kookpan;lonac;κατσαρόλα
+bratpfanne;kueche;Bratpfanne/Pfanne;frying pan/pan;sartén;frigideira;poêle;padella;koekenpan;tava;τηγάνι
+messer;kueche;Messer/Küchenmesser;knife/kitchen knife;cuchillo;faca;couteau;coltello;mes/keukenmes;nož;μαχαίρι
+schneidebrett;kueche;Schneidebrett/Brett;chopping board/cutting board;tabla de cortar;tábua de cortar;planche à découper;tagliere;snijplank;daska za rezanje;ξύλο κοπής
+kochloeffel;kueche;Kochlöffel;wooden spoon;cuchara de madera;colher de pau;cuillère en bois;cucchiaio di legno;houten lepel;drvena kuhača;ξύλινη κουτάλα
+pfannenwender;kueche;Pfannenwender/Bratschaufel;spatula/turner;espátula;espátula;spatule;spatola/paletta;spatel/bakspaan;lopatica;σπάτουλα
+schoepfkelle;kueche;Schöpfkelle/Suppenkelle;ladle;cucharón;concha;louche;mestolo;soeplepel/pollepel;kutlača;κουτάλα σερβιρίσματος
+sieb;kueche;Sieb/Nudelsieb;colander/sieve;escurridor/colador;escorredor/coador;passoire;scolapasta/colino;vergiet/zeef;cjedilo;σουρωτήρι
+schuessel;kueche;Schüssel/Salatschüssel;bowl/salad bowl;bol/ensaladera;taça/saladeira;saladier/bol;ciotola/insalatiera;schaal/kom;zdjela;μπολ
+teller;kueche;Teller;plates;platos;pratos;assiettes;piatti;borden;tanjuri;πιάτα
+glaeser;kueche;Gläser/Trinkgläser/Glas;glasses/drinking glasses;vasos;copos;verres;bicchieri;glazen;čaše;ποτήρια
+tassen;kueche;Tassen/Tasse/Kaffeetassen;mugs/cups;tazas;canecas/chávenas;tasses/mugs;tazze;mokken/kopjes;šalice;κούπες
+besteck;kueche;Besteck;cutlery/silverware;cubiertos;talheres;couverts;posate;bestek;pribor za jelo;μαχαιροπίρουνα
+dosenoeffner;kueche;Dosenöffner/Büchsenöffner;can opener/tin opener;abrelatas;abre-latas;ouvre-boîte;apriscatole;blikopener;otvarač za konzerve;ανοιχτήρι κονσερβών
+flaschenoeffner;kueche;Flaschenöffner;bottle opener;abrebotellas/abridor;abre-garrafas/abridor;décapsuleur;apribottiglie;flesopener;otvarač za boce;ανοιχτήρι μπουκαλιών
+korkenzieher;kueche;Korkenzieher/Zapfenzieher;corkscrew;sacacorchos;saca-rolhas;tire-bouchon;cavatappi;kurkentrekker;vadičep;τιρμπουσόν
+schaeler;kueche;Sparschäler/Schäler;peeler/vegetable peeler;pelador/pelapatatas;descascador;économe/éplucheur;pelapatate;dunschiller;gulilica;αποφλοιωτής
+reibe;kueche;Reibe/Käsereibe/Raffel;grater/cheese grater;rallador;ralador;râpe;grattugia;rasp;ribež;τρίφτης
+schneebesen;kueche;Schneebesen;whisk;batidor/varillas;batedor;fouet;frusta;garde;pjenjača;σύρμα χτυπήματος
+messbecher;kueche;Messbecher;measuring jug/measuring cup;vaso medidor/jarra medidora;copo medidor;verre doseur;caraffa graduata/misurino;maatbeker;mjerna posuda;δοσομετρική κανάτα
+kuechenschere;kueche;Küchenschere/Schere;scissors/kitchen scissors;tijeras/tijeras de cocina;tesoura/tesoura de cozinha;ciseaux/ciseaux de cuisine;forbici/forbici da cucina;schaar/keukenschaar;škare/kuhinjske škare;ψαλίδι/ψαλίδι κουζίνας
+grillzange;kueche;Grillzange/Küchenzange/Zange;tongs/barbecue tongs;pinzas/pinzas de cocina;pinça/pinça de cozinha;pince/pince de cuisine;pinza/pinze da cucina;tang/grilltang;hvataljka;λαβίδα
+geschirrtuch;kueche;Geschirrtuch/Küchentuch/Abtrocknungstuch;tea towel/dish towel;paño de cocina/trapo de cocina;pano de cozinha/pano da loiça;torchon;strofinaccio/canovaccio;theedoek;kuhinjska krpa;πετσέτα κουζίνας
+topflappen;kueche;Topflappen/Ofenhandschuh;oven gloves/pot holders;agarradores/manoplas de cocina;pegas de cozinha/luvas de forno;maniques/gants de cuisine;presine/guanti da forno;pannenlappen/ovenwanten;kuhinjske rukavice;πιάστρες
+spuelbuerste;kueche;Spülbürste/Abwaschbürste;dish brush/washing-up brush;cepillo de fregar/cepillo para platos;escova da loiça;brosse à vaisselle;spazzola per piatti;afwasborstel;četka za suđe;βούρτσα πιάτων
+vorratsdosen;kueche;Frischhaltedosen/Vorratsdosen/Tupperware;food containers/storage containers;táperes/recipientes herméticos;caixas herméticas/caixas para alimentos;boîtes de conservation/boîtes hermétiques;contenitori per alimenti;vershouddozen/bewaardozen;posude za hranu;δοχεία φαγητού/τάπερ
+trinkflasche;kueche;Trinkflasche/Wasserflasche;water bottle/drinking bottle;botella reutilizable/cantimplora;garrafa reutilizável/cantil;gourde;borraccia;drinkfles/waterfles;boca za vodu;παγούρι
+thermoskanne;kueche;Thermoskanne/Thermosflasche;thermos/vacuum flask;termo;termo/garrafa térmica;thermos/bouteille isotherme;thermos/borraccia termica;thermosfles/thermoskan;termosica;θερμός
+wasserkocher;kueche;Wasserkocher;kettle/electric kettle;hervidor de agua/hervidor eléctrico;chaleira elétrica;bouilloire/bouilloire électrique;bollitore;waterkoker;kuhalo za vodu;βραστήρας
+mokkakanne;kueche;Espressokocher/Mokkakanne/Bialetti;moka pot/stovetop espresso maker;cafetera italiana;cafeteira italiana;cafetière italienne;moka/caffettiera;percolator;moka kuhalo za kavu;καφετιέρα μόκα
+kuehlbox;kueche;Kühlbox/Kühltasche;cool box/cooler/cool bag;nevera portátil;geleira/mala térmica;glacière/sac isotherme;borsa frigo/frigo portatile;koelbox/koeltas;prijenosni hladnjak/rashladna torba;ψυγειάκι
 `
 
 /** Tipps zu Artikeln (nur in der Ladenansicht). Fehlt die Sprache des Betrachters, gilt Englisch. */
@@ -396,6 +428,7 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   getraenke: 'Getränke',
   tk: 'Tiefkühl',
   haushalt: 'Haushalt',
+  kueche: 'Küche & Geschirr',
   hygiene: 'Drogerie',
   baby: 'Baby',
 }
@@ -410,6 +443,7 @@ export const CATEGORY_ORDER: Category[] = [
   'getraenke',
   'tk',
   'haushalt',
+  'kueche',
   'hygiene',
   'baby',
 ]

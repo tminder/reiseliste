@@ -129,6 +129,7 @@ const de = {
   cat_getraenke: 'Getränke',
   cat_tk: 'Tiefkühl',
   cat_haushalt: 'Haushalt',
+  cat_kueche: 'Küche & Geschirr',
   cat_hygiene: 'Drogerie',
   cat_baby: 'Baby',
 }
@@ -259,6 +260,7 @@ const en: Record<MessageKey, string> = {
   cat_getraenke: 'Drinks',
   cat_tk: 'Frozen',
   cat_haushalt: 'Household',
+  cat_kueche: 'Kitchen & tableware',
   cat_hygiene: 'Toiletries',
   cat_baby: 'Baby',
 }
