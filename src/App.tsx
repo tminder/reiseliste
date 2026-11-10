@@ -310,7 +310,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
                 </div>
                 {confirmRemove === l.id && (
                   <div className="confirm">
-                    <p className="small-text">{t('removeListConfirm')}</p>
+                    <p className="small-text warn-text">{t('removeListConfirm')}</p>
                     <div className="row-gap">
                       <button
                         className="danger-btn small"
@@ -542,6 +542,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   const [showMenu, setShowMenu] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
   const [showMembers, setShowMembers] = useState(false)
+  const [confirmLeave, setConfirmLeave] = useState(false)
   const [shop, setShop] = useState<Shop | null>(() => getChosenShop(id))
   // Für die Fotos zählt der gewählte Laden, sonst der angezeigte Vorschlag
   const [suggested, setSuggested] = useState<Shop | null>(null)
@@ -684,8 +685,8 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                   role="menuitem"
                   className="danger"
                   onClick={() => {
-                    void leaveList(id)
-                    go('/')
+                    setShowMenu(false)
+                    setConfirmLeave(true)
                   }}
                 >
                   <Trash2 size={18} /> {t('removeFromDevice')}
@@ -822,6 +823,27 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
 
       {showShare && <ShareSheet id={id} name={list.name} onClose={() => setShowShare(false)} />}
       {showMembers && <MembersSheet store={store} profile={profile} onClose={() => setShowMembers(false)} />}
+      {confirmLeave && (
+        // Warnung vor dem Entfernen (D-036)
+        <div className="sheet-backdrop" onClick={() => setConfirmLeave(false)}>
+          <div className="sheet" role="alertdialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+            <h2>{t('removeListTitle', { name: list.name })}</h2>
+            <p>{t('removeListConfirm')}</p>
+            <button
+              className="danger-btn"
+              onClick={() => {
+                void leaveList(id)
+                go('/')
+              }}
+            >
+              <Trash2 size={16} /> {t('removeYes')}
+            </button>
+            <button className="ghost" onClick={() => setConfirmLeave(false)}>
+              {t('cancel')}
+            </button>
+          </div>
+        </div>
+      )}
       {showEdit && (
         <EditSheet
           name={list.name}
