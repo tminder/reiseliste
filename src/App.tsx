@@ -567,6 +567,27 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   }
 
   const list = store.list
+
+  // Reiseland automatisch anpassen, wenn man in einem anderen unterstützten Land ist (D-040).
+  // Zu Hause (z. B. Deutschschweiz, Deutschland) liefert detectCountry null → keine Änderung.
+  const [countryMoved, setCountryMoved] = useState<{ from: string; to: string } | null>(null)
+  const listCountry = list?.country
+  useEffect(() => {
+    if (!listCountry) return
+    let alive = true
+    void detectCountry(30 * 60 * 1000).then((code) => {
+      if (!alive || !code || code === listCountry || !COUNTRY_BY_CODE.has(code)) return
+      if (countryChangeDeclined(id, code)) return
+      void store.updateList({ country: code })
+      setCountryMoved({ from: listCountry, to: code })
+    })
+    return () => {
+      alive = false
+    }
+    // Nur beim Öffnen der Liste bzw. wenn sie geladen ist
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, !!listCountry])
+
   const country = list ? COUNTRY_BY_CODE.get(list.country) : undefined
   const target: Lang = country?.lang ?? 'en'
   const items = store.items.filter((i) => !i.deleted)
@@ -697,6 +718,25 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         </div>
       </header>
       <IosAppHint id={id} />
+
+      {countryMoved && list.country === countryMoved.to && (
+        <div className="toast">
+          <MapPin size={16} /> {t('countryChanged', { country: `${COUNTRY_BY_CODE.get(countryMoved.to)?.flag ?? ''} ${countryName(countryMoved.to)}` })}
+          <button
+            className="link"
+            onClick={() => {
+              declineCountryChange(id, countryMoved.to)
+              void store.updateList({ country: countryMoved.from })
+              setCountryMoved(null)
+            }}
+          >
+            {t('undo')}
+          </button>
+          <button className="link" aria-label={t('close')} onClick={() => setCountryMoved(null)}>
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {shopMode && autoShop && (
         <div className="toast">
@@ -1337,6 +1377,22 @@ function PhotoStrip({
 }
 
 /** "2" → "2x", "500 g" bleibt "500 g" */
+/** „Rückgängig“ beim automatischen Reiseland (D-040): für diese Liste und dieses Land nicht mehr automatisch wechseln */
+function countryChangeDeclined(listId: string, code: string): boolean {
+  try {
+    return localStorage.getItem(`rl:nocountry:${listId}:${code}`) === '1'
+  } catch {
+    return false
+  }
+}
+function declineCountryChange(listId: string, code: string) {
+  try {
+    localStorage.setItem(`rl:nocountry:${listId}:${code}`, '1')
+  } catch {
+    /* egal */
+  }
+}
+
 /** „heute 10:58“, „gestern 18:20“ oder „3.11. 09:15“ (D-036) */
 function formatWhen(iso: string): string {
   const d = new Date(iso)

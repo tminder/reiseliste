@@ -1,4 +1,4 @@
-// Aktuelles Land erkennen (für den Vorschlag beim Anlegen einer Liste).
+// Aktuelles Land erkennen (Vorschlag beim Anlegen einer Liste, Reiseland automatisch anpassen: D-040).
 // Standort → Nominatim (OpenStreetMap) → Ländercode der App. Ergebnis 6 Stunden lokal gespeichert,
 // damit nicht bei jedem Öffnen der Startseite erneut nach dem Standort gefragt wird.
 
@@ -9,11 +9,11 @@ const TTL = 6 * 60 * 60 * 1000
 
 type Cached = { at: number; code: string | null }
 
-function read(): Cached | null {
+function read(ttl = TTL): Cached | null {
   try {
     const raw = localStorage.getItem('rl:here')
     const c = raw ? (JSON.parse(raw) as Cached) : null
-    return c && Date.now() - c.at < TTL ? c : null
+    return c && Date.now() - c.at < ttl ? c : null
   } catch {
     return null
   }
@@ -46,8 +46,8 @@ function toAppCode(iso: string, state: string): string | null {
  * Liefert den App-Ländercode des aktuellen Standorts, null wenn das Land nicht unterstützt wird
  * (z. B. zu Hause in Deutschland), oder undefined, wenn es nicht bestimmt werden konnte.
  */
-export async function detectCountry(): Promise<string | null | undefined> {
-  const cached = read()
+export async function detectCountry(maxAgeMs = TTL): Promise<string | null | undefined> {
+  const cached = read(maxAgeMs)
   if (cached) return cached.code
   try {
     const pos = await getPosition()
