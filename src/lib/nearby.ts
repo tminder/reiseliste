@@ -1,6 +1,6 @@
 import { t } from '../i18n'
 // Nächstgelegenen Supermarkt erkennen: Standort des Geräts + OpenStreetMap (Overpass API).
-// Der Standort wird nur auf Knopfdruck (oder bei bereits erteilter Erlaubnis beim Öffnen) abgefragt,
+// Der Standort wird nur mit Erlaubnis abgefragt und an die Overpass API geschickt. Auf dem Gerät bleiben die Stelle der letzten Suche (12 h) und der gewählte Laden (D-033).
 // an die Overpass API geschickt und nirgends gespeichert. Gespeichert wird nur der gewählte Laden, lokal pro Liste.
 
 export interface Shop {
@@ -9,6 +9,9 @@ export interface Shop {
   brand: string | null
   distance: number // Meter
   supermarket?: boolean
+  /** Lage des Ladens (für Distanz bei wiederverwendetem Ergebnis und „weggefahren?“, D-033) */
+  lat?: number
+  lon?: number
 }
 
 /** retry = true: vorübergehendes Problem (Server ausgelastet, kein Netz, GPS-Timeout) – später nochmal versuchen */
@@ -35,7 +38,7 @@ export function getPosition(): Promise<GeolocationPosition> {
 }
 
 /** Abstand in Metern (Haversine) */
-function meters(lat1: number, lon1: number, lat2: number, lon2: number) {
+export function meters(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6_371_000
   const rad = (d: number) => (d * Math.PI) / 180
   const dLat = rad(lat2 - lat1)
@@ -85,10 +88,14 @@ async function runQuery(query: string): Promise<OsmElement[]> {
 export const FAR_STEPS_M = [1_000, 3_000, 10_000, 20_000]
 export const FAR_RADIUS_M = FAR_STEPS_M[FAR_STEPS_M.length - 1]
 
-const CACHE_MS = 5 * 60 * 1000
-const SUGGESTION_MS = 30 * 60 * 1000
+// Läden ziehen nicht um: ein Ergebnis gilt, bis man sich wirklich bewegt hat (D-033)
+const CACHE_MS = 12 * 60 * 60 * 1000
+/** Ab dieser Strecke gilt man als „woanders“ (mindestens aber die GPS-Ungenauigkeit) */
+const MOVED_M = 300
+/** War man in einem Laden, reicht eine kürzere Strecke */
+const MOVED_INSIDE_M = 150
 export type NearbyResult = { shops: Shop[]; inside: boolean; accuracy?: number }
-type LastResult = { at: number; lat: number; lon: number; result: NearbyResult }
+type LastResult = { at: number; lat: number; lon: number; accuracy?: number; result: NearbyResult }
 
 // Letztes Suchergebnis im lokalen Speicher – übersteht ein Neuladen der Seite
 function readLast(): LastResult | null {
@@ -107,10 +114,18 @@ function writeLast(v: LastResult) {
   }
 }
 
-/** Vorschlag der letzten 30 Minuten (ohne neue Standortabfrage), z. B. nach einem Neuladen */
+/** Letztes Ergebnis (bis 12 h, ohne neue Standortabfrage) – wird sofort gezeigt, die Prüfung läuft im Hintergrund */
 export function recentSuggestion(): NearbyResult | null {
   const last = readLast()
-  return last && Date.now() - last.at < SUGGESTION_MS ? last.result : null
+  return last && Date.now() - last.at < CACHE_MS ? last.result : null
+}
+
+/** Distanzen eines gespeicherten Ergebnisses auf den aktuellen Standort umrechnen */
+function relocate(result: NearbyResult, lat: number, lon: number): NearbyResult {
+  const shops = result.shops
+    .map((s) => (s.lat != null && s.lon != null ? { ...s, distance: meters(lat, lon, s.lat, s.lon) } : s))
+    .sort((a, b) => (result.inside ? 0 : a.distance - b.distance))
+  return { ...result, shops }
 }
 
 /**
@@ -118,14 +133,17 @@ export function recentSuggestion(): NearbyResult | null {
  * `inside` = true: Läden im Umkreis der GPS-Genauigkeit (man ist wohl drin), alle Ladenarten, Supermärkte zuerst.
  * Sonst die nächsten Supermärkte; pro Stufe (1, 3, 10, 20 km) höchstens 40 Treffer, damit die Antwort klein bleibt.
  */
-export async function findNearbyShops(): Promise<NearbyResult & { fresh: boolean }> {
+export async function findNearbyShops(force = false): Promise<NearbyResult & { fresh: boolean }> {
   const pos = await getPosition()
   const { latitude: lat, longitude: lon, accuracy } = pos.coords
 
-  // Gleiche Stelle (< 50 m) innerhalb von 5 Minuten: letztes Ergebnis wiederverwenden
+  // Nicht wirklich bewegt (GPS-Sprünge in Gebäuden eingerechnet): letztes Ergebnis wiederverwenden, keine Anfrage
   const lastResult = readLast()
-  if (lastResult && Date.now() - lastResult.at < CACHE_MS && meters(lat, lon, lastResult.lat, lastResult.lon) < 50)
-    return { ...lastResult.result, accuracy, fresh: true }
+  if (!force && lastResult && Date.now() - lastResult.at < CACHE_MS) {
+    const moved = meters(lat, lon, lastResult.lat, lastResult.lon)
+    const limit = Math.max(lastResult.result.inside ? MOVED_INSIDE_M : MOVED_M, accuracy, lastResult.accuracy ?? 0)
+    if (moved <= limit) return { ...relocate(lastResult.result, lat, lon), accuracy, fresh: false }
+  }
 
   // GPS ist in Gebäuden ungenau: Radius an die Genauigkeit anpassen (mind. 75 m, höchstens 400 m)
   const radius = Math.min(400, Math.max(75, Math.round(accuracy * 1.5)))
@@ -148,6 +166,8 @@ ${FAR_STEPS_M.map((r) => `nwr(around:${r},${at})["shop"="supermarket"];out cente
         name,
         brand: (tags.brand as string | undefined) ?? null,
         distance: meters(lat, lon, p.lat, p.lon),
+        lat: p.lat,
+        lon: p.lon,
         rank: tags.shop === 'supermarket' ? 0 : 1, // Supermärkte vor Kiosken, Drogerien usw.
       }
     })
@@ -165,7 +185,7 @@ ${FAR_STEPS_M.map((r) => `nwr(around:${r},${at})["shop"="supermarket"];out cente
           .map(strip),
         inside: false,
       }
-  writeLast({ at: Date.now(), lat, lon, result })
+  writeLast({ at: Date.now(), lat, lon, accuracy, result })
   return { ...result, accuracy, fresh: true }
 }
 
@@ -176,16 +196,20 @@ function formatDistance(m: number) {
 }
 export { formatDistance }
 
-// ---------- Gewählter Laden pro Liste (nur auf diesem Gerät, 3 Stunden gültig) ----------
+// ---------- Gewählter Laden pro Liste (nur auf diesem Gerät) ----------
+// Gilt, solange man in der Nähe ist (D-033); ohne bekannte Lage (ältere Einträge) höchstens 3 Stunden.
 
 const VALID_MS = 3 * 60 * 60 * 1000
+const VALID_WITH_POS_MS = 24 * 60 * 60 * 1000
+/** Weiter weg als das: gewählter Laden wird verworfen */
+export const LEFT_SHOP_M = 1_000
 
 export function getChosenShop(listId: string): Shop | null {
   try {
     const raw = localStorage.getItem(`rl:shop:${listId}`)
     if (!raw) return null
     const { at, shop } = JSON.parse(raw) as { at: number; shop: Shop }
-    return Date.now() - at < VALID_MS ? shop : null
+    return Date.now() - at < (shop.lat != null ? VALID_WITH_POS_MS : VALID_MS) ? shop : null
   } catch {
     return null
   }

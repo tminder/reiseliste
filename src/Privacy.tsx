@@ -29,7 +29,7 @@ const DE: { title: string; back: string; updated: string; sections: Section[] } 
           'Profil: Dein Name und deine Sprache. Gespeichert auf deinem Gerät und – sobald du eine Liste öffnest – bei der Mitgliedschaft der Liste, damit die anderen Mitglieder sehen, wer dabei ist. Wer den Link zur Liste hat, sieht Namen und Sprachen der Mitglieder schon vor dem Beitreten, um sich auf einem neuen Gerät als bestehendes Mitglied auszuwählen.',
           'Listen und Artikel: Name der Liste, Reiseland, Artikel, Mengen, wer einen Artikel hinzugefügt hat, wer ihn holt, abgehakt/gelöscht. Damit die Liste mit allen Mitgliedern geteilt und abgeglichen werden kann.',
           'Anonyme Anmeldung: Jedes Gerät erhält eine zufällige Kennung (ohne E-Mail oder Passwort), damit nur Mitglieder eine Liste sehen können.',
-          'Standort: Nur wenn du es im Browser erlaubst. Er wird verwendet, um das Reiseland vorzuschlagen und den nächsten Supermarkt zu finden. Die Koordinaten werden dafür an OpenStreetMap-Dienste geschickt (siehe unten), aber von der App nirgends gespeichert. Gespeichert wird nur der gefundene Laden, und zwar auf deinem Gerät.',
+          'Standort: Nur wenn du es im Browser erlaubst. Er wird verwendet, um das Reiseland vorzuschlagen und den nächsten Supermarkt zu finden. Die Koordinaten werden dafür an OpenStreetMap-Dienste geschickt (siehe unten), aber nicht auf einem Server gespeichert. Auf deinem Gerät werden die Stelle der letzten Suche und die gefundenen Läden bis zu 12 Stunden gespeichert, damit nicht unnötig neu gesucht wird.',
           'Produktfotos: Für die Fotosuche werden Produktkategorie bzw. Suchbegriff, Land und ggf. die Ladenkette an Open Food Facts geschickt.',
           // Nur mit Community-Modul (D-027)
           ...(FEATURES.community
@@ -96,7 +96,7 @@ const EN: typeof DE = {
           'Profile: your name and language. Stored on your device and – once you open a list – with your membership of that list, so other members can see who is in it. Anyone with the link to the list can see the members’ names and languages before joining, so they can pick themselves as an existing member on a new device.',
           'Lists and items: list name, travel country, items, quantities, who added an item, who is getting it, checked/deleted. So the list can be shared and synced with all members.',
           'Anonymous sign-in: each device gets a random identifier (no email or password) so that only members can see a list.',
-          'Location: only if you allow it in your browser. It is used to suggest the travel country and to find the nearest supermarket. The coordinates are sent to OpenStreetMap services (see below) but are not stored anywhere by the app. Only the shop found is stored, on your device.',
+          'Location: only if you allow it in your browser. It is used to suggest the travel country and to find the nearest supermarket. The coordinates are sent to OpenStreetMap services (see below) but not stored on any server. The place of the last search and the shops found are stored on your device for up to 12 hours to avoid unnecessary new searches.',
           'Product photos: for the photo search, the product category or search term, the country and possibly the shop chain are sent to Open Food Facts.',
           // Nur mit Community-Modul (D-027)
           ...(FEATURES.community

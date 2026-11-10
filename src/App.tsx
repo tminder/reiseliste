@@ -30,7 +30,7 @@ import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
-import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, isInsideSupermarket, formatDistance, getChosenShop, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
+import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
 import { ListStore, forgetList, knownLists, lastList, memberProfiles, setLastList, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
@@ -830,7 +830,7 @@ function ShopBar({
   onSuggest: (s: Shop | null) => void
   onArrived: (s: Shop) => void
 }) {
-  // Nach einem Neuladen den letzten Vorschlag (bis 30 Min.) direkt wieder zeigen
+  // Letztes Ergebnis (bis 12 h) sofort zeigen, geprüft wird im Hintergrund (D-033)
   const [state, setState] = useState<{
     loading?: boolean
     shops?: Shop[]
@@ -844,17 +844,27 @@ function ShopBar({
   }>(() => recentSuggestion() ?? {})
   const [attempt, setAttempt] = useState(0)
 
+  const lastCheck = useRef(0)
+
+  /** manual: „Neu suchen“ – immer neue Anfrage. Sonst still im Hintergrund, neue Anfrage nur nach Ortswechsel. */
   async function detect(manual = false) {
+    lastCheck.current = Date.now()
     if (manual) setAttempt(0)
-    setState((s) => ({ ...s, loading: true, more: false })) // bisherigen Laden während der Suche weiter zeigen
+    // Ohne bisheriges Ergebnis „Suche …“ zeigen, sonst bleibt der bisherige Laden ruhig stehen
+    setState((s) => ({ ...s, loading: manual || !s.shops, more: manual ? s.more : false }))
     try {
-      const result = await findNearbyShops()
+      const result = await findNearbyShops(manual)
       setAttempt(0)
-      setState({ shops: result.shops, inside: result.inside })
+      setState((s) => ({ shops: result.shops, inside: result.inside, more: manual ? s.more : false, dismissed: result.fresh ? false : s.dismissed }))
       const here = isInsideSupermarket(result)
       if (here) onArrived(here)
     } catch (e) {
       const err = e instanceof NearbyError ? e : new NearbyError(t('errShopUnknown'), true)
+      // Hintergrund-Prüfung fehlgeschlagen, aber ein Ergebnis ist da: einfach weiter anzeigen
+      if (!manual && stateRef.current.shops?.length) {
+        setState((s) => ({ ...s, loading: false }))
+        return
+      }
       if (err.retry) {
         const wait = RETRY_S[Math.min(attempt, RETRY_S.length - 1)]
         setAttempt((a) => a + 1)
@@ -870,11 +880,37 @@ function ShopBar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [suggestion?.id])
 
-  // Automatisch suchen, sobald die Liste offen ist und noch kein Laden gewählt/vorgeschlagen ist
-  // (auch wenn noch ein Vorschlag von vorhin da ist – man könnte inzwischen woanders sein)
+  const stateRef = useRef(state)
+  stateRef.current = state
+
+  /** Gewählter Laden: verwerfen, wenn man sich weiter als LEFT_SHOP_M entfernt hat (D-033) */
+  async function checkLeft() {
+    if (!shop || shop.lat == null || shop.lon == null) return
+    lastCheck.current = Date.now()
+    try {
+      const { latitude, longitude, accuracy } = (await getPosition()).coords
+      if (meters(latitude, longitude, shop.lat, shop.lon) > Math.max(LEFT_SHOP_M, accuracy)) onChoose(null)
+    } catch {
+      /* ohne Standort bleibt der Laden */
+    }
+  }
+
+  // Beim Öffnen der Liste still prüfen: ohne gewählten Laden den Vorschlag, mit Laden ob man noch dort ist
   useEffect(() => {
-    if (shop) return
-    void detect()
+    if (shop) void checkLeft()
+    else void detect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shop])
+
+  // Zurück in der App (aus dem Hintergrund): erneut still prüfen, höchstens alle 2 Minuten
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible' || Date.now() - lastCheck.current < 120_000) return
+      if (shop) void checkLeft()
+      else void detect()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shop])
 
