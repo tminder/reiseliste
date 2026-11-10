@@ -139,4 +139,15 @@ create or replace view public.term_suggestions_summary as
 revoke all on public.term_suggestions_summary from anon, authenticated;
 
 -- API-Schema-Cache neu laden, damit neue Tabellen sofort erreichbar sind
+-- Profil auf neuem Gerät übernehmen (D-029): Wer den Link hat, sieht Name und Sprache der Mitglieder
+-- (ohne Kennungen), um sich als bestehendes Mitglied auszuwählen.
+create or replace function public.list_member_profiles(p_list_id uuid)
+returns table(name text, lang text) language sql stable security definer set search_path = public as $$
+  select distinct m.name, m.lang from list_members m
+  where m.list_id = p_list_id and m.name is not null and auth.uid() is not null
+  order by m.name;
+$$;
+revoke all on function public.list_member_profiles(uuid) from public, anon;
+grant execute on function public.list_member_profiles(uuid) to authenticated;
+
 notify pgrst, 'reload schema';

@@ -166,3 +166,9 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Wird die App ohne bestimmtes Ziel geöffnet (Startseite, Home-Bildschirm-Icon), springt sie direkt zur zuletzt geöffneten Liste (`rl:last` im Browser-Speicher). Das passiert nur einmal beim Laden. „Alle Listen“ führt danach normal zur Übersicht. Wurde die Liste vom Gerät entfernt, erscheint die Übersicht. Links auf eine bestimmte Liste haben Vorrang.
 - **Begründung:** Wunsch des Inhabers. Meist arbeitet man auf einer Reise mit genau einer Liste.
 - **Folgen:** Wer die Übersicht sehen will, tippt einmal auf „Alle Listen“. Lädt man die Seite auf der Übersicht neu, landet man wieder in der letzten Liste.
+
+## D-029 · Profil auf neuem Gerät: als bestehendes Mitglied auswählen
+
+- **Entscheidung:** Öffnet man einen Listen-Link auf einem Gerät ohne Profil, zeigt die Einrichtung über dem Formular die Mitglieder der Liste (Name und Sprache). Ein Tipp auf den eigenen Namen übernimmt Name und Sprache. Möglich macht das die Datenbank-Funktion `list_member_profiles` (security definer, nur Name und Sprache, keine Kennungen). Die Mitgliederliste zeigt dieselbe Person (gleicher Name und gleiche Sprache) auf mehreren Geräten nur einmal.
+- **Begründung:** Wunsch des Inhabers. Das Profil liegt nur im Browser, und jede anonyme Anmeldung ist eine neue Kennung. Eine frühere Mitgliedschaft lässt sich deshalb nicht automatisch einem neuen Gerät zuordnen, sondern nur durch Auswahl.
+- **Folgen:** Wer den Link hat, sieht die Namen schon vor dem Beitreten (in der Datenschutzerklärung erwähnt). Die Funktion muss in Supabase angelegt sein (`supabase/schema.sql` erneut ausführen), sonst erscheint einfach das normale Formular. Siehe S-029.

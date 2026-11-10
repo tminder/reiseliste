@@ -111,6 +111,17 @@ export function lastList(): string | null {
   return id && LS.get<string[]>('rl:lists', []).includes(id) ? id : null
 }
 
+/** Name und Sprache der Mitglieder einer Liste, auch ohne Mitgliedschaft (D-029) */
+export async function memberProfiles(listId: string): Promise<Profile[]> {
+  if (!supabase || !navigator.onLine) return []
+  if (!(await ensureAuth())) return []
+  const { data, error } = await supabase.rpc('list_member_profiles', { p_list_id: listId })
+  if (error || !Array.isArray(data)) return []
+  return (data as { name: string; lang: Lang | null }[])
+    .filter((m) => m.name && m.lang)
+    .map((m) => ({ name: m.name, lang: m.lang as Lang }))
+}
+
 export function forgetList(id: string) {
   if (LS.get<string | null>('rl:last', null) === id) localStorage.removeItem('rl:last')
   LS.set('rl:lists', LS.get<string[]>('rl:lists', []).filter((x) => x !== id))
@@ -297,11 +308,15 @@ export class ListStore {
       supabase.from('list_members').select('user_id, name, lang, joined_at').eq('list_id', this.id).order('joined_at'),
       supabase.auth.getUser(),
     ])
-    return (data ?? []).map((m: { user_id: string; name: string | null; lang: Lang | null }) => ({
-      name: m.name,
-      lang: m.lang,
-      me: m.user_id === auth.user?.id,
-    }))
+    // Dieselbe Person auf mehreren Geräten (gleicher Name und Sprache) nur einmal zeigen (D-029)
+    const out: { name: string | null; lang: Lang | null; me: boolean }[] = []
+    for (const m of (data ?? []) as { user_id: string; name: string | null; lang: Lang | null }[]) {
+      const me = m.user_id === auth.user?.id
+      const same = m.name ? out.find((o) => o.name === m.name && o.lang === m.lang) : undefined
+      if (same) same.me ||= me
+      else out.push({ name: m.name, lang: m.lang, me })
+    }
+    return out
   }
 
   stop() {

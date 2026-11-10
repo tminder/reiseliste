@@ -26,7 +26,7 @@ const DE: { title: string; back: string; updated: string; sections: Section[] } 
       h: 'Welche Daten bearbeitet die App und wozu?',
       p: [
         [
-          'Profil: Dein Name und deine Sprache. Gespeichert auf deinem Gerät und – sobald du eine Liste öffnest – bei der Mitgliedschaft der Liste, damit die anderen Mitglieder sehen, wer dabei ist.',
+          'Profil: Dein Name und deine Sprache. Gespeichert auf deinem Gerät und – sobald du eine Liste öffnest – bei der Mitgliedschaft der Liste, damit die anderen Mitglieder sehen, wer dabei ist. Wer den Link zur Liste hat, sieht Namen und Sprachen der Mitglieder schon vor dem Beitreten, um sich auf einem neuen Gerät als bestehendes Mitglied auszuwählen.',
           'Listen und Artikel: Name der Liste, Reiseland, Artikel, Mengen, wer einen Artikel hinzugefügt hat, abgehakt/gelöscht. Damit die Liste mit allen Mitgliedern geteilt und abgeglichen werden kann.',
           'Anonyme Anmeldung: Jedes Gerät erhält eine zufällige Kennung (ohne E-Mail oder Passwort), damit nur Mitglieder eine Liste sehen können.',
           'Standort: Nur wenn du es im Browser erlaubst. Er wird verwendet, um das Reiseland vorzuschlagen und den nächsten Supermarkt zu finden. Die Koordinaten werden dafür an OpenStreetMap-Dienste geschickt (siehe unten), aber von der App nirgends gespeichert. Gespeichert wird nur der gefundene Laden, und zwar auf deinem Gerät.',
@@ -93,7 +93,7 @@ const EN: typeof DE = {
       h: 'What data does the app process and why?',
       p: [
         [
-          'Profile: your name and language. Stored on your device and – once you open a list – with your membership of that list, so other members can see who is in it.',
+          'Profile: your name and language. Stored on your device and – once you open a list – with your membership of that list, so other members can see who is in it. Anyone with the link to the list can see the members’ names and languages before joining, so they can pick themselves as an existing member on a new device.',
           'Lists and items: list name, travel country, items, quantities, who added an item, checked/deleted. So the list can be shared and synced with all members.',
           'Anonymous sign-in: each device gets a random identifier (no email or password) so that only members can see a list.',
           'Location: only if you allow it in your browser. It is used to suggest the travel country and to find the nearest supermarket. The coordinates are sent to OpenStreetMap services (see below) but are not stored anywhere by the app. Only the shop found is stored, on your device.',

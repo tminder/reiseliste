@@ -30,7 +30,7 @@ import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, isInsideSupermarket, formatDistance, getChosenShop, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
-import { ListStore, forgetList, knownLists, lastList, setLastList, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
+import { ListStore, forgetList, knownLists, lastList, memberProfiles, setLastList, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
 // ---------- Routing über den Hash (funktioniert auf GitHub Pages ohne Server) ----------
 
@@ -65,6 +65,7 @@ export default function App() {
   if (!profile)
     return (
       <ProfileSetup
+        listId={route.page === 'list' && 'id' in route ? route.id : undefined}
         onDone={(p) => {
           profileStore.set(p)
           setProfile(p)
@@ -85,8 +86,18 @@ function guessLang(): Lang {
   return LANGS.includes(l) ? l : 'de'
 }
 
-function ProfileSetup({ onDone }: { onDone: (p: Profile) => void }) {
+function ProfileSetup({ onDone, listId }: { onDone: (p: Profile) => void; listId?: string }) {
   const existing = profileStore.get()
+  // Neues Gerät, Link auf eine Liste: bestehende Mitglieder zur Auswahl anbieten (D-029)
+  const [known, setKnown] = useState<Profile[]>([])
+  useEffect(() => {
+    if (!listId || existing) return
+    let alive = true
+    void memberProfiles(listId).then((m) => alive && setKnown(m))
+    return () => {
+      alive = false
+    }
+  }, [listId])
   const [name, setName] = useState(existing?.name ?? '')
   const [lang, setLangState] = useState<Lang>(existing?.lang ?? guessLang())
   const [, rerender] = useState(0)
@@ -101,6 +112,19 @@ function ProfileSetup({ onDone }: { onDone: (p: Profile) => void }) {
         <ShoppingCart size={26} strokeWidth={2.2} /> {t('appName')}
       </h1>
       <p className="lead">{t('tagline')}</p>
+      {known.length > 0 && (
+        <div className="card stack">
+          <p>{t('knownMember')}</p>
+          <div className="chips">
+            {known.map((m) => (
+              <button key={`${m.name}|${m.lang}`} className="chip" onClick={() => onDone(m)}>
+                {m.name} <span className="muted">· {LANG_LABEL[m.lang]}</span>
+              </button>
+            ))}
+          </div>
+          <p className="muted">{t('orNewProfile')}</p>
+        </div>
+      )}
       <form
         className="card stack"
         onSubmit={(e) => {

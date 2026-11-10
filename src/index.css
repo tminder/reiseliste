@@ -664,3 +664,14 @@ button.term-btn {
 .correction-hint {
   margin: 2px 0 0;
 }
+
+/* Bestehendes Mitglied auswählen (D-029) */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chips button.chip {
+  font-size: 1rem;
+  padding: 8px 14px;
+}
