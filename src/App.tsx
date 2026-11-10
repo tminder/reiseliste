@@ -211,6 +211,33 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
         </button>
       </header>
 
+      {lists.length > 0 && (
+        <section className="stack">
+          <h2>{t('yourLists')}</h2>
+          {lists.map((l) => {
+            const c = COUNTRY_BY_CODE.get(l.country)
+            return (
+              <div key={l.id} className="card row-between">
+                <a href={`#/l/${l.id}`} className="list-link">
+                  <span className="flag">{c?.flag}</span> {l.name}
+                </a>
+                <button
+                  className="ghost small"
+                  aria-label={t('removeList')}
+                  onClick={() => {
+                    forgetList(l.id)
+                    go('/')
+                    location.reload()
+                  }}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )
+          })}
+        </section>
+      )}
+
       <form className="card stack" onSubmit={create}>
         <h2>{t('newList')}</h2>
         <label>
@@ -239,32 +266,6 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
         <button className="primary">{t('createList')}</button>
       </form>
 
-      {lists.length > 0 && (
-        <section className="stack">
-          <h2>{t('yourLists')}</h2>
-          {lists.map((l) => {
-            const c = COUNTRY_BY_CODE.get(l.country)
-            return (
-              <div key={l.id} className="card row-between">
-                <a href={`#/l/${l.id}`} className="list-link">
-                  <span className="flag">{c?.flag}</span> {l.name}
-                </a>
-                <button
-                  className="ghost small"
-                  aria-label={t('removeList')}
-                  onClick={() => {
-                    forgetList(l.id)
-                    go('/')
-                    location.reload()
-                  }}
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            )
-          })}
-        </section>
-      )}
       {!supabase && <p className="note">{t('demoMode')}</p>}
       <LocationNotice />
       <footer className="footer">
