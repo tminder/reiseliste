@@ -26,6 +26,7 @@ Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im L
 npm install
 cp .env.example .env   # optional: Supabase-Werte eintragen
 npm run dev
+npm test               # Tests für Wörterbuch und Übersetzung (laufen auch vor jedem Deployment)
 ```
 
 ## Supabase einrichten (für Teilen in Echtzeit)

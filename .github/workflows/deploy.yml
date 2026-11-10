@@ -24,6 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Tests für Wörterbuch und Übersetzung (S-002) – schlagen sie fehl, wird nicht veröffentlicht
+      - run: npm test
       - run: npm run build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/

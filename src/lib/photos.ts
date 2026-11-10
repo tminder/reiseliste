@@ -20,7 +20,7 @@ export interface Photo {
 }
 
 /** Wörterbuch-ID → Kategorie in Open Food Facts. Fehlt ein Eintrag, zeigt die App keinen Foto-Knopf. */
-const OFF_CATEGORY: Record<string, string> = {
+export const OFF_CATEGORY: Record<string, string> = {
   milch: 'en:milks',
   hmilch: 'en:uht-milks',
   laktosefrei: 'en:lactose-free-milks',
