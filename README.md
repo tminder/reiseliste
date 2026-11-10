@@ -8,7 +8,7 @@ Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im L
 
 - Liste pro Reise mit Reiseland (18 Länder, Landessprachen: ES, PT, FR, IT, NL, HR, EL, EN)
 - Eingabe in 9 Sprachen (DE, EN, ES, PT, FR, IT, NL, HR, EL), inklusive Mengen („2 Milch“, „500 g Hackfleisch“)
-- Übersetzung über ein eingebautes Wörterbuch mit 357 Grundbegriffen (inkl. Küchenutensilien), ohne KI und ohne laufende Kosten
+- Übersetzung über ein eingebautes Wörterbuch mit 358 Grundbegriffen (inkl. Küchenutensilien und Schweizer Ausdrücken wie Rahm, Poulet, Rüebli, Chriesi, Schoggi), ohne KI und ohne laufende Kosten
 - Vorschläge aus dem Wörterbuch beim Tippen
 - Sortierung nach Abteilungen, Abhaken, „Ladenansicht“ mit grosser Schrift
 - Zeigen-Karte (Ladenansicht): Landesbegriff antippen → bildschirmfüllend mit „Wo finde ich das?“ zum Vorzeigen beim Personal
