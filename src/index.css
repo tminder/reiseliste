@@ -757,3 +757,9 @@ button.term-btn {
   align-items: center;
   gap: 4px;
 }
+.new-list-toggle {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

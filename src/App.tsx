@@ -178,6 +178,8 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
   const [detected, setDetected] = useState<string | null>(null)
   const touched = useRef(false)
   const lists = knownLists()
+  // „Neue Liste“ ist eingeklappt, sobald es Listen gibt; ohne Listen direkt offen
+  const [showNew, setShowNew] = useState(lists.length === 0)
 
   // Bist du schon im Ausland, wird das aktuelle Land vorgeschlagen (änderbar)
   useEffect(() => {
@@ -238,33 +240,46 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
         </section>
       )}
 
-      <form className="card stack" onSubmit={create}>
-        <h2>{t('newList')}</h2>
-        <label>
-          {t('travelCountry')}
-          <select
-            value={country}
-            onChange={(e) => {
-              touched.current = true
-              setCountry(e.target.value)
-            }}
-          >
-            {COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.flag} {countryName(c.code)} – {LANG_LABEL[c.lang]}
-              </option>
-            ))}
-          </select>
-          {detected && detected === country && <span className="hint-ok">
-              <LocateFixed size={14} /> {t('currentLocation')}
-            </span>}
-        </label>
-        <label>
-          {t('nameOptional')}
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder')} />
-        </label>
-        <button className="primary">{t('createList')}</button>
-      </form>
+      {showNew ? (
+        <form className="card stack" onSubmit={create}>
+          <div className="row-between">
+            <h2>{t('newList')}</h2>
+            {lists.length > 0 && (
+              <button type="button" className="ghost small" aria-label={t('close')} onClick={() => setShowNew(false)}>
+                <X size={16} />
+              </button>
+            )}
+          </div>
+          <label>
+            {t('travelCountry')}
+            <select
+              value={country}
+              onChange={(e) => {
+                touched.current = true
+                setCountry(e.target.value)
+              }}
+            >
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.flag} {countryName(c.code)} – {LANG_LABEL[c.lang]}
+                </option>
+              ))}
+            </select>
+            {detected && detected === country && <span className="hint-ok">
+                <LocateFixed size={14} /> {t('currentLocation')}
+              </span>}
+          </label>
+          <label>
+            {t('nameOptional')}
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder')} />
+          </label>
+          <button className="primary">{t('createList')}</button>
+        </form>
+      ) : (
+        <button className="ghost new-list-toggle" onClick={() => setShowNew(true)}>
+          <Plus size={18} /> {t('newList')}
+        </button>
+      )}
 
       {!supabase && <p className="note">{t('demoMode')}</p>}
       <LocationNotice />
