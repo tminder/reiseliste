@@ -695,11 +695,15 @@ function ItemRow({
         </div>
         <div className="orig">
           {local ? (
-            shopMode || !FEATURES.community ? (
-              // Antippen → Zeigen-Karte fürs Personal (D-032)
+            shopMode ? (
+              // Antippen → Zeigen-Karte fürs Personal, nur in der Ladenansicht (D-032)
               <button className="local term-btn" title={t('showStaff')} onClick={() => setShowCard(true)}>
                 <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
               </button>
+            ) : !FEATURES.community ? (
+              <span className="local">
+                <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
+              </span>
             ) : (
               // Antippen → Begriff korrigieren (gilt für die ganze Liste, wird als Vorschlag gesammelt)
               <button

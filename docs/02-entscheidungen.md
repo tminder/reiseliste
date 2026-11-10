@@ -187,7 +187,7 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-032 · Zeigen-Karte fürs Personal
 
-- **Entscheidung:** Ein Tipp auf den Begriff in der Landessprache (z. B. „🇪🇸 nata“) öffnet eine bildschirmfüllende Karte: oben „Entschuldigung, wo finde ich das?“, gross der Begriff (mit Menge), darunter „Danke!“, alles in der Landessprache, klein der Artikel in der eigenen Sprache. Antippen oder ✕ schliesst sie. Die Sätze stehen in `src/data/phrases.ts` und enthalten den Begriff bewusst nicht, damit Fall und Artikel in keiner Sprache falsch werden. Ist das Community-Modul eingeschaltet, öffnet der Tipp in der Bearbeiten-Ansicht weiterhin „Begriff korrigieren“, in der Ladenansicht die Karte.
+- **Entscheidung:** In der Ladenansicht öffnet ein Tipp auf den Begriff in der Landessprache (z. B. „🇪🇸 nata“) eine bildschirmfüllende Karte. In der Bearbeiten-Ansicht ist der Begriff nicht antippbar (Wunsch des Inhabers). Inhalt der Karte: oben „Entschuldigung, wo finde ich das?“, gross der Begriff (mit Menge), darunter „Danke!“, alles in der Landessprache, klein der Artikel in der eigenen Sprache. Antippen oder ✕ schliesst sie. Die Sätze stehen in `src/data/phrases.ts` und enthalten den Begriff bewusst nicht, damit Fall und Artikel in keiner Sprache falsch werden. Ist das Community-Modul eingeschaltet, öffnet der Tipp in der Bearbeiten-Ansicht „Begriff korrigieren“.
 - **Begründung:** Hilft genau dann, wenn man im Laden nicht weiterkommt, ohne die Sprache sprechen zu müssen.
 - **Folgen:** Die Sätze sind nicht von Muttersprachlern geprüft (S-001).
 
