@@ -1,6 +1,6 @@
 # Offene Fragen
 
-Stand: 2026-11-09 · Nur Fragen, die aktuell offen sind.
+Stand: 2026-11-10 · Nur Fragen, die aktuell offen sind.
 
 | ID | Frage | Warum wichtig |
 | --- | --- | --- |
@@ -8,7 +8,7 @@ Stand: 2026-11-09 · Nur Fragen, die aktuell offen sind.
 | F-002 | Welche Reiseländer und Sprachen kommen zuerst, und welche fehlen noch (z. B. Türkei, Thailand, Polen)? | Bestimmt, für welche Sprachen das Wörterbuch geprüft und erweitert wird. |
 | F-003 | Geschäftsmodell: kostenlos, Reise-Pass als Einmalkauf (3–5 € pro Reise) oder Abo? | Seltene, saisonale Nutzung spricht eher gegen ein Abo. |
 | F-004 | Wann kommt eine KI-Übersetzung für unbekannte Artikel dazu? Mit welchem Anbieter, zu welchen Kosten, und was ist mit dem Datenschutz? | Die Abdeckung des Wörterbuchs ist begrenzt (D-004). |
-| F-005 | Endgültiger Name und Marke? „Reiseliste“ ist ein Arbeitstitel. | Wichtig für Domain, Einträge in den Stores und die Suche danach. |
+| F-005 | Endgültiger Name und Marke? „Reiseliste“ ist ein Arbeitstitel. Vorgabe des Inhabers: Einkaufsliste mit Reisebezug, Sprache zweitrangig, kein „shop“. Gesucht ist ein generischer Grundname mit Zusatz. | Wichtig für Domain, Einträge in den Stores und die Suche danach. |
 | F-006 | Ab wann lohnen sich native Apps (D-009)? Was ist das Kriterium, z. B. eine bestimmte Zahl aktiver Gruppen oder der Bedarf an Geofencing? | Kostet Geld (99 $ pro Jahr für Apple) und Pflegeaufwand. |
 | F-009 | Wie gehen wir mit mehrdeutigen Begriffen um, z. B. „lavavajillas“ (Spülmittel oder Spülmaschine)? Mit einem Zusatzhinweis, einem Foto oder einer genaueren Bezeichnung? | Führt im Laden sonst zum falschen Produkt. |
 | F-010 | Sollen Listen nach der Reise ablaufen oder automatisch gelöscht werden? Wie lange speichern wir Daten? | Datenhaltung, Datenschutz und Kosten bei Supabase. |
