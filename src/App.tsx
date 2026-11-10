@@ -766,8 +766,8 @@ function ItemRow({
           <Camera size={18} />
         </button>
       )}
-      {!item.checked && (
-        // „Ich hole das“ (D-031): antippen übernimmt den Artikel, nochmals antippen gibt ihn frei
+      {shopMode && !item.checked && (
+        // „Ich hole das“ (D-031), nur in der Ladenansicht: antippen übernimmt den Artikel, nochmals antippen gibt ihn frei
         <button
           className={`ghost small ${item.claimedBy === me ? 'active' : ''}`}
           aria-label={item.claimedBy === me ? t('unclaim') : t('claim')}

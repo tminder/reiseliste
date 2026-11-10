@@ -181,8 +181,8 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-031 · Wer holt was: „Ich hole das“
 
-- **Entscheidung:** Jeder offene Artikel hat einen Hand-Knopf (✋). Ein Tipp trägt den eigenen Namen ein (Spalte `items.claimed_by`), alle sehen „🙋 Anna holt das“ bzw. „Du holst das“. Nochmals tippen gibt ihn frei. Tippt jemand anderes, übernimmt er den Artikel. Abgehakte Artikel zeigen den Hinweis nicht mehr.
-- **Begründung:** Verhindert Doppelkäufe, wenn sich die Gruppe im Laden aufteilt. Hauptnutzen einer geteilten Liste.
+- **Entscheidung:** In der Ladenansicht hat jeder offene Artikel einen Hand-Knopf (✋). In der Bearbeiten-Ansicht fehlt er, der Hinweis „holt das“ ist aber in beiden Ansichten sichtbar. Ein Tipp trägt den eigenen Namen ein (Spalte `items.claimed_by`), alle sehen „🙋 Anna holt das“ bzw. „Du holst das“. Nochmals tippen gibt ihn frei. Tippt jemand anderes, übernimmt er den Artikel. Abgehakte Artikel zeigen den Hinweis nicht mehr.
+- **Begründung:** Verhindert Doppelkäufe, wenn sich die Gruppe im Laden aufteilt. Hauptnutzen einer geteilten Liste. Nur in der Ladenansicht, damit die Bearbeiten-Ansicht ruhig bleibt (Wunsch des Inhabers).
 - **Folgen:** `supabase/schema.sql` muss erneut ausgeführt werden (neue Spalte). Bis dahin schlägt nur das Speichern eines „Ich hole das“ fehl, alle anderen Änderungen werden weiter synchronisiert, weil `claimed_by` nur mitgeschickt wird, wenn es gesetzt ist. Der Name wird in der Datenschutzerklärung erwähnt.
 
 ## D-032 · Zeigen-Karte fürs Personal

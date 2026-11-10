@@ -12,7 +12,7 @@ Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im L
 - Vorschläge aus dem Wörterbuch beim Tippen
 - Sortierung nach Abteilungen, Abhaken, „Ladenansicht“ mit grosser Schrift
 - Zeigen-Karte: Landesbegriff antippen → bildschirmfüllend mit „Wo finde ich das?“ zum Vorzeigen beim Personal
-- „Ich hole das“ (✋): zeigt allen, wer welchen Artikel kauft
+- „Ich hole das“ (✋, in der Ladenansicht): zeigt allen, wer welchen Artikel kauft
 - „Erledigte entfernen“ und „Schon mal gekauft“ zum schnellen Wieder-Hinzufügen
 - Produktfotos pro Reiseland aus [Open Food Facts](https://world.openfoodfacts.org) (📷 am Artikel, CC BY-SA)
 - Teilen per Link, QR-Code oder Teilen-Menü des Handys, Live-Sync über Supabase
