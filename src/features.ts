@@ -9,4 +9,6 @@ export const FEATURES = {
    * Code: src/features/community.ts · Datenbank: term_suggestions · Export: .github/workflows/export-suggestions.yml
    */
   community: false,
+  /** „Neu laden“-Link neben Datenschutz: leert den App-Cache (nur während des MVP, D-034) */
+  reloadLink: true,
 } as const

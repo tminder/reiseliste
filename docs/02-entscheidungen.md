@@ -197,3 +197,9 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Rückmeldung des Inhabers: Der Laden wurde neu gesucht, obwohl sich der Standort nicht geändert hatte. Ursache waren die kurze Gültigkeit (5 Minuten) und GPS-Sprünge in Gebäuden (mehr als 50 m). Läden ziehen nicht um, also zählt die Strecke statt der Zeit. Weniger Anfragen schonen auch die öffentlichen Server (S-025).
 - **Folgen:** Ein neuer Laden direkt nebenan erscheint erst nach etwa 300 m Bewegung oder über „Neu suchen“. Auf dem Gerät werden die Stelle der letzten Suche und die Lage der gefundenen Läden gespeichert (in der Datenschutzerklärung erwähnt).
 
+
+## D-034 · „Neu laden“-Link während des MVP
+
+- **Entscheidung:** Neben „Datenschutz & Kontakt“ (Fusszeile) und im Menu ☰ der Liste gibt es „Neu laden“. Der Link meldet den Service Worker ab, leert den App-Cache und lädt die Seite frisch vom Server. Listen, Profil und noch nicht gesendete Änderungen (localStorage) bleiben erhalten. Geschaltet über `FEATURES.reloadLink` in `src/features.ts`.
+- **Begründung:** Wunsch des Inhabers: Während des MVP ändert sich die App oft, und eine installierte PWA zeigt neue Versionen sonst manchmal erst verzögert.
+- **Folgen:** Vor einem öffentlichen Start `reloadLink` auf `false` setzen.

@@ -10,6 +10,7 @@ import {
   Check,
   Hand,
   Lightbulb,
+  RefreshCw,
   RotateCcw,
   List,
   LocateFixed,
@@ -29,6 +30,7 @@ import { categoryLabel, countryName, setUiLang, t } from './i18n'
 import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
+import { hardReload } from './lib/hardReload'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
@@ -155,6 +157,14 @@ function ProfileSetup({ onDone, listId }: { onDone: (p: Profile) => void; listId
       </form>
       <footer className="footer">
         <a href="#/datenschutz">{t('privacy')}</a>
+        {FEATURES.reloadLink && (
+          <>
+            {' · '}
+            <a href="#" onClick={(e) => (e.preventDefault(), void hardReload())}>
+              {t('reload')}
+            </a>
+          </>
+        )}
       </footer>
     </main>
   )
@@ -259,6 +269,14 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
       <LocationNotice />
       <footer className="footer">
         <a href="#/datenschutz">{t('privacy')}</a>
+        {FEATURES.reloadLink && (
+          <>
+            {' · '}
+            <a href="#" onClick={(e) => (e.preventDefault(), void hardReload())}>
+              {t('reload')}
+            </a>
+          </>
+        )}
       </footer>
     </main>
   )
@@ -489,6 +507,11 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                 <button role="menuitem" onClick={() => go('/datenschutz')}>
                   <Shield size={18} /> {t('privacy')}
                 </button>
+                {FEATURES.reloadLink && (
+                  <button role="menuitem" onClick={() => void hardReload()}>
+                    <RefreshCw size={18} /> {t('reload')}
+                  </button>
+                )}
                 <button
                   role="menuitem"
                   className="danger"

@@ -4,6 +4,13 @@ import './index.css'
 import App from './App.tsx'
 import { registerSW } from 'virtual:pwa-register'
 
+// Nach „Neu laden“ (D-034) den Zeitstempel wieder aus der Adresse entfernen
+if (new URLSearchParams(location.search).has('r')) {
+  const url = new URL(location.href)
+  url.searchParams.delete('r')
+  history.replaceState(null, '', url.toString())
+}
+
 // Neue App-Versionen automatisch laden: Bei autoUpdate lädt die Seite neu, sobald eine neue Version bereitsteht.
 // Geprüft wird beim Start, jede Stunde und immer wenn die App wieder in den Vordergrund kommt.
 registerSW({
