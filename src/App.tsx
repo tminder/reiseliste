@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEvent } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEvent } from 'react'
 import QRCode from 'qrcode'
 import {
   ArrowLeft,
@@ -12,6 +12,7 @@ import {
   Hand,
   Lightbulb,
   RotateCcw,
+  ScanLine,
   Link2,
   List,
   LocateFixed,
@@ -319,9 +320,12 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
   )
 }
 
-/** Liste über einen eingefügten Link öffnen – nötig in der iPhone-App vom Home-Bildschirm (D-037) */
+const QrScanner = lazy(() => import('./QrScanner'))
+
+/** Liste über einen eingefügten Link (D-037) oder per QR-Code (D-038) öffnen */
 function OpenByLink() {
   const [open, setOpen] = useState(false)
+  const [scan, setScan] = useState(false)
   const [text, setText] = useState('')
   const [error, setError] = useState(false)
   const openId = (value: string) => {
@@ -329,11 +333,22 @@ function OpenByLink() {
     if (id) go(`/l/${id}`)
     else setError(true)
   }
+  const scanner = scan && (
+    <Suspense fallback={null}>
+      <QrScanner onFound={(id) => go(`/l/${id}`)} onClose={() => setScan(false)} />
+    </Suspense>
+  )
   if (!open)
     return (
-      <button className="ghost new-list-toggle" onClick={() => setOpen(true)}>
-        <Link2 size={18} /> {t('openByLink')}
-      </button>
+      <div className="row-gap">
+        <button className="ghost new-list-toggle" onClick={() => setOpen(true)}>
+          <Link2 size={18} /> {t('openByLink')}
+        </button>
+        <button className="ghost new-list-toggle" onClick={() => setScan(true)}>
+          <ScanLine size={18} /> {t('scanQr')}
+        </button>
+        {scanner}
+      </div>
     )
   return (
     <form
@@ -381,7 +396,11 @@ function OpenByLink() {
             <ClipboardPaste size={16} /> {t('paste')}
           </button>
         )}
+        <button type="button" className="ghost" onClick={() => setScan(true)}>
+          <ScanLine size={16} /> {t('scanQr')}
+        </button>
       </div>
+      {scanner}
     </form>
   )
 }

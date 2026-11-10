@@ -804,3 +804,46 @@ button.danger-btn {
 .ios-hint p {
   margin: 0 0 8px;
 }
+
+/* QR-Scanner (D-038) */
+.scanner {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scanner-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.scanner-frame {
+  position: relative;
+  width: min(70vw, 280px);
+  aspect-ratio: 1;
+  border: 3px solid #fff;
+  border-radius: 20px;
+  box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.45);
+}
+.scanner-text {
+  position: absolute;
+  bottom: calc(40px + env(safe-area-inset-bottom));
+  left: 20px;
+  right: 20px;
+  text-align: center;
+  color: #fff;
+  font-size: 1.05rem;
+  margin: 0;
+}
+.scanner-close {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 12px;
+  color: #fff;
+  background: rgb(0 0 0 / 0.4);
+}

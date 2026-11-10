@@ -213,6 +213,13 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-037 · Listen in der iPhone-App vom Home-Bildschirm öffnen
 
-- **Entscheidung:** Auf der Startseite gibt es „Liste mit Link öffnen“: Link (oder Text mit Link) einfügen, auf Wunsch mit „Einfügen“ aus der Zwischenablage, und die Liste öffnet sich. Wird ein Listen-Link auf dem iPhone in Safari geöffnet (nicht in der Home-Bildschirm-App), erklärt ein Hinweis über der Liste den Weg und bietet „Link kopieren“ an. Er lässt sich mit „Nicht mehr zeigen“ ausblenden. Auch das Teilen-Fenster nennt den Weg.
+- **Entscheidung:** Auf der Startseite gibt es „Link einfügen“ (daneben „QR-Code scannen“, D-038): Link (oder Text mit Link) einfügen, auf Wunsch mit „Einfügen“ aus der Zwischenablage, und die Liste öffnet sich. Wird ein Listen-Link auf dem iPhone in Safari geöffnet (nicht in der Home-Bildschirm-App), erklärt ein Hinweis über der Liste den Weg und bietet „Link kopieren“ an. Er lässt sich mit „Nicht mehr zeigen“ ausblenden. Auch das Teilen-Fenster nennt den Weg.
 - **Begründung:** Rückmeldung des Inhabers: Haben beide die Web-App auf dem Home-Bildschirm, klappt das Teilen nicht. iOS öffnet Links immer in Safari, und Safari und die Home-Bildschirm-App haben getrennten Speicher.
 - **Folgen:** Ein Schritt mehr für iPhone-Nutzer (Link kopieren, in der App einfügen). Eine echte Lösung wären native Apps mit Universal Links (D-009, F-006).
+
+## D-038 · QR-Code einer Liste in der App scannen
+
+- **Entscheidung:** Neben „Link einfügen“ steht „QR-Code scannen“. Es öffnet die Rückkamera bildschirmfüllend mit Rahmen. Erkannt wird mit der Bibliothek jsQR direkt im Browser (etwa 5 Bilder pro Sekunde, verkleinert). Sobald ein QR-Code mit Listen-Link erkannt ist, öffnet sich die Liste. Andere QR-Codes ergeben einen Hinweis. Der Scanner wird erst beim Öffnen geladen (eigene Datei, etwa 50 kB komprimiert).
+- **Begründung:** Wunsch des Inhabers. Auf dem iPhone öffnet die Kamera-App QR-Codes in Safari, nicht in der Home-Bildschirm-App (D-037). Mit dem Scanner in der App landet die Liste direkt dort.
+- **Folgen:** Kamerazugriff nur auf Knopfdruck und mit Erlaubnis, Bilder werden weder gespeichert noch gesendet (in der Datenschutzerklärung erwähnt). Auf einem echten iPhone noch nicht getestet (S-031).
+

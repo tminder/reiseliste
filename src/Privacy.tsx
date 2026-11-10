@@ -30,6 +30,7 @@ const DE: { title: string; back: string; updated: string; sections: Section[] } 
           'Listen und Artikel: Name der Liste, Reiseland, Artikel, Mengen, wer einen Artikel hinzugefügt hat, wer ihn holt, abgehakt/gelöscht. Damit die Liste mit allen Mitgliedern geteilt und abgeglichen werden kann.',
           'Anonyme Anmeldung: Jedes Gerät erhält eine zufällige Kennung (ohne E-Mail oder Passwort), damit nur Mitglieder eine Liste sehen können.',
           'Standort: Nur wenn du es im Browser erlaubst. Er wird verwendet, um das Reiseland vorzuschlagen und den nächsten Supermarkt zu finden. Die Koordinaten werden dafür an OpenStreetMap-Dienste geschickt (siehe unten), aber nicht auf einem Server gespeichert. Auf deinem Gerät werden die Stelle der letzten Suche und die gefundenen Läden bis zu 12 Stunden gespeichert, damit nicht unnötig neu gesucht wird.',
+          'Kamera: Nur zum Scannen des QR-Codes einer Liste und nur mit deiner Erlaubnis. Das Bild wird ausschliesslich auf deinem Gerät ausgewertet, nicht gespeichert und nicht gesendet.',
           'Produktfotos: Für die Fotosuche werden Produktkategorie bzw. Suchbegriff, Land und ggf. die Ladenkette an Open Food Facts geschickt.',
           // Nur mit Community-Modul (D-027)
           ...(FEATURES.community
@@ -97,6 +98,7 @@ const EN: typeof DE = {
           'Lists and items: list name, travel country, items, quantities, who added an item, who is getting it, checked/deleted. So the list can be shared and synced with all members.',
           'Anonymous sign-in: each device gets a random identifier (no email or password) so that only members can see a list.',
           'Location: only if you allow it in your browser. It is used to suggest the travel country and to find the nearest supermarket. The coordinates are sent to OpenStreetMap services (see below) but not stored on any server. The place of the last search and the shops found are stored on your device for up to 12 hours to avoid unnecessary new searches.',
+          'Camera: only to scan a list’s QR code and only with your permission. The image is analysed on your device only, never stored or sent.',
           'Product photos: for the photo search, the product category or search term, the country and possibly the shop chain are sent to Open Food Facts.',
           // Nur mit Community-Modul (D-027)
           ...(FEATURES.community
