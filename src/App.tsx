@@ -13,7 +13,6 @@ import {
   Lightbulb,
   RotateCcw,
   ScanLine,
-  Link2,
   List,
   LocateFixed,
   MapPin,
@@ -235,16 +234,21 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
         <button className={`ghost ${panel === 'new' ? 'active' : ''}`} onClick={() => setPanel(panel === 'new' ? null : 'new')}>
           <Plus size={18} /> {t('newList')}
         </button>
-        <button className={`ghost ${panel === 'link' ? 'active' : ''}`} onClick={() => setPanel(panel === 'link' ? null : 'link')}>
-          <Link2 size={18} /> {t('openByLink')}
-        </button>
-        <button className="ghost" onClick={() => setScan(true)}>
+        {/* Beitreten: primär per QR-Code, Link einfügen als Alternative im Scanner (D-038) */}
+        <button className={`ghost ${panel === 'link' ? 'active' : ''}`} onClick={() => setScan(true)}>
           <ScanLine size={18} /> {t('scanQr')}
         </button>
       </div>
       {scan && (
         <Suspense fallback={null}>
-          <QrScanner onFound={(id) => go(`/l/${id}`)} onClose={() => setScan(false)} />
+          <QrScanner
+            onFound={(id) => go(`/l/${id}`)}
+            onClose={() => setScan(false)}
+            onPasteLink={() => {
+              setScan(false)
+              setPanel('link')
+            }}
+          />
         </Suspense>
       )}
       {panel === 'link' && <OpenByLink onClose={() => setPanel(null)} />}

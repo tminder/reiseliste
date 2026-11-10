@@ -15,7 +15,7 @@ Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im L
 - „Ich hole das“ (✋, in der Ladenansicht): zeigt allen, wer welchen Artikel kauft
 - „Erledigte entfernen“ und „Schon mal gekauft“ zum schnellen Wieder-Hinzufügen
 - Produktfotos pro Reiseland aus [Open Food Facts](https://world.openfoodfacts.org) (📷 am Artikel, CC BY-SA)
-- Teilen per Link, QR-Code oder Teilen-Menü des Handys, Live-Sync über Supabase. „Link einfügen“ und „QR-Code scannen“ für die iPhone-App vom Home-Bildschirm
+- Teilen per Link, QR-Code oder Teilen-Menü des Handys, Live-Sync über Supabase. „QR-Code scannen“ (oder Link einfügen) für die iPhone-App vom Home-Bildschirm
 - Offline nutzbar (PWA). Änderungen werden synchronisiert, sobald wieder Netz da ist
 - Oberfläche auf Deutsch und Englisch (folgt der Sprache im Profil, Texte in `src/i18n.ts`)
 - Ohne Supabase läuft die App im **Demo-Modus** nur auf dem Gerät

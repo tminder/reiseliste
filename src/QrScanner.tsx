@@ -2,11 +2,20 @@
 // nichts wird gespeichert oder gesendet. Wird erst beim Öffnen geladen (jsQR ist ~250 kB).
 import { useEffect, useRef, useState } from 'react'
 import jsQR from 'jsqr'
-import { X } from 'lucide-react'
+import { Link2, X } from 'lucide-react'
 import { t } from './i18n'
 import { listIdFrom } from './lib/links'
 
-export default function QrScanner({ onFound, onClose }: { onFound: (listId: string) => void; onClose: () => void }) {
+export default function QrScanner({
+  onFound,
+  onClose,
+  onPasteLink,
+}: {
+  onFound: (listId: string) => void
+  onClose: () => void
+  /** Alternative: Link einfügen statt scannen */
+  onPasteLink: () => void
+}) {
   const video = useRef<HTMLVideoElement>(null)
   const [error, setError] = useState<string | null>(null)
   const [wrong, setWrong] = useState(false)
@@ -63,7 +72,12 @@ export default function QrScanner({ onFound, onClose }: { onFound: (listId: stri
     <div className="scanner" role="dialog" aria-modal="true">
       <video ref={video} playsInline muted className="scanner-video" />
       <div className="scanner-frame" aria-hidden="true" />
-      <p className="scanner-text">{error ?? (wrong ? t('qrWrong') : t('qrScanHint'))}</p>
+      <div className="scanner-bottom">
+        <p className="scanner-text">{error ?? (wrong ? t('qrWrong') : t('qrScanHint'))}</p>
+        <button className="scanner-alt" onClick={onPasteLink}>
+          <Link2 size={18} /> {t('pasteLinkInstead')}
+        </button>
+      </div>
       <button className="ghost scanner-close" onClick={onClose} aria-label={t('close')}>
         <X size={28} />
       </button>
