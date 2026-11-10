@@ -31,6 +31,8 @@ export interface Item {
 export interface Profile {
   name: string
   lang: Lang
+  /** Wohnland (Code aus COUNTRIES) oder null = anderes Land. Fehlt bei älteren Profilen (D-041) */
+  home?: string | null
 }
 
 export type SyncState = 'local-only' | 'offline' | 'syncing' | 'synced' | 'error'

@@ -27,7 +27,7 @@ import {
   X,
 } from 'lucide-react'
 import { CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
-import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
+import { COUNTRIES, COUNTRY_BY_CODE, guessHome, LANG_LABEL } from './data/countries'
 import { categoryLabel, countryName, setUiLang, t, uiLang } from './i18n'
 import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
@@ -107,6 +107,8 @@ function ProfileSetup({ onDone, listId }: { onDone: (p: Profile) => void; listId
   }, [listId])
   const [name, setName] = useState(existing?.name ?? '')
   const [lang, setLangState] = useState<Lang>(existing?.lang ?? guessLang())
+  // Wohnland = „zu Hause“ (D-041); Vorschlag aus Browsersprache, änderbar
+  const [home, setHome] = useState<string>(() => (existing?.home !== undefined ? existing.home : guessHome(existing?.lang ?? guessLang())) ?? '')
   const [, rerender] = useState(0)
   const setLang = (l: Lang) => {
     setUiLang(l) // Oberfläche wechselt sofort mit
@@ -124,7 +126,7 @@ function ProfileSetup({ onDone, listId }: { onDone: (p: Profile) => void; listId
           <p>{t('knownMember')}</p>
           <div className="chips">
             {known.map((m) => (
-              <button key={`${m.name}|${m.lang}`} className="chip" onClick={() => onDone(m)}>
+              <button key={`${m.name}|${m.lang}`} className="chip" onClick={() => onDone({ ...m, home: guessHome(m.lang) })}>
                 {m.name} <span className="muted">· {LANG_LABEL[m.lang]}</span>
               </button>
             ))}
@@ -136,7 +138,7 @@ function ProfileSetup({ onDone, listId }: { onDone: (p: Profile) => void; listId
         className="card stack"
         onSubmit={(e) => {
           e.preventDefault()
-          if (name.trim()) onDone({ name: name.trim(), lang })
+          if (name.trim()) onDone({ name: name.trim(), lang, home: home || null })
         }}
       >
         <label>
@@ -153,6 +155,20 @@ function ProfileSetup({ onDone, listId }: { onDone: (p: Profile) => void; listId
             ))}
           </select>
         </label>
+        <label>
+          {t('homeCountry')}
+          <select value={home} onChange={(e) => setHome(e.target.value)}>
+            {[...COUNTRIES]
+              .sort((a, b) => countryName(a.code).localeCompare(countryName(b.code)))
+              .map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.flag} {countryName(c.code)}
+                </option>
+              ))}
+            <option value="">{t('homeOther')}</option>
+          </select>
+          <span className="muted small-text">{t('homeHint')}</span>
+        </label>
         <button className="primary" disabled={!name.trim()}>
           {t('letsGo')}
         </button>
@@ -168,7 +184,9 @@ function ProfileSetup({ onDone, listId }: { onDone: (p: Profile) => void; listId
 
 function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () => void }) {
   const [name, setName] = useState('')
-  const [country, setCountry] = useState('ES')
+  const home = profile.home !== undefined ? profile.home : guessHome(profile.lang)
+  // Vorauswahl: nie das eigene Wohnland (D-041)
+  const [country, setCountry] = useState(home === 'ES' ? 'IT' : 'ES')
   const [detected, setDetected] = useState<string | null>(null)
   const touched = useRef(false)
   const [lists, setLists] = useState(knownLists)
@@ -202,7 +220,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
   useEffect(() => {
     let alive = true
     void detectCountry().then((code) => {
-      if (!alive || !code) return
+      if (!alive || !code || code === home) return // zu Hause: kein Vorschlag
       setDetected(code)
       if (!touched.current) setCountry(code)
     })
@@ -226,7 +244,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
           <ShoppingCart size={26} strokeWidth={2.2} /> {t('appName')}
         </h1>
         <button className="ghost small" onClick={onEditProfile}>
-          {profile.name} · {LANG_LABEL[profile.lang]}
+          {profile.name} · {home ? `${COUNTRY_BY_CODE.get(home)?.flag ?? ''} ` : ''}{LANG_LABEL[profile.lang]}
         </button>
       </header>
 
@@ -569,14 +587,15 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   const list = store.list
 
   // Reiseland automatisch anpassen, wenn man in einem anderen unterstützten Land ist (D-040).
-  // Zu Hause (z. B. Deutschschweiz, Deutschland) liefert detectCountry null → keine Änderung.
+  // Zu Hause (Wohnland aus dem Profil, D-041) oder in einem nicht unterstützten Land: keine Änderung.
+  const home = profile.home !== undefined ? profile.home : guessHome(profile.lang)
   const [countryMoved, setCountryMoved] = useState<{ from: string; to: string } | null>(null)
   const listCountry = list?.country
   useEffect(() => {
     if (!listCountry) return
     let alive = true
     void detectCountry(30 * 60 * 1000).then((code) => {
-      if (!alive || !code || code === listCountry || !COUNTRY_BY_CODE.has(code)) return
+      if (!alive || !code || code === listCountry || code === home || !COUNTRY_BY_CODE.has(code)) return
       if (countryChangeDeclined(id, code)) return
       void store.updateList({ country: code })
       setCountryMoved({ from: listCountry, to: code })

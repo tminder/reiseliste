@@ -8,6 +8,9 @@ const de = {
   tagline: 'Du schreibst in deiner Sprache – im Laden siehst du jeden Artikel in der Landessprache.',
   yourName: 'Dein Name',
   namePlaceholder: 'z. B. Tobias',
+  homeCountry: 'Wo wohnst du?',
+  homeOther: 'Anderes Land',
+  homeHint: 'Zu Hause wechselt die App das Reiseland einer Liste nicht automatisch.',
   whichLanguage: 'In welcher Sprache schreibst du?',
   letsGo: "Los geht's",
   showStaff: 'Dem Personal zeigen',
@@ -142,6 +145,7 @@ const de = {
   regionWallonia: 'Wallonie',
   regionRomandy: 'Romandie',
   regionTicino: 'Tessin',
+  regionGermanSwiss: 'Deutschschweiz',
   correctTerm: 'Begriff korrigieren',
   correctionHint: 'Gilt sofort für alle in dieser Liste und hilft, das Wörterbuch zu verbessern.',
   privacy: 'Datenschutz & Kontakt',
@@ -167,6 +171,9 @@ const en: Record<MessageKey, string> = {
   tagline: 'Write in your language – in the shop you see every item in the local language.',
   yourName: 'Your name',
   namePlaceholder: 'e.g. Anna',
+  homeCountry: 'Where do you live?',
+  homeOther: 'Other country',
+  homeHint: 'At home the app does not change a list’s travel country automatically.',
   whichLanguage: 'Which language do you write in?',
   letsGo: "Let's go",
   showStaff: 'Show to staff',
@@ -299,6 +306,7 @@ const en: Record<MessageKey, string> = {
   regionWallonia: 'Wallonia',
   regionRomandy: 'Romandy',
   regionTicino: 'Ticino',
+  regionGermanSwiss: 'German-speaking',
   correctTerm: 'Correct term',
   correctionHint: 'Applies right away for everyone in this list and helps improve the dictionary.',
   privacy: 'Privacy & contact',
@@ -355,6 +363,7 @@ export function countryName(code: string): string {
     'BE-FR': 'regionWallonia',
     'CH-FR': 'regionRomandy',
     'CH-IT': 'regionTicino',
+    'CH-DE': 'regionGermanSwiss',
   }
   return region && suffix[code] ? `${name} (${t(suffix[code])})` : name
 }

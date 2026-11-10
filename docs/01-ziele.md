@@ -1,6 +1,6 @@
 # Ziele
 
-Stand: 2026-11-08
+Stand: 2026-11-10
 
 **Kurz:** Eine geteilte Einkaufsliste für Reisegruppen. Jeder schreibt in seiner Sprache, und im Laden steht jeder Artikel in der Landessprache, so wie er im Regal heisst.
 
@@ -34,3 +34,5 @@ Lernen, ob Reisegruppen eine Liste mit Landessprache lieber nutzen als Einzelüb
 1. Paare, Familien und Freundesgruppen in Ferienwohnungen, oft mit gemischten Sprachen
 2. Camper und Roadtrip-Reisende, die häufig das Land wechseln und oft kein Netz haben
 3. Expats in den ersten Monaten im neuen Land
+
+Die App ist international: Wohnland und Sprache wählt jeder im Profil, jedes unterstützte Land kann Wohn- oder Reiseland sein (D-041).

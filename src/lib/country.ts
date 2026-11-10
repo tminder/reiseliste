@@ -36,7 +36,7 @@ function toAppCode(iso: string, state: string): string | null {
   if (iso === 'ch') {
     if (/ticino|tessin/.test(s)) return 'CH-IT'
     if (ROMANDIE.some((c) => s.includes(c))) return 'CH-FR'
-    return null // Deutschschweiz: Landessprache Deutsch – kein Reiseland in dieser App
+    return 'CH-DE'
   }
   const code = iso.toUpperCase()
   return COUNTRY_BY_CODE.has(code) ? code : null
