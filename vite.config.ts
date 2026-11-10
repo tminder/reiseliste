@@ -26,8 +26,8 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: 'Reiseliste – Einkaufsliste in der Landessprache',
-        short_name: 'Reiseliste',
+        name: 'Proviant – Einkaufsliste für Reisen',
+        short_name: 'Proviant',
         description: 'Geteilte Einkaufsliste, die jeden Artikel in der Landessprache zeigt.',
         theme_color: '#0f766e',
         background_color: '#f8fafc',

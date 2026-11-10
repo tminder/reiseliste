@@ -1,4 +1,4 @@
-# 🛒 Reiseliste
+# 🛒 Proviant
 
 Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im Laden steht jeder Artikel zusätzlich in der **Landessprache des Reiselands**.
 

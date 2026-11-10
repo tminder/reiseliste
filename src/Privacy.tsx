@@ -18,7 +18,7 @@ const DE: { title: string; back: string; updated: string; sections: Section[] } 
     {
       h: 'Wer ist verantwortlich?',
       p: [
-        `Tobias Minder, Schweiz, E-Mail: ${CONTACT}. Die Reiseliste ist ein privates, nicht kommerzielles Projekt in der Testphase. Es gibt keine Werbung, kein Tracking und keine Analyse-Tools.`,
+        `Tobias Minder, Schweiz, E-Mail: ${CONTACT}. Proviant ist ein privates, nicht kommerzielles Projekt in der Testphase. Es gibt keine Werbung, kein Tracking und keine Analyse-Tools.`,
       ],
     },
     {
@@ -82,7 +82,7 @@ const EN: typeof DE = {
     {
       h: 'Who is responsible?',
       p: [
-        `Tobias Minder, Switzerland, email: ${CONTACT}. Travel List is a private, non-commercial project in a test phase. There are no ads, no tracking and no analytics tools.`,
+        `Tobias Minder, Switzerland, email: ${CONTACT}. Proviant is a private, non-commercial project in a test phase. There are no ads, no tracking and no analytics tools.`,
       ],
     },
     {

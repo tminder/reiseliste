@@ -4,7 +4,7 @@
 import type { Category, Lang } from './data/dictionary'
 
 const de = {
-  appName: 'Reiseliste',
+  appName: 'Proviant',
   tagline: 'Du schreibst in deiner Sprache – im Laden siehst du jeden Artikel in der Landessprache.',
   yourName: 'Dein Name',
   namePlaceholder: 'z. B. Tobias',
@@ -127,7 +127,7 @@ const de = {
 export type MessageKey = keyof typeof de
 
 const en: Record<MessageKey, string> = {
-  appName: 'Travel List',
+  appName: 'Proviant',
   tagline: 'Write in your language – in the shop you see every item in the local language.',
   yourName: 'Your name',
   namePlaceholder: 'e.g. Anna',

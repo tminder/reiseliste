@@ -1,6 +1,6 @@
 # Entscheidungen
 
-Stand: 2026-11-09 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
+Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
 
 ---
 
@@ -141,3 +141,9 @@ Stand: 2026-11-09 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Ein Tipp auf den Begriff in der Landessprache, z. B. „🇪🇸 nata“, öffnet „Begriff korrigieren“. Das geht auch bei Artikeln ohne Übersetzung. Die Korrektur gilt sofort für alle Artikel mit demselben Wörterbuch-Eintrag in dieser Liste, auch für später hinzugefügte. Damit sehen sie alle Mitglieder. Zusätzlich wird sie als Vorschlag in der Supabase-Tabelle `term_suggestions` gespeichert. Nutzer dürfen dort nur eintragen, nicht lesen. Offline bleibt der Vorschlag auf dem Gerät und wird beim nächsten Abgleich gesendet. Ins Wörterbuch kommen Vorschläge nur nach Prüfung durch den Inhaber, nie automatisch. Die Zusammenfassung `term_suggestions_summary` (gruppiert nach Begriff und Anzahl verschiedener Nutzer, ohne Kennungen) exportiert ein GitHub-Actions-Job montags und auf Knopfdruck nach `docs/korrekturvorschlaege.csv` im Repo. So kann Claude sie lesen, ohne Zugang zu Supabase. Der Job braucht das GitHub-Secret `SUPABASE_SECRET_KEY` und sendet es nur im `apikey`-Header. Gute Vorschläge übernimmt Claude auf Zuruf („übernimm die Korrekturen“) in `src/data/dictionary.ts`. Alternativ lässt sich im Supabase SQL Editor `select * from term_suggestions_summary;` ausführen.
 - **Begründung:** Entscheidung des Inhabers. Kein Risiko durch Spam oder Manipulation, und die Nutzer profitieren trotzdem sofort in ihrer Liste.
 - **Folgen:** Das Wörterbuch wird nur besser, wenn regelmässig ausgewertet wird. Die Zusammenfassung ist öffentlich, weil das Repo öffentlich ist (nur Begriffe, keine Kennungen). Die Vorschläge und der Export sind in der Datenschutzerklärung aufgeführt (D-023).
+
+## D-025 · Die App heisst „Proviant“
+
+- **Entscheidung:** Der Name der App ist „Proviant“ (Oberfläche DE und EN, Manifest, Seitentitel, Datenschutz, README). Untertitel im Manifest: „Einkaufsliste für Reisen“. Der Markenname bekommt später einen Zusatz (F-005). Repo `tminder/reiseliste`, URL und interne Schlüssel (`rl:`) bleiben unverändert.
+- **Begründung:** Entscheidung des Inhabers. Positionierung als Einkaufsliste mit Reisebezug, Sprache zweitrangig, ohne „shop“. „Proviant“ verstehen viele Sprachen (DE, SV, DA, NO, NL „proviand“, EN/FR „provisions“). „Travel List“ wäre auf Englisch als Packliste missverstanden worden.
+- **Folgen:** „Proviant“ allein ist generisch und schon belegt, deshalb nicht als Marke schützbar (F-005). Bereits installierte PWAs zeigen den neuen Namen erst nach einem Update bzw. neuem Hinzufügen zum Home-Bildschirm.
