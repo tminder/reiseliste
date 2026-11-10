@@ -1,7 +1,6 @@
 import { t } from '../i18n'
 // Nächstgelegenen Supermarkt erkennen: Standort des Geräts + OpenStreetMap (Overpass API).
 // Der Standort wird nur mit Erlaubnis abgefragt und an die Overpass API geschickt. Auf dem Gerät bleiben die Stelle der letzten Suche (12 h) und der gewählte Laden (D-033).
-// an die Overpass API geschickt und nirgends gespeichert. Gespeichert wird nur der gewählte Laden, lokal pro Liste.
 
 export interface Shop {
   id: string
