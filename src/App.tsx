@@ -95,16 +95,17 @@ function guessLang(): Lang {
 
 function ProfileSetup({ onDone, listId }: { onDone: (p: Profile) => void; listId?: string }) {
   const existing = profileStore.get()
+  const hasProfile = !!existing
   // Neues Gerät, Link auf eine Liste: bestehende Mitglieder zur Auswahl anbieten (D-029)
   const [known, setKnown] = useState<Profile[]>([])
   useEffect(() => {
-    if (!listId || existing) return
+    if (!listId || hasProfile) return
     let alive = true
     void memberProfiles(listId).then((m) => alive && setKnown(m))
     return () => {
       alive = false
     }
-  }, [listId])
+  }, [listId, hasProfile])
   const [name, setName] = useState(existing?.name ?? '')
   const [lang, setLangState] = useState<Lang>(existing?.lang ?? guessLang())
   // Wohnland = „zu Hause“ (D-041); Vorschlag aus Browsersprache, änderbar
@@ -227,7 +228,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
     return () => {
       alive = false
     }
-  }, [])
+  }, [home])
 
   function create(e: FormEvent) {
     e.preventDefault()
@@ -510,7 +511,7 @@ function useStore(id: string, profile: Profile) {
   useEffect(() => {
     void store.start(profile)
     return () => store.stop()
-  }, [store])
+  }, [store, profile])
   const version = useSyncExternalStore(
     (cb) => store.subscribe(cb),
     () => `${store.items.length}|${store.items.map((i) => i.updatedAt).join()}|${store.list?.updatedAt}|${store.sync}|${store.notFound}`,

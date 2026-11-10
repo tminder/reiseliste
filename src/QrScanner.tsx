@@ -17,7 +17,7 @@ export default function QrScanner({
   onPasteLink: () => void
 }) {
   const video = useRef<HTMLVideoElement>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(() => (typeof navigator.mediaDevices?.getUserMedia === 'function' ? null : t('cameraUnavailable')))
   const [wrong, setWrong] = useState(false)
 
   useEffect(() => {
@@ -59,7 +59,6 @@ export default function QrScanner({
         raf = requestAnimationFrame(tick)
       })
       .catch(() => setError(t('cameraDenied')))
-    if (!navigator.mediaDevices?.getUserMedia) setError(t('cameraUnavailable'))
 
     return () => {
       done = true

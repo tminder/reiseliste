@@ -24,6 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Code-Prüfung (S-013): Fehler stoppen die Veröffentlichung, Warnungen nicht
+      - run: npm run lint
       # Tests für Wörterbuch und Übersetzung (S-002) – schlagen sie fehl, wird nicht veröffentlicht
       - run: npm test
       - run: npm run build
