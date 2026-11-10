@@ -1,12 +1,24 @@
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
+
+// Kennung dieses Builds (D-035): steckt im Code und in version.json. Weichen beide ab, lädt die App neu.
+const BUILD_ID = process.env.GITHUB_SHA?.slice(0, 12) || new Date().toISOString()
+
+const versionFile = (): Plugin => ({
+  name: 'version-file',
+  generateBundle() {
+    this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ id: BUILD_ID }) })
+  },
+})
 
 // BASE_PATH wird im GitHub-Pages-Workflow auf /<repo-name>/ gesetzt
 export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
   plugins: [
     react(),
+    versionFile(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false, // Registrierung in src/main.tsx (mit Update-Prüfung)
