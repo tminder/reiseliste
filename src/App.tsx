@@ -552,6 +552,9 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   const { store } = useStore(id, profile)
   useEffect(() => setLastList(id), [id])
   const [input, setInput] = useState('')
+  // „Schon mal gekauft“ nur, solange das Eingabefeld aktiv ist (D-030)
+  const [inputFocused, setInputFocused] = useState(false)
+  const blurTimer = useRef<number | undefined>(undefined)
   const [shopMode, setShopModeState] = useState(false)
   const setShopMode = (v: boolean) => {
     if (!v) setAutoShop(null)
@@ -784,6 +787,14 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onFocus={() => {
+              window.clearTimeout(blurTimer.current)
+              setInputFocused(true)
+            }}
+            // Kurz verzögert, damit ein Tipp auf einen Vorschlag noch ankommt
+            onBlur={() => {
+              blurTimer.current = window.setTimeout(() => setInputFocused(false), 250)
+            }}
             placeholder={t('addPlaceholder', { lang: LANG_LABEL[profile.lang], example: t('addExample') })}
             aria-label={t('addItem')}
           />
@@ -810,7 +821,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         </form>
       )}
 
-      {!shopMode && !input && again.length > 0 && (
+      {!shopMode && inputFocused && !input && again.length > 0 && (
         <div className="again">
           <span className="muted small-text">
             <RotateCcw size={14} /> {t('buyAgain')}
@@ -820,6 +831,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
               <button
                 key={i.id}
                 className="chip"
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() =>
                   void store.addItem({
                     text: nameIn(i.conceptId, profile.lang) ?? i.text,
