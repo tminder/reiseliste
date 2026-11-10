@@ -8,7 +8,9 @@ import {
   CloudOff,
   Camera,
   Check,
+  Hand,
   Lightbulb,
+  RotateCcw,
   List,
   LocateFixed,
   MapPin,
@@ -25,6 +27,7 @@ import { CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from '.
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { categoryLabel, countryName, setUiLang, t } from './i18n'
 import Privacy from './Privacy'
+import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, isInsideSupermarket, formatDistance, getChosenShop, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
@@ -405,6 +408,16 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
 
   const open = items.filter((i) => !i.checked)
   const done = items.filter((i) => i.checked)
+  // Schon mal gekauft (D-030): entfernte Artikel dieser Liste, die gerade nicht auf der Liste stehen
+  const keyOf = (i: Item) => i.conceptId ?? i.text.trim().toLowerCase()
+  const onList = new Set(items.map(keyOf))
+  const again: Item[] = []
+  for (const i of [...store.items].filter((x) => x.deleted).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))) {
+    const k = keyOf(i)
+    if (onList.has(k) || again.some((a) => keyOf(a) === k)) continue
+    again.push(i)
+    if (again.length >= 8) break
+  }
   const groups = new Map<Category | 'sonstiges', Item[]>()
   for (const item of open) {
     const cat = (item.conceptId && BY_ID.get(item.conceptId)?.category) || 'sonstiges'
@@ -544,6 +557,33 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         </form>
       )}
 
+      {!shopMode && !input && again.length > 0 && (
+        <div className="again">
+          <span className="muted small-text">
+            <RotateCcw size={14} /> {t('buyAgain')}
+          </span>
+          <div className="chips">
+            {again.map((i) => (
+              <button
+                key={i.id}
+                className="chip"
+                onClick={() =>
+                  void store.addItem({
+                    text: nameIn(i.conceptId, profile.lang) ?? i.text,
+                    qty: null,
+                    lang: i.conceptId ? profile.lang : i.lang,
+                    conceptId: i.conceptId,
+                    author: profile.name,
+                  })
+                }
+              >
+                <Plus size={14} /> {nameIn(i.conceptId, profile.lang) ?? i.text}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="toolbar">
         <button className={shopMode ? 'primary' : 'ghost'} onClick={() => setShopMode(!shopMode)}>
           {shopMode ? (
@@ -569,16 +609,21 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           <section key={cat} className="group">
             <h3>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
             {groups.get(cat)!.map((item) => (
-              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} />
+              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} />
             ))}
           </section>
         ))}
 
       {done.length > 0 && (
         <section className="group done">
-          <h3>{t('inCart')}</h3>
+          <h3 className="done-head">
+            {t('inCart')}
+            <button className="ghost small" onClick={() => void store.removeChecked()}>
+              <Trash2 size={16} /> {t('removeChecked')}
+            </button>
+          </h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} />
+            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} />
           ))}
         </section>
       )}
@@ -609,6 +654,7 @@ function ItemRow({
   shopName,
   viewer,
   shopMode,
+  me,
 }: {
   item: Item
   store: ListStore
@@ -618,8 +664,11 @@ function ItemRow({
   shopName?: string
   viewer: Lang
   shopMode: boolean
+  /** Name aus dem Profil (für „Ich hole das“, D-031) */
+  me: string
 }) {
   const [editing, setEditing] = useState(false)
+  const [showCard, setShowCard] = useState(false)
   const [showPhotos, setShowPhotos] = useState(false)
   const [showHint, setShowHint] = useState(false)
   const [override, setOverride] = useState(item.localOverride ?? '')
@@ -647,9 +696,10 @@ function ItemRow({
         <div className="orig">
           {local ? (
             shopMode || !FEATURES.community ? (
-              <span className="local">
+              // Antippen → Zeigen-Karte fürs Personal (D-032)
+              <button className="local term-btn" title={t('showStaff')} onClick={() => setShowCard(true)}>
                 <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
-              </span>
+              </button>
             ) : (
               // Antippen → Begriff korrigieren (gilt für die ganze Liste, wird als Vorschlag gesammelt)
               <button
@@ -667,6 +717,9 @@ function ItemRow({
             <span className="missing">{t('noTranslation')}</span>
           )}
           {!shopMode && <span className="muted"> · {item.author}</span>}
+          {item.claimedBy && !item.checked && (
+            <span className="claim"> · {item.claimedBy === me ? t('claimedByMe') : t('claimedBy', { name: item.claimedBy })}</span>
+          )}
         </div>
         {FEATURES.community && !local && !shopMode && !editing && (
           <button className="link" onClick={() => setEditing(true)}>
@@ -713,11 +766,48 @@ function ItemRow({
           <Camera size={18} />
         </button>
       )}
+      {!item.checked && (
+        // „Ich hole das“ (D-031): antippen übernimmt den Artikel, nochmals antippen gibt ihn frei
+        <button
+          className={`ghost small ${item.claimedBy === me ? 'active' : ''}`}
+          aria-label={item.claimedBy === me ? t('unclaim') : t('claim')}
+          title={item.claimedBy === me ? t('unclaim') : t('claim')}
+          onClick={() => void store.updateItem(item.id, { claimedBy: item.claimedBy === me ? null : me })}
+        >
+          <Hand size={18} />
+        </button>
+      )}
       {!shopMode && (
         <button className="ghost small" aria-label={t('delete')} onClick={() => void store.updateItem(item.id, { deleted: true })}>
           <X size={18} />
         </button>
       )}
+      {showCard && local && (
+        <ShowCard term={local} qty={item.qty} own={own} target={target} onClose={() => setShowCard(false)} />
+      )}
+    </div>
+  )
+}
+
+/** Zeigen-Karte (D-032): Artikel bildschirmfüllend in der Landessprache, zum Vorzeigen beim Personal */
+function ShowCard({ term, qty, own, target, onClose }: { term: string; qty: string | null; own: string; target: Lang; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  return (
+    <div className="showcard" role="dialog" aria-modal="true" onClick={onClose}>
+      <p className="showcard-ask" lang={target}>{WHERE_IS[target]}</p>
+      <p className="showcard-term" lang={target}>
+        {qty && <span className="showcard-qty">{formatQty(qty)} </span>}
+        {term}
+      </p>
+      <p className="showcard-thanks" lang={target}>{THANKS[target]}</p>
+      <p className="showcard-own">{own}</p>
+      <button className="ghost showcard-close" onClick={onClose} aria-label={t('close')}>
+        <X size={28} />
+      </button>
     </div>
   )
 }

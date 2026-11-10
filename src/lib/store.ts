@@ -19,6 +19,8 @@ export interface Item {
   lang: Lang
   conceptId: string | null
   localOverride: string | null
+  /** Wer holt den Artikel (Name, D-031). undefined = Spalte unbekannt bzw. nie gesetzt */
+  claimedBy?: string | null
   checked: boolean
   deleted: boolean
   author: string
@@ -162,6 +164,8 @@ const toRemoteItem = (i: Item) => ({
   author: i.author,
   created_at: i.createdAt,
   updated_at: i.updatedAt,
+  // Nur mitschicken, wenn gesetzt – so funktioniert der Sync auch, solange die Spalte in Supabase noch fehlt
+  ...(i.claimedBy !== undefined ? { claimed_by: i.claimedBy } : {}),
 })
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const fromRemoteList = (r: any): ShoppingList => ({ id: r.id, name: r.name, country: r.country, updatedAt: r.updated_at })
@@ -176,6 +180,7 @@ const fromRemoteItem = (r: any): Item => ({
   checked: r.checked,
   deleted: r.deleted,
   author: r.author ?? '',
+  claimedBy: r.claimed_by,
   createdAt: r.created_at,
   updatedAt: r.updated_at,
 })
@@ -408,7 +413,12 @@ export class ListStore {
     return this.write({ table: 'items', row: item })
   }
 
-  updateItem(id: string, patch: Partial<Pick<Item, 'checked' | 'deleted' | 'localOverride' | 'qty'>>) {
+  /** Alle abgehakten Artikel entfernen (D-030) */
+  async removeChecked() {
+    for (const i of this.items.filter((x) => x.checked && !x.deleted)) await this.updateItem(i.id, { deleted: true })
+  }
+
+  updateItem(id: string, patch: Partial<Pick<Item, 'checked' | 'deleted' | 'localOverride' | 'qty' | 'claimedBy'>>) {
     const current = this.items.find((i) => i.id === id)
     if (!current) return
     const updated = { ...current, ...patch, updatedAt: now() }

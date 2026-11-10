@@ -675,3 +675,85 @@ button.term-btn {
   font-size: 1rem;
   padding: 8px 14px;
 }
+
+/* Zeigen-Karte fürs Personal (D-032) */
+.showcard {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+  text-align: center;
+}
+.showcard-ask {
+  font-size: 1.3rem;
+  margin: 0;
+}
+.showcard-term {
+  font-size: clamp(2.4rem, 12vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--accent);
+}
+.showcard-qty {
+  color: var(--text);
+}
+.showcard-thanks {
+  font-size: 1.3rem;
+  margin: 0;
+}
+.showcard-own {
+  color: var(--muted);
+  margin: 12px 0 0;
+}
+.showcard-close {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 12px;
+}
+
+/* Wer holt was (D-031) */
+.claim {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Schon mal gekauft (D-030) */
+.again {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 8px;
+}
+.again .muted {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.again .chips button.chip {
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.done-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.done-head button {
+  font-size: 0.8rem;
+  text-transform: none;
+  letter-spacing: normal;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

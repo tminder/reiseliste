@@ -27,6 +27,7 @@ create table if not exists public.items (
   lang text not null,
   concept_id text,
   local_override text,
+  claimed_by text,
   checked boolean not null default false,
   deleted boolean not null default false,
   author text,
@@ -34,6 +35,8 @@ create table if not exists public.items (
   updated_at timestamptz not null default now()
 );
 -- Für Datenbanken, die mit einer älteren Version dieses Skripts angelegt wurden
+-- Wer holt den Artikel (Name, D-031)
+alter table public.items add column if not exists claimed_by text;
 alter table public.lists add column if not exists created_by uuid default auth.uid();
 -- Name und Sprache des Mitglieds (aus dem Profil in der App)
 alter table public.list_members add column if not exists name text;
