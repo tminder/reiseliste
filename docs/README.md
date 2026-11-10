@@ -9,6 +9,8 @@ Die Dateien zeigen immer den **aktuellen Stand**, keine Historie. Die Historie s
 | [Offene Fragen](03-offene-fragen.md) | Was aktuell noch zu klären ist | F-001 … |
 | [Technische Schulden](04-technische-schulden.md) | Bekannte Schwächen, die aktuell im Code bestehen | S-001 … |
 
+Konzepte (Entwürfe, noch nicht entschieden): [Native App](konzept-native-app.md)
+
 ## Regeln
 
 - **Nur der aktuelle Stand.** Es gibt keine Status-Spalten, keine Einträge „erledigt“ oder „ersetzt“ und kein Änderungsprotokoll.
