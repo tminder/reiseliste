@@ -847,3 +847,14 @@ button.danger-btn {
   color: #fff;
   background: rgb(0 0 0 / 0.4);
 }
+
+/* Startseite: Neu / Öffnen übereinander, oberhalb von „Deine Listen“ */
+.home-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.home-actions > .new-list-toggle {
+  align-self: stretch;
+  justify-content: flex-start;
+}
