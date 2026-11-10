@@ -223,3 +223,9 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Wunsch des Inhabers. Auf dem iPhone öffnet die Kamera-App QR-Codes in Safari, nicht in der Home-Bildschirm-App (D-037). Mit dem Scanner in der App landet die Liste direkt dort.
 - **Folgen:** Kamerazugriff nur auf Knopfdruck und mit Erlaubnis, Bilder werden weder gespeichert noch gesendet (in der Datenschutzerklärung erwähnt). Auf einem echten iPhone noch nicht getestet (S-031).
 
+
+## D-039 · Supabase wach halten per täglichem Ping
+
+- **Entscheidung:** Der GitHub-Job „Supabase wach halten“ (`.github/workflows/keepalive.yml`) ruft täglich um 04:37 UTC die Datenbank-Funktion `ping()` auf. Sie schreibt einen Zeitstempel in die Tabelle `keepalive` (eine Zeile, kein direkter Zugriff). Fehlt die Funktion noch, macht der Job eine einfache Leseanfrage und warnt. Antwortet Supabase gar nicht, schlägt der Job fehl, und GitHub schickt eine E-Mail. Er nutzt URL und Publishable Key aus `.env.production`, es braucht kein Secret.
+- **Begründung:** Gratis-Projekte werden nach 7 Tagen mit zu wenig Datenbank-Aktivität pausiert. Während einer Testreise mit wenigen Nutzern wäre die App dann ohne Sync. Eine kleine Schreibaktion zählt sicher als Aktivität.
+- **Folgen:** `supabase/schema.sql` muss erneut ausgeführt werden. Supabase garantiert nicht, dass das reicht. Den Pausier-Schutz garantiert nur der Pro-Tarif (25 $ pro Monat). GitHub stoppt geplante Jobs in Repos ohne Aktivität nach 60 Tagen.

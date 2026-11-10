@@ -156,4 +156,15 @@ $$;
 revoke all on function public.list_member_profiles(uuid) from public, anon;
 grant execute on function public.list_member_profiles(uuid) to authenticated;
 
+-- Supabase wach halten (D-039): Der GitHub-Job „Supabase wach halten“ ruft täglich ping() auf.
+-- Eine kleine Schreibaktion zählt sicher als Datenbank-Aktivität (Gratis-Projekte pausieren nach 7 Tagen ohne).
+create table if not exists public.keepalive (id int primary key default 1 check (id = 1), at timestamptz not null default now());
+alter table public.keepalive enable row level security; -- kein direkter Zugriff, nur über ping()
+create or replace function public.ping()
+returns timestamptz language sql volatile security definer set search_path = public as $$
+  insert into keepalive (id, at) values (1, now()) on conflict (id) do update set at = excluded.at returning at;
+$$;
+revoke all on function public.ping() from public;
+grant execute on function public.ping() to anon, authenticated;
+
 notify pgrst, 'reload schema';
