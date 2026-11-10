@@ -3,9 +3,10 @@
 // Bei Änderungen an Datenflüssen (neue Dienste, Speicherdauer …) diese Seite mit anpassen.
 
 import { ArrowLeft } from 'lucide-react'
+import { FEATURES } from './features'
 import { uiLang } from './i18n'
 
-const UPDATED = '2026-11-09'
+const UPDATED = '2026-11-10'
 const CONTACT = 'mail@tobiasminder.ch'
 
 type Section = { h: string; p: (string | string[])[] }
@@ -30,7 +31,10 @@ const DE: { title: string; back: string; updated: string; sections: Section[] } 
           'Anonyme Anmeldung: Jedes Gerät erhält eine zufällige Kennung (ohne E-Mail oder Passwort), damit nur Mitglieder eine Liste sehen können.',
           'Standort: Nur wenn du es im Browser erlaubst. Er wird verwendet, um das Reiseland vorzuschlagen und den nächsten Supermarkt zu finden. Die Koordinaten werden dafür an OpenStreetMap-Dienste geschickt (siehe unten), aber von der App nirgends gespeichert. Gespeichert wird nur der gefundene Laden, und zwar auf deinem Gerät.',
           'Produktfotos: Für die Fotosuche werden Produktkategorie bzw. Suchbegriff, Land und ggf. die Ladenkette an Open Food Facts geschickt.',
-          'Korrekturvorschläge: Korrigierst du einen Begriff in der Landessprache, wird der Vorschlag (Artikel, alter und neuer Begriff, Land, Liste, anonyme Kennung) gespeichert, damit der Betreiber das Wörterbuch verbessern kann. Eine Zusammenfassung ohne Kennungen (Begriffe, Sprache, Anzahl, Beispiel-Artikel) wird wöchentlich in das öffentliche Code-Repository der App übertragen.',
+          // Nur mit Community-Modul (D-027)
+          ...(FEATURES.community
+            ? ['Korrekturvorschläge: Korrigierst du einen Begriff in der Landessprache, wird der Vorschlag (Artikel, alter und neuer Begriff, Land, Liste, anonyme Kennung) gespeichert, damit der Betreiber das Wörterbuch verbessern kann. Eine Zusammenfassung ohne Kennungen (Begriffe, Sprache, Anzahl, Beispiel-Artikel) wird wöchentlich in das öffentliche Code-Repository der App übertragen.']
+            : []),
           'Auf deinem Gerät (Browser-Speicher): Profil, Listen zum Offline-Gebrauch, zwischengespeicherte Fotos und Suchergebnisse. Cookies werden nicht verwendet.',
         ],
       ],
@@ -56,7 +60,7 @@ const DE: { title: string; back: string; updated: string; sections: Section[] } 
     {
       h: 'Wie lange werden Daten gespeichert?',
       p: [
-        'Listen, Artikel, Mitgliedschaften und Korrekturvorschläge bleiben gespeichert, bis du die Löschung verlangst. „Von diesem Gerät entfernen“ löscht nur die Kopie auf deinem Gerät. Daten auf deinem Gerät kannst du jederzeit über die Browser-Einstellungen löschen.',
+        `Listen, Artikel${FEATURES.community ? ', Mitgliedschaften und Korrekturvorschläge' : ' und Mitgliedschaften'} bleiben gespeichert, bis du die Löschung verlangst. „Von diesem Gerät entfernen“ löscht nur die Kopie auf deinem Gerät. Daten auf deinem Gerät kannst du jederzeit über die Browser-Einstellungen löschen.`,
       ],
     },
     {
@@ -94,7 +98,10 @@ const EN: typeof DE = {
           'Anonymous sign-in: each device gets a random identifier (no email or password) so that only members can see a list.',
           'Location: only if you allow it in your browser. It is used to suggest the travel country and to find the nearest supermarket. The coordinates are sent to OpenStreetMap services (see below) but are not stored anywhere by the app. Only the shop found is stored, on your device.',
           'Product photos: for the photo search, the product category or search term, the country and possibly the shop chain are sent to Open Food Facts.',
-          'Correction suggestions: if you correct a term in the local language, the suggestion (item, old and new term, country, list, anonymous identifier) is stored so the operator can improve the dictionary. A summary without identifiers (terms, language, count, example items) is copied weekly to the app’s public code repository.',
+          // Nur mit Community-Modul (D-027)
+          ...(FEATURES.community
+            ? ['Correction suggestions: if you correct a term in the local language, the suggestion (item, old and new term, country, list, anonymous identifier) is stored so the operator can improve the dictionary. A summary without identifiers (terms, language, count, example items) is copied weekly to the app’s public code repository.']
+            : []),
           'On your device (browser storage): profile, lists for offline use, cached photos and search results. No cookies are used.',
         ],
       ],
@@ -120,7 +127,7 @@ const EN: typeof DE = {
     {
       h: 'How long is data kept?',
       p: [
-        '“Remove from this device” only deletes the copy on your device. Lists, items, memberships and correction suggestions are kept until you request deletion. You can delete data on your device at any time in your browser settings.',
+        `“Remove from this device” only deletes the copy on your device. Lists, items${FEATURES.community ? ', memberships and correction suggestions' : ' and memberships'} are kept until you request deletion. You can delete data on your device at any time in your browser settings.`,
       ],
     },
     {

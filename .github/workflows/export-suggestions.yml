@@ -7,9 +7,9 @@
 
 name: Korrekturvorschläge exportieren
 
+# Community-Modul ist im MVP ausgeschaltet (D-027): nur manueller Start.
+# Beim Einschalten wieder ergänzen:  schedule: - cron: '17 5 * * 1'  (montags 05:17 UTC)
 on:
-  schedule:
-    - cron: '17 5 * * 1' # montags 05:17 UTC
   workflow_dispatch:
 
 permissions:

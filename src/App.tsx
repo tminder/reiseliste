@@ -25,6 +25,7 @@ import { CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from '.
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { categoryLabel, countryName, setUiLang, t } from './i18n'
 import Privacy from './Privacy'
+import { FEATURES } from './features'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, isInsideSupermarket, formatDistance, getChosenShop, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
@@ -590,7 +591,9 @@ function ItemRow({
   const [showPhotos, setShowPhotos] = useState(false)
   const [showHint, setShowHint] = useState(false)
   const [override, setOverride] = useState(item.localOverride ?? '')
-  const local = item.localOverride || nameIn(item.conceptId, target)
+  // Eigene Landesbegriffe gibt es nur mit dem Community-Modul (D-027)
+  const override_ = FEATURES.community ? item.localOverride : null
+  const local = override_ || nameIn(item.conceptId, target)
   // Gross: der Artikel in der Sprache des Betrachters (sonst wie eingegeben). Klein: Landessprache.
   const own = (item.lang !== viewer && nameIn(item.conceptId, viewer)) || item.text
   const hint = item.conceptId ? (HINTS[item.conceptId]?.[viewer] ?? HINTS[item.conceptId]?.en) : undefined
@@ -611,7 +614,7 @@ function ItemRow({
         </div>
         <div className="orig">
           {local ? (
-            shopMode ? (
+            shopMode || !FEATURES.community ? (
               <span className="local">
                 <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
               </span>
@@ -633,7 +636,7 @@ function ItemRow({
           )}
           {!shopMode && <span className="muted"> · {item.author}</span>}
         </div>
-        {!local && !shopMode && !editing && (
+        {FEATURES.community && !local && !shopMode && !editing && (
           <button className="link" onClick={() => setEditing(true)}>
             {t('enterLocalTerm')}
           </button>
@@ -643,7 +646,9 @@ function ItemRow({
             className="override"
             onSubmit={(e) => {
               e.preventDefault()
-              void store.correctTerm(item, override, { targetLang: target, country, oldTerm: local })
+              void import('./features/community').then((m) =>
+                m.correctTerm(store, item, override, { targetLang: target, country, oldTerm: local }),
+              )
               setEditing(false)
             }}
           >
@@ -667,7 +672,7 @@ function ItemRow({
           <Lightbulb size={18} />
         </button>
       )}
-      {shopMode && local && !item.checked && shopTag && hasPhotos(item.conceptId, item.localOverride) && (
+      {shopMode && local && !item.checked && shopTag && hasPhotos(item.conceptId, override_) && (
         <button
           className={`ghost small ${showPhotos ? 'active' : ''}`}
           aria-label={t('photos')}

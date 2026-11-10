@@ -1,5 +1,6 @@
 import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js'
 import type { Lang } from '../data/dictionary'
+import { FEATURES } from '../features'
 
 // ---------- Typen ----------
 
@@ -40,14 +41,14 @@ export const supabase: SupabaseClient | null = URL && KEY ? createClient(URL, KE
 
 /** Letzte Fehlermeldung von Supabase – wird in der App angezeigt, um Probleme zu finden. */
 export let lastSyncError: string | null = null
-const setError = (where: string, msg: string) => {
+export const setError = (where: string, msg: string) => {
   lastSyncError = `${where}: ${msg}`
   console.warn('[reiseliste]', lastSyncError)
 }
 
 let authReady: Promise<boolean> | null = null
 /** Anonyme Anmeldung – nötig, damit die Zugriffsregeln (RLS) greifen. */
-function ensureAuth(): Promise<boolean> {
+export function ensureAuth(): Promise<boolean> {
   if (!supabase) return Promise.resolve(false)
   authReady ??= (async () => {
     const { data } = await supabase.auth.getSession()
@@ -187,35 +188,6 @@ export function flushQueue(): Promise<boolean> {
   return flushing
 }
 
-// ---------- Korrekturvorschläge fürs Wörterbuch (D-024) ----------
-
-export interface TermSuggestion {
-  concept_id: string | null
-  item_text: string
-  item_lang: string
-  target_lang: string
-  country: string
-  old_term: string | null
-  new_term: string
-  list_id: string
-}
-
-const suggestionQueue = {
-  all: () => LS.get<TermSuggestion[]>('rl:sugq', []),
-  set: (v: TermSuggestion[]) => LS.set('rl:sugq', v),
-}
-
-/** Vorschlag merken und (wenn möglich) gleich an Supabase senden; sonst später beim nächsten Abgleich */
-export async function flushSuggestions(add?: TermSuggestion) {
-  const pending = [...suggestionQueue.all(), ...(add ? [add] : [])]
-  suggestionQueue.set(pending)
-  if (!supabase || !pending.length || !navigator.onLine) return
-  if (!(await ensureAuth())) return
-  const { error } = await supabase.from('term_suggestions').insert(pending)
-  if (error) setError('Korrekturvorschlag', error.message)
-  else suggestionQueue.set(suggestionQueue.all().slice(pending.length))
-}
-
 // ---------- Store für eine Liste ----------
 
 const newer = (a: { updatedAt: string }, b: { updatedAt: string }) => a.updatedAt >= b.updatedAt
@@ -334,7 +306,7 @@ export class ListStore {
     if (!navigator.onLine) return this.setSync('offline')
     if (!silent) this.setSync('syncing')
     const pushed = await flushQueue()
-    void flushSuggestions()
+    if (FEATURES.community) void import('../features/community').then((m) => m.flushSuggestions())
     const [listRes, itemsRes] = await Promise.all([
       supabase.from('lists').select('*').eq('id', this.id).maybeSingle(),
       supabase.from('items').select('*').eq('list_id', this.id),
@@ -391,10 +363,11 @@ export class ListStore {
 
   addItem(data: Pick<Item, 'text' | 'qty' | 'lang' | 'conceptId' | 'author'>) {
     const t = now()
-    // Wurde der Begriff in dieser Liste schon korrigiert, gilt die Korrektur auch für den neuen Artikel
-    const corrected = data.conceptId
-      ? this.items.find((i) => !i.deleted && i.conceptId === data.conceptId && i.localOverride)?.localOverride
-      : null
+    // Community-Modul: Wurde der Begriff in dieser Liste schon korrigiert, gilt die Korrektur auch für den neuen Artikel
+    const corrected =
+      FEATURES.community && data.conceptId
+        ? this.items.find((i) => !i.deleted && i.conceptId === data.conceptId && i.localOverride)?.localOverride
+        : null
     const item: Item = {
       id: crypto.randomUUID(),
       listId: this.id,
@@ -407,29 +380,6 @@ export class ListStore {
     }
     this.items = [...this.items, item]
     return this.write({ table: 'items', row: item })
-  }
-
-  /**
-   * Begriff in der Landessprache korrigieren: gilt sofort für alle Artikel mit demselben Wörterbuch-Eintrag
-   * in dieser Liste und wird als Vorschlag fürs Wörterbuch gesammelt.
-   */
-  async correctTerm(item: Item, newTerm: string, ctx: { targetLang: string; country: string; oldTerm: string | null }) {
-    const term = newTerm.trim()
-    if (!term || term === ctx.oldTerm) return
-    const same = item.conceptId
-      ? this.items.filter((i) => !i.deleted && i.conceptId === item.conceptId)
-      : [item]
-    for (const i of same) await this.updateItem(i.id, { localOverride: term })
-    void flushSuggestions({
-      concept_id: item.conceptId,
-      item_text: item.text,
-      item_lang: item.lang,
-      target_lang: ctx.targetLang,
-      country: ctx.country,
-      old_term: ctx.oldTerm,
-      new_term: term,
-      list_id: this.id,
-    })
   }
 
   updateItem(id: string, patch: Partial<Pick<Item, 'checked' | 'deleted' | 'localOverride' | 'qty'>>) {

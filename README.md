@@ -9,7 +9,7 @@ Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im L
 - Liste pro Reise mit Reiseland (18 Länder, Landessprachen: ES, PT, FR, IT, NL, HR, EL, EN)
 - Eingabe in 9 Sprachen (DE, EN, ES, PT, FR, IT, NL, HR, EL), inklusive Mengen („2 Milch“, „500 g Hackfleisch“)
 - Übersetzung über ein eingebautes Wörterbuch mit 132 Grundbegriffen, ohne KI und ohne laufende Kosten
-- Vorschläge beim Tippen. Unbekannte Artikel können mit einem eigenen Landesbegriff ergänzt werden
+- Vorschläge aus dem Wörterbuch beim Tippen
 - Sortierung nach Abteilungen, Abhaken, „Ladenansicht“ mit grosser Schrift
 - Produktfotos pro Reiseland aus [Open Food Facts](https://world.openfoodfacts.org) (📷 am Artikel, CC BY-SA)
 - Teilen per Link, QR-Code oder Teilen-Menü des Handys, Live-Sync über Supabase
@@ -40,7 +40,15 @@ Zugriff: Jedes Gerät meldet sich anonym an. Eine Liste sehen nur Personen, die 
 1. Repo → **Settings → Pages** → Source: **GitHub Actions**.
 2. Push auf `main`. Die App ist danach unter `https://<user>.github.io/reiseliste/` erreichbar.
 
-## Korrekturvorschläge auswerten
+## Module
+
+Optionale Funktionen werden in `src/features.ts` ein- und ausgeschaltet. Ausgeschaltete Module sind unsichtbar und senden keine Daten.
+
+| Modul | Status | Inhalt |
+| --- | --- | --- |
+| `community` | aus (D-027) | Begriffe korrigieren, eigene Landesbegriffe, Korrekturvorschläge fürs Wörterbuch (D-024). Code: `src/features/community.ts` |
+
+### Korrekturvorschläge auswerten (nur mit Community-Modul)
 
 Nutzer können Begriffe in der Landessprache korrigieren (Tipp auf den Begriff). Die Vorschläge landen in Supabase:
 
@@ -48,7 +56,7 @@ Nutzer können Begriffe in der Landessprache korrigieren (Tipp auf den Begriff).
 select * from term_suggestions_summary;  -- im Supabase SQL Editor
 ```
 
-Automatisch: Der Job „Korrekturvorschläge exportieren“ (`.github/workflows/export-suggestions.yml`) schreibt die Zusammenfassung montags und auf Knopfdruck nach `docs/korrekturvorschlaege.csv`. Dafür einmalig das Repo-Secret `SUPABASE_SECRET_KEY` anlegen (Supabase → Project Settings → API Keys → Secret key). Danach Claude sagen: „übernimm die Korrekturen“.
+Automatisch: Der Job „Korrekturvorschläge exportieren“ (`.github/workflows/export-suggestions.yml`) schreibt die Zusammenfassung auf Knopfdruck (mit eingeschaltetem Modul auch montags) nach `docs/korrekturvorschlaege.csv`. Dafür einmalig das Repo-Secret `SUPABASE_SECRET_KEY` anlegen (Supabase → Project Settings → API Keys → Secret key). Danach Claude sagen: „übernimm die Korrekturen“.
 
 ## Aufbau
 
