@@ -274,6 +274,77 @@ babynahrung;baby;Babybrei/Babynahrung;baby food;potitos/comida para bebé;papas 
 babymilch;baby;Säuglingsmilch/Pre-Milch/Babymilch;infant formula/baby milk;leche de fórmula/leche infantil;leite para bebé/leite de fórmula;lait infantile/lait bébé;latte per neonati/latte artificiale;flesvoeding/zuigelingenmelk;adaptirano mlijeko;βρεφικό γάλα
 schwimmwindeln;baby;Schwimmwindeln;swim nappies/swim diapers;pañales de agua/pañales bañador;fraldas de banho/fraldas para água;couches de bain/couches piscine;pannolini da mare/pannolini per piscina;zwemluiers;pelene za kupanje;πάνες θαλάσσης
 babysonnencreme;baby;Kindersonnencreme/Baby-Sonnencreme;kids' sun cream/baby sunscreen;protector solar infantil/crema solar para niños;protetor solar infantil/protetor solar criança;crème solaire enfant/protection solaire bébé;crema solare bambini;zonnebrand voor kinderen/kinderzonnebrand;krema za sunčanje za djecu;παιδικό αντηλιακό
+grapefruit;obst;Grapefruit;grapefruit;pomelo;toranja;pamplemousse;pompelmo;grapefruit;grejp;γκρέιπφρουτ
+granatapfel;obst;Granatapfel;pomegranate;granada;romã;grenade;melograno;granaatappel;nar;ρόδι
+datteln;obst;Datteln;dates;dátiles;tâmaras;dattes;datteri;dadels;datulje;χουρμάδες
+spargel;obst;Spargel;asparagus;espárragos;espargos;asperges;asparagi;asperges;šparoge;σπαράγγια
+artischocken;obst;Artischocken/Artischocke;artichokes;alcachofas;alcachofras;artichauts;carciofi;artisjokken;artičoke;αγκινάρες
+fenchel;obst;Fenchel;fennel;hinojo;funcho;fenouil;finocchio;venkel;komorač;μάραθο
+rotezwiebeln;obst;rote Zwiebeln;red onions;cebollas moradas/cebolla morada;cebolas roxas;oignons rouges;cipolle rosse;rode uien;crveni luk;κόκκινα κρεμμύδια
+schalotten;obst;Schalotten;shallots;chalotas;chalotas/chalotes;échalotes;scalogni;sjalotten;ljutika;εσαλότ
+eisbergsalat;obst;Eisbergsalat;iceberg lettuce;lechuga iceberg;alface iceberg;laitue iceberg;lattuga iceberg/insalata iceberg;ijsbergsla;ledena salata;μαρούλι άισμπεργκ
+thymian;obst;Thymian;thyme;tomillo;tomilho;thym;timo;tijm;timijan;θυμάρι
+gouda;milch;Gouda;gouda;queso gouda;queijo gouda;gouda;gouda;goudse kaas/gouda;gauda;γκούντα
+emmentaler;milch;Emmentaler;Emmental;queso emmental;queijo emmental;emmental;emmental/emmentaler;emmentaler;ementaler;έμενταλ
+weichkaese;milch;Brie/Camembert/Weichkäse;brie/camembert;queso brie/camembert;queijo brie/camembert;brie/camembert;brie/camembert;brie/camembert;brie/camembert;μπρι/καμαμπέρ
+mascarpone;milch;Mascarpone;mascarpone;mascarpone;mascarpone;mascarpone;mascarpone;mascarpone;mascarpone;μασκαρπόνε
+burrata;milch;Burrata;burrata;burrata;burrata;burrata;burrata;burrata;burrata;μπουράτα
+halloumi;milch;Halloumi/Grillkäse;halloumi;queso halloumi;queijo halloumi;halloumi;halloumi;halloumi;halloumi sir;χαλούμι
+pudding;milch;Pudding/Vanillepudding;custard/pudding;natillas;pudim;crème dessert;budino;vla/pudding;puding;πουτίγκα
+schokomilch;milch;Schokomilch/Kakaogetränk;chocolate milk;batido de chocolate/batido de cacao;leite com chocolate/achocolatado;lait chocolaté;latte al cioccolato;chocolademelk;čokoladno mlijeko;σοκολατούχο γάλα
+kondensmilch;vorrat;Kondensmilch/gezuckerte Kondensmilch;condensed milk;leche condensada;leite condensado;lait concentré sucré;latte condensato;gecondenseerde melk;kondenzirano mlijeko;ζαχαρούχο γάλα
+hummus;milch;Hummus;hummus;hummus;húmus;houmous;hummus;hummus;humus;χούμους
+zwieback;brot;Zwieback;rusks/toasted bread;biscotes;tostas;biscottes;fette biscottate;beschuit;dvopek;φρυγανιές
+knaeckebrot;brot;Knäckebrot;crispbread;pan crujiente/tostadas de centeno;tostas de centeio/pão estaladiço;pain suédois;crackers di segale/pane croccante;knäckebröd;hrskavi kruh;κριτσίνια σίκαλης
+pizzateig;brot;Pizzateig;pizza dough;masa de pizza;massa de pizza;pâte à pizza;pasta per pizza/impasto per pizza;pizzadeeg;tijesto za pizzu;ζύμη για πίτσα
+blaetterteig;brot;Blätterteig;puff pastry;hojaldre/masa de hojaldre;massa folhada;pâte feuilletée;pasta sfoglia;bladerdeeg;lisnato tijesto;σφολιάτα
+koteletts;fleisch;Schweinekoteletts/Koteletts;pork chops;chuletas de cerdo;costeletas de porco;côtelettes de porc;braciole di maiale;karbonades;svinjski kotleti;χοιρινές μπριζόλες
+spareribs;fleisch;Spareribs/Schweinerippchen;pork ribs/spare ribs;costillas de cerdo;entrecosto/costelinhas de porco;travers de porc;costine di maiale;spareribs;svinjska rebarca;χοιρινά παϊδάκια
+chickenwings;fleisch;Hähnchenflügel/Chicken Wings;chicken wings;alitas de pollo;asas de frango;ailes de poulet;ali di pollo/alette di pollo;kippenvleugels;pileća krilca;φτερούγες κοτόπουλου
+burger;fleisch;Burger/Hamburger-Patties;burgers/burger patties;hamburguesas;hambúrgueres;steaks hachés;hamburger;hamburgers;pljeskavice/burgeri;μπιφτέκια
+kabeljau;fleisch;Kabeljau/Dorsch;cod;bacalao;bacalhau;cabillaud;merluzzo;kabeljauw;bakalar;μπακαλιάρος
+oktopus;fleisch;Oktopus/Krake;octopus;pulpo;polvo;poulpe;polpo;octopus;hobotnica;χταπόδι
+sardellen;fleisch;Sardellen/Anchovis;anchovies;anchoas/boquerones;anchovas;anchois;acciughe/alici;ansjovis;inćuni;αντζούγιες
+lasagne;vorrat;Lasagneplatten/Lasagne;lasagne sheets;placas de lasaña;folhas de lasanha;feuilles de lasagne;sfoglie per lasagne/lasagne;lasagnebladen;listovi za lazanje;φύλλα για λαζάνια
+kidneybohnen;vorrat;Kidneybohnen/rote Bohnen;kidney beans/red beans;alubias rojas;feijão vermelho;haricots rouges;fagioli rossi;kidneybonen/rode bonen;crveni grah;κόκκινα φασόλια
+puderzucker;vorrat;Puderzucker;icing sugar/powdered sugar;azúcar glas;açúcar em pó;sucre glace;zucchero a velo;poedersuiker;šećer u prahu;ζάχαρη άχνη
+brauner_zucker;vorrat;brauner Zucker/Rohrzucker;brown sugar/cane sugar;azúcar moreno;açúcar mascavado;sucre roux/sucre de canne;zucchero di canna;bruine suiker/rietsuiker;smeđi šećer;καστανή ζάχαρη
+suessstoff;vorrat;Süssstoff/Süßstoff;sweetener;edulcorante/sacarina;adoçante;édulcorant;dolcificante;zoetjes/zoetstof;sladilo;γλυκαντικό
+staerke;vorrat;Speisestärke/Maisstärke/Maizena;cornflour/cornstarch;maicena/harina de maíz;amido de milho/maizena;fécule de maïs/maïzena;amido di mais/maizena;maizena;kukuruzni škrob/gustin;κορν φλάουρ
+dressing;vorrat;Salatdressing/Salatsauce;salad dressing;aliño para ensalada/salsa para ensalada;molho para salada;sauce salade/vinaigrette;condimento per insalata;slasaus/dressing;preljev za salatu;σάλτσα σαλάτας
+pistazien;vorrat;Pistazien;pistachios;pistachos;pistácios;pistaches;pistacchi;pistachenoten;pistacije;φιστίκια Αιγίνης
+walnuesse;vorrat;Walnüsse/Baumnüsse;walnuts;nueces;nozes;cerneaux de noix/noix de Grenoble;noci;walnoten;orasi;καρύδια
+cashews;vorrat;Cashewnüsse/Cashews;cashews/cashew nuts;anacardos;cajus;noix de cajou;anacardi;cashewnoten;indijski oraščići;κάσιους
+nachos;vorrat;Tortilla-Chips/Nachos;tortilla chips/nachos;nachos/totopos;nachos;tortilla chips/nachos;nachos/tortilla chips;tortillachips/nacho's;nachos;νάτσος
+schokoriegel;vorrat;Schokoriegel;chocolate bars;barritas de chocolate;barras de chocolate;barres chocolatées;barrette di cioccolato;chocoladerepen;čokoladice;σοκολατένιες μπάρες
+kraeutertee;vorrat;Kräutertee;herbal tea;infusión;infusão/chá de ervas;infusion/tisane;tisana/infuso;kruidenthee;biljni čaj;τσάι βοτάνων
+kaffeebohnen;vorrat;Kaffeebohnen;coffee beans;café en grano;café em grão;café en grains;caffè in grani;koffiebonen;kava u zrnu;καφές σε κόκκους
+gemahlenerkaffee;vorrat;gemahlener Kaffee/Filterkaffee;ground coffee/filter coffee;café molido;café moído;café moulu;caffè macinato;gemalen koffie/filterkoffie;mljevena kava;αλεσμένος καφές
+gin;getraenke;Gin;gin;ginebra;gin;gin;gin;gin;gin;τζιν
+wodka;getraenke;Wodka;vodka;vodka;vodka;vodka;vodka;wodka;votka;βότκα
+rum;getraenke;Rum;rum;ron;rum;rhum;rum;rum;rum;ρούμι
+whisky;getraenke;Whisky;whisky/whiskey;whisky;whisky;whisky;whisky;whisky;viski;ουίσκι
+sangria;getraenke;Sangria;sangria;sangría;sangria;sangria;sangria;sangria;sangrija;σανγκρία
+energydrink;getraenke;Energydrink/Energy-Drink;energy drink;bebida energética;bebida energética;boisson énergisante;bevanda energetica/energy drink;energiedrank;energetsko piće;ενεργειακό ποτό
+tkbeeren;tk;TK-Beeren/tiefgekühlte Beeren;frozen berries;frutos rojos congelados;frutos vermelhos congelados;fruits rouges surgelés;frutti di bosco surgelati;diepvriesfruit/bevroren bessen;smrznuto bobičasto voće;κατεψυγμένα φρούτα του δάσους
+eisamstiel;tk;Eis am Stiel/Glace am Stängel;ice lollies/popsicles;polos;gelados de pau;glaces à l'eau/esquimaux;ghiaccioli;waterijsjes;sladoled na štapiću;παγωτό ξυλάκι
+wcreiniger;haushalt;WC-Reiniger/Toilettenreiniger;toilet cleaner;limpiador de WC;limpa WC;nettoyant WC/gel WC;detergente WC;wc-reiniger/toiletreiniger;sredstvo za čišćenje WC-a;καθαριστικό τουαλέτας
+bleiche;haushalt;Bleiche/Chlorreiniger;bleach;lejía;lixívia;eau de Javel;candeggina/varechina;bleekmiddel/chloor;varikina;χλωρίνη
+handschuhe;haushalt;Gummihandschuhe/Haushaltshandschuhe;rubber gloves;guantes de goma/guantes de fregar;luvas de borracha;gants de ménage;guanti di gomma;huishoudhandschoenen;gumene rukavice;γάντια κουζίνας
+kerzen;haushalt;Kerzen/Teelichter;candles/tea lights;velas;velas;bougies;candele;kaarsen/waxinelichtjes;svijeće;κεριά
+backpapier;haushalt;Backpapier;baking paper/parchment paper;papel de horno;papel vegetal;papier cuisson;carta da forno;bakpapier;papir za pečenje;λαδόχαρτο
+waescheklammern;haushalt;Wäscheklammern;clothes pegs/clothespins;pinzas de la ropa;molas da roupa;pinces à linge;mollette;wasknijpers;štipaljke;μανταλάκια
+insektenspray;haushalt;Insektenspray/Insektizid;insect spray/insecticide;insecticida;inseticida;insecticide;insetticida;insectenspray;insekticid/sprej protiv insekata;εντομοκτόνο
+grillspiesse;haushalt;Grillspiesse/Spiesse/Schaschlikspiesse;skewers;palos de brocheta/brochetas;espetos;piques à brochettes/brochettes;spiedini/stecchi per spiedini;satéprikkers/spiesjes;štapići za ražnjiće;καλαμάκια για σουβλάκια
+tueten;haushalt;Tüte/Einkaufstasche/Tragtasche;bag/shopping bag;bolsa;saco;sac/sac de courses;busta/borsa della spesa;tas/boodschappentas;vrećica;σακούλα
+plastikbesteck;haushalt;Plastikbesteck/Einwegbesteck;plastic cutlery/disposable cutlery;cubiertos de plástico/cubiertos desechables;talheres de plástico/talheres descartáveis;couverts jetables;posate di plastica;plastic bestek;plastični pribor za jelo;πλαστικά μαχαιροπίρουνα
+haargummis;hygiene;Haargummis/Haarbänder;hair ties/hair bands;gomas del pelo/coleteros;elásticos de cabelo;élastiques à cheveux;elastici per capelli;haarelastiekjes;gumice za kosu;λαστιχάκια μαλλιών
+mundspuelung;hygiene;Mundspülung/Mundwasser;mouthwash;enjuague bucal/colutorio;elixir bucal;bain de bouche;collutorio;mondwater;vodica za ispiranje usta;στοματικό διάλυμα
+handcreme;hygiene;Handcreme;hand cream;crema de manos;creme de mãos;crème pour les mains;crema mani/crema per le mani;handcrème;krema za ruke;κρέμα χεριών
+linsenmittel;hygiene;Kontaktlinsenflüssigkeit/Linsenmittel;contact lens solution;líquido de lentillas;líquido de lentes de contacto/solução para lentes;solution pour lentilles;soluzione per lenti a contatto;lenzenvloeistof;otopina za leće;υγρό φακών επαφής
+schnuller;baby;Schnuller/Nuggi;dummy/pacifier;chupete;chupeta;tétine/sucette;ciuccio;speen;duda;πιπίλα
+babyshampoo;baby;Babyshampoo/Kindershampoo;baby shampoo;champú para bebés/champú infantil;champô para bebé;shampooing bébé;shampoo per bambini;babyshampoo;šampon za bebe;βρεφικό σαμπουάν
+wundschutz;baby;Wundschutzcreme/Windelcreme;nappy rash cream/diaper cream;crema del pañal/crema para el culito;creme para a muda da fralda/pomada para assaduras;crème pour le change;crema per il cambio/pasta per il cambio;billencrème;krema protiv pelenskog osipa;κρέμα για συγκάματα
 `
 
 /** Tipps zu Artikeln (nur in der Ladenansicht). Fehlt die Sprache des Betrachters, gilt Englisch. */
