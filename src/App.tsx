@@ -173,7 +173,10 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
   const touched = useRef(false)
   const [lists, setLists] = useState(knownLists)
   // „Neue Liste“ ist eingeklappt, sobald es Listen gibt; ohne Listen direkt offen
-  const [showNew, setShowNew] = useState(lists.length === 0)
+  const [panel, setPanel] = useState<'new' | 'link' | null>(lists.length === 0 ? 'new' : null)
+  const [scan, setScan] = useState(false)
+  const showNew = panel === 'new'
+  const setShowNew = (v: boolean) => setPanel(v ? 'new' : null)
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
   // Letzte Änderung pro Liste (D-036): sofort aus dem Gerät, dann aktuell aus Supabase
   const [changed, setChanged] = useState<Record<string, string>>(() =>
@@ -227,49 +230,60 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
         </button>
       </header>
 
-      <div className="home-actions">
-        {showNew ? (
-          <form className="card stack" onSubmit={create}>
-            <div className="row-between">
-              <h2>{t('newList')}</h2>
-              {lists.length > 0 && (
-                <button type="button" className="ghost small" aria-label={t('close')} onClick={() => setShowNew(false)}>
-                  <X size={16} />
-                </button>
-              )}
-            </div>
-            <label>
-              {t('travelCountry')}
-              <select
-                value={country}
-                onChange={(e) => {
-                  touched.current = true
-                  setCountry(e.target.value)
-                }}
-              >
-                {COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.flag} {countryName(c.code)} – {LANG_LABEL[c.lang]}
-                  </option>
-                ))}
-              </select>
-              {detected && detected === country && <span className="hint-ok">
-                  <LocateFixed size={14} /> {t('currentLocation')}
-                </span>}
-            </label>
-            <label>
-              {t('nameOptional')}
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder')} />
-            </label>
-            <button className="primary">{t('createList')}</button>
-          </form>
-        ) : (
-          <button className="ghost new-list-toggle" onClick={() => setShowNew(true)}>
-            <Plus size={18} /> {t('newList')}
-          </button>
-        )}
-        <OpenByLink />
+      {/* Neu / Öffnen als waagrechte, scrollbare Knopfleiste; das Formular erscheint darunter */}
+      <div className="action-row">
+        <button className={`ghost ${panel === 'new' ? 'active' : ''}`} onClick={() => setPanel(panel === 'new' ? null : 'new')}>
+          <Plus size={18} /> {t('newList')}
+        </button>
+        <button className={`ghost ${panel === 'link' ? 'active' : ''}`} onClick={() => setPanel(panel === 'link' ? null : 'link')}>
+          <Link2 size={18} /> {t('openByLink')}
+        </button>
+        <button className="ghost" onClick={() => setScan(true)}>
+          <ScanLine size={18} /> {t('scanQr')}
+        </button>
       </div>
+      {scan && (
+        <Suspense fallback={null}>
+          <QrScanner onFound={(id) => go(`/l/${id}`)} onClose={() => setScan(false)} />
+        </Suspense>
+      )}
+      {panel === 'link' && <OpenByLink onClose={() => setPanel(null)} />}
+      {showNew && (
+        <form className="card stack" onSubmit={create}>
+          <div className="row-between">
+            <h2>{t('newList')}</h2>
+            {lists.length > 0 && (
+              <button type="button" className="ghost small" aria-label={t('close')} onClick={() => setShowNew(false)}>
+                <X size={16} />
+              </button>
+            )}
+          </div>
+          <label>
+            {t('travelCountry')}
+            <select
+              value={country}
+              onChange={(e) => {
+                touched.current = true
+                setCountry(e.target.value)
+              }}
+            >
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.flag} {countryName(c.code)} – {LANG_LABEL[c.lang]}
+                </option>
+              ))}
+            </select>
+            {detected && detected === country && <span className="hint-ok">
+                <LocateFixed size={14} /> {t('currentLocation')}
+              </span>}
+          </label>
+          <label>
+            {t('nameOptional')}
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder')} />
+          </label>
+          <button className="primary">{t('createList')}</button>
+        </form>
+      )}
 
       {lists.length > 0 && (
         <section className="stack">
@@ -324,10 +338,8 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
 
 const QrScanner = lazy(() => import('./QrScanner'))
 
-/** Liste über einen eingefügten Link (D-037) oder per QR-Code (D-038) öffnen */
-function OpenByLink() {
-  const [open, setOpen] = useState(false)
-  const [scan, setScan] = useState(false)
+/** Liste über einen eingefügten Link öffnen (D-037) */
+function OpenByLink({ onClose }: { onClose: () => void }) {
   const [text, setText] = useState('')
   const [error, setError] = useState(false)
   const openId = (value: string) => {
@@ -335,23 +347,6 @@ function OpenByLink() {
     if (id) go(`/l/${id}`)
     else setError(true)
   }
-  const scanner = scan && (
-    <Suspense fallback={null}>
-      <QrScanner onFound={(id) => go(`/l/${id}`)} onClose={() => setScan(false)} />
-    </Suspense>
-  )
-  if (!open)
-    return (
-      <>
-        <button className="ghost new-list-toggle" onClick={() => setOpen(true)}>
-          <Link2 size={18} /> {t('openByLink')}
-        </button>
-        <button className="ghost new-list-toggle" onClick={() => setScan(true)}>
-          <ScanLine size={18} /> {t('scanQr')}
-        </button>
-        {scanner}
-      </>
-    )
   return (
     <form
       className="card stack"
@@ -362,7 +357,7 @@ function OpenByLink() {
     >
       <div className="row-between">
         <h2>{t('openByLink')}</h2>
-        <button type="button" className="ghost small" aria-label={t('close')} onClick={() => setOpen(false)}>
+        <button type="button" className="ghost small" aria-label={t('close')} onClick={onClose}>
           <X size={16} />
         </button>
       </div>
@@ -398,11 +393,7 @@ function OpenByLink() {
             <ClipboardPaste size={16} /> {t('paste')}
           </button>
         )}
-        <button type="button" className="ghost" onClick={() => setScan(true)}>
-          <ScanLine size={16} /> {t('scanQr')}
-        </button>
       </div>
-      {scanner}
     </form>
   )
 }

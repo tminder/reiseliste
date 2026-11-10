@@ -859,3 +859,29 @@ button.danger-btn {
   align-self: stretch;
   justify-content: flex-start;
 }
+
+/* Startseite: Knopfleiste waagrecht, bei Platzmangel seitlich scrollbar */
+.action-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -16px;
+  padding: 2px 16px;
+  scroll-padding: 0 16px;
+}
+.action-row::-webkit-scrollbar {
+  display: none;
+}
+.action-row button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.action-row button.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
