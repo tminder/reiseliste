@@ -160,3 +160,9 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Entscheidung des Inhabers. Das MVP bleibt schlank, die Community-Funktionen sollen später modular ergänzt werden.
 - **Folgen:** Fehler im Wörterbuch (S-001) lassen sich vorerst nur durch Claude im Code korrigieren. Die Datenschutzerklärung nennt Korrekturvorschläge nur bei eingeschaltetem Modul. Beim Einschalten: Flag setzen, Zeitplan im Export-Job wieder aktivieren, Datenschutz prüfen (D-023).
 
+
+## D-028 · Beim Öffnen direkt zur zuletzt geöffneten Liste
+
+- **Entscheidung:** Wird die App ohne bestimmtes Ziel geöffnet (Startseite, Home-Bildschirm-Icon), springt sie direkt zur zuletzt geöffneten Liste (`rl:last` im Browser-Speicher). Das passiert nur einmal beim Laden. „Alle Listen“ führt danach normal zur Übersicht. Wurde die Liste vom Gerät entfernt, erscheint die Übersicht. Links auf eine bestimmte Liste haben Vorrang.
+- **Begründung:** Wunsch des Inhabers. Meist arbeitet man auf einer Reise mit genau einer Liste.
+- **Folgen:** Wer die Übersicht sehen will, tippt einmal auf „Alle Listen“. Lädt man die Seite auf der Übersicht neu, landet man wieder in der letzten Liste.

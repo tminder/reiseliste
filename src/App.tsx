@@ -30,9 +30,16 @@ import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, isInsideSupermarket, formatDistance, getChosenShop, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
-import { ListStore, forgetList, knownLists, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
+import { ListStore, forgetList, knownLists, lastList, setLastList, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
 // ---------- Routing über den Hash (funktioniert auf GitHub Pages ohne Server) ----------
+
+// Beim Öffnen der App ohne Ziel (Startseite) direkt zur zuletzt geöffneten Liste (D-028).
+// Nur einmal beim Laden – „Alle Listen“ führt danach normal zur Übersicht.
+if (location.hash === '' || location.hash === '#/' || location.hash === '#') {
+  const last = lastList()
+  if (last) history.replaceState(null, '', `#/l/${last}`)
+}
 
 function useRoute() {
   const [hash, setHash] = useState(location.hash)
@@ -306,6 +313,7 @@ function SyncBadge({ state, error }: { state: SyncState; error: string | null })
 
 function ListView({ id, profile }: { id: string; profile: Profile }) {
   const { store } = useStore(id, profile)
+  useEffect(() => setLastList(id), [id])
   const [input, setInput] = useState('')
   const [shopMode, setShopModeState] = useState(false)
   const setShopMode = (v: boolean) => {

@@ -101,7 +101,18 @@ function rememberList(id: string) {
   if (!ids.includes(id)) LS.set('rl:lists', [id, ...ids])
 }
 
+/** Zuletzt geöffnete Liste (D-028): wird beim Öffnen der App automatisch angezeigt */
+export function setLastList(id: string) {
+  LS.set('rl:last', id)
+}
+
+export function lastList(): string | null {
+  const id = LS.get<string | null>('rl:last', null)
+  return id && LS.get<string[]>('rl:lists', []).includes(id) ? id : null
+}
+
 export function forgetList(id: string) {
+  if (LS.get<string | null>('rl:last', null) === id) localStorage.removeItem('rl:last')
   LS.set('rl:lists', LS.get<string[]>('rl:lists', []).filter((x) => x !== id))
   localStorage.removeItem(`rl:list:${id}`)
 }
