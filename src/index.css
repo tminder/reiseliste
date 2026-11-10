@@ -795,3 +795,12 @@ button.danger-btn {
   border-radius: 10px;
   padding: 6px 12px;
 }
+
+/* Liste per Link öffnen / iPhone-Hinweis (D-037) */
+.error-text {
+  color: #dc2626;
+  margin: 0;
+}
+.ios-hint p {
+  margin: 0 0 8px;
+}

@@ -210,3 +210,9 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Wunsch des Inhabers. Bisher wurde eine Liste nur vom Gerät „vergessen“, die Mitgliedschaft blieb bestehen.
 - **Folgen:** `supabase/schema.sql` muss erneut ausgeführt werden (neue Policy). Bis dahin wird die Liste nur lokal entfernt. Verlässt das letzte Mitglied eine Liste, bleibt sie verwaist in der Datenbank (F-010).
 
+
+## D-037 · Listen in der iPhone-App vom Home-Bildschirm öffnen
+
+- **Entscheidung:** Auf der Startseite gibt es „Liste mit Link öffnen“: Link (oder Text mit Link) einfügen, auf Wunsch mit „Einfügen“ aus der Zwischenablage, und die Liste öffnet sich. Wird ein Listen-Link auf dem iPhone in Safari geöffnet (nicht in der Home-Bildschirm-App), erklärt ein Hinweis über der Liste den Weg und bietet „Link kopieren“ an. Er lässt sich mit „Nicht mehr zeigen“ ausblenden. Auch das Teilen-Fenster nennt den Weg.
+- **Begründung:** Rückmeldung des Inhabers: Haben beide die Web-App auf dem Home-Bildschirm, klappt das Teilen nicht. iOS öffnet Links immer in Safari, und Safari und die Home-Bildschirm-App haben getrennten Speicher.
+- **Folgen:** Ein Schritt mehr für iPhone-Nutzer (Link kopieren, in der App einfügen). Eine echte Lösung wären native Apps mit Universal Links (D-009, F-006).

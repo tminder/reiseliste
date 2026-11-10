@@ -8,9 +8,11 @@ import {
   CloudOff,
   Camera,
   Check,
+  ClipboardPaste,
   Hand,
   Lightbulb,
   RotateCcw,
+  Link2,
   List,
   LocateFixed,
   MapPin,
@@ -29,6 +31,7 @@ import { categoryLabel, countryName, setUiLang, t, uiLang } from './i18n'
 import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
+import { isIos, isStandalone, listIdFrom, listUrl } from './lib/links'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
@@ -265,6 +268,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
         </section>
       )}
 
+      <OpenByLink />
       {showNew ? (
         <form className="card stack" onSubmit={create}>
           <div className="row-between">
@@ -312,6 +316,119 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
         <a href="#/datenschutz">{t('privacy')}</a>
       </footer>
     </main>
+  )
+}
+
+/** Liste über einen eingefügten Link öffnen – nötig in der iPhone-App vom Home-Bildschirm (D-037) */
+function OpenByLink() {
+  const [open, setOpen] = useState(false)
+  const [text, setText] = useState('')
+  const [error, setError] = useState(false)
+  const openId = (value: string) => {
+    const id = listIdFrom(value)
+    if (id) go(`/l/${id}`)
+    else setError(true)
+  }
+  if (!open)
+    return (
+      <button className="ghost new-list-toggle" onClick={() => setOpen(true)}>
+        <Link2 size={18} /> {t('openByLink')}
+      </button>
+    )
+  return (
+    <form
+      className="card stack"
+      onSubmit={(e) => {
+        e.preventDefault()
+        openId(text)
+      }}
+    >
+      <div className="row-between">
+        <h2>{t('openByLink')}</h2>
+        <button type="button" className="ghost small" aria-label={t('close')} onClick={() => setOpen(false)}>
+          <X size={16} />
+        </button>
+      </div>
+      <p className="muted small-text">{t('openByLinkHint')}</p>
+      <input
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value)
+          setError(false)
+        }}
+        placeholder={t('linkPlaceholder')}
+        autoFocus
+      />
+      {error && <p className="small-text error-text">{t('linkInvalid')}</p>}
+      <div className="row-gap">
+        <button className="primary" disabled={!text.trim()}>
+          {t('openList')}
+        </button>
+        {navigator.clipboard?.readText && (
+          <button
+            type="button"
+            className="ghost"
+            onClick={async () => {
+              try {
+                const clip = await navigator.clipboard.readText()
+                setText(clip)
+                if (listIdFrom(clip)) openId(clip)
+              } catch {
+                /* Einfügen abgelehnt */
+              }
+            }}
+          >
+            <ClipboardPaste size={16} /> {t('paste')}
+          </button>
+        )}
+      </div>
+    </form>
+  )
+}
+
+/** In Safari auf dem iPhone geöffneter Listen-Link: Hinweis, wie man die Liste in die Home-Bildschirm-App holt (D-037) */
+function IosAppHint({ id }: { id: string }) {
+  const [hidden, setHidden] = useState(() => {
+    try {
+      return !isIos() || isStandalone() || localStorage.getItem('rl:iosHint') === '1'
+    } catch {
+      return true
+    }
+  })
+  const [copied, setCopied] = useState(false)
+  if (hidden) return null
+  return (
+    <div className="note info ios-hint">
+      <p>{t('iosHint')}</p>
+      <div className="row-gap">
+        <button
+          className="primary small"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(listUrl(id))
+              setCopied(true)
+            } catch {
+              /* egal */
+            }
+          }}
+        >
+          {copied ? t('copied') : t('copyLink')}
+        </button>
+        <button
+          className="ghost small"
+          onClick={() => {
+            try {
+              localStorage.setItem('rl:iosHint', '1')
+            } catch {
+              /* egal */
+            }
+            setHidden(true)
+          }}
+        >
+          {t('iosHintDismiss')}
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -555,6 +672,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           )}
         </div>
       </header>
+      <IosAppHint id={id} />
 
       {shopMode && autoShop && (
         <div className="toast">
@@ -1275,7 +1393,7 @@ function EditSheet({
 }
 
 function ShareSheet({ id, name, onClose }: { id: string; name: string; onClose: () => void }) {
-  const url = `${location.origin}${location.pathname}#/l/${id}`
+  const url = listUrl(id)
   const [qr, setQr] = useState('')
   const [copied, setCopied] = useState(false)
   useEffect(() => {
@@ -1289,6 +1407,7 @@ function ShareSheet({ id, name, onClose }: { id: string; name: string; onClose: 
         {!supabase && <p className="note">{t('demoShare')}</p>}
         {qr && <img src={qr} alt={t('qrAlt')} className="qr" />}
         <input readOnly value={url} onFocus={(e) => e.target.select()} />
+        <p className="muted small-text">{t('shareIosHint')}</p>
         <div className="row">
           <button
             className="primary"
