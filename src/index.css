@@ -976,12 +976,13 @@ button.scanner-alt {
 }
 /* Kurzes Aufleuchten: neu, wiederhergestellt oder von anderen geändert */
 .item.flash {
-  animation: item-flash 1.2s ease-out;
+  animation: item-flash 1.6s ease-out;
 }
 @keyframes item-flash {
-  0% {
+  0%,
+  35% {
     background-color: var(--accent-soft);
-    box-shadow: 0 0 0 2px var(--accent);
+    box-shadow: 0 0 0 3px var(--accent);
   }
   100% {
     background-color: var(--card);
@@ -1087,4 +1088,14 @@ ul.entries li {
 }
 .undo-bar {
   flex-wrap: wrap;
+}
+
+.app-version {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.menu-version {
+  padding: 6px 14px 4px;
 }

@@ -178,6 +178,7 @@ function ProfileSetup({ onDone, listId }: { onDone: (p: Profile) => void; listId
       </form>
       <footer className="footer">
         <a href="#/datenschutz">{t('privacy')}</a>
+        <AppVersion />
       </footer>
     </main>
   )
@@ -359,6 +360,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
       <LocationNotice />
       <footer className="footer">
         <a href="#/datenschutz">{t('privacy')}</a>
+        <AppVersion />
       </footer>
     </main>
   )
@@ -827,6 +829,9 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                 <button role="menuitem" onClick={() => go('/datenschutz')}>
                   <Shield size={18} /> {t('privacy')}
                 </button>
+                <div className="menu-version">
+                  <AppVersion />
+                </div>
                 <button
                   role="menuitem"
                   className="danger"
@@ -1632,6 +1637,17 @@ function saveVisit(listId: string, v: Visit | null) {
   } catch {
     /* egal */
   }
+}
+
+/** Version der laufenden App (Build-Kennung, D-035) und ob Animationen aus sind (D-044) – hilft bei der Fehlersuche */
+function AppVersion() {
+  const id = __BUILD_ID__.length > 12 ? __BUILD_ID__.slice(0, 16).replace('T', ' ') : __BUILD_ID__.slice(0, 7)
+  return (
+    <span className="app-version">
+      {t('version')} {id}
+      {reducedMotion() ? ` · ${t('motionOff')}` : ''}
+    </span>
+  )
 }
 
 /** Gleicher Artikel = gleicher Wörterbuch-Eintrag, sonst gleicher Text (D-045) */

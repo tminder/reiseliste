@@ -10,7 +10,7 @@ export function flash(el: Element) {
   el.classList.remove('flash')
   void (el as HTMLElement).offsetWidth // Animation neu starten
   el.classList.add('flash')
-  window.setTimeout(() => el.classList.remove('flash'), 1300)
+  window.setTimeout(() => el.classList.remove('flash'), 1700)
 }
 
 /** Zeile(n) hinausgleiten lassen, danach erst entfernen */
@@ -69,10 +69,10 @@ export function useFlip(
         if (motion)
           el.animate(
             [
-              { opacity: 0, transform: 'translateY(-8px)' },
+              { opacity: 0, transform: 'translateY(-14px) scale(0.97)' },
               { opacity: 1, transform: 'none' },
             ],
-            { duration: 220, easing: 'ease-out' },
+            { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)' },
           )
         continue
       }
