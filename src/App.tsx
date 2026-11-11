@@ -32,7 +32,7 @@ import { categoryLabel, countryName, setUiLang, t, uiLang } from './i18n'
 import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
-import { flash, isOnScreen, reducedMotion, reveal, slideOut, useFlip } from './lib/motion'
+import { flash, reducedMotion, slideOut, useFlip } from './lib/motion'
 import { addQty, sumQty } from './lib/qty'
 import { isIos, isStandalone, listIdFrom, listUrl } from './lib/links'
 import { findConcept, nameIn, normalize, splitQuantity, suggest } from './lib/translate'
@@ -572,20 +572,19 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   const mainRef = useRef<HTMLElement>(null)
   const localChanges = useRef(new Map<string, number>())
   const markLocal = (itemId: string) => localChanges.current.set(itemId, Date.now())
-  const lastAdded = useRef<{ key: string; name: string; at: number } | null>(null)
   useFlip(
     mainRef,
     (itemId) => Date.now() - (localChanges.current.get(itemId) ?? 0) < 5000,
-    (els) => {
-      // Selbst hinzugefügter Artikel ausserhalb des sichtbaren Bereichs: nicht wegscrollen (man tippt oft
-      // mehrere Artikel hintereinander), sondern kurz bestätigen – mit „Zeigen“ zum Hinspringen (D-044)
-      const last = lastAdded.current
-      if (!last || Date.now() - last.at > 3000) return
-      const el = els.find((e) => e.dataset.itemKey === last.key)
-      if (!el || isOnScreen(el)) return
-      showBar(t('addedHint', { name: last.name }), [{ label: t('show'), run: () => reveal(el) }])
-    },
   )
+  // Bestätigung direkt am Eingabefeld (D-044): angetippter Vorschlag zeigt kurz „✓“, „+“ wird zum Häkchen
+  const [confirmSid, setConfirmSid] = useState<string | null>(null)
+  const [justAdded, setJustAdded] = useState(false)
+  const justAddedTimer = useRef<number | undefined>(undefined)
+  const pulseAdded = () => {
+    window.clearTimeout(justAddedTimer.current)
+    setJustAdded(true)
+    justAddedTimer.current = window.setTimeout(() => setJustAdded(false), 900)
+  }
 
   // ---- Erledigte automatisch entfernen (D-043): nach 1 Tag oder beim Verlassen des Ladens ----
   const autoClear = store.list ? store.list.autoClear !== false : false
@@ -705,11 +704,11 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     if (!clean) return
     const data = { text: clean, qty, lang: profile.lang, conceptId: conceptId ?? findConcept(clean, profile.lang), author: profile.name }
     setInput('')
+    pulseAdded()
     // Steht derselbe Artikel schon offen auf der Liste: Menge erhöhen statt neuer Zeile (D-045)
     const key = data.conceptId ?? normalize(clean)
     const existing = store.items.find((i) => !i.deleted && !i.checked && dupKey(i) === key)
     if (!existing) {
-      lastAdded.current = { key, name: clean, at: Date.now() }
       void store.addItem(data)
       return
     }
@@ -734,13 +733,6 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
       }
     }, 40)
     showBar(t('qtyMerged', { name: nameIn(existing.conceptId, profile.lang) ?? existing.text, qty: formatQty(merged) }), [
-      {
-        label: t('show'),
-        run: () => {
-          const el = mainRef.current?.querySelector(`[data-item-key="${CSS.escape(key)}"]`)
-          if (el) reveal(el)
-        },
-      },
       { label: t('undo'), run: () => void store.updateItem(existing.id, { qty: before }) },
       {
         label: t('addSeparately'),
@@ -930,22 +922,37 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
             placeholder={t('addPlaceholder', { lang: LANG_LABEL[profile.lang], example: t('addExample') })}
             aria-label={t('addItem')}
           />
-          <button className="primary" aria-label={t('add')} disabled={!input.trim()}>
-            <Plus size={22} strokeWidth={2.5} />
+          <button className={`primary ${justAdded ? 'just-added' : ''}`} aria-label={t('add')} disabled={!input.trim() && !justAdded}>
+            {justAdded ? <Check size={22} strokeWidth={3} /> : <Plus size={22} strokeWidth={2.5} />}
           </button>
           {suggestions.length > 0 && (
             <ul className="suggestions">
               {suggestions.map((s) => (
-                <li key={s.id}>
+                <li key={s.id} className={confirmSid === s.id ? 'confirmed' : ''}>
                   <button
                     type="button"
                     onClick={() => {
+                      if (confirmSid) return
                       const { qty } = splitQuantity(input)
-                      add(`${qty ? qty + ' ' : ''}${s.names[profile.lang][0]}`, s.id)
+                      const text = `${qty ? qty + ' ' : ''}${s.names[profile.lang][0]}`
+                      // Erst kurz am Vorschlag bestätigen, dann hinzufügen (D-044)
+                      setConfirmSid(s.id)
+                      window.setTimeout(
+                        () => {
+                          add(text, s.id)
+                          setConfirmSid(null)
+                        },
+                        reducedMotion() ? 350 : 550,
+                      )
                     }}
                   >
+                    {confirmSid === s.id ? <Check size={16} strokeWidth={3} className="confirm-check" /> : null}
                     {s.names[profile.lang][0]} <span className="muted">→ {s.names[target][0]}</span>
-                    {openKeys.has(s.id) && <span className="on-list">✓ {t('alreadyOnList')}</span>}
+                    {confirmSid === s.id ? (
+                      <span className="on-list">{openKeys.has(s.id) ? t('qtyIncreased') : t('added')}</span>
+                    ) : (
+                      openKeys.has(s.id) && <span className="on-list">✓ {t('alreadyOnList')}</span>
+                    )}
                   </button>
                 </li>
               ))}

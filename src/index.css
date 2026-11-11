@@ -1124,3 +1124,31 @@ ul.entries li {
 main.page:has(.group) {
   padding-bottom: calc(110px + env(safe-area-inset-bottom));
 }
+
+/* Bestätigung am Vorschlag und am „+“ (D-044) */
+.suggestions li.confirmed button {
+  background: var(--accent-soft);
+  font-weight: 650;
+  transition: background-color 0.15s ease;
+}
+.suggestions li.confirmed .confirm-check {
+  color: var(--accent);
+  vertical-align: -3px;
+  margin-right: 6px;
+  animation: check-pop 0.32s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.add .primary.just-added {
+  animation: check-pop 0.32s cubic-bezier(0.3, 1.6, 0.5, 1);
+  opacity: 1;
+}
+.add:has(.just-added) input {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  transition: box-shadow 0.6s ease, border-color 0.6s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .suggestions li.confirmed .confirm-check,
+  .add .primary.just-added {
+    animation: none;
+  }
+}

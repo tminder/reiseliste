@@ -262,7 +262,7 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Statuswechsel sind sichtbar animiert, kurz (150–400 ms) und ohne Spielerei:
   - **Abhaken:** Der Kreis ploppt, das Häkchen zeichnet sich, der Artikelname wird von links nach rechts durchgestrichen. Erst nach etwa 0,4 s rutscht die Zeile nach „Im Wagen“. Auf Android vibriert das Handy kurz.
   - **Umsortieren:** Zeilen und Abteilungs-Überschriften gleiten an ihren neuen Platz (FLIP-Technik, `src/lib/motion.ts`), statt zu springen.
-  - **Hinzufügen und Rückgängig:** Neue Zeilen gleiten ein und leuchten kurz türkis auf. Liegt ein selbst hinzugefügter Artikel ausserhalb des sichtbaren Bereichs, scrollt die Liste nicht weg (man tippt oft mehrere Artikel hintereinander). Stattdessen bestätigt die Leiste unten „✓ Käse hinzugefügt · Zeigen“. Das Eingabefeld bleibt beim Scrollen oben stehen.
+  - **Hinzufügen und Rückgängig:** Neue Zeilen gleiten ein und leuchten kurz türkis auf. Liegt ein selbst hinzugefügter Artikel ausserhalb des sichtbaren Bereichs, scrollt die Liste nicht weg (man tippt oft mehrere Artikel hintereinander). Bestätigt wird direkt am Eingabefeld: Ein angetippter Vorschlag färbt sich kurz mit „✓ … hinzugefügt“ bzw. „Menge erhöht“, bevor die Vorschläge schliessen. Beim Hinzufügen mit Enter oder „+“ wird das „+“ kurz zum Häkchen und das Eingabefeld leuchtet. Das Eingabefeld bleibt beim Scrollen oben stehen.
   - **Löschen und „Erledigte entfernen“:** Zeilen gleiten nach links hinaus, die Lücke schliesst sich weich. Die Rückgängig-Leiste fährt von unten herein.
   - **Änderungen anderer Mitglieder** (Sync): Die betroffene Zeile leuchtet kurz auf. Eigene Änderungen leuchten nicht.
   - **„Ich hole das“:** Die Hand ploppt, der Hinweis blendet ein.
@@ -273,7 +273,7 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 ## D-045 · Doppelte Artikel zusammenführen
 
 - **Entscheidung:** Als gleich gelten Artikel mit demselben Wörterbuch-Eintrag („Milch“, „milk“, „leche“), sonst derselbe Text ohne Rücksicht auf Gross- und Kleinschreibung. „H-Milch“ und „Milch“ bleiben getrennt.
-  - **Beim Hinzufügen:** Steht der Artikel schon offen auf der Liste, entsteht keine neue Zeile, die Menge wird erhöht („Milch war schon auf der Liste: jetzt 3x · Rückgängig · Separat“). „Separat“ legt doch einen eigenen Eintrag an. Die bestehende Zeile leuchtet auf und die Menge hüpft kurz. Die Liste scrollt nicht weg, „Zeigen“ in der Leiste springt hin.
+  - **Beim Hinzufügen:** Steht der Artikel schon offen auf der Liste, entsteht keine neue Zeile, die Menge wird erhöht („Milch war schon auf der Liste: jetzt 3x · Rückgängig · Separat“). „Separat“ legt doch einen eigenen Eintrag an. Die bestehende Zeile leuchtet auf und die Menge hüpft kurz. Die Liste scrollt nicht weg.
   - **Beim Tippen:** Vorschläge, die schon offen auf der Liste stehen, zeigen „✓ schon auf der Liste“.
   - **Bei der Anzeige:** Mehrere offene Einträge desselben Artikels (z. B. gleichzeitig auf zwei Handys eingetragen oder „Separat“) erscheinen als eine Zeile mit summierter Menge und allen Autoren. „2 Einträge“ klappt die Einzeleinträge auf, dort lassen sie sich einzeln löschen. Abhaken, Löschen und „Ich hole das“ gelten für alle Einträge der Zeile.
   - **Mengen** (`src/lib/qty.ts`): Stück werden addiert (ohne Angabe = 1), g/kg und ml/cl/l umgerechnet („500 g + 1 kg = 1,5 kg“), gleiche andere Einheiten addiert („2 Packungen + 1 Packungen“). Sonst bleiben beide stehen („1 Packung + 500 g“).
