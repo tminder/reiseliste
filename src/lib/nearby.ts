@@ -133,15 +133,21 @@ function relocate(result: NearbyResult, lat: number, lon: number): NearbyResult 
  * `inside` = true: Läden im Umkreis der GPS-Genauigkeit (man ist wohl drin), alle Ladenarten, Supermärkte zuerst.
  * Sonst die nächsten Supermärkte; pro Stufe (1, 3, 10, 20 km) höchstens 40 Treffer, damit die Antwort klein bleibt.
  */
-export async function findNearbyShops(force = false): Promise<NearbyResult & { fresh: boolean }> {
-  const pos = await getPosition()
+/**
+ * precise: Wechsel in die Ladenansicht (D-046). Frischer Standort (höchstens 10 s alt), neue Suche schon ab
+ * 75 m Abstand oder wenn die letzte Suche älter als 30 Minuten ist – in Städten liegen Läden oft nah beieinander.
+ */
+export async function findNearbyShops(force = false, precise = false): Promise<NearbyResult & { fresh: boolean }> {
+  const pos = await getPosition(precise ? 10_000 : undefined)
   const { latitude: lat, longitude: lon, accuracy } = pos.coords
 
   // Nicht wirklich bewegt (GPS-Sprünge in Gebäuden eingerechnet): letztes Ergebnis wiederverwenden, keine Anfrage
   const lastResult = readLast()
-  if (!force && lastResult && Date.now() - lastResult.at < CACHE_MS) {
+  const maxAge = precise ? 30 * 60 * 1000 : CACHE_MS
+  if (!force && lastResult && Date.now() - lastResult.at < maxAge) {
     const moved = meters(lat, lon, lastResult.lat, lastResult.lon)
-    const limit = Math.max(lastResult.result.inside ? MOVED_INSIDE_M : MOVED_M, accuracy, lastResult.accuracy ?? 0)
+    const base = precise ? 75 : lastResult.result.inside ? MOVED_INSIDE_M : MOVED_M
+    const limit = Math.max(base, accuracy, precise ? 0 : (lastResult.accuracy ?? 0))
     if (moved <= limit) return { ...relocate(lastResult.result, lat, lon), accuracy, fresh: false }
   }
 

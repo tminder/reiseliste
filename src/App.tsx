@@ -793,7 +793,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           <span className="sub">
             {country?.flag} {countryName(list.country)} · {LANG_LABEL[target]}
           </span>
-          <ShopBar shop={shop} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
+          <ShopBar shop={shop} shopMode={shopMode} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
         </div>
         <SyncBadge state={store.sync} error={lastSyncError} />
         <div className="menu-wrap">
@@ -1352,11 +1352,14 @@ const RETRY_S = [15, 30, 60, 120, 300]
 
 function ShopBar({
   shop,
+  shopMode,
   onChoose,
   onSuggest,
   onArrived,
 }: {
   shop: Shop | null
+  /** Wechsel in die Ladenansicht löst eine genauere Prüfung im Hintergrund aus (D-046) */
+  shopMode: boolean
   onChoose: (s: Shop | null) => void
   onSuggest: (s: Shop | null) => void
   onArrived: (s: Shop) => void
@@ -1378,13 +1381,13 @@ function ShopBar({
   const lastCheck = useRef(0)
 
   /** manual: „Neu suchen“ – immer neue Anfrage. Sonst still im Hintergrund, neue Anfrage nur nach Ortswechsel. */
-  async function detect(manual = false) {
+  async function detect(manual = false, precise = false) {
     lastCheck.current = Date.now()
     if (manual) setAttempt(0)
     // Ohne bisheriges Ergebnis „Suche …“ zeigen, sonst bleibt der bisherige Laden ruhig stehen
     setState((s) => ({ ...s, loading: manual || !s.shops, more: manual ? s.more : false }))
     try {
-      const result = await findNearbyShops(manual)
+      const result = await findNearbyShops(manual, precise)
       setAttempt(0)
       setState((s) => ({ shops: result.shops, inside: result.inside, more: manual ? s.more : false, dismissed: result.fresh ? false : s.dismissed }))
       const here = isInsideSupermarket(result)
@@ -1415,16 +1418,34 @@ function ShopBar({
   stateRef.current = state
 
   /** Gewählter Laden: verwerfen, wenn man sich weiter als LEFT_SHOP_M entfernt hat (D-033) */
-  async function checkLeft() {
-    if (!shop || shop.lat == null || shop.lon == null) return
+  async function checkLeft(limitM = LEFT_SHOP_M): Promise<boolean> {
+    if (!shop || shop.lat == null || shop.lon == null) return false
     lastCheck.current = Date.now()
     try {
-      const { latitude, longitude, accuracy } = (await getPosition()).coords
-      if (meters(latitude, longitude, shop.lat, shop.lon) > Math.max(LEFT_SHOP_M, accuracy)) onChoose(null)
+      const { latitude, longitude, accuracy } = (await getPosition(limitM < LEFT_SHOP_M ? 10_000 : undefined)).coords
+      if (meters(latitude, longitude, shop.lat, shop.lon) > Math.max(limitM, accuracy)) {
+        onChoose(null)
+        return true
+      }
     } catch {
       /* ohne Standort bleibt der Laden */
     }
+    return false
   }
+
+  // Wechsel in die Ladenansicht (D-046): genauer prüfen, ob man beim angezeigten Laden steht. Höchstens 1× pro Minute.
+  const lastShopModeCheck = useRef(0)
+  useEffect(() => {
+    if (!shopMode || Date.now() - lastShopModeCheck.current < 60_000) return
+    lastShopModeCheck.current = Date.now()
+    // Gewählter Laden mehr als 150 m entfernt: verwerfen, dann sucht die App den Laden, in dem man steht
+    if (shop)
+      void checkLeft(150).then((left) => {
+        if (left) void detect(false, true)
+      })
+    else void detect(false, true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shopMode])
 
   // Beim Öffnen der Liste still prüfen: ohne gewählten Laden den Vorschlag, mit Laden ob man noch dort ist
   useEffect(() => {
