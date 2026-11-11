@@ -35,6 +35,8 @@ create table if not exists public.items (
   updated_at timestamptz not null default now()
 );
 -- Für Datenbanken, die mit einer älteren Version dieses Skripts angelegt wurden
+-- Erledigte automatisch entfernen, pro Liste abschaltbar (D-043)
+alter table public.lists add column if not exists auto_clear boolean not null default true;
 -- Wer holt den Artikel (Name, D-031)
 alter table public.items add column if not exists claimed_by text;
 alter table public.lists add column if not exists created_by uuid default auth.uid();

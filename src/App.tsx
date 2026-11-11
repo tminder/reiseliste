@@ -561,6 +561,20 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     undoTimer.current = window.setTimeout(() => setUndo(null), 5000)
   }
   useEffect(() => () => window.clearTimeout(undoTimer.current), [])
+
+  // ---- Erledigte automatisch entfernen (D-043): nach 1 Tag oder beim Verlassen des Ladens ----
+  const autoClear = store.list ? store.list.autoClear !== false : false
+  const showUndoRef = useRef(showUndo)
+  showUndoRef.current = showUndo
+  // Nach 1 Tag: beim Öffnen und alle 5 Minuten, solange die Liste offen ist
+  useEffect(() => {
+    if (!autoClear) return
+    const run = () =>
+      void store.removeChecked(DAY_MS).then((ids) => ids.length && showUndoRef.current(ids, t('autoClearedDay', { n: ids.length })))
+    run()
+    const iv = window.setInterval(run, 5 * 60 * 1000)
+    return () => window.clearInterval(iv)
+  }, [autoClear, store])
   // „Schon mal gekauft“ nur, solange das Eingabefeld aktiv ist (D-030)
   const [inputFocused, setInputFocused] = useState(false)
   const blurTimer = useRef<number | undefined>(undefined)
@@ -596,6 +610,42 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     setChosenShop(id, s)
     setShop(s)
   }
+
+  // Laden verlassen (D-043): War man in der Ladenansicht bei einem Laden, merkt sich die App den Besuch.
+  // Ist man später (beim Zurückkehren in die App oder alle 2 Minuten) weiter als 150 m weg, werden Erledigte entfernt.
+  const visitShop = shopMode ? (autoShop ?? photoShop) : null
+  useEffect(() => {
+    if (visitShop?.lat != null && visitShop.lon != null) saveVisit(id, { lat: visitShop.lat, lon: visitShop.lon, at: Date.now() })
+  }, [id, visitShop?.id, visitShop?.lat, visitShop?.lon])
+  useEffect(() => {
+    if (!autoClear) return
+    let busy = false
+    const check = async () => {
+      const visit = readVisit(id)
+      if (!visit || busy || document.visibilityState !== 'visible') return
+      busy = true
+      try {
+        const { latitude, longitude, accuracy } = (await getPosition(10_000)).coords
+        if (meters(latitude, longitude, visit.lat, visit.lon) > Math.max(150, accuracy)) {
+          saveVisit(id, null)
+          const ids = await store.removeChecked()
+          if (ids.length) showUndoRef.current(ids, t('autoClearedShop', { n: ids.length }))
+        }
+      } catch {
+        /* ohne Standort: später nochmals, spätestens greift die 1-Tages-Regel */
+      } finally {
+        busy = false
+      }
+    }
+    const iv = window.setInterval(() => void check(), 2 * 60 * 1000)
+    const onVisible = () => void check()
+    document.addEventListener('visibilitychange', onVisible)
+    void check()
+    return () => {
+      window.clearInterval(iv)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [autoClear, id, store])
 
   const list = store.list
 
@@ -950,8 +1000,9 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         <EditSheet
           name={list.name}
           country={list.country}
-          onSave={(name, country) => {
-            void store.updateList({ name, country })
+          autoClear={list.autoClear !== false}
+          onSave={(name, country, autoClear) => {
+            void store.updateList({ name, country, ...(autoClear !== (list.autoClear !== false) ? { autoClear } : {}) })
             setShowEdit(false)
           }}
           onClose={() => setShowEdit(false)}
@@ -1445,6 +1496,27 @@ function PhotoStrip({
 }
 
 /** "2" → "2x", "500 g" bleibt "500 g" */
+const DAY_MS = 24 * 60 * 60 * 1000
+
+/** Letzter Ladenbesuch pro Liste (D-043), nur auf diesem Gerät, höchstens 12 Stunden gültig */
+type Visit = { lat: number; lon: number; at: number }
+function readVisit(listId: string): Visit | null {
+  try {
+    const v = JSON.parse(localStorage.getItem(`rl:visit:${listId}`) ?? 'null') as Visit | null
+    return v && Date.now() - v.at < 12 * 60 * 60 * 1000 ? v : null
+  } catch {
+    return null
+  }
+}
+function saveVisit(listId: string, v: Visit | null) {
+  try {
+    if (v) localStorage.setItem(`rl:visit:${listId}`, JSON.stringify(v))
+    else localStorage.removeItem(`rl:visit:${listId}`)
+  } catch {
+    /* egal */
+  }
+}
+
 /** „Rückgängig“ beim automatischen Reiseland (D-040): für diese Liste und dieses Land nicht mehr automatisch wechseln */
 function countryChangeDeclined(listId: string, code: string): boolean {
   try {
@@ -1517,16 +1589,19 @@ function MembersSheet({ store, profile, onClose }: { store: ListStore; profile: 
 function EditSheet({
   name,
   country,
+  autoClear,
   onSave,
   onClose,
 }: {
   name: string
   country: string
-  onSave: (name: string, country: string) => void
+  autoClear: boolean
+  onSave: (name: string, country: string, autoClear: boolean) => void
   onClose: () => void
 }) {
   const [n, setN] = useState(name)
   const [c, setC] = useState(country)
+  const [ac, setAc] = useState(autoClear)
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <form
@@ -1534,7 +1609,7 @@ function EditSheet({
         onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
           e.preventDefault()
-          onSave(n.trim() || name, c)
+          onSave(n.trim() || name, c, ac)
         }}
       >
         <h2>{t('editListTitle')}</h2>
@@ -1553,6 +1628,13 @@ function EditSheet({
           </select>
         </label>
         <p className="muted small-text">{t('countryChangeHint')}</p>
+        <label className="check-row">
+          <input type="checkbox" checked={ac} onChange={(e) => setAc(e.target.checked)} />
+          <span>
+            {t('autoClear')}
+            <span className="muted small-text block">{t('autoClearHint')}</span>
+          </span>
+        </label>
         <div className="row">
           <button className="primary">{t('save')}</button>
           <button type="button" className="ghost" onClick={onClose}>

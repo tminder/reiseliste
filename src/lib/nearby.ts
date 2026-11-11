@@ -25,14 +25,15 @@ export class NearbyError extends Error {
   }
 }
 
-export function getPosition(): Promise<GeolocationPosition> {
+/** maxAgeMs: wie alt eine zwischengespeicherte Position höchstens sein darf (Standard 1 Minute) */
+export function getPosition(maxAgeMs = 60_000): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
     if (!('geolocation' in navigator)) return reject(new NearbyError(t('errNoGeo')))
     navigator.geolocation.getCurrentPosition(resolve, (err) => {
       if (err.code === err.PERMISSION_DENIED)
         reject(new NearbyError(t('errGeoDenied'), false, true))
       else reject(new NearbyError(t('errGeoFailed'), true))
-    }, { enableHighAccuracy: true, timeout: 15_000, maximumAge: 60_000 })
+    }, { enableHighAccuracy: true, timeout: 15_000, maximumAge: maxAgeMs })
   })
 }
 

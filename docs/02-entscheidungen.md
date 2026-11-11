@@ -175,7 +175,7 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-030 · Nach dem Einkauf: Erledigte entfernen, schon Gekauftes wieder hinzufügen
 
-- **Entscheidung:** Über der Gruppe „Im Wagen“ steht der Knopf „Erledigte entfernen“. Er entfernt alle abgehakten Artikel (Soft-Delete) ohne Rückfrage, danach ist „Rückgängig“ möglich (D-042). Unter dem Eingabefeld zeigt „Schon mal gekauft“ bis zu 8 entfernte Artikel dieser Liste, die gerade nicht auf der Liste stehen (neueste zuerst, ohne Doppelte). Ein Tipp setzt den Artikel ohne Menge wieder auf die Liste, in der Sprache des Tippenden. Nur in der Bearbeiten-Ansicht, nur bei leerem Eingabefeld und nur, solange man ins Eingabefeld getippt hat (Wunsch des Inhabers).
+- **Entscheidung:** Über der Gruppe „Im Wagen“ steht der Knopf „Erledigte entfernen“ (automatisch: D-043). Er entfernt alle abgehakten Artikel (Soft-Delete) ohne Rückfrage, danach ist „Rückgängig“ möglich (D-042). Unter dem Eingabefeld zeigt „Schon mal gekauft“ bis zu 8 entfernte Artikel dieser Liste, die gerade nicht auf der Liste stehen (neueste zuerst, ohne Doppelte). Ein Tipp setzt den Artikel ohne Menge wieder auf die Liste, in der Sprache des Tippenden. Nur in der Bearbeiten-Ansicht, nur bei leerem Eingabefeld und nur, solange man ins Eingabefeld getippt hat (Wunsch des Inhabers).
 - **Begründung:** Auf Reisen kauft man fast täglich ein, eine Liste wird immer wieder verwendet (Vorschlag „wenige, aber gute Funktionen“, vom Inhaber gewählt).
 - **Folgen:** Auch ohne Kauf gelöschte Artikel erscheinen unter „Schon mal gekauft“. Keine Datenbank-Änderung nötig.
 
@@ -247,4 +247,13 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Nach dem Löschen eines Artikels (✕) oder nach „Erledigte entfernen“ erscheint unten 5 Sekunden lang „„Milch“ gelöscht · Rückgängig“ bzw. „2 Artikel entfernt · Rückgängig“. „Rückgängig“ stellt die Artikel mit Menge, Autor und Status wieder her. Gelöscht wird weiterhin über das sichtbare ✕, Swipen gibt es vorerst nicht.
 - **Begründung:** Empfehlung von Claude, vom Inhaber bestätigt. Testpersonen sollen die App ohne Erklärung bedienen können, ein sichtbares ✕ ist dafür besser als eine versteckte Wischgeste. Das grössere Problem war, dass versehentlich Gelöschtes weg war.
 - **Folgen:** Ob die Zeilen ohne Swipen zu voll wirken, zeigt der Test mit Testpersonen. Swipen liesse sich dann mit wenig Aufwand ergänzen, das Rückgängig ist schon da.
+
+## D-043 · Erledigte automatisch entfernen: nach dem Ladenbesuch oder nach 1 Tag
+
+- **Entscheidung:** Abgehakte Artikel werden automatisch entfernt (Soft-Delete, danach „Rückgängig“ wie in D-042):
+  - **Laden verlassen:** Ist die Ladenansicht mit einem Laden offen, merkt sich das Gerät den Besuch (Lage des Ladens, `rl:visit:<Liste>`, höchstens 12 Stunden). Beim Zurückkehren in die App und alle 2 Minuten, solange sie offen ist, prüft es den Standort. Ist man mehr als 150 m weg (mindestens die GPS-Ungenauigkeit), werden alle Erledigten entfernt: „2 erledigte Artikel entfernt (Laden verlassen) · Rückgängig“.
+  - **Nach 1 Tag:** Artikel, die vor mehr als 24 Stunden abgehakt wurden, werden beim Öffnen der Liste und alle 5 Minuten entfernt.
+  - **Einstellung pro Liste:** „Erledigte automatisch entfernen“ unter Menü → Name & Reiseland, Standard an. Gespeichert in `lists.auto_clear`, gilt für alle Mitglieder.
+- **Begründung:** Wunsch des Inhabers. Nach dem Einkauf soll die Liste ohne Handgriff wieder nur zeigen, was noch fehlt. Entfernte Artikel bleiben unter „Schon mal gekauft“ verfügbar.
+- **Folgen:** Als Web-App prüft Proviant nur, wenn sie offen ist oder wieder geöffnet wird, nicht im Hintergrund. `supabase/schema.sql` muss erneut ausgeführt werden (neue Spalte), bis dahin funktioniert alles, nur das Abschalten wird nicht synchronisiert. Ohne Standortfreigabe greift nur die 1-Tages-Regel.
 

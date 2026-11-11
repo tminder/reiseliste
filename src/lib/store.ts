@@ -8,6 +8,8 @@ export interface ShoppingList {
   id: string
   name: string
   country: string
+  /** Erledigte automatisch entfernen (D-043). undefined = Standard (an) bzw. Spalte fehlt */
+  autoClear?: boolean
   updatedAt: string
 }
 
@@ -188,7 +190,14 @@ const queue = {
   },
 }
 
-const toRemoteList = (l: ShoppingList) => ({ id: l.id, name: l.name, country: l.country, updated_at: l.updatedAt })
+const toRemoteList = (l: ShoppingList) => ({
+  id: l.id,
+  name: l.name,
+  country: l.country,
+  updated_at: l.updatedAt,
+  // Nur mitschicken, wenn gesetzt – so klappt der Sync auch, solange die Spalte in Supabase noch fehlt
+  ...(l.autoClear !== undefined ? { auto_clear: l.autoClear } : {}),
+})
 const toRemoteItem = (i: Item) => ({
   id: i.id,
   list_id: i.listId,
@@ -206,7 +215,7 @@ const toRemoteItem = (i: Item) => ({
   ...(i.claimedBy !== undefined ? { claimed_by: i.claimedBy } : {}),
 })
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const fromRemoteList = (r: any): ShoppingList => ({ id: r.id, name: r.name, country: r.country, updatedAt: r.updated_at })
+const fromRemoteList = (r: any): ShoppingList => ({ id: r.id, name: r.name, country: r.country, autoClear: r.auto_clear ?? undefined, updatedAt: r.updated_at })
 const fromRemoteItem = (r: any): Item => ({
   id: r.id,
   listId: r.list_id,
@@ -424,7 +433,7 @@ export class ListStore {
     return this.write({ table: 'lists', row: this.list })
   }
 
-  updateList(patch: Partial<Pick<ShoppingList, 'name' | 'country'>>) {
+  updateList(patch: Partial<Pick<ShoppingList, 'name' | 'country' | 'autoClear'>>) {
     if (!this.list) return
     this.list = { ...this.list, ...patch, updatedAt: now() }
     return this.write({ table: 'lists', row: this.list })
@@ -452,8 +461,10 @@ export class ListStore {
   }
 
   /** Alle abgehakten Artikel entfernen (D-030) */
-  async removeChecked(): Promise<string[]> {
-    const ids = this.items.filter((x) => x.checked && !x.deleted).map((x) => x.id)
+  /** Abgehakte Artikel entfernen; olderThanMs: nur solche, die vor mindestens so langer Zeit abgehakt wurden (D-043) */
+  async removeChecked(olderThanMs = 0): Promise<string[]> {
+    const limit = new Date(Date.now() - olderThanMs).toISOString()
+    const ids = this.items.filter((x) => x.checked && !x.deleted && (!olderThanMs || x.updatedAt <= limit)).map((x) => x.id)
     for (const id of ids) await this.updateItem(id, { deleted: true })
     return ids
   }
