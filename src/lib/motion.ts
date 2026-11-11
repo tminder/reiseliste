@@ -17,6 +17,11 @@ export function flash(el: Element) {
   window.setTimeout(() => el.classList.remove(cls), cls === 'flash' ? 1700 : 1400)
 }
 
+export function isOnScreen(el: Element): boolean {
+  const r = el.getBoundingClientRect()
+  return r.top >= 0 && r.bottom <= window.innerHeight
+}
+
 /** Zeile sichtbar machen, falls sie ausserhalb des Bildschirms liegt */
 export function reveal(el: Element) {
   const r = el.getBoundingClientRect()

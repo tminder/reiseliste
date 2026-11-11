@@ -32,7 +32,7 @@ import { categoryLabel, countryName, setUiLang, t, uiLang } from './i18n'
 import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
-import { flash, reducedMotion, reveal, slideOut, useFlip } from './lib/motion'
+import { flash, isOnScreen, reducedMotion, reveal, slideOut, useFlip } from './lib/motion'
 import { addQty, sumQty } from './lib/qty'
 import { isIos, isStandalone, listIdFrom, listUrl } from './lib/links'
 import { findConcept, nameIn, normalize, splitQuantity, suggest } from './lib/translate'
@@ -572,14 +572,18 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   const mainRef = useRef<HTMLElement>(null)
   const localChanges = useRef(new Map<string, number>())
   const markLocal = (itemId: string) => localChanges.current.set(itemId, Date.now())
+  const lastAdded = useRef<{ key: string; name: string; at: number } | null>(null)
   useFlip(
     mainRef,
     (itemId) => Date.now() - (localChanges.current.get(itemId) ?? 0) < 5000,
     (els) => {
-      // Selbst hinzugefügter Artikel ausserhalb des sichtbaren Bereichs: kurz hinscrollen
-      const el = els[els.length - 1]
-      const r = el.getBoundingClientRect()
-      if (r.top < 0 || r.bottom > window.innerHeight) el.scrollIntoView({ block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' })
+      // Selbst hinzugefügter Artikel ausserhalb des sichtbaren Bereichs: nicht wegscrollen (man tippt oft
+      // mehrere Artikel hintereinander), sondern kurz bestätigen – mit „Zeigen“ zum Hinspringen (D-044)
+      const last = lastAdded.current
+      if (!last || Date.now() - last.at > 3000) return
+      const el = els.find((e) => e.dataset.itemKey === last.key)
+      if (!el || isOnScreen(el)) return
+      showBar(t('addedHint', { name: last.name }), [{ label: t('show'), run: () => reveal(el) }])
     },
   )
 
@@ -705,6 +709,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     const key = data.conceptId ?? normalize(clean)
     const existing = store.items.find((i) => !i.deleted && !i.checked && dupKey(i) === key)
     if (!existing) {
+      lastAdded.current = { key, name: clean, at: Date.now() }
       void store.addItem(data)
       return
     }
@@ -719,7 +724,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         mainRef.current?.querySelector(`[data-item-id="${existing.id}"]`) ??
         mainRef.current?.querySelector(`[data-item-key="${CSS.escape(key)}"]`)
       if (!el) return
-      reveal(el)
+      // Nicht hinscrollen (man tippt oft mehrere Artikel hintereinander); die Leiste unten bestätigt
       flash(el)
       const badge = el.querySelector('.qty')
       if (badge) {
@@ -729,6 +734,13 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
       }
     }, 40)
     showBar(t('qtyMerged', { name: nameIn(existing.conceptId, profile.lang) ?? existing.text, qty: formatQty(merged) }), [
+      {
+        label: t('show'),
+        run: () => {
+          const el = mainRef.current?.querySelector(`[data-item-key="${CSS.escape(key)}"]`)
+          if (el) reveal(el)
+        },
+      },
       { label: t('undo'), run: () => void store.updateItem(existing.id, { qty: before }) },
       {
         label: t('addSeparately'),

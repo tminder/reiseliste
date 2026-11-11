@@ -198,7 +198,12 @@ button.link {
 .add {
   display: flex;
   gap: 8px;
-  position: relative;
+  position: sticky;
+  top: env(safe-area-inset-top);
+  z-index: 5;
+  background: var(--bg);
+  padding: 8px 0;
+  margin: -8px 0;
 }
 .add .primary {
   font-size: 1.3rem;
