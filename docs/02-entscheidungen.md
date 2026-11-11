@@ -266,14 +266,14 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
   - **Löschen und „Erledigte entfernen“:** Zeilen gleiten nach links hinaus, die Lücke schliesst sich weich. Die Rückgängig-Leiste fährt von unten herein.
   - **Änderungen anderer Mitglieder** (Sync): Die betroffene Zeile leuchtet kurz auf. Eigene Änderungen leuchten nicht.
   - **„Ich hole das“:** Die Hand ploppt, der Hinweis blendet ein.
-  - Bei „Bewegung reduzieren“ im System gibt es keine Bewegung, nur Farbwechsel.
+  - Bei „Bewegung reduzieren“ im System gibt es keine Bewegung. Das Aufleuchten bleibt als kurze Einfärbung mit Farbübergang, damit Änderungen trotzdem sichtbar sind.
 - **Begründung:** Wunsch des Inhabers: Statuswechsel sollen deutlicher und eleganter bestätigt werden. Im Laden soll man sehen, was gerade passiert ist, auch bei Änderungen anderer.
 - **Folgen:** Abhaken wirkt sich erst nach 0,4 s auf Liste und Sync aus. Auf dem iPhone gibt es keine Vibration, weil Safari sie nicht unterstützt.
 
 ## D-045 · Doppelte Artikel zusammenführen
 
 - **Entscheidung:** Als gleich gelten Artikel mit demselben Wörterbuch-Eintrag („Milch“, „milk“, „leche“), sonst derselbe Text ohne Rücksicht auf Gross- und Kleinschreibung. „H-Milch“ und „Milch“ bleiben getrennt.
-  - **Beim Hinzufügen:** Steht der Artikel schon offen auf der Liste, entsteht keine neue Zeile, die Menge wird erhöht („Milch war schon auf der Liste: jetzt 3x · Rückgängig · Separat“). „Separat“ legt doch einen eigenen Eintrag an.
+  - **Beim Hinzufügen:** Steht der Artikel schon offen auf der Liste, entsteht keine neue Zeile, die Menge wird erhöht („Milch war schon auf der Liste: jetzt 3x · Rückgängig · Separat“). „Separat“ legt doch einen eigenen Eintrag an. Die bestehende Zeile wird dabei sichtbar gemacht: Die Liste scrollt hin, die Zeile leuchtet auf, die Menge hüpft kurz.
   - **Beim Tippen:** Vorschläge, die schon offen auf der Liste stehen, zeigen „✓ schon auf der Liste“.
   - **Bei der Anzeige:** Mehrere offene Einträge desselben Artikels (z. B. gleichzeitig auf zwei Handys eingetragen oder „Separat“) erscheinen als eine Zeile mit summierter Menge und allen Autoren. „2 Einträge“ klappt die Einzeleinträge auf, dort lassen sie sich einzeln löschen. Abhaken, Löschen und „Ich hole das“ gelten für alle Einträge der Zeile.
   - **Mengen** (`src/lib/qty.ts`): Stück werden addiert (ohne Angabe = 1), g/kg und ml/cl/l umgerechnet („500 g + 1 kg = 1,5 kg“), gleiche andere Einheiten addiert („2 Packungen + 1 Packungen“). Sonst bleiben beide stehen („1 Packung + 500 g“).

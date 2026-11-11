@@ -972,7 +972,7 @@ button.scanner-alt {
 
 /* ---------- Weiche Übergänge bei Statuswechseln (D-044) ---------- */
 .item {
-  transition: opacity 0.25s ease, background-color 0.25s ease;
+  transition: opacity 0.25s ease, background-color 0.8s ease, box-shadow 0.8s ease;
 }
 /* Kurzes Aufleuchten: neu, wiederhergestellt oder von anderen geändert */
 .item.flash {
@@ -1098,4 +1098,24 @@ ul.entries li {
 }
 .menu-version {
   padding: 6px 14px 4px;
+}
+/* Ohne Animation (Bewegung reduzieren): kurz einfärben, dann über den Farbübergang zurück (D-044) */
+.item.flash-static {
+  background-color: var(--accent-soft);
+  box-shadow: 0 0 0 3px var(--accent);
+  transition: none;
+}
+/* Menge hüpft kurz, wenn sie sich durch Zusammenführen ändert (D-045) */
+.qty.bump {
+  display: inline-block;
+  animation: check-pop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .qty.bump {
+    animation: none;
+  }
+}
+/* Platz unten, damit die Leiste „Rückgängig“ die letzte Zeile nicht verdeckt */
+main.page:has(.group) {
+  padding-bottom: calc(110px + env(safe-area-inset-bottom));
 }

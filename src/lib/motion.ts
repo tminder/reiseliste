@@ -5,12 +5,22 @@ import { useLayoutEffect, useRef } from 'react'
 
 export const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
-/** Kurzes Aufleuchten einer Zeile */
+/**
+ * Kurzes Aufleuchten einer Zeile. Bei „Bewegung reduzieren“ ohne Animation: Die Zeile wird
+ * kurz eingefärbt und blendet dann über einen einfachen Farbübergang zurück.
+ */
 export function flash(el: Element) {
-  el.classList.remove('flash')
+  const cls = reducedMotion() ? 'flash-static' : 'flash'
+  el.classList.remove('flash', 'flash-static')
   void (el as HTMLElement).offsetWidth // Animation neu starten
-  el.classList.add('flash')
-  window.setTimeout(() => el.classList.remove('flash'), 1700)
+  el.classList.add(cls)
+  window.setTimeout(() => el.classList.remove(cls), cls === 'flash' ? 1700 : 1400)
+}
+
+/** Zeile sichtbar machen, falls sie ausserhalb des Bildschirms liegt */
+export function reveal(el: Element) {
+  const r = el.getBoundingClientRect()
+  if (r.top < 0 || r.bottom > window.innerHeight) el.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' })
 }
 
 /** Zeile(n) hinausgleiten lassen, danach erst entfernen */

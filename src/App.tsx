@@ -32,7 +32,7 @@ import { categoryLabel, countryName, setUiLang, t, uiLang } from './i18n'
 import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
-import { flash, reducedMotion, slideOut, useFlip } from './lib/motion'
+import { flash, reducedMotion, reveal, slideOut, useFlip } from './lib/motion'
 import { addQty, sumQty } from './lib/qty'
 import { isIos, isStandalone, listIdFrom, listUrl } from './lib/links'
 import { findConcept, nameIn, normalize, splitQuantity, suggest } from './lib/translate'
@@ -711,10 +711,23 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     const before = existing.qty
     const merged = addQty(before, qty)
     void store.updateItem(existing.id, { qty: merged })
+    // Bestehende Zeile zeigen: hinscrollen, aufleuchten, Menge hüpft kurz (D-044, D-045).
+    // Bei zusammengefassten Zeilen trägt die Zeile die ID des ersten Eintrags.
+    markLocal(existing.id)
     window.setTimeout(() => {
-      const el = mainRef.current?.querySelector(`[data-item-id="${existing.id}"]`)
-      if (el) flash(el)
-    }, 30)
+      const el =
+        mainRef.current?.querySelector(`[data-item-id="${existing.id}"]`) ??
+        mainRef.current?.querySelector(`[data-item-key="${CSS.escape(key)}"]`)
+      if (!el) return
+      reveal(el)
+      flash(el)
+      const badge = el.querySelector('.qty')
+      if (badge) {
+        badge.classList.remove('bump')
+        void (badge as HTMLElement).offsetWidth
+        badge.classList.add('bump')
+      }
+    }, 40)
     showBar(t('qtyMerged', { name: nameIn(existing.conceptId, profile.lang) ?? existing.text, qty: formatQty(merged) }), [
       { label: t('undo'), run: () => void store.updateItem(existing.id, { qty: before }) },
       {
@@ -1125,6 +1138,7 @@ function ItemRow({
     <div
       ref={rowRef}
       data-item-id={item.id}
+      data-item-key={dupKey(item)}
       data-stamp={stamp}
       className={`item ${shownChecked ? 'checked' : ''} ${pending !== null ? 'just-toggled' : ''}`}
     >
