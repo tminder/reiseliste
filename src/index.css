@@ -1060,6 +1060,8 @@ button.ghost.small.active svg {
 
 /* Doppelte Artikel (D-045) */
 .on-list {
+  white-space: nowrap;
+  display: inline-block;
   margin-left: 8px;
   font-size: 0.8rem;
   color: var(--accent);
