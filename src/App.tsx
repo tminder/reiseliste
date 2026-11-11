@@ -32,9 +32,10 @@ import { categoryLabel, countryName, setUiLang, t, uiLang } from './i18n'
 import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
-import { reducedMotion, slideOut, useFlip } from './lib/motion'
+import { flash, reducedMotion, slideOut, useFlip } from './lib/motion'
+import { addQty, sumQty } from './lib/qty'
 import { isIos, isStandalone, listIdFrom, listUrl } from './lib/links'
-import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
+import { findConcept, nameIn, normalize, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
@@ -554,13 +555,15 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   useEffect(() => setLastList(id), [id])
   const [input, setInput] = useState('')
   // „Gelöscht · Rückgängig“ für 5 Sekunden (D-042)
-  const [undo, setUndo] = useState<{ ids: string[]; label: string } | null>(null)
+  // Leiste unten mit Hinweis und Aktionen („Rückgängig“, „Separat hinzufügen“)
+  const [undo, setUndo] = useState<{ label: string; actions: { label: string; run: () => void }[] } | null>(null)
   const undoTimer = useRef<number | undefined>(undefined)
-  const showUndo = (ids: string[], label: string) => {
+  const showBar = (label: string, actions: { label: string; run: () => void }[]) => {
     window.clearTimeout(undoTimer.current)
-    setUndo({ ids, label })
+    setUndo({ label, actions })
     undoTimer.current = window.setTimeout(() => setUndo(null), 5000)
   }
+  const showUndo = (ids: string[], label: string) => showBar(label, [{ label: t('undo'), run: () => void store.restore(ids) }])
   useEffect(() => () => window.clearTimeout(undoTimer.current), [])
 
   // ---- Weiche Übergänge (D-044) ----
@@ -694,14 +697,32 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   function add(text: string, conceptId?: string) {
     const { qty, text: clean } = splitQuantity(text)
     if (!clean) return
-    void store.addItem({
-      text: clean,
-      qty,
-      lang: profile.lang,
-      conceptId: conceptId ?? findConcept(clean, profile.lang),
-      author: profile.name,
-    })
+    const data = { text: clean, qty, lang: profile.lang, conceptId: conceptId ?? findConcept(clean, profile.lang), author: profile.name }
     setInput('')
+    // Steht derselbe Artikel schon offen auf der Liste: Menge erhöhen statt neuer Zeile (D-045)
+    const key = data.conceptId ?? normalize(clean)
+    const existing = store.items.find((i) => !i.deleted && !i.checked && dupKey(i) === key)
+    if (!existing) {
+      void store.addItem(data)
+      return
+    }
+    const before = existing.qty
+    const merged = addQty(before, qty)
+    void store.updateItem(existing.id, { qty: merged })
+    window.setTimeout(() => {
+      const el = mainRef.current?.querySelector(`[data-item-id="${existing.id}"]`)
+      if (el) flash(el)
+    }, 30)
+    showBar(t('qtyMerged', { name: nameIn(existing.conceptId, profile.lang) ?? existing.text, qty: formatQty(merged) }), [
+      { label: t('undo'), run: () => void store.updateItem(existing.id, { qty: before }) },
+      {
+        label: t('addSeparately'),
+        run: () => {
+          void store.updateItem(existing.id, { qty: before })
+          void store.addItem(data)
+        },
+      },
+    ])
   }
 
   if (!list) {
@@ -729,11 +750,17 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     again.push(i)
     if (again.length >= 8) break
   }
-  const groups = new Map<Category | 'sonstiges', Item[]>()
+  // Pro Abteilung; doppelte offene Einträge desselben Artikels werden zu einer Zeile zusammengefasst (D-045)
+  const groups = new Map<Category | 'sonstiges', Item[][]>()
   for (const item of open) {
     const cat = (item.conceptId && BY_ID.get(item.conceptId)?.category) || 'sonstiges'
-    groups.set(cat, [...(groups.get(cat) ?? []), item])
+    const list = groups.get(cat) ?? []
+    const same = list.find((g) => dupKey(g[0]) === dupKey(item))
+    if (same) same.push(item)
+    else list.push([item])
+    groups.set(cat, list)
   }
+  const openKeys = new Set(open.map(dupKey))
   const order: (Category | 'sonstiges')[] = [...CATEGORY_ORDER, 'sonstiges']
 
   return (
@@ -888,6 +915,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                     }}
                   >
                     {s.names[profile.lang][0]} <span className="muted">→ {s.names[target][0]}</span>
+                    {openKeys.has(s.id) && <span className="on-list">✓ {t('alreadyOnList')}</span>}
                   </button>
                 </li>
               ))}
@@ -948,8 +976,8 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         .map((cat) => (
           <section key={cat} className="group">
             <h3 data-flip={cat}>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
-            {groups.get(cat)!.map((item) => (
-              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(i) => showUndo([i.id], t('deletedOne', { name: i.text }))} onLocalChange={markLocal} />
+            {groups.get(cat)!.map((grp) => (
+              <ItemRow key={grp[0].id} item={grp[0]} group={grp.length > 1 ? grp : undefined} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} />
             ))}
           </section>
         ))}
@@ -970,7 +998,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
             </button>
           </h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(i) => showUndo([i.id], t('deletedOne', { name: i.text }))} onLocalChange={markLocal} />
+            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} />
           ))}
         </section>
       )}
@@ -978,16 +1006,19 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
       {undo && (
         <div className="undo-bar" role="status">
           <span>{undo.label}</span>
-          <button
-            className="link"
-            onClick={() => {
-              void store.restore(undo.ids)
-              window.clearTimeout(undoTimer.current)
-              setUndo(null)
-            }}
-          >
-            {t('undo')}
-          </button>
+          {undo.actions.map((a) => (
+            <button
+              key={a.label}
+              className="link"
+              onClick={() => {
+                a.run()
+                window.clearTimeout(undoTimer.current)
+                setUndo(null)
+              }}
+            >
+              {a.label}
+            </button>
+          ))}
         </div>
       )}
 
@@ -1042,8 +1073,11 @@ function ItemRow({
   me,
   onDeleted,
   onLocalChange,
+  group,
 }: {
   item: Item
+  /** Mehrere offene Einträge desselben Artikels, als eine Zeile angezeigt (D-045) */
+  group?: Item[]
   store: ListStore
   target: Lang
   country: string
@@ -1054,12 +1088,20 @@ function ItemRow({
   /** Name aus dem Profil (für „Ich hole das“, D-031) */
   me: string
   /** Für „Gelöscht · Rückgängig“ (D-042) */
-  onDeleted: (item: Item) => void
+  onDeleted: (ids: string[], name: string) => void
   /** Eigene Änderung melden, damit sie nicht als „von anderen“ aufleuchtet (D-044) */
   onLocalChange: (id: string) => void
 }) {
   const [editing, setEditing] = useState(false)
   const [showCard, setShowCard] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  // Zusammengefasste Zeile: Menge summiert, alle Autoren, Aktionen gelten für alle Einträge (D-045)
+  const entries = group ?? [item]
+  const ids = entries.map((e) => e.id)
+  const qty = group ? sumQty(group.map((e) => e.qty)) : item.qty
+  const author = [...new Set(entries.map((e) => e.author).filter(Boolean))].join(', ')
+  const claimedBy = entries.find((e) => e.claimedBy)?.claimedBy ?? null
+  const stamp = entries.map((e) => e.updatedAt).reduce((a, b) => (a > b ? a : b))
   // Abhaken mit kurzer Animation, bevor die Zeile umsortiert wird (D-044)
   const [pending, setPending] = useState<boolean | null>(null)
   const shownChecked = pending ?? item.checked
@@ -1078,7 +1120,7 @@ function ItemRow({
     <div
       ref={rowRef}
       data-item-id={item.id}
-      data-stamp={item.updatedAt}
+      data-stamp={stamp}
       className={`item ${shownChecked ? 'checked' : ''} ${pending !== null ? 'just-toggled' : ''}`}
     >
       <button
@@ -1093,8 +1135,8 @@ function ItemRow({
           if (next) navigator.vibrate?.(12)
           window.setTimeout(
             () => {
-              // Beim Abhaken wird „Ich hole das“ zurückgesetzt (D-031)
-              void store.updateItem(item.id, { checked: next, ...(item.claimedBy ? { claimedBy: null } : {}) })
+              // Beim Abhaken wird „Ich hole das“ zurückgesetzt (D-031); bei zusammengefassten Zeilen alle Einträge
+              for (const e of entries) void store.updateItem(e.id, { checked: next, ...(e.claimedBy ? { claimedBy: null } : {}) })
               setPending(null)
             },
             reducedMotion() ? 0 : 380,
@@ -1105,7 +1147,7 @@ function ItemRow({
       </button>
       <div className="body">
         <div className="main">
-          {item.qty && <span className="qty">{formatQty(item.qty)}</span>}
+          {qty && <span className="qty">{formatQty(qty)}</span>}
           <span className="txt">{own}</span>
         </div>
         <div className="orig">
@@ -1135,9 +1177,14 @@ function ItemRow({
           ) : (
             <span className="missing">{t('noTranslation')}</span>
           )}
-          {!shopMode && <span className="muted"> · {item.author}</span>}
-          {item.claimedBy && !item.checked && (
-            <span className="claim"> · {item.claimedBy === me ? t('claimedByMe') : t('claimedBy', { name: item.claimedBy })}</span>
+          {!shopMode && <span className="muted"> · {author}</span>}
+          {group && (
+            <button className="link entries-btn" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
+              {t('entries', { n: group.length })}
+            </button>
+          )}
+          {claimedBy && !item.checked && (
+            <span className="claim"> · {claimedBy === me ? t('claimedByMe') : t('claimedBy', { name: claimedBy })}</span>
           )}
         </div>
         {FEATURES.community && !local && !shopMode && !editing && (
@@ -1166,6 +1213,28 @@ function ItemRow({
         {editing && (
           <p className="muted small-text correction-hint">{t('correctionHint')}</p>
         )}
+        {group && expanded && (
+          <ul className="entries">
+            {group.map((e) => (
+              <li key={e.id}>
+                <span>
+                  {e.qty ? formatQty(e.qty) : '1x'} · {e.author}
+                </span>
+                <button
+                  className="ghost small"
+                  aria-label={t('delete')}
+                  onClick={() => {
+                    onLocalChange(e.id)
+                    void store.updateItem(e.id, { deleted: true })
+                    onDeleted([e.id], own)
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
         {shopMode && showHint && hint && !item.checked && <div className="hint">{hint}</div>}
         {shopMode && showPhotos && local && (
           <PhotoStrip country={country} conceptId={item.conceptId} term={local} store={shopTag} storeName={shopName} />
@@ -1188,12 +1257,12 @@ function ItemRow({
       {shopMode && !item.checked && (
         // „Ich hole das“ (D-031), nur in der Ladenansicht: antippen übernimmt den Artikel, nochmals antippen gibt ihn frei
         <button
-          className={`ghost small ${item.claimedBy === me ? 'active' : ''}`}
-          aria-label={item.claimedBy === me ? t('unclaim') : t('claim')}
-          title={item.claimedBy === me ? t('unclaim') : t('claim')}
+          className={`ghost small ${claimedBy === me ? 'active' : ''}`}
+          aria-label={claimedBy === me ? t('unclaim') : t('claim')}
+          title={claimedBy === me ? t('unclaim') : t('claim')}
           onClick={() => {
             onLocalChange(item.id)
-            void store.updateItem(item.id, { claimedBy: item.claimedBy === me ? null : me })
+            for (const e of entries) void store.updateItem(e.id, { claimedBy: claimedBy === me ? null : me })
           }}
         >
           <Hand size={18} />
@@ -1203,8 +1272,8 @@ function ItemRow({
         <button className="ghost small" aria-label={t('delete')} onClick={() => {
           onLocalChange(item.id)
           void slideOut(rowRef.current ? [rowRef.current] : []).then(() => {
-            void store.updateItem(item.id, { deleted: true })
-            onDeleted(item)
+            for (const e of entries) void store.updateItem(e.id, { deleted: true })
+            onDeleted(ids, own)
           })
         }}>
           <X size={18} />
@@ -1563,6 +1632,11 @@ function saveVisit(listId: string, v: Visit | null) {
   } catch {
     /* egal */
   }
+}
+
+/** Gleicher Artikel = gleicher Wörterbuch-Eintrag, sonst gleicher Text (D-045) */
+function dupKey(i: Item): string {
+  return i.conceptId ?? normalize(i.text)
 }
 
 /** „Rückgängig“ beim automatischen Reiseland (D-040): für diese Liste und dieses Land nicht mehr automatisch wechseln */

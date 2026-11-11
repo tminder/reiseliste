@@ -944,9 +944,7 @@ button.scanner-alt {
   box-shadow: 0 6px 20px rgb(0 0 0 / 0.25);
 }
 .undo-bar span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1 1 auto;
 }
 .undo-bar .link {
   color: #5eead4;
@@ -1058,4 +1056,33 @@ button.ghost.small.active svg {
   .main .txt {
     transition: none;
   }
+}
+
+/* Doppelte Artikel (D-045) */
+.on-list {
+  margin-left: 8px;
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+.entries-btn {
+  margin-left: 6px;
+  font-size: 0.8rem;
+}
+ul.entries {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+ul.entries li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  padding: 2px 0;
+}
+.undo-bar {
+  flex-wrap: wrap;
 }
