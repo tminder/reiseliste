@@ -32,6 +32,7 @@ import { categoryLabel, countryName, setUiLang, t, uiLang } from './i18n'
 import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
+import { reducedMotion, slideOut, useFlip } from './lib/motion'
 import { isIos, isStandalone, listIdFrom, listUrl } from './lib/links'
 import { findConcept, nameIn, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
@@ -562,6 +563,21 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   }
   useEffect(() => () => window.clearTimeout(undoTimer.current), [])
 
+  // ---- Weiche Übergänge (D-044) ----
+  const mainRef = useRef<HTMLElement>(null)
+  const localChanges = useRef(new Map<string, number>())
+  const markLocal = (itemId: string) => localChanges.current.set(itemId, Date.now())
+  useFlip(
+    mainRef,
+    (itemId) => Date.now() - (localChanges.current.get(itemId) ?? 0) < 5000,
+    (els) => {
+      // Selbst hinzugefügter Artikel ausserhalb des sichtbaren Bereichs: kurz hinscrollen
+      const el = els[els.length - 1]
+      const r = el.getBoundingClientRect()
+      if (r.top < 0 || r.bottom > window.innerHeight) el.scrollIntoView({ block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' })
+    },
+  )
+
   // ---- Erledigte automatisch entfernen (D-043): nach 1 Tag oder beim Verlassen des Ladens ----
   const autoClear = store.list ? store.list.autoClear !== false : false
   const showUndoRef = useRef(showUndo)
@@ -721,7 +737,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   const order: (Category | 'sonstiges')[] = [...CATEGORY_ORDER, 'sonstiges']
 
   return (
-    <main className={`page ${shopMode ? 'shop' : ''}`}>
+    <main ref={mainRef} className={`page ${shopMode ? 'shop' : ''}`}>
       <header className="topbar">
         <a href="#/" className="back" aria-label={t('allLists')}>
           <ArrowLeft size={22} />
@@ -931,28 +947,30 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         .filter((c) => groups.has(c))
         .map((cat) => (
           <section key={cat} className="group">
-            <h3>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
+            <h3 data-flip={cat}>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
             {groups.get(cat)!.map((item) => (
-              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(i) => showUndo([i.id], t('deletedOne', { name: i.text }))} />
+              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(i) => showUndo([i.id], t('deletedOne', { name: i.text }))} onLocalChange={markLocal} />
             ))}
           </section>
         ))}
 
       {done.length > 0 && (
         <section className="group done">
-          <h3 className="done-head">
+          <h3 className="done-head" data-flip="done">
             {t('inCart')}
             <button
               className="ghost small"
               onClick={() =>
-                void store.removeChecked().then((ids) => ids.length && showUndo(ids, t('deletedMany', { n: ids.length })))
+                void slideOut(Array.from(mainRef.current?.querySelectorAll('.group.done .item') ?? [])).then(() =>
+                  store.removeChecked().then((ids) => ids.length && showUndo(ids, t('deletedMany', { n: ids.length }))),
+                )
               }
             >
               <Trash2 size={16} /> {t('removeChecked')}
             </button>
           </h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(i) => showUndo([i.id], t('deletedOne', { name: i.text }))} />
+            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(i) => showUndo([i.id], t('deletedOne', { name: i.text }))} onLocalChange={markLocal} />
           ))}
         </section>
       )}
@@ -1023,6 +1041,7 @@ function ItemRow({
   shopMode,
   me,
   onDeleted,
+  onLocalChange,
 }: {
   item: Item
   store: ListStore
@@ -1036,9 +1055,15 @@ function ItemRow({
   me: string
   /** Für „Gelöscht · Rückgängig“ (D-042) */
   onDeleted: (item: Item) => void
+  /** Eigene Änderung melden, damit sie nicht als „von anderen“ aufleuchtet (D-044) */
+  onLocalChange: (id: string) => void
 }) {
   const [editing, setEditing] = useState(false)
   const [showCard, setShowCard] = useState(false)
+  // Abhaken mit kurzer Animation, bevor die Zeile umsortiert wird (D-044)
+  const [pending, setPending] = useState<boolean | null>(null)
+  const shownChecked = pending ?? item.checked
+  const rowRef = useRef<HTMLDivElement>(null)
   const [showPhotos, setShowPhotos] = useState(false)
   const [showHint, setShowHint] = useState(false)
   const [override, setOverride] = useState(item.localOverride ?? '')
@@ -1050,21 +1075,38 @@ function ItemRow({
   const hint = item.conceptId ? (HINTS[item.conceptId]?.[viewer] ?? HINTS[item.conceptId]?.en) : undefined
 
   return (
-    <div className={`item ${item.checked ? 'checked' : ''}`}>
+    <div
+      ref={rowRef}
+      data-item-id={item.id}
+      data-stamp={item.updatedAt}
+      className={`item ${shownChecked ? 'checked' : ''} ${pending !== null ? 'just-toggled' : ''}`}
+    >
       <button
         className="check"
         aria-label={item.checked ? t('markOpen') : t('check')}
-        onClick={() =>
-          // Beim Abhaken wird „Ich hole das“ zurückgesetzt (D-031)
-          void store.updateItem(item.id, { checked: !item.checked, ...(item.claimedBy ? { claimedBy: null } : {}) })
-        }
+        onClick={() => {
+          if (pending !== null) return
+          const next = !item.checked
+          onLocalChange(item.id)
+          // Erst Häkchen und Durchstreichen zeigen, dann rutscht die Zeile an ihren neuen Platz (D-044)
+          setPending(next)
+          if (next) navigator.vibrate?.(12)
+          window.setTimeout(
+            () => {
+              // Beim Abhaken wird „Ich hole das“ zurückgesetzt (D-031)
+              void store.updateItem(item.id, { checked: next, ...(item.claimedBy ? { claimedBy: null } : {}) })
+              setPending(null)
+            },
+            reducedMotion() ? 0 : 380,
+          )
+        }}
       >
-        {item.checked && <Check size={18} strokeWidth={3} />}
+        {shownChecked && <Check size={18} strokeWidth={3} />}
       </button>
       <div className="body">
         <div className="main">
           {item.qty && <span className="qty">{formatQty(item.qty)}</span>}
-          {own}
+          <span className="txt">{own}</span>
         </div>
         <div className="orig">
           {local ? (
@@ -1149,15 +1191,21 @@ function ItemRow({
           className={`ghost small ${item.claimedBy === me ? 'active' : ''}`}
           aria-label={item.claimedBy === me ? t('unclaim') : t('claim')}
           title={item.claimedBy === me ? t('unclaim') : t('claim')}
-          onClick={() => void store.updateItem(item.id, { claimedBy: item.claimedBy === me ? null : me })}
+          onClick={() => {
+            onLocalChange(item.id)
+            void store.updateItem(item.id, { claimedBy: item.claimedBy === me ? null : me })
+          }}
         >
           <Hand size={18} />
         </button>
       )}
       {!shopMode && (
         <button className="ghost small" aria-label={t('delete')} onClick={() => {
-          void store.updateItem(item.id, { deleted: true })
-          onDeleted(item)
+          onLocalChange(item.id)
+          void slideOut(rowRef.current ? [rowRef.current] : []).then(() => {
+            void store.updateItem(item.id, { deleted: true })
+            onDeleted(item)
+          })
         }}>
           <X size={18} />
         </button>

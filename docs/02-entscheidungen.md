@@ -257,3 +257,16 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Wunsch des Inhabers. Nach dem Einkauf soll die Liste ohne Handgriff wieder nur zeigen, was noch fehlt. Entfernte Artikel bleiben unter „Schon mal gekauft“ verfügbar.
 - **Folgen:** Als Web-App prüft Proviant nur, wenn sie offen ist oder wieder geöffnet wird, nicht im Hintergrund. `supabase/schema.sql` muss erneut ausgeführt werden (neue Spalte), bis dahin funktioniert alles, nur das Abschalten wird nicht synchronisiert. Ohne Standortfreigabe greift nur die 1-Tages-Regel.
 
+## D-044 · Weiche Übergänge bei Statuswechseln
+
+- **Entscheidung:** Statuswechsel sind sichtbar animiert, kurz (150–400 ms) und ohne Spielerei:
+  - **Abhaken:** Der Kreis ploppt, das Häkchen zeichnet sich, der Artikelname wird von links nach rechts durchgestrichen. Erst nach etwa 0,4 s rutscht die Zeile nach „Im Wagen“. Auf Android vibriert das Handy kurz.
+  - **Umsortieren:** Zeilen und Abteilungs-Überschriften gleiten an ihren neuen Platz (FLIP-Technik, `src/lib/motion.ts`), statt zu springen.
+  - **Hinzufügen und Rückgängig:** Neue Zeilen gleiten ein und leuchten kurz türkis auf. Liegt ein selbst hinzugefügter Artikel ausserhalb des sichtbaren Bereichs, scrollt die Liste hin.
+  - **Löschen und „Erledigte entfernen“:** Zeilen gleiten nach links hinaus, die Lücke schliesst sich weich. Die Rückgängig-Leiste fährt von unten herein.
+  - **Änderungen anderer Mitglieder** (Sync): Die betroffene Zeile leuchtet kurz auf. Eigene Änderungen leuchten nicht.
+  - **„Ich hole das“:** Die Hand ploppt, der Hinweis blendet ein.
+  - Bei „Bewegung reduzieren“ im System gibt es keine Bewegung, nur Farbwechsel.
+- **Begründung:** Wunsch des Inhabers: Statuswechsel sollen deutlicher und eleganter bestätigt werden. Im Laden soll man sehen, was gerade passiert ist, auch bei Änderungen anderer.
+- **Folgen:** Abhaken wirkt sich erst nach 0,4 s auf Liste und Sync aus. Auf dem iPhone gibt es keine Vibration, weil Safari sie nicht unterstützt.
+

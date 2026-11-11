@@ -309,8 +309,20 @@ button.link {
 }
 .checked .main,
 .checked .orig {
-  text-decoration: line-through;
   opacity: 0.55;
+}
+.checked .orig {
+  text-decoration: line-through;
+}
+/* Durchstreichen des Artikelnamens läuft von links nach rechts (D-044) */
+.main .txt {
+  background: linear-gradient(currentColor, currentColor) 0 55% / 0 2px no-repeat;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: background-size 0.3s ease;
+}
+.checked .main .txt {
+  background-size: 100% 2px;
 }
 .override {
   display: flex;
@@ -958,4 +970,92 @@ button.scanner-alt {
 .block {
   display: block;
   margin-top: 2px;
+}
+
+/* ---------- Weiche Übergänge bei Statuswechseln (D-044) ---------- */
+.item {
+  transition: opacity 0.25s ease, background-color 0.25s ease;
+}
+/* Kurzes Aufleuchten: neu, wiederhergestellt oder von anderen geändert */
+.item.flash {
+  animation: item-flash 1.2s ease-out;
+}
+@keyframes item-flash {
+  0% {
+    background-color: var(--accent-soft);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+  100% {
+    background-color: var(--card);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+/* Abhaken: Kreis ploppt, Häkchen zeichnet sich */
+.just-toggled .check {
+  animation: check-pop 0.32s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.just-toggled .check svg path,
+.just-toggled .check svg polyline {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: check-draw 0.25s 0.05s ease-out forwards;
+}
+.check {
+  transition: background-color 0.18s ease;
+}
+@keyframes check-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.22);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes check-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+/* „Ich hole das“: Hand ploppt, Hinweis blendet ein */
+button.ghost.small.active svg {
+  animation: check-pop 0.32s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.claim {
+  animation: fade-in 0.3s ease-out;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+/* Rückgängig-Leiste fährt von unten herein */
+.undo-bar {
+  animation: bar-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes bar-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .item.flash,
+  .just-toggled .check,
+  .just-toggled .check svg path,
+  .just-toggled .check svg polyline,
+  button.ghost.small.active svg,
+  .claim,
+  .undo-bar {
+    animation: none;
+  }
+  .just-toggled .check svg path,
+  .just-toggled .check svg polyline {
+    stroke-dashoffset: 0;
+  }
+  .main .txt {
+    transition: none;
+  }
 }
