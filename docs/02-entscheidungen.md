@@ -304,7 +304,7 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Der GitHub-Workflow „Datenbank sichern“ (`.github/workflows/backup.yml`) ist vorbereitet, aber vorerst nicht eingeschaltet: keine Secrets, kein Zeitplan, nur von Hand startbar. **Vor der nativen App ist die Sicherung Pflicht** (Phase 0 im Konzept). Dann: Secrets `SUPABASE_DB_URL` (Verbindung „Session pooler“ mit Passwort) und `BACKUP_PASSPHRASE` setzen, wöchentlichen Zeitplan im Workflow einschalten, ersten Lauf prüfen, Satz zur Sicherung in der Datenschutzerklärung ergänzen (Sicherung bei GitHub, USA, 90 Tage). Der Workflow sichert das Schema `public` und die Kennungen der anonymen Konten (`auth.users`) mit `pg_dump`, verschlüsselt mit GPG (AES-256) und bewahrt die Datei 90 Tage als Artefakt auf. Die Passphrase muss der Inhaber zusätzlich sicher aufbewahren.
 - **Begründung:** Entscheidung des Inhabers: Für den privaten Test genügt es vorerst ohne Sicherung, für Nutzer aus den App-Stores nicht. Das Repo ist öffentlich, darum nur verschlüsselt.
-- **Folgen:** Bis dahin gibt es keine Sicherung (S-035). Die Wiederherstellung ist nicht geübt (S-041).
+- **Folgen:** Bis dahin gibt es keine Sicherung, und die Wiederherstellung ist nicht geübt (S-035).
 
 ## D-051 · Eigene Fehlerüberwachung über Supabase
 

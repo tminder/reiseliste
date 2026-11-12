@@ -131,7 +131,7 @@ Schon heute gibt es einen Notnagel: Beim Beitreten übernimmt die App Name und S
 
 | Phase | Inhalt | Aufwand (Claude + Inhaber) |
 | --- | --- | --- |
-| 0. Vorbereitung | MVP-Test ausgewertet, Abläufe der Listenansicht ausgelagert (S-044), eigene Domain, Review (S-032), Datenschutz geprüft (S-034), **Datenbank-Sicherung eingeschaltet und Wiederherstellung geübt (Pflicht, D-050, S-041)** | 2–4 Tage |
+| 0. Vorbereitung | MVP-Test ausgewertet, Abläufe der Listenansicht ausgelagert (S-044), eigene Domain, Review (S-032), Datenschutz geprüft (S-034), **Datenbank-Sicherung eingeschaltet und Wiederherstellung geübt (Pflicht, D-050, S-035)** | 2–4 Tage |
 | 1. Erste App | Capacitor, Plattform-Schicht, Pfad-Links und Universal/App Links, nativer Speicher, Standort, QR, Teilen, Icons | 1–2 Wochen |
 | 2. Store | Konten, Store-Texte, Datenschutzangaben, TestFlight, 14 Tage geschlossener Test bei Google | 2–3 Wochen, davon viel Warten |
 | 3. Mehrwert | Push über Supabase Edge Function, danach Geofencing, Widget | 1–3 Wochen |
