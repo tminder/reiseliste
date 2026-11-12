@@ -49,9 +49,3 @@ export function addQty(a: string | null, b: string | null): string | null {
   if (pa && pb && pa.unit === pb.unit) return format({ n: pa.n + pb.n, unit: pa.unit })
   return null
 }
-
-/** Mehrere Mengen zusammenführen (für die zusammengefasste Anzeige; die Einträge passen zusammen, sonst „a + b“) */
-export function sumQty(list: (string | null)[]): string | null {
-  if (list.length <= 1) return list[0] ?? null
-  return list.slice(1).reduce<string>((acc, q) => addQty(acc, q) ?? `${acc} + ${q ?? '1'}`, list[0] ?? '1')
-}

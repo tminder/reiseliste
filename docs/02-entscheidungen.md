@@ -265,15 +265,16 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Wunsch des Inhabers: Statuswechsel sollen deutlicher und eleganter bestätigt werden. Im Laden soll man sehen, was gerade passiert ist, auch bei Änderungen anderer.
 - **Folgen:** Abhaken wirkt sich erst nach 0,4 s auf Liste und Sync aus. Auf dem iPhone gibt es keine Vibration, weil Safari sie nicht unterstützt.
 
-## D-045 · Doppelte Artikel zusammenführen
+## D-045 · Ein Eintrag pro Artikel, Mengen nur eindeutig zusammenzählen
 
-- **Entscheidung:** Als gleich gelten Artikel mit demselben Wörterbuch-Eintrag („Milch“, „milk“, „leche“), aber nur, wenn der Text genau einem Namen dieses Eintrags entspricht. Wurde der Eintrag nur über ein enthaltenes Wort gefunden („feine Schokolade“ → Schokolade), zählt der Text. Sonst gilt derselbe Text ohne Rücksicht auf Gross- und Kleinschreibung. „H-Milch“ und „Milch“, „schwarze Schokolade“ und „Schokolade“ bleiben getrennt.
-  - **Beim Hinzufügen:** Steht der Artikel schon offen und mit passender Menge auf der Liste, entsteht keine neue Zeile, die Menge wird erhöht („Milch war schon auf der Liste: jetzt 3x · Rückgängig · Separat“). „Separat“ legt doch einen eigenen Eintrag an. Die bestehende Zeile leuchtet auf und die Menge hüpft kurz. Die Liste scrollt nicht weg.
+- **Entscheidung:** Pro Artikel gibt es nur einen offenen Eintrag. Als gleich gelten Artikel mit demselben Wörterbuch-Eintrag („Milch“, „milk“, „leche“), aber nur, wenn der Text genau einem Namen dieses Eintrags entspricht. Wurde der Eintrag nur über ein enthaltenes Wort gefunden („feine Schokolade“), zählt der Text (ohne Gross- und Kleinschreibung). „H-Milch“ und „Milch“, „schwarze Schokolade“ und „Schokolade“ bleiben getrennt.
+  - **Beim Hinzufügen, eindeutig:** Beide haben eine Menge in derselben Einheit (Stück, g/kg, ml/cl/l, gleiche Packungsgrösse, `src/lib/qty.ts`): Die Menge wird addiert („Milch war schon auf der Liste: jetzt 3x · Rückgängig“).
+  - **Beim Hinzufügen, nicht eindeutig** (eine Seite ohne Menge, oder „2x“ und „2 × 100 g“): Nichts ändert sich. Die Leiste zeigt „Schokolade steht schon auf der Liste (2x)“ mit „Auf 2 × 100 g ändern“ bzw. „+1“ bei einer Eingabe ohne Menge.
+  - In allen Fällen leuchtet die bestehende Zeile auf, die Liste scrollt nicht weg.
   - **Beim Tippen:** Vorschläge, die schon offen auf der Liste stehen, zeigen „✓ schon auf der Liste“.
-  - **Bei der Anzeige:** Mehrere offene Einträge desselben Artikels mit zusammenpassenden Mengen (z. B. gleichzeitig auf zwei Handys eingetragen oder „Separat“) erscheinen als eine Zeile mit summierter Menge und allen Autoren. „2 Einträge“ klappt die Einzeleinträge auf, dort lassen sie sich einzeln löschen. Abhaken, Löschen und „Ich hole das“ gelten für alle Einträge der Zeile.
-  - **Mengen** (`src/lib/qty.ts`): Stück werden addiert (ohne Angabe = 1), g/kg und ml/cl/l umgerechnet („500 g + 1 kg = 1,5 kg“), gleiche andere Einheiten addiert („2 Packungen + 1 Packungen“). Gleiche Packungsgrössen werden addiert („2 × 100 g + 1 × 100 g = 3 × 100 g“, D-048). Passen die Mengen nicht zusammen („2“ und „2 × 100 g“, „1 Packung“ und „500 g“), wird nichts zusammengeführt: Es bleiben getrennte Zeilen, auch in der Anzeige (Wunsch des Inhabers, „1 + 2 × 100 g + 2“ war unverständlich).
-- **Begründung:** Wunsch des Inhabers (Varianten 1, 3 und 4 aus dem Vorschlag). Doppelte Zeilen führen im Laden zu Verwirrung oder Doppelkäufen.
-- **Folgen:** Abgehakte Artikel in „Im Wagen“ werden nicht zusammengefasst. Ist ein Artikel schon abgehakt, legt eine neue Eingabe einen neuen offenen Eintrag an.
+  - **Doppelte Einträge** (gleichzeitig auf zwei Geräten eingetragen oder aus älteren Versionen): Der älteste bleibt mit seiner Menge, die anderen werden entfernt. Bewusst ohne Zusammenzählen, damit mehrere Geräte nicht doppelt addieren.
+- **Begründung:** Entscheidung des Inhabers: Zusammenfassen schuf Fehler („1 + 2 × 100 g + 2“, schwarze Schokolade mit Schokolade verschmolzen). Darum nur ein Eintrag pro Artikel, kein „Separat“ und keine zusammengefassten Zeilen mehr, Mengen nur zusammenzählen, wenn es eindeutig ist.
+- **Folgen:** Wer bewusst zwei verschiedene Packungsgrössen will, ändert die Menge von Hand oder verwendet einen genaueren Artikelnamen. Bei gleichzeitigem Eintragen auf zwei Geräten kann eine Menge verloren gehen (selten).
 
 ## D-046 · Wechsel in die Ladenansicht prüft den Laden genauer
 

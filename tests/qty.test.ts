@@ -1,6 +1,6 @@
 // Zusammenrechnen von Mengen bei doppelten Artikeln (D-045)
 import { describe, expect, it } from 'vitest'
-import { addQty, canAddQty, sumQty } from '../src/lib/qty'
+import { addQty, canAddQty } from '../src/lib/qty'
 
 describe('addQty', () => {
   it.each([
@@ -32,13 +32,5 @@ describe('canAddQty', () => {
     expect(canAddQty('2', '2 × 100 g')).toBe(false)
     expect(canAddQty('2 × 100 g', '3 × 100 g')).toBe(true)
     expect(canAddQty('1 Packung', '500 g')).toBe(false)
-  })
-})
-
-describe('sumQty', () => {
-  it('fasst mehrere Mengen zusammen', () => {
-    expect(sumQty([null, null, '2'])).toBe('4')
-    expect(sumQty(['250 g'])).toBe('250 g')
-    expect(sumQty([null])).toBeNull()
   })
 })

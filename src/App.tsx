@@ -33,7 +33,7 @@ import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
 import { flash, reducedMotion, slideOut, useFlip } from './lib/motion'
-import { addQty, canAddQty, sumQty } from './lib/qty'
+import { addQty } from './lib/qty'
 import { isIos, isStandalone, listIdFrom, listUrl } from './lib/links'
 import { exactConcept, findConcept, nameIn, normalize, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
@@ -715,32 +715,28 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   const items = store.items.filter((i) => !i.deleted)
   const suggestions = suggest(input, profile.lang)
 
-  function add(text: string, conceptId?: string) {
-    const { qty, text: clean } = splitQuantity(text)
-    if (!clean) return
-    const data = { text: clean, qty, lang: profile.lang, conceptId: conceptId ?? findConcept(clean, profile.lang), author: profile.name }
-    setInput('')
-    pulseAdded()
-    // Steht derselbe Artikel schon offen auf der Liste und passen die Mengen zusammen: Menge erhöhen statt neuer Zeile (D-045).
-    // Unterschiedliche Einheiten oder Packungsgrössen („2“ und „2 × 100 g“) bleiben getrennte Zeilen.
-    const key = dupKey({ text: clean, lang: profile.lang, conceptId: data.conceptId } as Item)
-    const existing = store.items.find((i) => !i.deleted && !i.checked && dupKey(i) === key && canAddQty(i.qty, qty))
-    const merged = existing ? addQty(existing.qty, qty) : null
-    if (!existing || merged === null) {
-      void store.addItem(data)
-      return
+  // Doppelte offene Einträge desselben Artikels (gleichzeitig auf zwei Geräten oder aus älteren Versionen) zu einem
+  // zusammenführen (D-045): Der älteste bleibt mit seiner Menge, die anderen werden entfernt. Bewusst ohne Zusammenzählen:
+  // Jedes Gerät kommt so zum selben Ergebnis, auch wenn mehrere gleichzeitig aufräumen (sonst würde doppelt addiert).
+  useEffect(() => {
+    const byKey = new Map<string, Item[]>()
+    for (const i of store.items) {
+      if (i.deleted || i.checked) continue
+      const k = dupKey(i)
+      byKey.set(k, [...(byKey.get(k) ?? []), i])
     }
-    const before = existing.qty
-    void store.updateItem(existing.id, { qty: merged })
-    // Bestehende Zeile zeigen: hinscrollen, aufleuchten, Menge hüpft kurz (D-044, D-045).
-    // Bei zusammengefassten Zeilen trägt die Zeile die ID des ersten Eintrags.
-    markLocal(existing.id)
+    for (const dups of byKey.values()) {
+      if (dups.length < 2) continue
+      dups.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id))
+      for (const r of dups.slice(1)) void store.updateItem(r.id, { deleted: true })
+    }
+  }, [store, store.items])
+
+  // Bestehende Zeile zeigen: aufleuchten, Menge hüpft kurz (D-044). Nicht hinscrollen, die Leiste unten bestätigt.
+  function highlight(itemId: string) {
     window.setTimeout(() => {
-      const el =
-        mainRef.current?.querySelector(`[data-item-id="${existing.id}"]`) ??
-        mainRef.current?.querySelector(`[data-item-key="${CSS.escape(key)}"]`)
+      const el = mainRef.current?.querySelector(`[data-item-id="${itemId}"]`)
       if (!el) return
-      // Nicht hinscrollen (man tippt oft mehrere Artikel hintereinander); die Leiste unten bestätigt
       flash(el)
       const badge = el.querySelector('.qty')
       if (badge) {
@@ -749,16 +745,40 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         badge.classList.add('bump')
       }
     }, 40)
-    showBar(t('qtyMerged', { name: nameIn(existing.conceptId, profile.lang) ?? existing.text, qty: formatQty(merged) }), [
-      { label: t('undo'), run: () => void store.updateItem(existing.id, { qty: before }) },
-      {
-        label: t('addSeparately'),
-        run: () => {
-          void store.updateItem(existing.id, { qty: before })
-          void store.addItem(data)
-        },
-      },
-    ])
+  }
+
+  function add(text: string, conceptId?: string) {
+    const { qty, text: clean } = splitQuantity(text)
+    if (!clean) return
+    const data = { text: clean, qty, lang: profile.lang, conceptId: conceptId ?? findConcept(clean, profile.lang), author: profile.name }
+    setInput('')
+    pulseAdded()
+    // Pro Artikel gibt es nur einen offenen Eintrag (D-045)
+    const key = dupKey({ text: clean, lang: profile.lang, conceptId: data.conceptId } as Item)
+    const existing = store.items.find((i) => !i.deleted && !i.checked && dupKey(i) === key)
+    if (!existing) {
+      void store.addItem(data)
+      return
+    }
+    const name = nameIn(existing.conceptId, profile.lang) ?? existing.text
+    const before = existing.qty
+    markLocal(existing.id)
+    highlight(existing.id)
+    // Eindeutig: beide mit Menge in derselben Einheit bzw. Packungsgrösse → zusammenzählen
+    const sum = before !== null && qty !== null ? addQty(before, qty) : null
+    if (sum !== null) {
+      void store.updateItem(existing.id, { qty: sum })
+      showBar(t('qtyMerged', { name, qty: formatQty(sum) }), [{ label: t('undo'), run: () => void store.updateItem(existing.id, { qty: before }) }])
+      return
+    }
+    // Nicht eindeutig („Milch“ nochmals, „2x“ und „2 × 100 g“): nichts ändern, nur anbieten
+    const actions: { label: string; run: () => void }[] = []
+    if (qty !== null) actions.push({ label: t('setQty', { qty: formatQty(qty) }), run: () => void store.updateItem(existing.id, { qty }) })
+    else {
+      const plus = addQty(before, null)
+      if (plus !== null) actions.push({ label: t('plusOne'), run: () => void store.updateItem(existing.id, { qty: plus }) })
+    }
+    showBar(before ? t('alreadyOnListQty', { name, qty: formatQty(before) }) : t('alreadyOnListName', { name }), actions)
   }
 
   if (!list) {
@@ -786,15 +806,11 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     again.push(i)
     if (again.length >= 8) break
   }
-  // Pro Abteilung; doppelte offene Einträge desselben Artikels werden zu einer Zeile zusammengefasst (D-045)
-  const groups = new Map<Category | 'sonstiges', Item[][]>()
+  // Pro Abteilung
+  const groups = new Map<Category | 'sonstiges', Item[]>()
   for (const item of open) {
     const cat = (item.conceptId && BY_ID.get(item.conceptId)?.category) || 'sonstiges'
-    const list = groups.get(cat) ?? []
-    const same = list.find((g) => dupKey(g[0]) === dupKey(item) && canAddQty(g[0].qty, item.qty))
-    if (same) same.push(item)
-    else list.push([item])
-    groups.set(cat, list)
+    groups.set(cat, [...(groups.get(cat) ?? []), item])
   }
   const openKeys = new Set(open.map(dupKey))
   const order: (Category | 'sonstiges')[] = [...CATEGORY_ORDER, 'sonstiges']
@@ -1045,8 +1061,8 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         .map((cat) => (
           <section key={cat} className="group">
             <h3 data-flip={cat}>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
-            {groups.get(cat)!.map((grp) => (
-              <ItemRow key={grp[0].id} item={grp[0]} group={grp.length > 1 ? grp : undefined} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
+            {groups.get(cat)!.map((item) => (
+              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
             ))}
           </section>
         ))}
@@ -1143,11 +1159,8 @@ function ItemRow({
   onDeleted,
   onLocalChange,
   onChecked,
-  group,
 }: {
   item: Item
-  /** Mehrere offene Einträge desselben Artikels, als eine Zeile angezeigt (D-045) */
-  group?: Item[]
   store: ListStore
   target: Lang
   country: string
@@ -1166,14 +1179,10 @@ function ItemRow({
 }) {
   const [editing, setEditing] = useState(false)
   const [showCard, setShowCard] = useState(false)
-  const [expanded, setExpanded] = useState(false)
-  // Zusammengefasste Zeile: Menge summiert, alle Autoren, Aktionen gelten für alle Einträge (D-045)
-  const entries = group ?? [item]
-  const ids = entries.map((e) => e.id)
-  const qty = group ? sumQty(group.map((e) => e.qty)) : item.qty
-  const author = [...new Set(entries.map((e) => e.author).filter(Boolean))].join(', ')
-  const claimedBy = entries.find((e) => e.claimedBy)?.claimedBy ?? null
-  const stamp = entries.map((e) => e.updatedAt).reduce((a, b) => (a > b ? a : b))
+  const qty = item.qty
+  const author = item.author
+  const claimedBy = item.claimedBy ?? null
+  const stamp = item.updatedAt
   // Abhaken mit kurzer Animation, bevor die Zeile umsortiert wird (D-044)
   const [pending, setPending] = useState<boolean | null>(null)
   const shownChecked = pending ?? item.checked
@@ -1208,8 +1217,8 @@ function ItemRow({
           if (next) navigator.vibrate?.(12)
           window.setTimeout(
             () => {
-              // Beim Abhaken wird „Ich hole das“ zurückgesetzt (D-031); bei zusammengefassten Zeilen alle Einträge
-              for (const e of entries) void store.updateItem(e.id, { checked: next, ...(e.claimedBy ? { claimedBy: null } : {}) })
+              // Beim Abhaken wird „Ich hole das“ zurückgesetzt (D-031)
+              void store.updateItem(item.id, { checked: next, ...(item.claimedBy ? { claimedBy: null } : {}) })
               setPending(null)
               if (next) onChecked?.()
             },
@@ -1252,11 +1261,6 @@ function ItemRow({
             <span className="missing">{t('noTranslation')}</span>
           )}
           {!shopMode && <span className="muted"> · {author}</span>}
-          {group && (
-            <button className="link entries-btn" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
-              {t('entries', { n: group.length })}
-            </button>
-          )}
           {claimedBy && !item.checked && (
             <span className="claim"> · {claimedBy === me ? t('claimedByMe') : t('claimedBy', { name: claimedBy })}</span>
           )}
@@ -1287,28 +1291,6 @@ function ItemRow({
         {editing && (
           <p className="muted small-text correction-hint">{t('correctionHint')}</p>
         )}
-        {group && expanded && (
-          <ul className="entries">
-            {group.map((e) => (
-              <li key={e.id}>
-                <span>
-                  {e.qty ? formatQty(e.qty) : '1x'} · {e.author}
-                </span>
-                <button
-                  className="ghost small"
-                  aria-label={t('delete')}
-                  onClick={() => {
-                    onLocalChange(e.id)
-                    void store.updateItem(e.id, { deleted: true })
-                    onDeleted([e.id], own)
-                  }}
-                >
-                  <X size={14} />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
         {shopMode && showHint && hint && !item.checked && <div className="hint">{hint}</div>}
         {shopMode && showPhotos && local && (
           <PhotoStrip country={country} conceptId={item.conceptId} term={local} store={shopTag} storeName={shopName} />
@@ -1336,7 +1318,7 @@ function ItemRow({
           title={claimedBy === me ? t('unclaim') : t('claim')}
           onClick={() => {
             onLocalChange(item.id)
-            for (const e of entries) void store.updateItem(e.id, { claimedBy: claimedBy === me ? null : me })
+            void store.updateItem(item.id, { claimedBy: claimedBy === me ? null : me })
           }}
         >
           <Hand size={18} />
@@ -1346,8 +1328,8 @@ function ItemRow({
         <button className="ghost small" aria-label={t('delete')} onClick={() => {
           onLocalChange(item.id)
           void slideOut(rowRef.current ? [rowRef.current] : []).then(() => {
-            for (const e of entries) void store.updateItem(e.id, { deleted: true })
-            onDeleted(ids, own)
+            void store.updateItem(item.id, { deleted: true })
+            onDeleted([item.id], own)
           })
         }}>
           <X size={18} />
