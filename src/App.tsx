@@ -784,12 +784,14 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     const cat = (item.conceptId && BY_ID.get(item.conceptId)?.category) || 'sonstiges'
     groups.set(cat, [...(groups.get(cat) ?? []), item])
   }
-  // Was schon offen auf der Liste steht, pro Artikel mit Mengen („✓ 3x · 2 × 100 g auf der Liste“, D-045)
+  // Was schon offen auf der Liste steht, pro Artikel mit Menge („✓ 3x auf der Liste“, D-045)
   const openQtys = new Map<string, (string | null)[]>()
   for (const i of open) openQtys.set(dupKey(i), [...(openQtys.get(dupKey(i)) ?? []), i.qty])
   const onListLabel = (key: string) => {
     const qtys = openQtys.get(key)
-    return qtys ? t('alreadyOnList', { qty: qtys.map((q) => (q ? formatQty(q) : '1x')).join(' · ') }) : null
+    if (!qtys) return null
+    // Mehrere Zeilen (z. B. „3x“ und „2 × 100 g“): nur „auf der Liste“, ohne Mengen
+    return qtys.length > 1 ? t('onList') : t('alreadyOnList', { qty: qtys[0] ? formatQty(qtys[0]) : '1x' })
   }
   const order: (Category | 'sonstiges')[] = [...CATEGORY_ORDER, 'sonstiges']
 
