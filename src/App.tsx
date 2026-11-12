@@ -646,22 +646,27 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     setShop(s)
   }
 
-  // Laden verlassen (D-043): War man in der Ladenansicht bei einem Laden, merkt sich die App den Besuch.
-  // Ist man später (beim Zurückkehren in die App oder alle 2 Minuten) weiter als 150 m weg, werden Erledigte entfernt.
+  // Laden verlassen (D-043): Steht man in der Ladenansicht wirklich beim Laden (höchstens 100 m, GPS genau genug),
+  // merkt sich die App den Besuch. Ist man später (beim Zurückkehren in die App oder alle 2 Minuten) weiter als 150 m weg,
+  // werden Erledigte entfernt. Ein bloss vorgeschlagener Laden in der Nähe zählt nicht als Besuch.
   const visitShop = shopMode ? (autoShop ?? photoShop) : null
-  useEffect(() => {
-    if (visitShop?.lat != null && visitShop.lon != null) saveVisit(id, { lat: visitShop.lat, lon: visitShop.lon, at: Date.now() })
-  }, [id, visitShop?.id, visitShop?.lat, visitShop?.lon])
+  const visitShopRef = useRef(visitShop)
+  visitShopRef.current = visitShop
   useEffect(() => {
     if (!autoClear) return
     let busy = false
     const check = async () => {
       const visit = readVisit(id)
-      if (!visit || busy || document.visibilityState !== 'visible') return
+      const vs = visitShopRef.current
+      const candidate = !visit && vs?.lat != null && vs.lon != null ? vs : null
+      if ((!visit && !candidate) || busy || document.visibilityState !== 'visible') return
       busy = true
       try {
         const { latitude, longitude, accuracy } = (await getPosition(10_000)).coords
-        if (meters(latitude, longitude, visit.lat, visit.lon) > Math.max(150, accuracy)) {
+        if (candidate) {
+          if (accuracy <= VISIT_ACCURACY_M && meters(latitude, longitude, candidate.lat!, candidate.lon!) <= VISIT_RADIUS_M)
+            saveVisit(id, { lat: candidate.lat!, lon: candidate.lon!, at: Date.now() })
+        } else if (visit && meters(latitude, longitude, visit.lat, visit.lon) > Math.max(150, accuracy)) {
           saveVisit(id, null)
           const ids = await store.removeChecked()
           if (ids.length) showUndoRef.current(ids, t('autoClearedShop', { n: ids.length }))
@@ -680,7 +685,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
       window.clearInterval(iv)
       document.removeEventListener('visibilitychange', onVisible)
     }
-  }, [autoClear, id, store])
+  }, [autoClear, id, store, visitShop?.id, visitShop?.lat, visitShop?.lon])
 
   const list = store.list
 
@@ -1704,11 +1709,16 @@ function PhotoStrip({
 /** "2" → "2x", "500 g" bleibt "500 g" */
 const DAY_MS = 24 * 60 * 60 * 1000
 
-/** Letzter Ladenbesuch pro Liste (D-043), nur auf diesem Gerät, höchstens 12 Stunden gültig */
+/** Als Ladenbesuch zählt nur, wer höchstens so weit vom Laden entfernt ist, bei genügend genauem GPS (D-043) */
+const VISIT_RADIUS_M = 100
+const VISIT_ACCURACY_M = 100
+
+/** Letzter Ladenbesuch pro Liste (D-043), nur auf diesem Gerät, höchstens 12 Stunden gültig.
+ *  Schlüssel „rl:shopvisit“: ältere Einträge („rl:visit“) wurden auch ohne echten Besuch gespeichert und gelten nicht mehr. */
 type Visit = { lat: number; lon: number; at: number }
 function readVisit(listId: string): Visit | null {
   try {
-    const v = JSON.parse(localStorage.getItem(`rl:visit:${listId}`) ?? 'null') as Visit | null
+    const v = JSON.parse(localStorage.getItem(`rl:shopvisit:${listId}`) ?? 'null') as Visit | null
     return v && Date.now() - v.at < 12 * 60 * 60 * 1000 ? v : null
   } catch {
     return null
@@ -1716,8 +1726,8 @@ function readVisit(listId: string): Visit | null {
 }
 function saveVisit(listId: string, v: Visit | null) {
   try {
-    if (v) localStorage.setItem(`rl:visit:${listId}`, JSON.stringify(v))
-    else localStorage.removeItem(`rl:visit:${listId}`)
+    if (v) localStorage.setItem(`rl:shopvisit:${listId}`, JSON.stringify(v))
+    else localStorage.removeItem(`rl:shopvisit:${listId}`)
   } catch {
     /* egal */
   }
