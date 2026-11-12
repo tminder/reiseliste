@@ -14,16 +14,17 @@ import {
   Lightbulb,
   RotateCcw,
   ScanLine,
-  List,
   LocateFixed,
   MapPin,
   Menu,
   Pencil,
   Plus,
+  Settings,
   Share2,
   ShoppingCart,
   Store as StoreIcon,
   Trash2,
+  UserRound,
   X,
 } from 'lucide-react'
 import { CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
@@ -66,25 +67,28 @@ const go = (path: string) => (location.hash = path)
 
 export default function App() {
   const [profile, setProfile] = useState<Profile | null>(profileStore.get())
+  const [editingProfile, setEditingProfile] = useState(false)
   const route = useRoute()
   // Sprache der Oberfläche = Sprache aus dem Profil (vor der Einrichtung: Browsersprache)
   setUiLang(profile?.lang ?? guessLang())
 
   if (route.page === 'privacy') return <Privacy />
-  if (!profile)
+  if (!profile || editingProfile)
     return (
       <ProfileSetup
         listId={route.page === 'list' && 'id' in route ? route.id : undefined}
         onDone={(p) => {
           profileStore.set(p)
           setProfile(p)
+          setEditingProfile(false)
         }}
+        onCancel={profile ? () => setEditingProfile(false) : undefined}
       />
     )
   return route.page === 'list' && 'id' in route ? (
-    <ListView key={route.id} id={route.id} profile={profile} />
+    <ListView key={route.id} id={route.id} profile={profile} onEditProfile={() => setEditingProfile(true)} />
   ) : (
-    <Home profile={profile} onEditProfile={() => setProfile(null)} />
+    <Home profile={profile} onEditProfile={() => setEditingProfile(true)} />
   )
 }
 
@@ -95,7 +99,7 @@ function guessLang(): Lang {
   return LANGS.includes(l) ? l : 'de'
 }
 
-function ProfileSetup({ onDone, listId }: { onDone: (p: Profile) => void; listId?: string }) {
+function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile) => void; onCancel?: () => void; listId?: string }) {
   const existing = profileStore.get()
   const hasProfile = !!existing
   // Neues Gerät, Link auf eine Liste: bestehende Mitglieder zur Auswahl anbieten (D-029)
@@ -173,8 +177,13 @@ function ProfileSetup({ onDone, listId }: { onDone: (p: Profile) => void; listId
           <span className="muted small-text">{t('homeHint')}</span>
         </label>
         <button className="primary" disabled={!name.trim()}>
-          {t('letsGo')}
+          {onCancel ? t('save') : t('letsGo')}
         </button>
+        {onCancel && (
+          <button type="button" className="ghost" onClick={onCancel}>
+            {t('cancel')}
+          </button>
+        )}
       </form>
       <footer className="footer">
         <a href="#/datenschutz">{t('privacy')}</a>
@@ -552,7 +561,7 @@ function SyncBadge({ state, error }: { state: SyncState; error: string | null })
   )
 }
 
-function ListView({ id, profile }: { id: string; profile: Profile }) {
+function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile; onEditProfile: () => void }) {
   const { store } = useStore(id, profile)
   useEffect(() => setLastList(id), [id])
   const [input, setInput] = useState('')
@@ -809,6 +818,10 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           <ShopBar shop={shop} shopMode={shopMode} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
         </div>
         <SyncBadge state={store.sync} error={lastSyncError} />
+        {/* Teilen direkt in der Kopfzeile, das Menü ist für den Rest (D-017) */}
+        <button className="ghost icon" aria-label={t('share')} title={t('share')} onClick={() => setShowShare(true)}>
+          <Share2 size={20} />
+        </button>
         <div className="menu-wrap">
           <button className="ghost icon" aria-label={t('menu')} aria-expanded={showMenu} onClick={() => setShowMenu(!showMenu)}>
             <Menu size={20} />
@@ -817,15 +830,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
             <>
               <div className="menu-backdrop" onClick={() => setShowMenu(false)} />
               <div className="menu" role="menu">
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setShowMenu(false)
-                    setShowShare(true)
-                  }}
-                >
-                  <Share2 size={18} /> {t('share')}
-                </button>
+                <div className="menu-label">{t('thisList')}</div>
                 <button
                   role="menuitem"
                   onClick={() => {
@@ -839,29 +844,11 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                   role="menuitem"
                   onClick={() => {
                     setShowMenu(false)
-                    setShopMode(!shopMode)
-                  }}
-                >
-                  <ShoppingCart size={18} /> {shopMode ? t('shopModeEnd') : t('shopMode')}
-                </button>
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setShowMenu(false)
                     setShowEdit(true)
                   }}
                 >
-                  <Pencil size={18} /> {t('editList')}
+                  <Settings size={18} /> {t('editList')}
                 </button>
-                <button role="menuitem" onClick={() => go('/')}>
-                  <List size={18} /> {t('allLists')}
-                </button>
-                <button role="menuitem" onClick={() => go('/datenschutz')}>
-                  <Shield size={18} /> {t('privacy')}
-                </button>
-                <div className="menu-version">
-                  <AppVersion />
-                </div>
                 <button
                   role="menuitem"
                   className="danger"
@@ -872,6 +859,23 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                 >
                   <Trash2 size={18} /> {t('removeFromDevice')}
                 </button>
+                <div className="menu-sep" role="separator" />
+                <div className="menu-label">{t('appName')}</div>
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setShowMenu(false)
+                    onEditProfile()
+                  }}
+                >
+                  <UserRound size={18} /> {t('myProfile')}
+                </button>
+                <button role="menuitem" onClick={() => go('/datenschutz')}>
+                  <Shield size={18} /> {t('privacy')}
+                </button>
+                <div className="menu-version">
+                  <AppVersion />
+                </div>
               </div>
             </>
           )}

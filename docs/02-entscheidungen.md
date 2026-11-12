@@ -97,11 +97,14 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Wunsch des Inhabers. Handys trennen die Echtzeit-Verbindung im Hintergrund, der Abgleich fängt das auf.
 - **Folgen:** Ein Update kann die Seite mitten in der Eingabe neu laden. Bereits gespeicherte Artikel gehen dabei nicht verloren. Der Abgleich alle 20 Sekunden erzeugt mehr Anfragen an Supabase, im Gratis-Tarif ist das unkritisch.
 
-## D-017 · Menü (☰) in der Liste
+## D-017 · Kopfzeile und Menü (☰) in der Liste
 
-- **Entscheidung:** Oben rechts in der Liste sitzt ein Menü-Knopf ☰ statt des Knopfs „Teilen“. Das Menü enthält: Teilen, Ladenansicht an/aus, Name & Reiseland bearbeiten, Alle Listen, Von diesem Gerät entfernen. Der Knopf für die Ladenansicht bleibt zusätzlich über der Liste.
-- **Begründung:** Wunsch des Inhabers. Der Kopf bleibt kompakt, und weitere Funktionen haben Platz.
-- **Folgen:** „Von diesem Gerät entfernen“ entfernt die Liste nur lokal. Die anderen Mitglieder behalten sie (S-010).
+- **Entscheidung:** Oben rechts in der Liste sitzen zwei Knöpfe: **Teilen** (Symbol) und das **Menü ☰**. Das Menü hat zwei Gruppen mit Trennlinie:
+  - **Diese Liste:** Mitglieder, Listen-Einstellungen (Name, Reiseland, „Erledigte automatisch entfernen“), Aus meinen Listen entfernen (rot).
+  - **Proviant:** Mein Profil (Name, Sprache, Wohnland; mit „Abbrechen“, danach zurück in die Liste), Datenschutz & Kontakt, darunter klein die Version.
+  - Nicht im Menü: die Ladenansicht (Knopf über der Liste, Abhaken schaltet um, D-047) und „Alle Listen“ (Pfeil oben links).
+- **Begründung:** Wunsch des Inhabers nach einer Durchsicht: Teilen ist für eine geteilte Liste die wichtigste Aktion, Doppeltes fällt weg, die Einstellung zum automatischen Entfernen war unter „Name & Reiseland“ versteckt, das Profil liess sich nur auf der Startseite ändern.
+- **Folgen:** Die Kopfzeile ist etwas enger, lange Listennamen werden früher gekürzt. Ein Feedback-Eintrag ist bewusst noch nicht dabei.
 
 ## D-018 · Symbole statt Emojis
 
@@ -248,7 +251,7 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Abgehakte Artikel werden automatisch entfernt (Soft-Delete, danach „Rückgängig“ wie in D-042):
   - **Laden verlassen:** Ist die Ladenansicht mit einem Laden offen und ist man nachweislich dort (höchstens 100 m vom Laden, GPS-Genauigkeit höchstens 100 m), merkt sich das Gerät den Besuch (Lage des Ladens, `rl:shopvisit:<Liste>`, höchstens 12 Stunden). Ein bloss vorgeschlagener Laden in der Nähe zählt nicht, auch nicht, wenn das Abhaken in die Ladenansicht schaltet (D-047). Beim Zurückkehren in die App und alle 2 Minuten, solange sie offen ist, prüft es den Standort (und ob man inzwischen beim Laden angekommen ist). Ist man nach einem Besuch mehr als 150 m weg (mindestens die GPS-Ungenauigkeit), werden alle Erledigten entfernt: „Erledigte entfernt: 2 (Laden verlassen) · Rückgängig“.
   - **Nach 1 Tag:** Artikel, die vor mehr als 24 Stunden abgehakt wurden, werden beim Öffnen der Liste und alle 5 Minuten entfernt.
-  - **Einstellung pro Liste:** „Erledigte automatisch entfernen“ unter Menü → Name & Reiseland, Standard an. Gespeichert in `lists.auto_clear`, gilt für alle Mitglieder.
+  - **Einstellung pro Liste:** „Erledigte automatisch entfernen“ unter Menü → Listen-Einstellungen, Standard an. Gespeichert in `lists.auto_clear`, gilt für alle Mitglieder.
 - **Begründung:** Wunsch des Inhabers. Nach dem Einkauf soll die Liste ohne Handgriff wieder nur zeigen, was noch fehlt. Entfernte Artikel bleiben unter „Schon mal gekauft“ verfügbar.
 - **Folgen:** Als Web-App prüft Proviant nur, wenn sie offen ist oder wieder geöffnet wird, nicht im Hintergrund. `supabase/schema.sql` muss erneut ausgeführt werden (neue Spalte), bis dahin funktioniert alles, nur das Abschalten wird nicht synchronisiert. Ohne Standortfreigabe greift nur die 1-Tages-Regel.
 
