@@ -146,7 +146,7 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Der Name der App ist „Proviant“ (Oberfläche DE und EN, Manifest, Seitentitel, Datenschutz, README). Untertitel im Manifest: „Einkaufsliste für Reisen“. Der Markenname bekommt später einen Zusatz (F-005). Repo `tminder/reiseliste`, URL und interne Schlüssel (`rl:`) bleiben unverändert.
 - **Begründung:** Entscheidung des Inhabers. Positionierung als Einkaufsliste mit Reisebezug, Sprache zweitrangig, ohne „shop“. „Proviant“ verstehen viele Sprachen (DE, SV, DA, NO, NL „proviand“, EN/FR „provisions“). „Travel List“ wäre auf Englisch als Packliste missverstanden worden.
-- **Folgen:** „Proviant“ allein ist generisch und schon belegt, deshalb nicht als Marke schützbar (F-005). Bereits installierte PWAs zeigen den neuen Namen erst nach einem Update bzw. neuem Hinzufügen zum Home-Bildschirm.
+- **Folgen:** „Proviant“ allein ist generisch und schon belegt, deshalb nicht als Marke schützbar (F-005). Zudem ist „Proviant“ eine bekannte deutsche Getränkemarke (Proviant Fruchtmanufaktur Berlin, Bio-Limonaden im Detailhandel). International verstehen das Wort vor allem Deutsch-, Skandinavisch- und Niederländischsprachige, auf Englisch, Spanisch, Italienisch und Französisch ist es ein Fremdwort. Als Arbeitstitel fürs MVP tauglich, als internationale Marke fraglich. Bereits installierte PWAs zeigen den neuen Namen erst nach einem Update bzw. neuem Hinzufügen zum Home-Bildschirm.
 
 ## D-026 · App-Icon: Einkaufswagen auf geschwungenem Weg
 
