@@ -1326,9 +1326,6 @@ function ItemRow({
           <p className="muted small-text correction-hint">{t('correctionHint')}</p>
         )}
         {shopMode && showHint && hint && !item.checked && <div className="hint">{hint}</div>}
-        {shopMode && showPhotos && local && (
-          <PhotoStrip country={country} conceptId={item.conceptId} term={local} store={shopTag} storeName={shopName} />
-        )}
       </div>
       {shopMode && hint && !item.checked && (
         <button className={`ghost small ${showHint ? 'active' : ''}`} aria-label={t('tip')} onClick={() => setShowHint(!showHint)}>
@@ -1368,6 +1365,12 @@ function ItemRow({
         }}>
           <X size={18} />
         </button>
+      )}
+      {/* Fotos über die ganze Breite der Karte, unter Text und Knöpfen */}
+      {shopMode && showPhotos && local && (
+        <div className="item-wide">
+          <PhotoStrip country={country} conceptId={item.conceptId} term={local} store={shopTag} storeName={shopName} />
+        </div>
       )}
       {showCard && local && (
         <ShowCard term={local} qty={item.qty} own={own} target={target} onClose={() => setShowCard(false)} />

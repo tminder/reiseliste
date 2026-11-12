@@ -257,6 +257,7 @@ button.link {
 }
 .item {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   gap: 12px;
   background: var(--card);
@@ -393,6 +394,14 @@ button.active {
 }
 .photos {
   margin-top: 8px;
+}
+/* Produktfotos als eigene Zeile über die volle Kartenbreite */
+.item-wide {
+  flex-basis: 100%;
+  min-width: 0;
+}
+.item-wide .photos {
+  margin-top: -4px;
 }
 .photo-row {
   display: flex;
