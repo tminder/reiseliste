@@ -158,6 +158,29 @@ $$;
 revoke all on function public.list_member_profiles(uuid) from public, anon;
 grant execute on function public.list_member_profiles(uuid) to authenticated;
 
+-- Liste löschen, wenn man das einzige Mitglied ist (D-036). „Einziges Mitglied“ heisst: alle Mitgliedschaften
+-- gehören zur selben Person (gleicher Name und gleiche Sprache, z. B. Handy und Laptop). Artikel und
+-- Mitgliedschaften verschwinden über „on delete cascade“ mit. Sonst passiert nichts (Rückgabe false).
+create or replace function public.delete_list(p_list_id uuid)
+returns boolean language plpgsql volatile security definer set search_path = public as $$
+declare
+  my_name text;
+  my_lang text;
+begin
+  select name, lang into my_name, my_lang from list_members where list_id = p_list_id and user_id = auth.uid();
+  if not found then return false; end if;
+  if exists (
+    select 1 from list_members
+    where list_id = p_list_id and user_id <> auth.uid()
+      and (my_name is null or name is distinct from my_name or lang is distinct from my_lang)
+  ) then return false; end if;
+  delete from lists where id = p_list_id;
+  return true;
+end;
+$$;
+revoke all on function public.delete_list(uuid) from public, anon;
+grant execute on function public.delete_list(uuid) to authenticated;
+
 -- Supabase wach halten (D-039): Der GitHub-Job „Supabase wach halten“ ruft täglich ping() auf.
 -- Eine kleine Schreibaktion zählt sicher als Datenbank-Aktivität (Gratis-Projekte pausieren nach 7 Tagen ohne).
 create table if not exists public.keepalive (id int primary key default 1 check (id = 1), at timestamptz not null default now());

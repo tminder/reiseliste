@@ -40,7 +40,7 @@ import { exactConcept, findConcept, nameIn, normalize, splitQuantity, suggest } 
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
-import { ListStore, knownLists, lastList, leaveList, localLastChange, remoteLastChanges, memberProfiles, setLastList, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
+import { ListStore, deleteList, isSoleMember, knownLists, lastList, leaveList, localLastChange, remoteLastChanges, memberProfiles, setLastList, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
 // ---------- Routing über den Hash (funktioniert auf GitHub Pages ohne Server) ----------
 
@@ -209,6 +209,13 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
   const showNew = panel === 'new'
   const setShowNew = (v: boolean) => setPanel(v ? 'new' : null)
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
+  // Einziges Mitglied? Dann „Löschen“ statt „Entfernen“ (D-036). null = noch unbekannt
+  const [sole, setSole] = useState<boolean | null>(null)
+  const askRemove = (listId: string | null) => {
+    setConfirmRemove(listId)
+    setSole(null)
+    if (listId) void isSoleMember(listId).then((v) => setSole(v))
+  }
   // Letzte Änderung pro Liste (D-036): sofort aus dem Gerät, dann aktuell aus Supabase
   const [changed, setChanged] = useState<Record<string, string>>(() =>
     Object.fromEntries(lists.map((l) => [l.id, localLastChange(l.id)]).filter((e): e is [string, string] => !!e[1])),
@@ -335,23 +342,23 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
                     <span className="flag">{c?.flag}</span> {l.name}
                     {changed[l.id] && <span className="list-changed">{t('lastChange', { when: formatWhen(changed[l.id]) })}</span>}
                   </a>
-                  <button className="ghost small" aria-label={t('removeList')} onClick={() => setConfirmRemove(confirmRemove === l.id ? null : l.id)}>
+                  <button className="ghost small" aria-label={t('removeList')} onClick={() => askRemove(confirmRemove === l.id ? null : l.id)}>
                     <Trash2 size={16} />
                   </button>
                 </div>
                 {confirmRemove === l.id && (
                   <div className="confirm">
-                    <p className="small-text warn-text">{t('removeListConfirm')}</p>
+                    <p className="small-text warn-text">{sole ? t('deleteListConfirm') : t('removeListConfirm')}</p>
                     <div className="row-gap">
                       <button
                         className="danger-btn small"
                         onClick={() => {
-                          void leaveList(l.id)
+                          void (sole ? deleteList(l.id) : leaveList(l.id))
                           setConfirmRemove(null)
                           setLists(knownLists())
                         }}
                       >
-                        {t('removeYes')}
+                        {sole ? t('deleteYes') : t('removeYes')}
                       </button>
                       <button className="ghost small" onClick={() => setConfirmRemove(null)}>
                         {t('cancel')}
@@ -624,6 +631,11 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
   const [showEdit, setShowEdit] = useState(false)
   const [showMembers, setShowMembers] = useState(false)
   const [confirmLeave, setConfirmLeave] = useState(false)
+  // Einziges Mitglied? Dann „Liste löschen“ statt „Aus meinen Listen entfernen“ (D-036). Geprüft beim Öffnen des Menüs.
+  const [sole, setSole] = useState<boolean | null>(null)
+  useEffect(() => {
+    if (showMenu) void isSoleMember(id).then(setSole)
+  }, [showMenu, id])
   const [shop, setShop] = useState<Shop | null>(() => getChosenShop(id))
   // Für die Fotos zählt der gewählte Laden, sonst der angezeigte Vorschlag
   const [suggested, setSuggested] = useState<Shop | null>(null)
@@ -857,7 +869,7 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
                     setConfirmLeave(true)
                   }}
                 >
-                  <Trash2 size={18} /> {t('removeFromDevice')}
+                  <Trash2 size={18} /> {sole ? t('deleteList') : t('removeFromDevice')}
                 </button>
                 <div className="menu-sep" role="separator" />
                 <div className="menu-label">{t('appName')}</div>
@@ -873,9 +885,6 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
                 <button role="menuitem" onClick={() => go('/datenschutz')}>
                   <Shield size={18} /> {t('privacy')}
                 </button>
-                <div className="menu-version">
-                  <AppVersion />
-                </div>
               </div>
             </>
           )}
@@ -1099,16 +1108,16 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
         // Warnung vor dem Entfernen (D-036)
         <div className="sheet-backdrop" onClick={() => setConfirmLeave(false)}>
           <div className="sheet" role="alertdialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <h2>{t('removeListTitle', { name: list.name })}</h2>
-            <p>{t('removeListConfirm')}</p>
+            <h2>{sole ? t('deleteListTitle', { name: list.name }) : t('removeListTitle', { name: list.name })}</h2>
+            <p>{sole ? t('deleteListConfirm') : t('removeListConfirm')}</p>
             <button
               className="danger-btn"
               onClick={() => {
-                void leaveList(id)
+                void (sole ? deleteList(id) : leaveList(id))
                 go('/')
               }}
             >
-              <Trash2 size={16} /> {t('removeYes')}
+              <Trash2 size={16} /> {sole ? t('deleteYes') : t('removeYes')}
             </button>
             <button className="ghost" onClick={() => setConfirmLeave(false)}>
               {t('cancel')}

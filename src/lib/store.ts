@@ -164,6 +164,43 @@ export async function leaveList(id: string) {
   }
 }
 
+/**
+ * Ist man (auch mit mehreren Geräten, gleicher Name und Sprache) das einzige Mitglied der Liste? (D-036)
+ * Ohne Supabase gibt es die Liste nur auf diesem Gerät: true. Offline oder bei Fehlern: null (unbekannt).
+ */
+export async function isSoleMember(id: string): Promise<boolean | null> {
+  if (!supabase) return true
+  if (!navigator.onLine) return null
+  try {
+    if (!(await ensureAuth())) return null
+    const [{ data, error }, { data: auth }] = await Promise.all([
+      supabase.from('list_members').select('user_id, name, lang').eq('list_id', id),
+      supabase.auth.getUser(),
+    ])
+    if (error || !data) return null
+    const rows = data as { user_id: string; name: string | null; lang: string | null }[]
+    const mine = rows.find((r) => r.user_id === auth.user?.id)
+    if (!mine) return null
+    return rows.every((r) => r.user_id === mine.user_id || (mine.name !== null && r.name === mine.name && r.lang === mine.lang))
+  } catch {
+    return null
+  }
+}
+
+/** Liste für alle löschen, wenn man das einzige Mitglied ist; sonst (oder bei Fehlern) nur verlassen (D-036) */
+export async function deleteList(id: string) {
+  forgetList(id)
+  if (!supabase || !navigator.onLine) return
+  try {
+    if (!(await ensureAuth())) return
+    const { data, error } = await supabase.rpc('delete_list', { p_list_id: id })
+    if (!error && data === true) return
+  } catch {
+    /* unten: wenigstens austreten */
+  }
+  await leaveList(id)
+}
+
 export function forgetList(id: string) {
   if (LS.get<string | null>('rl:last', null) === id) localStorage.removeItem('rl:last')
   LS.set('rl:lists', LS.get<string[]>('rl:lists', []).filter((x) => x !== id))
