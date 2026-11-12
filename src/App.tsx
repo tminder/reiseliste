@@ -784,7 +784,13 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     const cat = (item.conceptId && BY_ID.get(item.conceptId)?.category) || 'sonstiges'
     groups.set(cat, [...(groups.get(cat) ?? []), item])
   }
-  const openKeys = new Set(open.map(dupKey))
+  // Was schon offen auf der Liste steht, pro Artikel mit Mengen („✓ 3x · 2 × 100 g auf der Liste“, D-045)
+  const openQtys = new Map<string, (string | null)[]>()
+  for (const i of open) openQtys.set(dupKey(i), [...(openQtys.get(dupKey(i)) ?? []), i.qty])
+  const onListLabel = (key: string) => {
+    const qtys = openQtys.get(key)
+    return qtys ? t('alreadyOnList', { qty: qtys.map((q) => (q ? formatQty(q) : '1x')).join(' · ') }) : null
+  }
   const order: (Category | 'sonstiges')[] = [...CATEGORY_ORDER, 'sonstiges']
 
   return (
@@ -969,9 +975,11 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
                     {confirmSid === s.id ? <Check size={16} strokeWidth={3} className="confirm-check" /> : null}
                     {s.names[profile.lang][0]} <span className="muted">→ {s.names[target][0]}</span>
                     {confirmSid === s.id ? (
-                      <span className="on-list">{openKeys.has(s.id) ? t('qtyIncreased') : t('added')}</span>
+                      <span className="on-list">
+                        {openQtys.get(s.id)?.some((q) => canAddQty(q, splitQuantity(input).qty)) ? t('qtyIncreased') : t('added')}
+                      </span>
                     ) : (
-                      openKeys.has(s.id) && <span className="on-list">✓ {t('alreadyOnList')}</span>
+                      onListLabel(s.id) && <span className="on-list">✓ {onListLabel(s.id)}</span>
                     )}
                   </button>
                 </li>

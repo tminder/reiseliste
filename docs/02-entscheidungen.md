@@ -272,7 +272,7 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
   - **Gleiche Einheit** (`src/lib/qty.ts`): Stück (ohne Angabe = 1), Gewicht (g/kg werden umgerechnet: „500 g + 1 kg = 1,5 kg“), Volumen (ml/cl/l), gleiche Packungsgrösse („2 × 100 g + 1 × 100 g = 3 × 100 g“), gleiches Packungswort („2 Packungen + 1 Packungen“).
   - **Zusammengezählt:** Die Leiste zeigt „Schokolade war schon auf der Liste: jetzt 3x · Rückgängig“, die bestehende Zeile leuchtet auf, die Liste scrollt nicht weg.
   - **Nicht zusammengezählt:** z. B. „3x Schokolade“ und „2 × 100 g Schokolade“ stehen als zwei Zeilen untereinander. Jede Zeile ist ein eigener Eintrag, es gibt keine zusammengefassten Zeilen.
-  - **Beim Tippen:** Vorschläge, die schon offen auf der Liste stehen, zeigen „✓ schon auf der Liste“.
+  - **Beim Tippen:** Vorschläge, die schon offen auf der Liste stehen, zeigen die Menge: „✓ 3x auf der Liste“, bei mehreren Zeilen „✓ 3x · 2 × 100 g auf der Liste“ (ohne Menge „1x“).
 - **Begründung:** Entscheidung des Inhabers: Zusammenfassen über verschiedene Einheiten schuf unverständliche Mengen („1 + 2 × 100 g + 2“) und falsche Verschmelzungen (schwarze Schokolade mit Schokolade). Nachfragen ist umständlich.
 - **Folgen:** Werden derselbe Artikel und dieselbe Einheit gleichzeitig auf zwei Geräten eingetragen, entstehen zwei Zeilen (selten, kein automatisches Aufräumen).
 
