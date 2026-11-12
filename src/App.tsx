@@ -33,7 +33,7 @@ import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
 import { flash, reducedMotion, slideOut, useFlip } from './lib/motion'
-import { addQty } from './lib/qty'
+import { addQty, canAddQty } from './lib/qty'
 import { isIos, isStandalone, listIdFrom, listUrl } from './lib/links'
 import { exactConcept, findConcept, nameIn, normalize, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
@@ -715,23 +715,6 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   const items = store.items.filter((i) => !i.deleted)
   const suggestions = suggest(input, profile.lang)
 
-  // Doppelte offene Einträge desselben Artikels (gleichzeitig auf zwei Geräten oder aus älteren Versionen) zu einem
-  // zusammenführen (D-045): Der älteste bleibt mit seiner Menge, die anderen werden entfernt. Bewusst ohne Zusammenzählen:
-  // Jedes Gerät kommt so zum selben Ergebnis, auch wenn mehrere gleichzeitig aufräumen (sonst würde doppelt addiert).
-  useEffect(() => {
-    const byKey = new Map<string, Item[]>()
-    for (const i of store.items) {
-      if (i.deleted || i.checked) continue
-      const k = dupKey(i)
-      byKey.set(k, [...(byKey.get(k) ?? []), i])
-    }
-    for (const dups of byKey.values()) {
-      if (dups.length < 2) continue
-      dups.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id))
-      for (const r of dups.slice(1)) void store.updateItem(r.id, { deleted: true })
-    }
-  }, [store, store.items])
-
   // Bestehende Zeile zeigen: aufleuchten, Menge hüpft kurz (D-044). Nicht hinscrollen, die Leiste unten bestätigt.
   function highlight(itemId: string) {
     window.setTimeout(() => {
@@ -753,32 +736,21 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     const data = { text: clean, qty, lang: profile.lang, conceptId: conceptId ?? findConcept(clean, profile.lang), author: profile.name }
     setInput('')
     pulseAdded()
-    // Pro Artikel gibt es nur einen offenen Eintrag (D-045)
+    // Gleicher Artikel mit gleicher Einheit schon offen auf der Liste: Menge addieren (D-045).
+    // Sonst (andere Einheit, andere Packungsgrösse) kommt er als eigene Zeile dazu, ohne Nachfrage.
     const key = dupKey({ text: clean, lang: profile.lang, conceptId: data.conceptId } as Item)
-    const existing = store.items.find((i) => !i.deleted && !i.checked && dupKey(i) === key)
-    if (!existing) {
+    const existing = store.items.find((i) => !i.deleted && !i.checked && dupKey(i) === key && canAddQty(i.qty, qty))
+    const sum = existing ? addQty(existing.qty, qty) : null
+    if (!existing || sum === null) {
       void store.addItem(data)
       return
     }
-    const name = nameIn(existing.conceptId, profile.lang) ?? existing.text
     const before = existing.qty
     markLocal(existing.id)
     highlight(existing.id)
-    // Eindeutig: beide mit Menge in derselben Einheit bzw. Packungsgrösse → zusammenzählen
-    const sum = before !== null && qty !== null ? addQty(before, qty) : null
-    if (sum !== null) {
-      void store.updateItem(existing.id, { qty: sum })
-      showBar(t('qtyMerged', { name, qty: formatQty(sum) }), [{ label: t('undo'), run: () => void store.updateItem(existing.id, { qty: before }) }])
-      return
-    }
-    // Nicht eindeutig („Milch“ nochmals, „2x“ und „2 × 100 g“): nichts ändern, nur anbieten
-    const actions: { label: string; run: () => void }[] = []
-    if (qty !== null) actions.push({ label: t('setQty', { qty: formatQty(qty) }), run: () => void store.updateItem(existing.id, { qty }) })
-    else {
-      const plus = addQty(before, null)
-      if (plus !== null) actions.push({ label: t('plusOne'), run: () => void store.updateItem(existing.id, { qty: plus }) })
-    }
-    showBar(before ? t('alreadyOnListQty', { name, qty: formatQty(before) }) : t('alreadyOnListName', { name }), actions)
+    void store.updateItem(existing.id, { qty: sum })
+    const name = nameIn(existing.conceptId, profile.lang) ?? existing.text
+    showBar(t('qtyMerged', { name, qty: formatQty(sum) }), [{ label: t('undo'), run: () => void store.updateItem(existing.id, { qty: before }) }])
   }
 
   if (!list) {

@@ -265,16 +265,16 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Wunsch des Inhabers: Statuswechsel sollen deutlicher und eleganter bestätigt werden. Im Laden soll man sehen, was gerade passiert ist, auch bei Änderungen anderer.
 - **Folgen:** Abhaken wirkt sich erst nach 0,4 s auf Liste und Sync aus. Auf dem iPhone gibt es keine Vibration, weil Safari sie nicht unterstützt.
 
-## D-045 · Ein Eintrag pro Artikel, Mengen nur eindeutig zusammenzählen
+## D-045 · Gleiche Artikel nur bei gleicher Einheit zusammenzählen
 
-- **Entscheidung:** Pro Artikel gibt es nur einen offenen Eintrag. Als gleich gelten Artikel mit demselben Wörterbuch-Eintrag („Milch“, „milk“, „leche“), aber nur, wenn der Text genau einem Namen dieses Eintrags entspricht. Wurde der Eintrag nur über ein enthaltenes Wort gefunden („feine Schokolade“), zählt der Text (ohne Gross- und Kleinschreibung). „H-Milch“ und „Milch“, „schwarze Schokolade“ und „Schokolade“ bleiben getrennt.
-  - **Beim Hinzufügen, eindeutig:** Beide haben eine Menge in derselben Einheit (Stück, g/kg, ml/cl/l, gleiche Packungsgrösse, `src/lib/qty.ts`): Die Menge wird addiert („Milch war schon auf der Liste: jetzt 3x · Rückgängig“).
-  - **Beim Hinzufügen, nicht eindeutig** (eine Seite ohne Menge, oder „2x“ und „2 × 100 g“): Nichts ändert sich. Die Leiste zeigt „Schokolade steht schon auf der Liste (2x)“ mit „Auf 2 × 100 g ändern“ bzw. „+1“ bei einer Eingabe ohne Menge.
-  - In allen Fällen leuchtet die bestehende Zeile auf, die Liste scrollt nicht weg.
+- **Entscheidung:** Kommt ein Artikel dazu, der schon offen auf der Liste steht, wird die Menge nur addiert, wenn Artikel und Einheit genau übereinstimmen. Sonst kommt er als eigene Zeile dazu, ohne Nachfrage.
+  - **Gleicher Artikel:** derselbe Wörterbuch-Eintrag („Milch“, „milk“, „leche“), aber nur, wenn der Text genau einem Namen dieses Eintrags entspricht. Wurde der Eintrag nur über ein enthaltenes Wort gefunden („feine Schokolade“), zählt der Text (ohne Gross- und Kleinschreibung). „H-Milch“ und „Milch“, „schwarze Schokolade“ und „Schokolade“ bleiben getrennt.
+  - **Gleiche Einheit** (`src/lib/qty.ts`): Stück (ohne Angabe = 1), Gewicht (g/kg werden umgerechnet: „500 g + 1 kg = 1,5 kg“), Volumen (ml/cl/l), gleiche Packungsgrösse („2 × 100 g + 1 × 100 g = 3 × 100 g“), gleiches Packungswort („2 Packungen + 1 Packungen“).
+  - **Zusammengezählt:** Die Leiste zeigt „Schokolade war schon auf der Liste: jetzt 3x · Rückgängig“, die bestehende Zeile leuchtet auf, die Liste scrollt nicht weg.
+  - **Nicht zusammengezählt:** z. B. „3x Schokolade“ und „2 × 100 g Schokolade“ stehen als zwei Zeilen untereinander. Jede Zeile ist ein eigener Eintrag, es gibt keine zusammengefassten Zeilen.
   - **Beim Tippen:** Vorschläge, die schon offen auf der Liste stehen, zeigen „✓ schon auf der Liste“.
-  - **Doppelte Einträge** (gleichzeitig auf zwei Geräten eingetragen oder aus älteren Versionen): Der älteste bleibt mit seiner Menge, die anderen werden entfernt. Bewusst ohne Zusammenzählen, damit mehrere Geräte nicht doppelt addieren.
-- **Begründung:** Entscheidung des Inhabers: Zusammenfassen schuf Fehler („1 + 2 × 100 g + 2“, schwarze Schokolade mit Schokolade verschmolzen). Darum nur ein Eintrag pro Artikel, kein „Separat“ und keine zusammengefassten Zeilen mehr, Mengen nur zusammenzählen, wenn es eindeutig ist.
-- **Folgen:** Wer bewusst zwei verschiedene Packungsgrössen will, ändert die Menge von Hand oder verwendet einen genaueren Artikelnamen. Bei gleichzeitigem Eintragen auf zwei Geräten kann eine Menge verloren gehen (selten).
+- **Begründung:** Entscheidung des Inhabers: Zusammenfassen über verschiedene Einheiten schuf unverständliche Mengen („1 + 2 × 100 g + 2“) und falsche Verschmelzungen (schwarze Schokolade mit Schokolade). Nachfragen ist umständlich.
+- **Folgen:** Werden derselbe Artikel und dieselbe Einheit gleichzeitig auf zwei Geräten eingetragen, entstehen zwei Zeilen (selten, kein automatisches Aufräumen).
 
 ## D-046 · Wechsel in die Ladenansicht prüft den Laden genauer
 
