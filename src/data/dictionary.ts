@@ -108,6 +108,9 @@ kaffee;vorrat;Kaffee/Kafi;coffee;café;café;café;caffè;koffie;kava;καφές
 tee;vorrat;Tee;tea;té;chá;thé;tè;thee;čaj;τσάι
 kakao;vorrat;Kakao/Kakaopulver;cocoa;cacao en polvo;cacau;cacao;cacao;cacao;kakao;κακάο
 schokolade;vorrat;Schokolade/Schoggi;chocolate;chocolate;chocolate;chocolat;cioccolato;chocolade;čokolada;σοκολάτα
+schoko_dunkel;vorrat;Zartbitterschokolade/dunkle Schokolade/schwarze Schokolade/Bitterschokolade/dunkle Schoggi/schwarze Schoggi;dark chocolate/plain chocolate;chocolate negro/chocolate puro;chocolate negro/chocolate amargo;chocolat noir;cioccolato fondente;pure chocolade;tamna čokolada;μαύρη σοκολάτα
+schoko_milch;vorrat;Milchschokolade/Milchschoggi;milk chocolate;chocolate con leche;chocolate de leite;chocolat au lait;cioccolato al latte;melkchocolade;mliječna čokolada;σοκολάτα γάλακτος
+schoko_weiss;vorrat;weisse Schokolade/weiße Schokolade/weisse Schoggi;white chocolate;chocolate blanco;chocolate branco;chocolat blanc;cioccolato bianco;witte chocolade;bijela čokolada;λευκή σοκολάτα
 kekse;vorrat;Kekse/Guetzli;biscuits/cookies;galletas;bolachas;biscuits;biscotti;koekjes;keksi;μπισκότα
 chips;vorrat;Chips;crisps/chips;patatas fritas de bolsa;batatas fritas de pacote;chips;patatine;chips;čips;πατατάκια
 nuesse;vorrat;Nüsse;nuts;frutos secos;frutos secos;noix;frutta secca;noten;orašasti plodovi;ξηροί καρποί

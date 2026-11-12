@@ -1,6 +1,6 @@
 // Prüft die Zuordnung Eingabe → Wörterbuch (S-002).
 import { describe, expect, it } from 'vitest'
-import { findConcept, nameIn, normalize, splitQuantity, suggest } from '../src/lib/translate'
+import { exactConcept, findConcept, nameIn, normalize, splitQuantity, suggest } from '../src/lib/translate'
 import { listIdFrom } from '../src/lib/links'
 
 describe('normalize', () => {
@@ -86,5 +86,22 @@ describe('listIdFrom', () => {
     const id = 'abcdef12-2222-3333-4444-555555555555'
     expect(listIdFrom(`Schau: https://tminder.github.io/reiseliste/#/l/${id.toUpperCase()} danke`)).toBe(id)
     expect(listIdFrom('kein Link')).toBeNull()
+  })
+})
+
+describe('Schokoladensorten (D-045)', () => {
+  it.each([
+    ['Schwarze Schokolade', 'schoko_dunkel'],
+    ['Zartbitterschokolade', 'schoko_dunkel'],
+    ['dunkle Schoggi', 'schoko_dunkel'],
+    ['Milchschokolade', 'schoko_milch'],
+    ['weiße Schokolade', 'schoko_weiss'],
+    ['Schokolade', 'schokolade'],
+  ])('%s', (text, id) => {
+    expect(findConcept(text, 'de')).toBe(id)
+  })
+  it('nur genaue Treffer zählen als gleicher Artikel', () => {
+    expect(exactConcept('Schokolade', 'de')).toBe('schokolade')
+    expect(exactConcept('feine Schokolade', 'de')).toBeNull()
   })
 })

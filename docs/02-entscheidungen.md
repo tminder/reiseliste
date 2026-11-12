@@ -267,7 +267,7 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-045 · Doppelte Artikel zusammenführen
 
-- **Entscheidung:** Als gleich gelten Artikel mit demselben Wörterbuch-Eintrag („Milch“, „milk“, „leche“), sonst derselbe Text ohne Rücksicht auf Gross- und Kleinschreibung. „H-Milch“ und „Milch“ bleiben getrennt.
+- **Entscheidung:** Als gleich gelten Artikel mit demselben Wörterbuch-Eintrag („Milch“, „milk“, „leche“), aber nur, wenn der Text genau einem Namen dieses Eintrags entspricht. Wurde der Eintrag nur über ein enthaltenes Wort gefunden („feine Schokolade“ → Schokolade), zählt der Text. Sonst gilt derselbe Text ohne Rücksicht auf Gross- und Kleinschreibung. „H-Milch“ und „Milch“, „schwarze Schokolade“ und „Schokolade“ bleiben getrennt.
   - **Beim Hinzufügen:** Steht der Artikel schon offen und mit passender Menge auf der Liste, entsteht keine neue Zeile, die Menge wird erhöht („Milch war schon auf der Liste: jetzt 3x · Rückgängig · Separat“). „Separat“ legt doch einen eigenen Eintrag an. Die bestehende Zeile leuchtet auf und die Menge hüpft kurz. Die Liste scrollt nicht weg.
   - **Beim Tippen:** Vorschläge, die schon offen auf der Liste stehen, zeigen „✓ schon auf der Liste“.
   - **Bei der Anzeige:** Mehrere offene Einträge desselben Artikels mit zusammenpassenden Mengen (z. B. gleichzeitig auf zwei Handys eingetragen oder „Separat“) erscheinen als eine Zeile mit summierter Menge und allen Autoren. „2 Einträge“ klappt die Einzeleinträge auf, dort lassen sie sich einzeln löschen. Abhaken, Löschen und „Ich hole das“ gelten für alle Einträge der Zeile.

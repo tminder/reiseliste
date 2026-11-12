@@ -35,7 +35,7 @@ import { FEATURES } from './features'
 import { flash, reducedMotion, slideOut, useFlip } from './lib/motion'
 import { addQty, canAddQty, sumQty } from './lib/qty'
 import { isIos, isStandalone, listIdFrom, listUrl } from './lib/links'
-import { findConcept, nameIn, normalize, splitQuantity, suggest } from './lib/translate'
+import { exactConcept, findConcept, nameIn, normalize, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
@@ -723,7 +723,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     pulseAdded()
     // Steht derselbe Artikel schon offen auf der Liste und passen die Mengen zusammen: Menge erhöhen statt neuer Zeile (D-045).
     // Unterschiedliche Einheiten oder Packungsgrössen („2“ und „2 × 100 g“) bleiben getrennte Zeilen.
-    const key = data.conceptId ?? normalize(clean)
+    const key = dupKey({ text: clean, lang: profile.lang, conceptId: data.conceptId } as Item)
     const existing = store.items.find((i) => !i.deleted && !i.checked && dupKey(i) === key && canAddQty(i.qty, qty))
     const merged = existing ? addQty(existing.qty, qty) : null
     if (!existing || merged === null) {
@@ -1746,8 +1746,13 @@ function AppVersion() {
 }
 
 /** Gleicher Artikel = gleicher Wörterbuch-Eintrag, sonst gleicher Text (D-045) */
+/**
+ * Gleicher Artikel (D-045): derselbe Wörterbuch-Eintrag, aber nur wenn der Text genau dazu passt.
+ * „Schwarze Schokolade“ wurde früher über das enthaltene Wort „Schokolade“ zugeordnet und darf nicht mit „Schokolade“ verschmelzen.
+ */
 function dupKey(i: Item): string {
-  return i.conceptId ?? normalize(i.text)
+  if (i.conceptId && exactConcept(i.text, i.lang) === i.conceptId) return i.conceptId
+  return normalize(i.text)
 }
 
 /** „Rückgängig“ beim automatischen Reiseland (D-040): für diese Liste und dieses Land nicht mehr automatisch wechseln */

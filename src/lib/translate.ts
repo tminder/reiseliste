@@ -124,6 +124,19 @@ export function findConcept(text: string, lang: Lang): string | null {
   return null
 }
 
+/** Nur genaue Treffer (Name oder Endungsvariante), ohne „enthaltenes Wort“. Für den Vergleich doppelter Artikel (D-045). */
+export function exactConcept(text: string, lang: Lang): string | null {
+  const n = normalize(text)
+  if (!n) return null
+  const exact = pick(exactIndex.get(n), lang)
+  if (exact) return exact
+  for (const s of stems(n)) {
+    const hit = pick(stemIndex.get(s), lang)
+    if (hit) return hit
+  }
+  return null
+}
+
 export function nameIn(conceptId: string | null | undefined, lang: Lang): string | null {
   if (!conceptId) return null
   return BY_ID.get(conceptId)?.names[lang][0] ?? null
