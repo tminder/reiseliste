@@ -290,3 +290,13 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Wird in der normalen Ansicht ein Artikel abgehakt, wechselt die App nach der Abhak-Animation in die Ladenansicht. Ein Hinweis erscheint: „Ladenansicht eingeschaltet · zurück“. Nach „zurück“ wechselt die App nicht mehr, solange die Liste offen ist. Wieder-Öffnen eines Artikels löst nichts aus. Die Laden-Prüfung aus D-046 startet dabei wie bei jedem Wechsel.
 - **Begründung:** Entscheidung des Inhabers nach einem Test. Abhaken ist das deutlichste Zeichen, dass jemand gerade einkauft, und funktioniert auch ohne Standort.
 - **Folgen:** Schon der erste Haken schaltet um, auch beim Aufräumen zu Hause. Wer das nicht will, tippt einmal auf „zurück“.
+
+## D-049 · Grenzen gegen Missbrauch und Content-Security-Policy
+
+- **Entscheidung:**
+  - **Längen** (check-Bedingungen in `schema.sql`, gleich in `src/lib/limits.ts`): Listenname 1–80 Zeichen, Artikeltext 1–200, Menge 40, Namen 40. Die App begrenzt die Eingabefelder und kürzt vor dem Speichern, die Datenbank lehnt Längeres ab. Bestehende Daten bleiben unangetastet („not valid“).
+  - **Mengen** (Trigger `enforce_limits`): höchstens 30 neue Listen pro Nutzer und Tag, 500 offene Artikel pro Liste, 300 neue Artikel pro Liste und Stunde, 50 Mitgliedschaften pro Liste. Änderungen an bestehenden Zeilen zählen nicht. Lehnt die Datenbank eine Änderung wegen einer Grenze ab, verwirft die App sie, statt sie endlos zu wiederholen; der Sync-Hinweis zeigt den Fehler.
+  - **Content-Security-Policy** als `<meta>`-Tag im Build: Skripte nur von der eigenen Seite, Verbindungen nur zu Supabase, den zwei Overpass-Servern, Nominatim und Open Food Facts. Neue externe Dienste müssen in `vite.config.ts` (CSP) und in der Datenschutzerklärung ergänzt werden.
+- **Begründung:** Befund der MVP-Beurteilung (früher S-038), vom Inhaber zur Umsetzung freigegeben. Anonyme Konten kann jeder anlegen; ohne Grenzen liesse sich der Gratis-Speicher mit einem Skript füllen. Die CSP ist eine zweite Verteidigungslinie gegen eingeschleustes Skript.
+- **Folgen:** `supabase/schema.sql` muss neu ausgeführt werden. Die Grenze für anonyme Anmeldungen pro IP-Adresse stellt Supabase selbst (Dashboard → Authentication → Rate Limits), sie ist nicht im Code. Eine CSP über HTTP-Header (z. B. `frame-ancestors`) erlaubt GitHub Pages nicht.
+

@@ -12,6 +12,27 @@ const versionFile = (): Plugin => ({
   },
 })
 
+// Content-Security-Policy (S-038): nur im Build, der Entwicklungsserver braucht Inline-Skripte und WebSockets.
+// Neue externe Dienste hier und in src/Privacy.tsx eintragen.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://*.openfoodfacts.org",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://overpass-api.de https://overpass.private.coffee https://nominatim.openstreetmap.org https://*.openfoodfacts.org",
+  "worker-src 'self'",
+  "manifest-src 'self'",
+  "media-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ')
+const cspMeta = (): Plugin => ({
+  name: 'csp-meta',
+  apply: 'build',
+  transformIndexHtml: () => [{ tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content: CSP }, injectTo: 'head-prepend' }],
+})
+
 // BASE_PATH wird im GitHub-Pages-Workflow auf /<repo-name>/ gesetzt
 export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
@@ -19,6 +40,7 @@ export default defineConfig({
   plugins: [
     react(),
     versionFile(),
+    cspMeta(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false, // Registrierung in src/main.tsx (mit Update-Prüfung)

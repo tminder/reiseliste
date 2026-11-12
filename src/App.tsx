@@ -40,6 +40,7 @@ import { exactConcept, findConcept, nameIn, normalize, splitQuantity, suggest } 
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
+import { MAX } from './lib/limits'
 import { ListStore, DELETE_GRACE_MS, flushDeletes, recentDelete, scheduleDelete, undoDelete, isSoleMember, knownLists, lastList, leaveList, localLastChange, remoteLastChanges, memberProfiles, setLastList, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
 // ---------- Routing über den Hash (funktioniert auf GitHub Pages ohne Server) ----------
@@ -152,7 +153,7 @@ function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile) => vo
       >
         <label>
           {t('yourName')}
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('namePlaceholder')} autoFocus />
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('namePlaceholder')} maxLength={MAX.personName} autoFocus />
         </label>
         <label>
           {t('whichLanguage')}
@@ -336,7 +337,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
           </label>
           <label>
             {t('nameOptional')}
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder')} />
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder')} maxLength={MAX.listName} />
           </label>
           <button className="primary">{t('createList')}</button>
         </form>
@@ -981,6 +982,7 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
         >
           <input
             value={input}
+            maxLength={MAX.itemText + MAX.qty}
             onChange={(e) => setInput(e.target.value)}
             onFocus={() => {
               window.clearTimeout(blurTimer.current)
@@ -1861,7 +1863,7 @@ function EditSheet({
         <h2>{t('editListTitle')}</h2>
         <label>
           {t('name')}
-          <input value={n} onChange={(e) => setN(e.target.value)} />
+          <input value={n} onChange={(e) => setN(e.target.value)} maxLength={MAX.listName} />
         </label>
         <label>
           {t('travelCountry')}

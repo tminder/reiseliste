@@ -1,3 +1,4 @@
+import { MAX, clip, clipOrNull } from './limits'
 import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js'
 import type { Lang } from '../data/dictionary'
 import { FEATURES } from '../features'
@@ -325,7 +326,9 @@ export function flushQueue(): Promise<boolean> {
             : await supabase.from('items').upsert(toRemoteItem(op.row))
         if (error) {
           setError(`Speichern (${op.table})`, error.message)
-          return false
+          // Dauerhafte Ablehnung (Grenze überschritten, S-038): verwerfen statt endlos wiederholen
+          const permanent = error.code === '23514' || error.code === '22001' || (error.code === 'P0001' && error.message.startsWith('limit:'))
+          if (!permanent) return false
         }
         queue.remove(op)
       }
@@ -506,13 +509,14 @@ export class ListStore {
   }
 
   create(name: string, country: string) {
-    this.list = { id: this.id, name, country, updatedAt: now() }
+    this.list = { id: this.id, name: clip(name, MAX.listName), country, updatedAt: now() }
     rememberList(this.id)
     return this.write({ table: 'lists', row: this.list })
   }
 
   updateList(patch: Partial<Pick<ShoppingList, 'name' | 'country' | 'autoClear'>>) {
     if (!this.list) return
+    if (patch.name !== undefined) patch = { ...patch, name: clip(patch.name, MAX.listName) }
     this.list = { ...this.list, ...patch, updatedAt: now() }
     return this.write({ table: 'lists', row: this.list })
   }
@@ -533,6 +537,9 @@ export class ListStore {
       createdAt: t,
       updatedAt: t,
       ...data,
+      text: clip(data.text, MAX.itemText),
+      qty: clipOrNull(data.qty, MAX.qty),
+      author: clip(data.author, MAX.personName),
     }
     this.items = [...this.items, item]
     return this.write({ table: 'items', row: item })
