@@ -1,4 +1,4 @@
-// Längen-Grenzen, gleich wie die check-Bedingungen in supabase/schema.sql (S-038).
+// Längen-Grenzen, gleich wie die check-Bedingungen in supabase/schema.sql (D-049).
 // Die App kürzt Eingaben vorher, damit die Datenbank nichts ablehnen muss.
 export const MAX = {
   listName: 80,

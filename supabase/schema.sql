@@ -46,7 +46,7 @@ alter table public.list_members add column if not exists lang text;
 
 create index if not exists items_list_id_idx on public.items(list_id);
 
--- Grenzen gegen Missbrauch (S-038). „not valid“: gilt für neue und geänderte Zeilen, bestehende bleiben unangetastet.
+-- Grenzen gegen Missbrauch (D-049). „not valid“: gilt für neue und geänderte Zeilen, bestehende bleiben unangetastet.
 -- Die App kürzt Eingaben schon vorher auf diese Längen (src/lib/limits.ts).
 alter table public.lists drop constraint if exists lists_len;
 alter table public.lists add constraint lists_len
@@ -116,7 +116,7 @@ begin
   if auth.uid() is null or not exists (select 1 from lists where id = p_list_id) then
     return false;
   end if;
-  -- Höchstens 50 Mitgliedschaften pro Liste (S-038)
+  -- Höchstens 50 Mitgliedschaften pro Liste (D-049)
   if not exists (select 1 from list_members where list_id = p_list_id and user_id = auth.uid())
      and (select count(*) from list_members where list_id = p_list_id) >= 50 then
     return false;

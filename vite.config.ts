@@ -12,7 +12,7 @@ const versionFile = (): Plugin => ({
   },
 })
 
-// Content-Security-Policy (S-038): nur im Build, der Entwicklungsserver braucht Inline-Skripte und WebSockets.
+// Content-Security-Policy (D-049): nur im Build, der Entwicklungsserver braucht Inline-Skripte und WebSockets.
 // Neue externe Dienste hier und in src/Privacy.tsx eintragen.
 const CSP = [
   "default-src 'self'",

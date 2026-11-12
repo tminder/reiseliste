@@ -326,7 +326,7 @@ export function flushQueue(): Promise<boolean> {
             : await supabase.from('items').upsert(toRemoteItem(op.row))
         if (error) {
           setError(`Speichern (${op.table})`, error.message)
-          // Dauerhafte Ablehnung (Grenze überschritten, S-038): verwerfen statt endlos wiederholen
+          // Dauerhafte Ablehnung (Grenze überschritten, D-049): verwerfen statt endlos wiederholen
           const permanent = error.code === '23514' || error.code === '22001' || (error.code === 'P0001' && error.message.startsWith('limit:'))
           if (!permanent) return false
         }
