@@ -1,5 +1,5 @@
 # Datenbank sichern (D-050): Supabase sichert im Gratis-Tarif nicht selbst.
-# Läuft wöchentlich und auf Knopfdruck. Die Sicherung wird verschlüsselt (GPG, AES-256) und als
+# Vorbereitet, aber noch nicht eingeschaltet: läuft nur auf Knopfdruck, wöchentlich erst ab der nativen App. Die Sicherung wird verschlüsselt (GPG, AES-256) und als
 # Artefakt dieses Laufs 90 Tage aufbewahrt. Das Repo ist öffentlich: unverschlüsselt darf hier nichts liegen.
 #
 # Nötige Secrets (Settings → Secrets and variables → Actions):
@@ -14,8 +14,9 @@
 name: Datenbank sichern
 
 on:
-  schedule:
-    - cron: '17 3 * * 1' # montags 03:17 UTC
+  # Vorerst nur von Hand (Entscheidung des Inhabers, D-050). Vor der nativen App einschalten:
+  # schedule:
+  #   - cron: '17 3 * * 1' # montags 03:17 UTC
   workflow_dispatch:
 
 permissions:
