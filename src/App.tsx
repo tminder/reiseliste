@@ -40,7 +40,7 @@ import { exactConcept, findConcept, nameIn, normalize, splitQuantity, suggest } 
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
-import { ListStore, deleteList, isSoleMember, knownLists, lastList, leaveList, localLastChange, remoteLastChanges, memberProfiles, setLastList, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
+import { ListStore, DELETE_GRACE_MS, flushDeletes, recentDelete, scheduleDelete, undoDelete, isSoleMember, knownLists, lastList, leaveList, localLastChange, remoteLastChanges, memberProfiles, setLastList, lastSyncError, profileStore, supabase, type Item, type Profile, type SyncState } from './lib/store'
 
 // ---------- Routing über den Hash (funktioniert auf GitHub Pages ohne Server) ----------
 
@@ -69,6 +69,8 @@ export default function App() {
   const [profile, setProfile] = useState<Profile | null>(profileStore.get())
   const [editingProfile, setEditingProfile] = useState(false)
   const route = useRoute()
+  // Liegengebliebene Löschungen nachholen (App während der Gnadenfrist geschlossen, D-036)
+  useEffect(() => void flushDeletes(), [])
   // Sprache der Oberfläche = Sprache aus dem Profil (vor der Einrichtung: Browsersprache)
   setUiLang(profile?.lang ?? guessLang())
 
@@ -211,6 +213,16 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
   // Einziges Mitglied? Dann „Löschen“ statt „Entfernen“ (D-036). null = noch unbekannt
   const [sole, setSole] = useState<boolean | null>(null)
+  // „Gelöscht · Rückgängig“ während der Gnadenfrist (D-036)
+  const [deleted, setDeleted] = useState(() => recentDelete())
+  useEffect(() => {
+    if (!deleted) return
+    const timer = window.setTimeout(() => {
+      setDeleted(null)
+      void flushDeletes()
+    }, deleted.leftMs)
+    return () => window.clearTimeout(timer)
+  }, [deleted])
   const askRemove = (listId: string | null) => {
     setConfirmRemove(listId)
     setSole(null)
@@ -353,7 +365,10 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
                       <button
                         className="danger-btn small"
                         onClick={() => {
-                          void (sole ? deleteList(l.id) : leaveList(l.id))
+                          if (sole) {
+                            scheduleDelete(l.id, l.name)
+                            setDeleted({ id: l.id, name: l.name, leftMs: DELETE_GRACE_MS })
+                          } else void leaveList(l.id)
                           setConfirmRemove(null)
                           setLists(knownLists())
                         }}
@@ -373,6 +388,21 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
       )}
 
       {!supabase && <p className="note">{t('demoMode')}</p>}
+      {deleted && (
+        <div className="undo-bar" role="status">
+          <span>{t('listDeleted', { name: deleted.name })}</span>
+          <button
+            className="link"
+            onClick={() => {
+              undoDelete(deleted.id)
+              setDeleted(null)
+              setLists(knownLists())
+            }}
+          >
+            {t('undo')}
+          </button>
+        </div>
+      )}
       <LocationNotice />
       <footer className="footer">
         <a href="#/datenschutz">{t('privacy')}</a>
@@ -1113,7 +1143,8 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
             <button
               className="danger-btn"
               onClick={() => {
-                void (sole ? deleteList(id) : leaveList(id))
+                if (sole) scheduleDelete(id, list.name)
+                else void leaveList(id)
                 go('/')
               }}
             >

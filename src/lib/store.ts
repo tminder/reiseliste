@@ -188,17 +188,58 @@ export async function isSoleMember(id: string): Promise<boolean | null> {
 }
 
 /** Liste für alle löschen, wenn man das einzige Mitglied ist; sonst (oder bei Fehlern) nur verlassen (D-036) */
-export async function deleteList(id: string) {
-  forgetList(id)
-  if (!supabase || !navigator.onLine) return
+async function deleteOnServer(id: string): Promise<boolean> {
+  if (!supabase) return true
+  if (!navigator.onLine) return false
   try {
-    if (!(await ensureAuth())) return
+    if (!(await ensureAuth())) return false
     const { data, error } = await supabase.rpc('delete_list', { p_list_id: id })
-    if (!error && data === true) return
+    if (!error && data === true) return true
+    // Inzwischen nicht mehr allein, oder die Funktion fehlt noch (Schema nicht aktualisiert): wenigstens austreten
+    await leaveList(id)
+    return true
   } catch {
-    /* unten: wenigstens austreten */
+    /* später nochmals */
   }
-  await leaveList(id)
+  return false
+}
+
+// Löschen mit Gnadenfrist (D-036): Die Liste verschwindet sofort vom Gerät, gelöscht wird auf dem Server erst nach
+// DELETE_GRACE_MS. Bis dahin ist „Rückgängig“ möglich. Wird die App vorher geschlossen, holt der nächste Start es nach.
+export const DELETE_GRACE_MS = 8000
+type PendingDelete = { id: string; name: string; at: number; cache: string | null; wasLast: boolean }
+
+export function scheduleDelete(id: string, name: string) {
+  const pending = LS.get<PendingDelete[]>('rl:pendingDelete', []).filter((p) => p.id !== id)
+  pending.push({ id, name, at: Date.now(), cache: localStorage.getItem(`rl:list:${id}`), wasLast: LS.get<string | null>('rl:last', null) === id })
+  LS.set('rl:pendingDelete', pending)
+  forgetList(id)
+}
+
+/** Jüngste noch rückgängig machbare Löschung (für die Leiste auf der Startseite) */
+export function recentDelete(): { id: string; name: string; leftMs: number } | null {
+  const p = LS.get<PendingDelete[]>('rl:pendingDelete', []).at(-1)
+  if (!p) return null
+  const leftMs = p.at + DELETE_GRACE_MS - Date.now()
+  return leftMs > 0 ? { id: p.id, name: p.name, leftMs } : null
+}
+
+export function undoDelete(id: string) {
+  const pending = LS.get<PendingDelete[]>('rl:pendingDelete', [])
+  const p = pending.find((x) => x.id === id)
+  LS.set('rl:pendingDelete', pending.filter((x) => x.id !== id))
+  if (!p) return
+  if (p.cache) localStorage.setItem(`rl:list:${id}`, p.cache)
+  rememberList(id)
+  if (p.wasLast) LS.set('rl:last', id)
+}
+
+/** Fällige Löschungen auf dem Server ausführen (beim Start und nach Ablauf der Frist) */
+export async function flushDeletes() {
+  const due = LS.get<PendingDelete[]>('rl:pendingDelete', []).filter((p) => Date.now() - p.at >= DELETE_GRACE_MS)
+  for (const p of due) {
+    if (await deleteOnServer(p.id)) LS.set('rl:pendingDelete', LS.get<PendingDelete[]>('rl:pendingDelete', []).filter((x) => x.id !== p.id))
+  }
 }
 
 export function forgetList(id: string) {
