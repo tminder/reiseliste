@@ -72,7 +72,9 @@ Automatisch: Der Job „Korrekturvorschläge exportieren“ (`.github/workflows/
 | `src/data/countries.ts` | Reiseländer → Landessprache |
 | `src/lib/translate.ts` | Mengen erkennen, Eingabe dem Wörterbuch zuordnen, Vorschläge |
 | `src/lib/store.ts` | Lokaler Speicher, Offline-Warteschlange, Supabase-Sync und Echtzeit |
-| `src/App.tsx` | Oberfläche: Profil, Listen, Liste, Teilen |
+| `src/App.tsx` | Einstieg: Weiterleitung über den Hash, Profil oder Liste anzeigen |
+| `src/ui/` | Startseite (`Home.tsx`), Profil (`ProfileSetup.tsx`), Hilfen (`format.ts`) |
+| `src/ui/list/` | Liste (`ListView.tsx`), Artikel (`ItemRow.tsx`), Laden (`ShopBar.tsx`), Fotos (`PhotoStrip.tsx`), Mitglieder/Bearbeiten/Teilen (`sheets.tsx`) |
 | `supabase/schema.sql` | Tabellen, Zugriffsregeln, Echtzeit |
 
 ## Bekannte Grenzen / nächste Schritte

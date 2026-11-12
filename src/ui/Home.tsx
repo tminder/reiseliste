@@ -1,0 +1,322 @@
+// Startseite: alle Listen, neue Liste anlegen, Liste beitreten (QR-Code oder Link)
+import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
+import { UserPlus, ClipboardPaste, ScanLine, LocateFixed, MapPin, Plus, ShoppingCart, Trash2, X } from 'lucide-react'
+import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from '../data/countries'
+import { countryName, t } from '../i18n'
+import { listIdFrom } from '../lib/links'
+import { detectCountry } from '../lib/country'
+import { MAX } from '../lib/limits'
+import { ListStore, DELETE_GRACE_MS, flushDeletes, recentDelete, scheduleDelete, undoDelete, isSoleMember, knownLists, leaveList, localLastChange, remoteLastChanges, supabase, type Profile } from '../lib/store'
+import { AppVersion } from './AppVersion'
+import { formatWhen, go } from './format'
+
+
+export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () => void }) {
+  const [name, setName] = useState('')
+  // Vorauswahl: kein Land mit der eigenen Sprache, dort braucht es keine Übersetzung (D-041)
+  const [country, setCountry] = useState(() => ['ES', 'IT', 'FR'].find((c) => COUNTRY_BY_CODE.get(c)?.lang !== profile.lang) ?? 'ES')
+  const [detected, setDetected] = useState<string | null>(null)
+  const touched = useRef(false)
+  const [lists, setLists] = useState(knownLists)
+  // „Neue Liste“ ist eingeklappt, sobald es Listen gibt; ohne Listen direkt offen
+  const [panel, setPanel] = useState<'new' | 'join' | 'link' | null>(lists.length === 0 ? 'new' : null)
+  const [scan, setScan] = useState(false)
+  const showNew = panel === 'new'
+  const setShowNew = (v: boolean) => setPanel(v ? 'new' : null)
+  const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
+  // Einziges Mitglied? Dann „Löschen“ statt „Entfernen“ (D-036). null = noch unbekannt
+  const [sole, setSole] = useState<boolean | null>(null)
+  // „Gelöscht · Rückgängig“ während der Gnadenfrist (D-036)
+  const [deleted, setDeleted] = useState(() => recentDelete())
+  useEffect(() => {
+    if (!deleted) return
+    const timer = window.setTimeout(() => {
+      setDeleted(null)
+      void flushDeletes()
+    }, deleted.leftMs)
+    return () => window.clearTimeout(timer)
+  }, [deleted])
+  const askRemove = (listId: string | null) => {
+    setConfirmRemove(listId)
+    setSole(null)
+    if (listId) void isSoleMember(listId).then((v) => setSole(v))
+  }
+  // Letzte Änderung pro Liste (D-036): sofort aus dem Gerät, dann aktuell aus Supabase
+  const [changed, setChanged] = useState<Record<string, string>>(() =>
+    Object.fromEntries(lists.map((l) => [l.id, localLastChange(l.id)]).filter((e): e is [string, string] => !!e[1])),
+  )
+  useEffect(() => {
+    let alive = true
+    void remoteLastChanges(lists.map((l) => l.id)).then((remote) => {
+      if (!alive) return
+      setChanged((c) => {
+        const next = { ...c }
+        for (const [id, at] of Object.entries(remote)) if (!next[id] || at > next[id]) next[id] = at
+        return next
+      })
+    })
+    return () => {
+      alive = false
+    }
+  }, [lists])
+  const sorted = [...lists].sort((a, b) => (changed[b.id] ?? '').localeCompare(changed[a.id] ?? ''))
+
+  // Bist du schon im Ausland, wird das aktuelle Land vorgeschlagen (änderbar)
+  useEffect(() => {
+    let alive = true
+    void detectCountry().then((code) => {
+      if (!alive || !code || COUNTRY_BY_CODE.get(code)?.lang === profile.lang) return // eigene Sprache: kein Vorschlag
+      setDetected(code)
+      if (!touched.current) setCountry(code)
+    })
+    return () => {
+      alive = false
+    }
+  }, [profile.lang])
+
+  function create(e: FormEvent) {
+    e.preventDefault()
+    const id = crypto.randomUUID()
+    const store = new ListStore(id)
+    void store.create(name.trim() || t('defaultListName', { country: countryName(country) }), country)
+    go(`/l/${id}`)
+  }
+
+  return (
+    <main className="page narrow">
+      <header className="topbar">
+        <h1 className="brand">
+          <ShoppingCart size={26} strokeWidth={2.2} /> {t('appName')}
+        </h1>
+        <button className="ghost small" onClick={onEditProfile}>
+          {profile.name} · {LANG_LABEL[profile.lang]}
+        </button>
+      </header>
+
+      {/* Neu / Öffnen als waagrechte, scrollbare Knopfleiste; das Formular erscheint darunter */}
+      <div className="action-row">
+        <button className={`ghost ${panel === 'new' ? 'active' : ''}`} onClick={() => setPanel(panel === 'new' ? null : 'new')}>
+          <Plus size={18} /> {t('newList')}
+        </button>
+        {/* Beitreten: QR-Code scannen oder Link einfügen (D-037, D-038) */}
+        <button className={`ghost ${panel === 'join' || panel === 'link' ? 'active' : ''}`} onClick={() => setPanel(panel === 'join' || panel === 'link' ? null : 'join')}>
+          <UserPlus size={18} /> {t('joinList')}
+        </button>
+      </div>
+      {scan && (
+        <Suspense fallback={null}>
+          <QrScanner
+            onFound={(id) => go(`/l/${id}`)}
+            onClose={() => setScan(false)}
+            onPasteLink={() => {
+              setScan(false)
+              setPanel('link')
+            }}
+          />
+        </Suspense>
+      )}
+      {(panel === 'join' || panel === 'link') && (
+        <JoinList onClose={() => setPanel(null)} onScan={() => setScan(true)} focusLink={panel === 'link'} />
+      )}
+      {showNew && (
+        <form className="card stack" onSubmit={create}>
+          <div className="row-between">
+            <h2>{t('newList')}</h2>
+            {lists.length > 0 && (
+              <button type="button" className="ghost small" aria-label={t('close')} onClick={() => setShowNew(false)}>
+                <X size={16} />
+              </button>
+            )}
+          </div>
+          <label>
+            {t('travelCountry')}
+            <select
+              value={country}
+              onChange={(e) => {
+                touched.current = true
+                setCountry(e.target.value)
+              }}
+            >
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.flag} {countryName(c.code)} – {LANG_LABEL[c.lang]}
+                </option>
+              ))}
+            </select>
+            {detected && detected === country && <span className="hint-ok">
+                <LocateFixed size={14} /> {t('currentLocation')}
+              </span>}
+          </label>
+          <label>
+            {t('nameOptional')}
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder')} maxLength={MAX.listName} />
+          </label>
+          <button className="primary">{t('createList')}</button>
+        </form>
+      )}
+
+      {lists.length > 0 && (
+        <section className="stack">
+          <h2>{t('yourLists')}</h2>
+          {sorted.map((l) => {
+            const c = COUNTRY_BY_CODE.get(l.country)
+            return (
+              <div key={l.id} className="card list-card">
+                <div className="row-between">
+                  <a href={`#/l/${l.id}`} className="list-link">
+                    <span className="flag">{c?.flag}</span> {l.name}
+                    {changed[l.id] && <span className="list-changed">{t('lastChange', { when: formatWhen(changed[l.id]) })}</span>}
+                  </a>
+                  <button className="ghost small" aria-label={t('removeList')} onClick={() => askRemove(confirmRemove === l.id ? null : l.id)}>
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+                {confirmRemove === l.id && (
+                  <div className="confirm">
+                    <p className="small-text warn-text">{sole ? t('deleteListConfirm') : t('removeListConfirm')}</p>
+                    <div className="row-gap">
+                      <button
+                        className="danger-btn small"
+                        onClick={() => {
+                          if (sole) {
+                            scheduleDelete(l.id, l.name)
+                            setDeleted({ id: l.id, name: l.name, leftMs: DELETE_GRACE_MS })
+                          } else void leaveList(l.id)
+                          setConfirmRemove(null)
+                          setLists(knownLists())
+                        }}
+                      >
+                        {sole ? t('deleteYes') : t('removeYes')}
+                      </button>
+                      <button className="ghost small" onClick={() => setConfirmRemove(null)}>
+                        {t('cancel')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </section>
+      )}
+
+      {!supabase && <p className="note">{t('demoMode')}</p>}
+      {deleted && (
+        <div className="undo-bar" role="status">
+          <span>{t('listDeleted', { name: deleted.name })}</span>
+          <button
+            className="link"
+            onClick={() => {
+              undoDelete(deleted.id)
+              setDeleted(null)
+              setLists(knownLists())
+            }}
+          >
+            {t('undo')}
+          </button>
+        </div>
+      )}
+      <LocationNotice />
+      <footer className="footer">
+        <a href="#/datenschutz">{t('privacy')}</a>
+        <AppVersion />
+      </footer>
+    </main>
+  )
+}
+
+const QrScanner = lazy(() => import('../QrScanner'))
+
+/** Liste über einen eingefügten Link öffnen (D-037) */
+/** „Liste beitreten“ (D-037/D-038): primär QR-Code scannen, alternativ Link einfügen */
+function JoinList({ onClose, onScan, focusLink }: { onClose: () => void; onScan: () => void; focusLink?: boolean }) {
+  const [text, setText] = useState('')
+  const [error, setError] = useState(false)
+  const openId = (value: string) => {
+    const id = listIdFrom(value)
+    if (id) go(`/l/${id}`)
+    else setError(true)
+  }
+  return (
+    <form
+      className="card stack"
+      onSubmit={(e) => {
+        e.preventDefault()
+        openId(text)
+      }}
+    >
+      <div className="row-between">
+        <h2>{t('joinList')}</h2>
+        <button type="button" className="ghost small" aria-label={t('close')} onClick={onClose}>
+          <X size={16} />
+        </button>
+      </div>
+      <button type="button" className="primary join-scan" onClick={onScan}>
+        <ScanLine size={20} /> {t('scanQr')}
+      </button>
+      <p className="join-or muted small-text">{t('orPasteLink')}</p>
+      <input
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value)
+          setError(false)
+        }}
+        placeholder={t('linkPlaceholder')}
+        autoFocus={focusLink}
+      />
+      {error && <p className="small-text error-text">{t('linkInvalid')}</p>}
+      <div className="row-gap">
+        <button className="ghost" disabled={!text.trim()}>
+          {t('openList')}
+        </button>
+        {navigator.clipboard?.readText && (
+          <button
+            type="button"
+            className="ghost"
+            onClick={async () => {
+              try {
+                const clip = await navigator.clipboard.readText()
+                setText(clip)
+                if (listIdFrom(clip)) openId(clip)
+              } catch {
+                /* Einfügen abgelehnt */
+              }
+            }}
+          >
+            <ClipboardPaste size={16} /> {t('paste')}
+          </button>
+        )}
+      </div>
+    </form>
+  )
+}
+
+/** Einmaliger Hinweis zum Standort (bis „OK“ getippt) */
+function LocationNotice() {
+  const [seen, setSeen] = useState(() => {
+    try {
+      return localStorage.getItem('rl:locnotice') === '1'
+    } catch {
+      return true
+    }
+  })
+  if (seen) return null
+  return (
+    <div className="note info">
+      <MapPin size={15} /> {t('locationNotice')} <a href="#/datenschutz">{t('privacy')}</a>
+      <button
+        className="link"
+        onClick={() => {
+          try {
+            localStorage.setItem('rl:locnotice', '1')
+          } catch {
+            /* egal */
+          }
+          setSeen(true)
+        }}
+      >
+        {t('ok')}
+      </button>
+    </div>
+  )
+}

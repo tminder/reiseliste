@@ -98,7 +98,7 @@ Schon heute gibt es einen Notnagel: Beim Beitreten übernimmt die App Name und S
 | `src/lib/hardReload.ts` / Update-Prüfung (D-035) | In der App ersetzt durch App-Updates bzw. Live-Updates |
 | `vite.config.ts` | Service Worker nur im Web, nicht in der App |
 | `supabase/schema.sql` | Tabelle `push_tokens` und Regeln dazu (Stufe 2) |
-| `App.tsx` | Vorher aufteilen (S-007), sonst wird der Umbau unübersichtlich |
+| `src/ui/list/ListView.tsx` | Vorher die Abläufe in eigene Hooks auslagern (S-044), sonst wird der Umbau unübersichtlich |
 
 ## 6. Store-Anforderungen
 
@@ -131,7 +131,7 @@ Schon heute gibt es einen Notnagel: Beim Beitreten übernimmt die App Name und S
 
 | Phase | Inhalt | Aufwand (Claude + Inhaber) |
 | --- | --- | --- |
-| 0. Vorbereitung | MVP-Test ausgewertet, `App.tsx` aufgeteilt (S-007), eigene Domain, Review (S-032), Datenschutz geprüft (S-034), **Datenbank-Sicherung eingeschaltet und Wiederherstellung geübt (Pflicht, D-050, S-041)** | 2–4 Tage |
+| 0. Vorbereitung | MVP-Test ausgewertet, Abläufe der Listenansicht ausgelagert (S-044), eigene Domain, Review (S-032), Datenschutz geprüft (S-034), **Datenbank-Sicherung eingeschaltet und Wiederherstellung geübt (Pflicht, D-050, S-041)** | 2–4 Tage |
 | 1. Erste App | Capacitor, Plattform-Schicht, Pfad-Links und Universal/App Links, nativer Speicher, Standort, QR, Teilen, Icons | 1–2 Wochen |
 | 2. Store | Konten, Store-Texte, Datenschutzangaben, TestFlight, 14 Tage geschlossener Test bei Google | 2–3 Wochen, davon viel Warten |
 | 3. Mehrwert | Push über Supabase Edge Function, danach Geofencing, Widget | 1–3 Wochen |
