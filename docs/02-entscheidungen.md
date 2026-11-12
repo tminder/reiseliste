@@ -1,6 +1,6 @@
 # Entscheidungen
 
-Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
+Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
 
 ---
 
@@ -119,11 +119,6 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Wunsch des Inhabers. Im Laden sind große Schrift und Tipps sofort da, ohne Tippen. Die Leitplanken verhindern ungewollte Wechsel durch ungenaues GPS, z. B. wenn man neben einem Supermarkt wohnt oder vorbeigeht.
 - **Folgen:** Eine Web-App kann den Standort nicht im Hintergrund prüfen. Der Wechsel passiert also nur beim Öffnen der Liste, nicht beim Betreten des Ladens. Das ginge erst mit nativen Apps (D-009).
 
-## D-021 · App-Symbol
-
-- **Entscheidung:** Das App-Symbol zeigt einen weißen Einkaufswagen auf petrolfarbenem Verlauf, dazu eine Sprechblase mit „A→á“ für die Übersetzung. Es gibt PNG-Dateien für den iPhone-Home-Bildschirm (`apple-touch-icon.png`, 180 px), für Android/PWA (192 und 512 px), eine „maskable“ Variante mit Rand für runde Android-Symbole und das SVG als Browser-Symbol. Quelle ist ein SVG, die PNGs werden mit `rsvg-convert` daraus erzeugt.
-- **Begründung:** iOS zeigt auf dem Home-Bildschirm nur PNG-Symbole. Das Motiv verbindet Einkauf und Übersetzung.
-
 ## D-022 · Oberfläche mehrsprachig (Deutsch, Englisch)
 
 - **Entscheidung:** Alle Texte der Oberfläche stehen in `src/i18n.ts`, auf Deutsch und Englisch. Die Sprache der Oberfläche folgt der Sprache im Profil. Vor dem Anlegen des Profils gilt die Sprache des Browsers. Für Sprachen ohne eigene Texte wird Englisch verwendet. Ländernamen kommen in der Oberflächensprache vom Browser (`Intl.DisplayNames`), Abteilungen und Tipps sind übersetzt. Wechselt man im Profil die Sprache, wechselt die Oberfläche sofort mit.
@@ -148,10 +143,10 @@ Stand: 2026-11-10 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Entscheidung des Inhabers. Positionierung als Einkaufsliste mit Reisebezug, Sprache zweitrangig, ohne „shop“. „Proviant“ verstehen viele Sprachen (DE, SV, DA, NO, NL „proviand“, EN/FR „provisions“). „Travel List“ wäre auf Englisch als Packliste missverstanden worden.
 - **Folgen:** „Proviant“ allein ist generisch und schon belegt, deshalb nicht als Marke schützbar (F-005). Zudem ist „Proviant“ eine bekannte deutsche Getränkemarke (Proviant Fruchtmanufaktur Berlin, Bio-Limonaden im Detailhandel). International verstehen das Wort vor allem Deutsch-, Skandinavisch- und Niederländischsprachige, auf Englisch, Spanisch, Italienisch und Französisch ist es ein Fremdwort. Als Arbeitstitel fürs MVP tauglich, als internationale Marke fraglich. Bereits installierte PWAs zeigen den neuen Namen erst nach einem Update bzw. neuem Hinzufügen zum Home-Bildschirm.
 
-## D-026 · App-Icon: Einkaufswagen auf geschwungenem Weg
+## D-026 · App-Icon: gefüllter Einkaufswagen auf geschwungener Strasse
 
-- **Entscheidung:** Das Icon zeigt einen weissen Einkaufswagen auf einem türkisen Weg (#14b8a6), der unter dem Wagen gerade verläuft und am Ende in einem S nach oben ausläuft. Dunkler Grund (#1e293b), keine weiteren Details. Quelle ist `public/favicon.svg`. Daraus entstehen favicon-32, icon-192/512, apple-touch-icon (180, ohne Rundung) und icon-maskable-512 (Motiv auf 80 % verkleinert).
-- **Begründung:** Entscheidung des Inhabers (Variante „C3-2“). Einfach und auch in Home-Bildschirm-Grösse lesbar. Verbindet Einkaufen und Unterwegs-Sein.
+- **Entscheidung:** Das Icon zeigt einen weiss gefüllten Einkaufswagen, der leicht schräg auf einer dunklen, S-förmig geschwungenen Strasse (#1e293b) fährt. Petrolfarbener Grund (#14b8a6), keine weiteren Details. Quelle ist `public/favicon.svg`. Daraus entstehen mit `rsvg-convert` favicon-32, icon-192/512, apple-touch-icon (180 px, ohne Rundung, weil iOS selbst rundet) und icon-maskable-512 (Motiv auf 80 % verkleinert, Strasse läuft bis zum Rand).
+- **Begründung:** Entscheidung des Inhabers (Variante „i-b“). Der gefüllte Wagen bleibt auch in Home-Bildschirm-Grösse gut lesbar. Die Strasse verbindet Einkaufen und Unterwegs-Sein. iOS zeigt auf dem Home-Bildschirm nur PNG-Symbole, deshalb die PNG-Dateien.
 - **Folgen:** Bereits installierte PWAs zeigen das neue Icon erst nach dem Entfernen und erneuten Hinzufügen zum Home-Bildschirm.
 
 ## D-027 · Community-Funktionen nicht im MVP, später als Modul
