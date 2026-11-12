@@ -44,7 +44,7 @@ const DE: { title: string; back: string; updated: string; sections: Section[] } 
       h: 'An wen werden Daten übermittelt?',
       p: [
         [
-          'Supabase, Inc. (USA): Datenbank und Anmeldung für Listen, Artikel und Mitglieder.',
+          'Supabase, Inc. (USA): Datenbank und Anmeldung für Listen, Artikel und Mitglieder. Die Daten liegen in einem Rechenzentrum in London (Vereinigtes Königreich).',
           'GitHub, Inc. (USA): Hosting der App (GitHub Pages). Beim Aufruf fallen technisch bedingt Server-Protokolle mit IP-Adresse an.',
           'OpenStreetMap: Overpass API (FOSSGIS e.V., Deutschland; bei Ausfall Private.coffee, gemeinnütziger Verein in Österreich) für die Ladensuche, Nominatim (OpenStreetMap Foundation, Vereinigtes Königreich) für das Land – jeweils mit Koordinaten und IP-Adresse.',
           'Open Food Facts (Frankreich): Fotosuche, mit IP-Adresse.',
@@ -112,7 +112,7 @@ const EN: typeof DE = {
       h: 'Who receives data?',
       p: [
         [
-          'Supabase, Inc. (USA): database and sign-in for lists, items and members.',
+          'Supabase, Inc. (USA): database and sign-in for lists, items and members. The data is stored in a data centre in London (United Kingdom).',
           'GitHub, Inc. (USA): hosting of the app (GitHub Pages). Server logs including IP addresses are created for technical reasons.',
           'OpenStreetMap: Overpass API (FOSSGIS e.V., Germany; if unavailable, Private.coffee, a non-profit association in Austria) for the shop search, Nominatim (OpenStreetMap Foundation, United Kingdom) for the country – each with coordinates and IP address.',
           'Open Food Facts (France): photo search, with IP address.',
