@@ -73,7 +73,7 @@ Eine kleine Schicht `src/platform/` entscheidet, ob die Web- oder die native Var
 
 ### Profil und Konto speichern: Optionen (noch nicht entschieden, F-016)
 
-Heute liegen Profil (Name, Sprache, Wohnland) und die Liste der eigenen Listen im `localStorage` des Browsers, die Anmeldung ist anonym (Supabase). In der nativen App gibt es diese Möglichkeiten, sie lassen sich kombinieren:
+Heute liegen Profil (Name, Sprache) und die Liste der eigenen Listen im `localStorage` des Browsers, die Anmeldung ist anonym (Supabase). In der nativen App gibt es diese Möglichkeiten, sie lassen sich kombinieren:
 
 | Option | Was | Vorteil | Nachteil |
 | --- | --- | --- | --- |

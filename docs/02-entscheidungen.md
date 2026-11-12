@@ -47,7 +47,7 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-008 · Landessprache über das Reiseland der Liste, Vorschlag per Standort
 
-- **Entscheidung:** Jede Liste hat ein Reiseland, daraus folgt die Landessprache. Beim Anlegen schlägt die App das Land des aktuellen Standorts vor, sofern es unterstützt wird und nicht das eigene Wohnland ist (D-041). Dafür werden die Koordinaten über Nominatim (OpenStreetMap) einem Land zugeordnet. Das Ergebnis gilt 6 Stunden. Zu Hause, z. B. in Deutschland oder der Deutschschweiz, bleibt die Auswahl von Hand. Bestehende Listen ändern ihr Land nicht automatisch. Name und Land lassen sich über das Menü ändern (D-017). Länder mit mehreren Sprachen sind als einzelne Einträge auswählbar, z. B. Belgien (Flandern/Wallonie) oder die Schweiz (Romandie/Tessin). Der Vorschlag ordnet sie über die Region zu.
+- **Entscheidung:** Jede Liste hat ein Reiseland, daraus folgt die Landessprache. Beim Anlegen schlägt die App das Land des aktuellen Standorts vor, sofern es unterstützt wird und seine Sprache nicht die eigene ist (D-041). Dafür werden die Koordinaten über Nominatim (OpenStreetMap) einem Land zugeordnet. Das Ergebnis gilt 6 Stunden. In einem Land mit der eigenen Sprache, z. B. für Deutschsprachige in Deutschland oder der Deutschschweiz, bleibt die Auswahl von Hand. Bestehende Listen ändern ihr Land nicht automatisch. Name und Land lassen sich über das Menü ändern (D-017). Länder mit mehreren Sprachen sind als einzelne Einträge auswählbar, z. B. Belgien (Flandern/Wallonie) oder die Schweiz (Romandie/Tessin). Der Vorschlag ordnet sie über die Region zu.
 - **Begründung:** Man kann die Liste vor der Reise anlegen, das Land bleibt also wählbar. Ist man schon vor Ort, spart der Vorschlag einen Schritt (Wunsch des Inhabers).
 - **Folgen:** Auf der Startseite fragt der Browser nach dem Standort. Die Koordinaten gehen an Nominatim, das steht in der Datenschutzerklärung (D-023).
 
@@ -101,7 +101,7 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Oben rechts in der Liste sitzen zwei Knöpfe: **Teilen** (Symbol) und das **Menü ☰**. Das Menü hat zwei Gruppen mit Trennlinie:
   - **Diese Liste:** Mitglieder, Listen-Einstellungen (Name, Reiseland, „Erledigte automatisch entfernen“), Aus meinen Listen entfernen bzw. Liste löschen, wenn man das einzige Mitglied ist (rot, D-036).
-  - **Proviant:** Mein Profil (Name, Sprache, Wohnland; mit „Abbrechen“, danach zurück in die Liste), Datenschutz & Kontakt. Die Version steht nicht im Menü, nur in der Fusszeile der Startseite und des Profils.
+  - **Proviant:** Mein Profil (Name, Sprache; mit „Abbrechen“, danach zurück in die Liste), Datenschutz & Kontakt. Die Version steht nicht im Menü, nur in der Fusszeile der Startseite und des Profils.
   - Nicht im Menü: die Ladenansicht (Knopf über der Liste, Abhaken schaltet um, D-047) und „Alle Listen“ (Pfeil oben links).
 - **Begründung:** Wunsch des Inhabers nach einer Durchsicht: Teilen ist für eine geteilte Liste die wichtigste Aktion, Doppeltes fällt weg, die Einstellung zum automatischen Entfernen war unter „Name & Reiseland“ versteckt, das Profil liess sich nur auf der Startseite ändern.
 - **Folgen:** Die Kopfzeile ist etwas enger, lange Listennamen werden früher gekürzt. Ein Feedback-Eintrag ist bewusst noch nicht dabei.
@@ -230,15 +230,15 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-040 · Reiseland passt sich beim Grenzübertritt automatisch an
 
-- **Entscheidung:** Beim Öffnen einer Liste prüft die App still das aktuelle Land (Nominatim, Ergebnis höchstens 30 Minuten alt). Ist man in einem anderen unterstützten Reiseland als dem der Liste, wechselt sie das Reiseland der Liste automatisch (für alle Mitglieder) und zeigt „Reiseland auf 🇫🇷 Frankreich geändert · Rückgängig“. „Rückgängig“ stellt das alte Land wieder her, und für diese Liste wird nicht mehr automatisch auf dieses Land gewechselt (nur auf diesem Gerät). Im eigenen Wohnland (D-041) und in nicht unterstützten Ländern passiert nichts.
+- **Entscheidung:** Beim Öffnen einer Liste prüft die App still das aktuelle Land (Nominatim, Ergebnis höchstens 30 Minuten alt). Ist man in einem anderen unterstützten Reiseland als dem der Liste, wechselt sie das Reiseland der Liste automatisch (für alle Mitglieder) und zeigt „Reiseland auf 🇫🇷 Frankreich geändert · Rückgängig“. „Rückgängig“ stellt das alte Land wieder her, und für diese Liste wird nicht mehr automatisch auf dieses Land gewechselt (nur auf diesem Gerät). In Ländern mit der eigenen Sprache (D-041) und in nicht unterstützten Ländern passiert nichts.
 - **Begründung:** Wunsch des Inhabers. Auf Rundreisen (z. B. Spanien → Frankreich) soll die Liste ohne Handgriff die neue Landessprache zeigen.
-- **Folgen:** Ein Mitglied, das ein falsches oder kein Wohnland angegeben hat, kann das Reiseland zu Hause umstellen. Dafür gibt es „Rückgängig“. Fällt der Standort weg (keine Erlaubnis), bleibt alles wie es ist.
+- **Folgen:** Ein Mitglied mit anderer Sprache kann das Reiseland umstellen, während man selbst zu Hause ist, z. B. ein Gast aus Deutschland in Spanien. Dafür gibt es „Rückgängig“. Fällt der Standort weg (keine Erlaubnis), bleibt alles wie es ist.
 
-## D-041 · International: Wohnland im Profil als „zu Hause“
+## D-041 · International: Sprache statt Wohnland
 
-- **Entscheidung:** Das Profil hat neben Name und Sprache ein Wohnland („Wo wohnst du?“, alle Länder der App oder „Anderes Land“). Es ist die Basis für „zu Hause“: Dort wechselt die App das Reiseland nicht automatisch (D-040), und beim Anlegen einer Liste wird das Wohnland nicht vorgeschlagen. Ältere Profile ohne Angabe bekommen einen geratenen Wert (Browsersprache mit Region, z. B. de-CH → Deutschschweiz, sonst aus der Sprache, z. B. Spanisch → Spanien), änderbar über den Namen oben rechts. Damit jedes Land Wohn- und Reiseland sein kann, sind die deutschsprachigen Länder (Deutschland, Österreich, Deutschschweiz, Liechtenstein) sowie Brasilien, Argentinien, Kanada, Australien und Neuseeland dazugekommen (jetzt 27 Länder). Die Ländererkennung liefert für die Deutschschweiz jetzt „Schweiz (Deutschschweiz)“.
-- **Begründung:** Wunsch des Inhabers: Die App soll international funktionieren, nicht nur für Reisende aus dem deutschsprachigen Raum. Ein Spanier auf Reisen in der Schweiz braucht Deutsch als Landessprache.
-- **Folgen:** Das Wohnland wird nur auf dem Gerät gespeichert, nicht bei der Mitgliedschaft. Bei „bestehendes Mitglied auswählen“ (D-029) wird es geraten. Die Oberfläche gibt es weiterhin nur auf Deutsch und Englisch (S-008).
+- **Entscheidung:** Das Profil hat nur Name und Sprache, kein Wohnland mehr. Ob eine Übersetzung nötig ist, entscheidet die Sprache: In einem Land, dessen Landessprache die eigene Sprache ist, wechselt die App das Reiseland nicht automatisch (D-040) und schlägt es beim Anlegen einer Liste nicht vor. Die Vorauswahl beim Anlegen ist sonst das erkannte Land oder Spanien, Italien bzw. Frankreich (das erste mit fremder Sprache). Ein früher gespeichertes Wohnland wird ignoriert und beim nächsten Speichern des Profils entfernt.
+- **Begründung:** Entscheidung des Inhabers: Für Expats funktionierte das Wohnland nicht. Eine Deutsche in Barcelona hatte „Spanien“ als Wohnland und bekam zu Hause nie Spanisch, obwohl sie genau dort die Übersetzung braucht. Die Übersetzung hängt ohnehin nur an den Sprachen. Ein Schritt weniger beim Einrichten und eine Angabe weniger.
+- **Folgen:** Eine Deutschschweizerin in Deutschland (oder in Österreich) bekommt das Reiseland nicht automatisch umgestellt, z. B. auf „Sahne“ statt „Rahm“. Sie kann es von Hand ändern. Die Oberfläche bleibt Deutsch oder Englisch (D-022).
 
 ## D-042 · „Rückgängig“ nach dem Löschen statt Swipen
 

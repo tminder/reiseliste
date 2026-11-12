@@ -164,3 +164,39 @@ test.describe('Laden', () => {
     await expect(page.locator('.shopline')).toContainText('Lidl')
   })
 })
+
+test.describe('Reiseland nach Sprache (D-041)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
+  const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
+
+  async function open(page: Page, lang: string) {
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
+    await page.route(/interpreter/, (r) => r.fulfill(json({ elements: [] })))
+    await page.addInitScript(
+      ({ id, lang }) => {
+        if (localStorage.getItem('rl:seeded')) return
+        localStorage.setItem('rl:seeded', '1')
+        // Altes Profil mit Wohnland Spanien: darf keine Rolle mehr spielen
+        localStorage.setItem('rl:profile', JSON.stringify({ name: 'Anna', lang, home: 'ES' }))
+        localStorage.setItem('rl:lists', JSON.stringify([id]))
+        localStorage.setItem('rl:list:' + id, JSON.stringify({ list: { id, name: 'Wochenende', country: 'IT', updatedAt: '2026-01-01T00:00:00Z' }, items: [] }))
+      },
+      { id: LIST, lang },
+    )
+    await page.goto(`/#/l/${LIST}`)
+  }
+
+  test('Expat (Deutsch, wohnt in Spanien): Liste wechselt auf Spanien', async ({ page, problems }) => {
+    void problems
+    await open(page, 'de')
+    await expect(page.locator('.topbar .sub')).toContainText('Spanien', { timeout: 10_000 })
+    await expect(page.locator('.toast')).toContainText('Reiseland')
+  })
+
+  test('Spanischsprachig in Spanien: Liste bleibt beim bisherigen Land', async ({ page, problems }) => {
+    void problems
+    await open(page, 'es')
+    await page.waitForTimeout(3000)
+    await expect(page.locator('.topbar .sub')).toContainText(/Ital/)
+  })
+})

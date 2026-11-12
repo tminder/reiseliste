@@ -7,7 +7,7 @@ export interface Country {
   lang: Lang
 }
 
-// Länder, deren Landessprache das Wörterbuch abdeckt – Reiseland und Wohnland (D-041)
+// Länder, deren Landessprache das Wörterbuch abdeckt (Reiseland)
 export const COUNTRIES: Country[] = [
   { code: 'ES', name: 'Spanien', flag: '🇪🇸', lang: 'es' },
   { code: 'PT', name: 'Portugal', flag: '🇵🇹', lang: 'pt' },
@@ -50,19 +50,4 @@ export const LANG_LABEL: Record<Lang, string> = {
   nl: 'Nederlands',
   hr: 'Hrvatski',
   el: 'Ελληνικά',
-}
-
-/**
- * Wohnland raten (Profil ohne Angabe): aus der Browsersprache mit Region (de-CH → CH-DE),
- * sonst aus der Sprache (de → DE). null = unbekannt bzw. nicht in der Liste.
- */
-export function guessHome(lang: Lang): string | null {
-  // Region nur verwenden, wenn die Browsersprache zur Profilsprache passt (en-US bei Profil Deutsch → nicht USA)
-  const [bl, br] = navigator.language.split('-')
-  const region = bl === lang ? br?.toUpperCase() : undefined
-  if (region === 'CH') return { fr: 'CH-FR', it: 'CH-IT' }[lang as string] ?? 'CH-DE'
-  if (region === 'BE') return lang === 'fr' ? 'BE-FR' : 'BE-NL'
-  if (region && COUNTRY_BY_CODE.has(region)) return region
-  const byLang: Partial<Record<Lang, string>> = { de: 'DE', en: 'GB', es: 'ES', pt: 'PT', fr: 'FR', it: 'IT', nl: 'NL', hr: 'HR', el: 'GR' }
-  return byLang[lang] ?? null
 }

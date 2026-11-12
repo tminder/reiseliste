@@ -34,8 +34,6 @@ export interface Item {
 export interface Profile {
   name: string
   lang: Lang
-  /** Wohnland (Code aus COUNTRIES) oder null = anderes Land. Fehlt bei älteren Profilen (D-041) */
-  home?: string | null
 }
 
 export type SyncState = 'local-only' | 'offline' | 'syncing' | 'synced' | 'error'
@@ -97,7 +95,7 @@ const LS = {
 
 export const profileStore = {
   get: () => LS.get<Profile | null>('rl:profile', null),
-  set: (p: Profile) => LS.set('rl:profile', p),
+  set: (p: Profile) => LS.set('rl:profile', { name: p.name, lang: p.lang }), // früheres Wohnland fällt weg (D-041)
 }
 
 export function knownLists(): ShoppingList[] {
