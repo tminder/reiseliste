@@ -633,7 +633,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     setShopMode(true)
     setAutoShop(s)
   }
-  // Beim ersten Abhaken in die Ladenansicht wechseln (D-047, Test). Nach „zurück“ nicht mehr, solange die Liste offen ist.
+  // Beim ersten Abhaken in die Ladenansicht wechseln (D-047). Nach „zurück“ nicht mehr, solange die Liste offen ist.
   const [checkShop, setCheckShop] = useState(false)
   const checkShopBlocked = useRef(false)
   const onChecked = () => {
