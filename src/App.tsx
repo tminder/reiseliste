@@ -604,7 +604,10 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   const blurTimer = useRef<number | undefined>(undefined)
   const [shopMode, setShopModeState] = useState(false)
   const setShopMode = (v: boolean) => {
-    if (!v) setAutoShop(null)
+    if (!v) {
+      setAutoShop(null)
+      setCheckShop(false)
+    }
     setShopModeState(v)
   }
   const [showShare, setShowShare] = useState(false)
@@ -629,6 +632,14 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     if (inputRef.current.trim() || shopModeRef.current || autoShopModeBlocked(s.id)) return
     setShopMode(true)
     setAutoShop(s)
+  }
+  // Beim ersten Abhaken in die Ladenansicht wechseln (D-047, Test). Nach „zurück“ nicht mehr, solange die Liste offen ist.
+  const [checkShop, setCheckShop] = useState(false)
+  const checkShopBlocked = useRef(false)
+  const onChecked = () => {
+    if (shopModeRef.current || checkShopBlocked.current) return
+    setShopMode(true)
+    setCheckShop(true)
   }
   const chooseShop = (s: Shop | null) => {
     setChosenShop(id, s)
@@ -900,6 +911,21 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
         </div>
       )}
 
+      {shopMode && checkShop && !autoShop && (
+        <div className="toast">
+          <ShoppingCart size={16} /> {t('checkShopMode')}
+          <button
+            className="link"
+            onClick={() => {
+              checkShopBlocked.current = true
+              setShopMode(false)
+            }}
+          >
+            {t('back')}
+          </button>
+        </div>
+      )}
+
       {!shopMode && (
         <form
           className="add"
@@ -1014,7 +1040,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
           <section key={cat} className="group">
             <h3 data-flip={cat}>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
             {groups.get(cat)!.map((grp) => (
-              <ItemRow key={grp[0].id} item={grp[0]} group={grp.length > 1 ? grp : undefined} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} />
+              <ItemRow key={grp[0].id} item={grp[0]} group={grp.length > 1 ? grp : undefined} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
             ))}
           </section>
         ))}
@@ -1035,7 +1061,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
             </button>
           </h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} />
+            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
           ))}
         </section>
       )}
@@ -1110,6 +1136,7 @@ function ItemRow({
   me,
   onDeleted,
   onLocalChange,
+  onChecked,
   group,
 }: {
   item: Item
@@ -1128,6 +1155,8 @@ function ItemRow({
   onDeleted: (ids: string[], name: string) => void
   /** Eigene Änderung melden, damit sie nicht als „von anderen“ aufleuchtet (D-044) */
   onLocalChange: (id: string) => void
+  /** Nach dem Abhaken (nicht beim Wieder-Öffnen), z. B. für den Wechsel in die Ladenansicht (D-047) */
+  onChecked?: () => void
 }) {
   const [editing, setEditing] = useState(false)
   const [showCard, setShowCard] = useState(false)
@@ -1176,6 +1205,7 @@ function ItemRow({
               // Beim Abhaken wird „Ich hole das“ zurückgesetzt (D-031); bei zusammengefassten Zeilen alle Einträge
               for (const e of entries) void store.updateItem(e.id, { checked: next, ...(e.claimedBy ? { claimedBy: null } : {}) })
               setPending(null)
+              if (next) onChecked?.()
             },
             reducedMotion() ? 0 : 380,
           )

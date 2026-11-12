@@ -281,3 +281,8 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Wunsch des Inhabers. Wer in die Ladenansicht wechselt, steht meist im Laden. In Städten liegen oft mehrere Supermärkte innerhalb von 300 m, die Regel aus D-033 hätte dann den falschen Laden stehen lassen. Der richtige Laden zählt für Fotos und „Laden verlassen“ (D-043).
 - **Folgen:** Etwas mehr Anfragen an OpenStreetMap, aber nur beim Wechsel in die Ladenansicht.
 
+## D-047 · Abhaken schaltet in die Ladenansicht (Test)
+
+- **Entscheidung:** Wird in der normalen Ansicht ein Artikel abgehakt, wechselt die App nach der Abhak-Animation in die Ladenansicht. Ein Hinweis erscheint: „Ladenansicht eingeschaltet · zurück“. Nach „zurück“ wechselt die App nicht mehr, solange die Liste offen ist. Wieder-Öffnen eines Artikels löst nichts aus. Die Laden-Prüfung aus D-046 startet dabei wie bei jedem Wechsel.
+- **Begründung:** Wunsch des Inhabers, als Test. Abhaken ist das deutlichste Zeichen, dass jemand gerade einkauft, und funktioniert auch ohne Standort.
+- **Folgen:** Auch Abhaken zu Hause (Aufräumen) schaltet um. Ob schon der erste oder erst ein zweiter Haken umschalten soll, ist offen (F-015).
