@@ -93,9 +93,9 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-016 · Automatisch aktuell: neue App-Versionen und Listendaten
 
-- **Entscheidung:** Neue App-Versionen werden automatisch geladen. Geprüft wird beim Start, stündlich und jedes Mal, wenn die App wieder in den Vordergrund kommt, und bei einer neuen Version lädt die Seite selbst neu. Listendaten kommen per Echtzeit. Zusätzlich gleicht die App ab, wenn sie in den Vordergrund kommt, und alle 20 Sekunden, solange die Liste sichtbar ist.
+- **Entscheidung:** Neue App-Versionen werden automatisch geladen. Geprüft wird beim Start, stündlich und jedes Mal, wenn die App wieder in den Vordergrund kommt, und bei einer neuen Version lädt die Seite selbst neu. Listendaten kommen per Echtzeit. Zusätzlich gleicht die App ab, wenn sie in den Vordergrund kommt und wenn der Echtzeit-Kanal nach einer Unterbrechung wieder verbunden ist. Alle 20 Sekunden nur, solange der Kanal nicht verbunden ist oder Änderungen auf dem Gerät warten.
 - **Begründung:** Wunsch des Inhabers. Handys trennen die Echtzeit-Verbindung im Hintergrund, der Abgleich fängt das auf.
-- **Folgen:** Ein Update kann die Seite mitten in der Eingabe neu laden. Bereits gespeicherte Artikel gehen dabei nicht verloren. Der Abgleich alle 20 Sekunden erzeugt mehr Anfragen an Supabase, im Gratis-Tarif ist das unkritisch.
+- **Folgen:** Ein Update kann die Seite mitten in der Eingabe neu laden. Bereits gespeicherte Artikel gehen dabei nicht verloren. Bricht der Echtzeit-Kanal unbemerkt ab (ohne Statusmeldung), fehlen Änderungen bis zum nächsten Wechsel in die App.
 
 ## D-017 · Kopfzeile und Menü (☰) in der Liste
 
@@ -305,3 +305,10 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Der GitHub-Workflow „Datenbank sichern“ (`.github/workflows/backup.yml`) ist vorbereitet, aber vorerst nicht eingeschaltet: keine Secrets, kein Zeitplan, nur von Hand startbar. **Vor der nativen App ist die Sicherung Pflicht** (Phase 0 im Konzept). Dann: Secrets `SUPABASE_DB_URL` (Verbindung „Session pooler“ mit Passwort) und `BACKUP_PASSPHRASE` setzen, wöchentlichen Zeitplan im Workflow einschalten, ersten Lauf prüfen, Satz zur Sicherung in der Datenschutzerklärung ergänzen (Sicherung bei GitHub, USA, 90 Tage). Der Workflow sichert das Schema `public` und die Kennungen der anonymen Konten (`auth.users`) mit `pg_dump`, verschlüsselt mit GPG (AES-256) und bewahrt die Datei 90 Tage als Artefakt auf. Die Passphrase muss der Inhaber zusätzlich sicher aufbewahren.
 - **Begründung:** Entscheidung des Inhabers: Für den privaten Test genügt es vorerst ohne Sicherung, für Nutzer aus den App-Stores nicht. Das Repo ist öffentlich, darum nur verschlüsselt.
 - **Folgen:** Bis dahin gibt es keine Sicherung (S-035). Die Wiederherstellung ist nicht geübt (S-041).
+
+## D-051 · Eigene Fehlerüberwachung über Supabase
+
+- **Entscheidung:** Fehler in der App (`error`, `unhandledrejection`) und beim Abgleich mit Supabase (`setError`) schickt die App in die Tabelle `client_errors`: Art, Fehlertext, Stack, App-Version, Bereich der App (`#/l/<id>` ohne Kennung), Browser-Kennung, anonyme Nutzer-Kennung. Vorher entfernt `src/lib/errors.ts` Kennungen (UUIDs) und von der Datenbank zitierte Zeilen („Failing row contains …“), damit keine Listeninhalte mitkommen. Netzwerk-Aussetzer (offline) werden nicht gemeldet. Pro Sitzung höchstens 20 verschiedene Meldungen, jede nur einmal; die Datenbank nimmt höchstens 50 pro Nutzer und Stunde an. Nutzer können nur eintragen, nicht lesen. Ausgewertet wird im SQL Editor (`select * from public.client_errors_summary;`). `ping()` (täglicher Job) löscht Meldungen nach 30 Tagen.
+- **Begründung:** Befund der MVP-Beurteilung, vom Inhaber zur Umsetzung gewählt. Ohne Fremddienst (kein Sentry), Daten bleiben bei Supabase in London. In der Testphase sollen Fehler auffallen, die niemand meldet.
+- **Folgen:** Neuer Datenfluss, in der Datenschutzerklärung beschrieben. `supabase/schema.sql` muss neu ausgeführt werden, sonst gehen die Meldungen ins Leere (die App merkt davon nichts).
+

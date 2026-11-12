@@ -4,6 +4,9 @@ import './index.css'
 import App from './App.tsx'
 import { registerSW } from 'virtual:pwa-register'
 import { reloadIfOutdated } from './lib/hardReload'
+import { installErrorReporting } from './lib/errors'
+
+installErrorReporting()
 
 // Nach einem harten Neuladen (D-035) den Zeitstempel wieder aus der Adresse entfernen
 if (new URLSearchParams(location.search).has('r')) {

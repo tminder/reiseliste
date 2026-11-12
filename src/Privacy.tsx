@@ -19,7 +19,7 @@ const DE: { title: string; back: string; updated: string; sections: Section[] } 
     {
       h: 'Wer ist verantwortlich?',
       p: [
-        `Tobias Minder, Schweiz, E-Mail: ${CONTACT}. Proviant ist ein privates, nicht kommerzielles Projekt in der Testphase. Es gibt keine Werbung, kein Tracking und keine Analyse-Tools.`,
+        `Tobias Minder, Schweiz, E-Mail: ${CONTACT}. Proviant ist ein privates, nicht kommerzielles Projekt in der Testphase. Es gibt keine Werbung, kein Tracking und keine Analyse-Tools, nur eine eigene Fehlerüberwachung (siehe unten).`,
       ],
     },
     {
@@ -36,6 +36,7 @@ const DE: { title: string; back: string; updated: string; sections: Section[] } 
           ...(FEATURES.community
             ? ['Korrekturvorschläge: Korrigierst du einen Begriff in der Landessprache, wird der Vorschlag (Artikel, alter und neuer Begriff, Land, Liste, anonyme Kennung) gespeichert, damit der Betreiber das Wörterbuch verbessern kann. Eine Zusammenfassung ohne Kennungen (Begriffe, Sprache, Anzahl, Beispiel-Artikel) wird wöchentlich in das öffentliche Code-Repository der App übertragen.']
             : []),
+          'Fehlermeldungen: Tritt in der App oder beim Abgleich ein Fehler auf, werden Fehlertext, App-Version, Browser und Gerätetyp, der Bereich der App und die anonyme Kennung an Supabase geschickt, damit der Betreiber Fehler findet. Listeninhalte und Listen-Kennungen werden vorher entfernt. Gespeichert 30 Tage.',
           'Auf deinem Gerät (Browser-Speicher): Profil, Listen zum Offline-Gebrauch, zwischengespeicherte Fotos und Suchergebnisse. Cookies werden nicht verwendet.',
         ],
       ],
@@ -87,7 +88,7 @@ const EN: typeof DE = {
     {
       h: 'Who is responsible?',
       p: [
-        `Tobias Minder, Switzerland, email: ${CONTACT}. Proviant is a private, non-commercial project in a test phase. There are no ads, no tracking and no analytics tools.`,
+        `Tobias Minder, Switzerland, email: ${CONTACT}. Proviant is a private, non-commercial project in a test phase. There are no ads, no tracking and no analytics tools, only our own error monitoring (see below).`,
       ],
     },
     {
@@ -104,6 +105,7 @@ const EN: typeof DE = {
           ...(FEATURES.community
             ? ['Correction suggestions: if you correct a term in the local language, the suggestion (item, old and new term, country, list, anonymous identifier) is stored so the operator can improve the dictionary. A summary without identifiers (terms, language, count, example items) is copied weekly to the app’s public code repository.']
             : []),
+          'Error reports: if an error occurs in the app or while syncing, the error text, app version, browser and device type, the part of the app and the anonymous identifier are sent to Supabase so the operator can find bugs. List contents and list identifiers are removed first. Kept for 30 days.',
           'On your device (browser storage): profile, lists for offline use, cached photos and search results. No cookies are used.',
         ],
       ],

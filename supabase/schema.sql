@@ -66,18 +66,23 @@ create or replace function public.enforce_limits()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
   -- Die App speichert per upsert: Auch Änderungen bestehender Zeilen lösen den Insert-Trigger aus. Die zählen nicht.
-  if tg_table_name = 'lists' and exists (select 1 from lists where id = new.id) then return new; end if;
-  if tg_table_name = 'items' and exists (select 1 from items where id = new.id) then return new; end if;
+  -- Verschachtelte if: Ausdrücke mit new.id dürfen nur für die passende Tabelle ausgewertet werden.
   if tg_table_name = 'lists' then
+    if exists (select 1 from lists where id = new.id) then return new; end if;
     if (select count(*) from lists where created_by = auth.uid() and created_at > now() - interval '1 day') >= 30 then
       raise exception 'limit: zu viele neue Listen';
     end if;
   elsif tg_table_name = 'items' then
+    if exists (select 1 from items where id = new.id) then return new; end if;
     if (select count(*) from items where list_id = new.list_id and not deleted) >= 500 then
       raise exception 'limit: zu viele Artikel in der Liste';
     end if;
     if (select count(*) from items where list_id = new.list_id and created_at > now() - interval '1 hour') >= 300 then
       raise exception 'limit: zu viele neue Artikel';
+    end if;
+  elsif tg_table_name = 'client_errors' then
+    if (select count(*) from client_errors where user_id = auth.uid() and created_at > now() - interval '1 hour') >= 50 then
+      raise exception 'limit: zu viele Fehlermeldungen';
     end if;
   end if;
   return new;
@@ -227,12 +232,42 @@ $$;
 revoke all on function public.delete_list(uuid) from public, anon;
 grant execute on function public.delete_list(uuid) to authenticated;
 
+-- Fehlermeldungen der App (D-051): nur eintragen, nicht lesen. Ohne Listeninhalte (die App entfernt sie vorher).
+-- Auswerten im SQL Editor: select * from public.client_errors_summary;  Einzelne: select * from public.client_errors order by id desc;
+-- Ältere als 30 Tage löscht ping() (täglicher Job).
+create table if not exists public.client_errors (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  user_id uuid default auth.uid(),
+  build text,
+  kind text,
+  message text not null,
+  stack text,
+  path text,
+  agent text
+);
+alter table public.client_errors drop constraint if exists client_errors_len;
+alter table public.client_errors add constraint client_errors_len
+  check (char_length(coalesce(build, '')) <= 40 and char_length(coalesce(kind, '')) <= 20 and char_length(message) between 1 and 500
+    and char_length(coalesce(stack, '')) <= 2000 and char_length(coalesce(path, '')) <= 100 and char_length(coalesce(agent, '')) <= 200) not valid;
+alter table public.client_errors enable row level security;
+drop policy if exists "errors: insert own" on public.client_errors;
+create policy "errors: insert own" on public.client_errors for insert to authenticated with check (user_id = auth.uid());
+drop trigger if exists client_errors_limits on public.client_errors;
+create trigger client_errors_limits before insert on public.client_errors for each row execute function public.enforce_limits();
+create or replace view public.client_errors_summary as
+  select date_trunc('day', created_at)::date as day, build, kind, message, count(*) as n, count(distinct user_id) as users
+  from public.client_errors group by 1, 2, 3, 4 order by 1 desc, 5 desc;
+revoke all on public.client_errors_summary from public, anon, authenticated;
+
 -- Supabase wach halten (D-039): Der GitHub-Job „Supabase wach halten“ ruft täglich ping() auf.
 -- Eine kleine Schreibaktion zählt sicher als Datenbank-Aktivität (Gratis-Projekte pausieren nach 7 Tagen ohne).
 create table if not exists public.keepalive (id int primary key default 1 check (id = 1), at timestamptz not null default now());
 alter table public.keepalive enable row level security; -- kein direkter Zugriff, nur über ping()
 create or replace function public.ping()
 returns timestamptz language sql volatile security definer set search_path = public as $$
+  -- Nebenbei: Fehlermeldungen nach 30 Tagen löschen (D-051)
+  with old as (delete from client_errors where created_at < now() - interval '30 days')
   insert into keepalive (id, at) values (1, now()) on conflict (id) do update set at = excluded.at returning at;
 $$;
 revoke all on function public.ping() from public;

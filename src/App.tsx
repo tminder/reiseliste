@@ -1,5 +1,4 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEvent } from 'react'
-import QRCode from 'qrcode'
 import {
   ArrowLeft,
   Shield,
@@ -30,7 +29,6 @@ import {
 import { CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, guessHome, LANG_LABEL } from './data/countries'
 import { categoryLabel, countryName, setUiLang, t, uiLang } from './i18n'
-import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
 import { flash, reducedMotion, slideOut, useFlip } from './lib/motion'
@@ -75,7 +73,12 @@ export default function App() {
   // Sprache der Oberfläche = Sprache aus dem Profil (vor der Einrichtung: Browsersprache)
   setUiLang(profile?.lang ?? guessLang())
 
-  if (route.page === 'privacy') return <Privacy />
+  if (route.page === 'privacy')
+    return (
+      <Suspense fallback={null}>
+        <Privacy />
+      </Suspense>
+    )
   if (!profile || editingProfile)
     return (
       <ProfileSetup
@@ -414,6 +417,7 @@ function Home({ profile, onEditProfile }: { profile: Profile; onEditProfile: () 
 }
 
 const QrScanner = lazy(() => import('./QrScanner'))
+const Privacy = lazy(() => import('./Privacy'))
 
 /** Liste über einen eingefügten Link öffnen (D-037) */
 /** „Liste beitreten“ (D-037/D-038): primär QR-Code scannen, alternativ Link einfügen */
@@ -1899,7 +1903,8 @@ function ShareSheet({ id, name, onClose }: { id: string; name: string; onClose: 
   const [qr, setQr] = useState('')
   const [copied, setCopied] = useState(false)
   useEffect(() => {
-    QRCode.toDataURL(url, { margin: 1, width: 240 }).then(setQr, () => setQr(''))
+    // QR-Code-Bibliothek erst beim Teilen laden (kleineres Start-Bundle, S-021)
+    void import('qrcode').then((m) => m.default.toDataURL(url, { margin: 1, width: 240 })).then(setQr, () => setQr(''))
   }, [url])
 
   return (

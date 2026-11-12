@@ -48,9 +48,13 @@ export const supabase: SupabaseClient | null = URL && KEY ? createClient(URL, KE
 
 /** Letzte Fehlermeldung von Supabase – wird in der App angezeigt, um Probleme zu finden. */
 export let lastSyncError: string | null = null
+let syncErrorListener: ((where: string, msg: string) => void) | null = null
+/** Fehlerüberwachung anhängen (D-051), ohne dass store.ts davon abhängt */
+export const onSyncError = (fn: (where: string, msg: string) => void) => (syncErrorListener = fn)
 export const setError = (where: string, msg: string) => {
   lastSyncError = `${where}: ${msg}`
   console.warn('[reiseliste]', lastSyncError)
+  syncErrorListener?.(where, msg)
 }
 
 let authReady: Promise<boolean> | null = null
@@ -362,6 +366,9 @@ export class ListStore {
     if (document.visibilityState === 'visible') void this.pushAndPull(true)
   }
   private poll: number | undefined
+  /** Echtzeit-Kanal verbunden (D-016) */
+  private live = false
+  private everLive = false
 
   readonly id: string
 
@@ -412,9 +419,12 @@ export class ListStore {
     if (this.list) rememberList(this.id)
     window.addEventListener('online', this.onOnline)
     document.addEventListener('visibilitychange', this.onVisible)
+    // Abgleich alle 20 Sekunden nur als Rückfallebene: wenn der Echtzeit-Kanal nicht verbunden ist
+    // oder noch Änderungen auf dem Gerät warten (D-016). Sonst kommen Änderungen über den Kanal.
     if (supabase)
       this.poll = window.setInterval(() => {
-        if (document.visibilityState === 'visible' && this.sync !== 'syncing') void this.pushAndPull(true)
+        if (document.visibilityState !== 'visible' || this.sync === 'syncing') return
+        if (!this.live || queue.all().length > 0) void this.pushAndPull(true)
       }, 20_000)
     if (!supabase) return
     if (!(await ensureAuth())) return this.setSync('error')
@@ -428,7 +438,13 @@ export class ListStore {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'lists', filter: `id=eq.${this.id}` }, (p) => {
         if (p.new && 'id' in p.new) this.applyList(fromRemoteList(p.new))
       })
-      .subscribe()
+      .subscribe((status) => {
+        const wasLive = this.live
+        this.live = status === 'SUBSCRIBED'
+        // Nach einer Unterbrechung verpasste Änderungen nachholen
+        if (this.live && !wasLive && this.everLive) void this.pushAndPull(true)
+        if (this.live) this.everLive = true
+      })
     await this.pushAndPull()
     // Neu erstellte Liste: erst nach dem Hochladen existiert sie online – dann Namen eintragen
     if (!this.joined && this.list) await this.join()
