@@ -33,7 +33,7 @@ import Privacy from './Privacy'
 import { THANKS, WHERE_IS } from './data/phrases'
 import { FEATURES } from './features'
 import { flash, reducedMotion, slideOut, useFlip } from './lib/motion'
-import { addQty, sumQty } from './lib/qty'
+import { addQty, canAddQty, sumQty } from './lib/qty'
 import { isIos, isStandalone, listIdFrom, listUrl } from './lib/links'
 import { findConcept, nameIn, normalize, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
@@ -721,15 +721,16 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
     const data = { text: clean, qty, lang: profile.lang, conceptId: conceptId ?? findConcept(clean, profile.lang), author: profile.name }
     setInput('')
     pulseAdded()
-    // Steht derselbe Artikel schon offen auf der Liste: Menge erhöhen statt neuer Zeile (D-045)
+    // Steht derselbe Artikel schon offen auf der Liste und passen die Mengen zusammen: Menge erhöhen statt neuer Zeile (D-045).
+    // Unterschiedliche Einheiten oder Packungsgrössen („2“ und „2 × 100 g“) bleiben getrennte Zeilen.
     const key = data.conceptId ?? normalize(clean)
-    const existing = store.items.find((i) => !i.deleted && !i.checked && dupKey(i) === key)
-    if (!existing) {
+    const existing = store.items.find((i) => !i.deleted && !i.checked && dupKey(i) === key && canAddQty(i.qty, qty))
+    const merged = existing ? addQty(existing.qty, qty) : null
+    if (!existing || merged === null) {
       void store.addItem(data)
       return
     }
     const before = existing.qty
-    const merged = addQty(before, qty)
     void store.updateItem(existing.id, { qty: merged })
     // Bestehende Zeile zeigen: hinscrollen, aufleuchten, Menge hüpft kurz (D-044, D-045).
     // Bei zusammengefassten Zeilen trägt die Zeile die ID des ersten Eintrags.
@@ -790,7 +791,7 @@ function ListView({ id, profile }: { id: string; profile: Profile }) {
   for (const item of open) {
     const cat = (item.conceptId && BY_ID.get(item.conceptId)?.category) || 'sonstiges'
     const list = groups.get(cat) ?? []
-    const same = list.find((g) => dupKey(g[0]) === dupKey(item))
+    const same = list.find((g) => dupKey(g[0]) === dupKey(item) && canAddQty(g[0].qty, item.qty))
     if (same) same.push(item)
     else list.push([item])
     groups.set(cat, list)

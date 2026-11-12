@@ -1,5 +1,6 @@
 // Mengen zusammenrechnen, wenn derselbe Artikel mehrmals auf die Liste kommt (D-045).
-// Gerechnet wird nur, wenn es sicher geht (Stück, g/kg, ml/cl/l, gleiche Einheit), sonst „1 Packung + 500 g“.
+// Gerechnet wird nur, wenn es sicher geht (Stück, g/kg, ml/cl/l, gleiche Einheit bzw. Packungsgrösse).
+// Passt es nicht zusammen, bleiben die Einträge getrennte Zeilen.
 
 type Parsed = { n: number; unit: string } // unit: '' = Stück, 'g', 'ml' oder die Einheit als Text
 
@@ -34,16 +35,23 @@ function format({ n, unit }: Parsed): string {
   return `${num(n)} ${unit}`
 }
 
-/** Zwei Mengen zusammenführen. null = keine Angabe (zählt als 1 Stück). */
-export function addQty(a: string | null, b: string | null): string {
+/** Lassen sich zwei Mengen sauber zusammenrechnen (gleiche Einheit bzw. gleiche Packungsgrösse)? null = keine Angabe (1 Stück). */
+export function canAddQty(a: string | null, b: string | null): boolean {
+  const pa = parse(a)
+  const pb = parse(b)
+  return !!pa && !!pb && pa.unit === pb.unit
+}
+
+/** Zwei Mengen zusammenführen. null = keine Angabe (zählt als 1 Stück). Passen sie nicht zusammen: null (D-045). */
+export function addQty(a: string | null, b: string | null): string | null {
   const pa = parse(a)
   const pb = parse(b)
   if (pa && pb && pa.unit === pb.unit) return format({ n: pa.n + pb.n, unit: pa.unit })
-  return [a ?? '1', b ?? '1'].map((x) => x.trim()).join(' + ')
+  return null
 }
 
-/** Mehrere Mengen zusammenführen (für die zusammengefasste Anzeige) */
+/** Mehrere Mengen zusammenführen (für die zusammengefasste Anzeige; die Einträge passen zusammen, sonst „a + b“) */
 export function sumQty(list: (string | null)[]): string | null {
   if (list.length <= 1) return list[0] ?? null
-  return list.slice(1).reduce<string>((acc, q) => addQty(acc, q), list[0] ?? '1')
+  return list.slice(1).reduce<string>((acc, q) => addQty(acc, q) ?? `${acc} + ${q ?? '1'}`, list[0] ?? '1')
 }
