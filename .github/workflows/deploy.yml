@@ -26,8 +26,17 @@ jobs:
       - run: npm ci
       # Code-Prüfung (S-013): Fehler stoppen die Veröffentlichung, Warnungen nicht
       - run: npm run lint
-      # Tests für Wörterbuch und Übersetzung (S-002) – schlagen sie fehl, wird nicht veröffentlicht
+      # Tests für Wörterbuch, Übersetzung und Mengen – schlagen sie fehl, wird nicht veröffentlicht
       - run: npm test
+      # Oberflächen-Tests der Hauptabläufe im Browser (D-052) – ebenfalls Pflicht vor dem Veröffentlichen
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: test-results
+          retention-days: 7
       - run: npm run build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/

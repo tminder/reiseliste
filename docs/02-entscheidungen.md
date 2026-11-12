@@ -312,3 +312,9 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Befund der MVP-Beurteilung, vom Inhaber zur Umsetzung gewählt. Ohne Fremddienst (kein Sentry), Daten bleiben bei Supabase in London. In der Testphase sollen Fehler auffallen, die niemand meldet.
 - **Folgen:** Neuer Datenfluss, in der Datenschutzerklärung beschrieben. `supabase/schema.sql` muss neu ausgeführt werden, sonst gehen die Meldungen ins Leere (die App merkt davon nichts).
 
+## D-052 · Automatische Tests vor jeder Veröffentlichung
+
+- **Entscheidung:** Vor jedem Deployment laufen in GitHub Actions: Lint, Vitest (`npm test`: Wörterbuch, Übersetzung, Mengen, Fehlerbereinigung und das Datenbank-Schema mit PGlite, einem echten Postgres im Speicher) und Playwright-Oberflächentests (`npm run e2e`, Ordner `e2e/`). Die Oberflächentests laufen gegen einen eigenen Build ohne Supabase, alle fremden Server sind gesperrt. Sie spielen durch: Profil und Liste anlegen, Übersetzung, Mengen zusammenzählen, Abhaken mit Wechsel in die Ladenansicht, Menü und Profil, Teilen mit QR-Code, Liste löschen mit Rückgängig, Datenschutzseite. Jeder Test schlägt zusätzlich fehl, wenn ein JavaScript-Fehler oder ein Verstoss gegen die Content-Security-Policy auftritt. Schlägt etwas fehl, wird nicht veröffentlicht; der Bericht liegt 7 Tage als Artefakt beim Lauf.
+- **Begründung:** Befund der MVP-Beurteilung, vom Inhaber freigegeben. Änderungen werden damit sicherer, Voraussetzung für das Aufteilen von `App.tsx` (S-007).
+- **Folgen:** Ein Deployment dauert rund 2 Minuten länger. Neue Funktionen bekommen einen Ablauf in `e2e/app.spec.ts`, Schema-Änderungen einen Fall in `tests/schema.test.ts`.
+
