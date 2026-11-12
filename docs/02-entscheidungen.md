@@ -219,7 +219,7 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Unter „Liste beitreten“ (D-037) ist „QR-Code scannen“ der primäre Weg. Er öffnet die Rückkamera bildschirmfüllend mit Rahmen. Erkannt wird mit der Bibliothek jsQR direkt im Browser (etwa 5 Bilder pro Sekunde, verkleinert). Sobald ein QR-Code mit Listen-Link erkannt ist, öffnet sich die Liste. Andere QR-Codes ergeben einen Hinweis. Unten im Scanner führt „Stattdessen Link einfügen“ zurück zum Link-Feld, auch wenn die Kamera nicht erlaubt ist. Der Scanner wird erst beim Öffnen geladen (eigene Datei, etwa 50 kB komprimiert).
 - **Begründung:** Wunsch des Inhabers. Auf dem iPhone öffnet die Kamera-App QR-Codes in Safari, nicht in der Home-Bildschirm-App (D-037). Mit dem Scanner in der App landet die Liste direkt dort.
-- **Folgen:** Kamerazugriff nur auf Knopfdruck und mit Erlaubnis, Bilder werden weder gespeichert noch gesendet (in der Datenschutzerklärung erwähnt). Auf einem echten iPhone noch nicht getestet (S-031).
+- **Folgen:** Kamerazugriff nur auf Knopfdruck und mit Erlaubnis, Bilder werden weder gespeichert noch gesendet (in der Datenschutzerklärung erwähnt). Auf echten Handys getestet.
 
 
 ## D-039 · Supabase wach halten per täglichem Ping
