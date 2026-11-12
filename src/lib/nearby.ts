@@ -58,10 +58,10 @@ export async function locationAlreadyAllowed(): Promise<boolean> {
 }
 
 // Öffentliche Overpass-Server; fällt einer aus oder ist ausgelastet, wird der nächste versucht.
+// Nur Betreiber aus der EU, beide in der Datenschutzerklärung genannt (S-025). Neue Server nur nach Prüfung des Betreibers.
 const ENDPOINTS = [
-  'https://overpass-api.de/api/interpreter',
-  'https://overpass.private.coffee/api/interpreter',
-  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass-api.de/api/interpreter', // FOSSGIS e.V., Deutschland
+  'https://overpass.private.coffee/api/interpreter', // Private.coffee, Verein nach österreichischem Recht
 ]
 
 type OsmElement = { type: string; id: number; lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }

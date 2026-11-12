@@ -46,7 +46,7 @@ const DE: { title: string; back: string; updated: string; sections: Section[] } 
         [
           'Supabase, Inc. (USA): Datenbank und Anmeldung für Listen, Artikel und Mitglieder.',
           'GitHub, Inc. (USA): Hosting der App (GitHub Pages). Beim Aufruf fallen technisch bedingt Server-Protokolle mit IP-Adresse an.',
-          'OpenStreetMap: Overpass API (FOSSGIS e.V., Deutschland, sowie Ersatzserver) für die Ladensuche, Nominatim (OpenStreetMap Foundation, Vereinigtes Königreich) für das Land – jeweils mit Koordinaten und IP-Adresse.',
+          'OpenStreetMap: Overpass API (FOSSGIS e.V., Deutschland; bei Ausfall Private.coffee, gemeinnütziger Verein in Österreich) für die Ladensuche, Nominatim (OpenStreetMap Foundation, Vereinigtes Königreich) für das Land – jeweils mit Koordinaten und IP-Adresse.',
           'Open Food Facts (Frankreich): Fotosuche, mit IP-Adresse.',
         ],
         'Bei Diensten in den USA und im Vereinigten Königreich kann ein Zugriff durch Behörden nach dortigem Recht nicht ausgeschlossen werden. Die Übermittlung erfolgt, soweit vorhanden, gestützt auf Angemessenheitsbeschlüsse bzw. Standardvertragsklauseln der Anbieter.',
@@ -114,7 +114,7 @@ const EN: typeof DE = {
         [
           'Supabase, Inc. (USA): database and sign-in for lists, items and members.',
           'GitHub, Inc. (USA): hosting of the app (GitHub Pages). Server logs including IP addresses are created for technical reasons.',
-          'OpenStreetMap: Overpass API (FOSSGIS e.V., Germany, plus fallback servers) for the shop search, Nominatim (OpenStreetMap Foundation, United Kingdom) for the country – each with coordinates and IP address.',
+          'OpenStreetMap: Overpass API (FOSSGIS e.V., Germany; if unavailable, Private.coffee, a non-profit association in Austria) for the shop search, Nominatim (OpenStreetMap Foundation, United Kingdom) for the country – each with coordinates and IP address.',
           'Open Food Facts (France): photo search, with IP address.',
         ],
         'For services in the USA and the United Kingdom, access by authorities under local law cannot be ruled out. Transfers rely, where available, on adequacy decisions or the providers’ standard contractual clauses.',
