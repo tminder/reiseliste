@@ -1,6 +1,6 @@
 # Konzept: Native App für iPhone und Android
 
-Stand: 2026-11-10 · Entwurf von Claude. Entschieden ist noch nichts. Wann sich der Schritt lohnt, ist als F-006 offen.
+Stand: 2026-11-12 · Entwurf von Claude. Entschieden ist noch nichts. Wann sich der Schritt lohnt, ist als F-006 offen.
 
 ## 1. Warum überhaupt eine native App?
 
@@ -70,6 +70,22 @@ Eine kleine Schicht `src/platform/` entscheidet, ob die Web- oder die native Var
 ### Stufe 3: später
 
 10. Siri- und Google-Assistant-Kurzbefehle („Milch auf die Reiseliste“), Apple Watch, Sprachnotizen.
+
+### Profil und Konto speichern: Optionen (noch nicht entschieden, F-016)
+
+Heute liegen Profil (Name, Sprache, Wohnland) und die Liste der eigenen Listen im `localStorage` des Browsers, die Anmeldung ist anonym (Supabase). In der nativen App gibt es diese Möglichkeiten, sie lassen sich kombinieren:
+
+| Option | Was | Vorteil | Nachteil |
+| --- | --- | --- | --- |
+| A. Lokal | `@capacitor/preferences` (iOS UserDefaults, Android SharedPreferences) | Einfacher Ersatz für `localStorage`, kein Konto, das System löscht nichts | Nach dem Deinstallieren und auf einem neuen Gerät ist alles weg |
+| B. Sicherer Speicher | iOS Keychain, Android Keystore, für das Supabase-Token | Auf iOS bleibt die Keychain auch nach dem Deinstallieren erhalten: Neuinstallation = derselbe Nutzer mit seinen Listen | Auf Android nach dem Deinstallieren weg |
+| C. System-Synchronisation | iOS iCloud Key-Value Store, Android Auto Backup | Profil und Listen-Übersicht auch auf dem iPad oder nach einem Handywechsel, ohne eigenes Konto | Nur innerhalb von Apple bzw. Google, kein Wechsel iPhone ↔ Android |
+| D. Profil auf dem Server | Profil am anonymen Supabase-Nutzer | Ein Profil für alle Listen, zentral änderbar | Geht verloren, wenn die anonyme Anmeldung verloren geht (ohne B oder E) |
+| E. Konto (freiwillig) | Sign in with Apple, Google oder E-Mail-Link; Supabase verknüpft das anonyme Konto nachträglich, Listen bleiben erhalten | Alle Geräte und Plattformen | Höhere Hürde, zusätzliche Personendaten (Datenschutzerklärung anpassen) |
+
+Schon heute gibt es einen Notnagel: Beim Beitreten übernimmt die App Name und Sprache aus früheren Mitgliedschaften (D-029).
+
+**Vorschlag von Claude:** zum Start A + B, dazu C für Gerätewechsel, alles ohne Konto. E später als freiwillige Funktion („Listen auf allen Geräten“).
 
 ## 5. Änderungen am bestehenden Code
 
@@ -147,3 +163,4 @@ Die native App lohnt sich, sobald **alle** drei Punkte zutreffen:
 - Privates Konto oder Organisations-Konto (D-U-N-S) bei Google und Apple?
 - Mac vorhanden, oder Cloud-Build?
 - Sollen Push-Mitteilungen und Geofencing Teil der ersten Version sein (empfohlen wegen Apple 4.2)?
+- Wie werden Profil und Anmeldung gespeichert (Abschnitt 4, „Profil und Konto speichern“, F-016)?
