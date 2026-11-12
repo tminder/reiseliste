@@ -61,7 +61,7 @@ const DE: { title: string; back: string; updated: string; sections: Section[] } 
     {
       h: 'Wie lange werden Daten gespeichert?',
       p: [
-        `Listen, Artikel${FEATURES.community ? ', Mitgliedschaften und Korrekturvorschläge' : ' und Mitgliedschaften'} bleiben gespeichert, bis du die Löschung verlangst. „Aus meinen Listen entfernen“ löscht die Kopie auf deinem Gerät und deine Mitgliedschaft. Die Liste selbst bleibt für die anderen Mitglieder bestehen. Bist du das einzige Mitglied, heisst der Punkt „Liste löschen“: Dann werden die Liste, alle Artikel und die Mitgliedschaften auch auf dem Server endgültig gelöscht. Daten auf deinem Gerät kannst du jederzeit über die Browser-Einstellungen löschen.`,
+        `Listen, Artikel${FEATURES.community ? ', Mitgliedschaften und Korrekturvorschläge' : ' und Mitgliedschaften'} bleiben gespeichert, bis du die Löschung verlangst. „Aus meinen Listen entfernen“ löscht die Kopie auf deinem Gerät und deine Mitgliedschaft. Die Liste selbst bleibt für die anderen Mitglieder bestehen. Bist du das einzige Mitglied, heisst der Punkt „Liste löschen“: Dann werden die Liste, alle Artikel und die Mitgliedschaften auch auf dem Server endgültig gelöscht. Einmal pro Woche wird die Datenbank verschlüsselt gesichert und die Sicherung 90 Tage bei GitHub, Inc. (USA) aufbewahrt. Gelöschte Daten verschwinden daher spätestens nach 90 Tagen auch aus den Sicherungen. Daten auf deinem Gerät kannst du jederzeit über die Browser-Einstellungen löschen.`,
       ],
     },
     {
@@ -129,7 +129,7 @@ const EN: typeof DE = {
     {
       h: 'How long is data kept?',
       p: [
-        `“Remove from my lists” deletes the copy on your device and your membership. The list itself stays for the other members. If you are the only member, the item is called “Delete list”: the list, all items and memberships are then deleted for good on the server too. Lists, items${FEATURES.community ? ', memberships and correction suggestions' : ' and memberships'} are kept until you request deletion. You can delete data on your device at any time in your browser settings.`,
+        `“Remove from my lists” deletes the copy on your device and your membership. The list itself stays for the other members. If you are the only member, the item is called “Delete list”: the list, all items and memberships are then deleted for good on the server too. Lists, items${FEATURES.community ? ', memberships and correction suggestions' : ' and memberships'} are kept until you request deletion. Once a week the database is backed up in encrypted form and the backup is kept for 90 days at GitHub, Inc. (USA). Deleted data therefore also disappears from the backups after 90 days at the latest. You can delete data on your device at any time in your browser settings.`,
       ],
     },
     {

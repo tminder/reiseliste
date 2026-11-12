@@ -300,3 +300,9 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Befund der MVP-Beurteilung, vom Inhaber zur Umsetzung freigegeben. Anonyme Konten kann jeder anlegen; ohne Grenzen liesse sich der Gratis-Speicher mit einem Skript füllen. Die CSP ist eine zweite Verteidigungslinie gegen eingeschleustes Skript.
 - **Folgen:** `supabase/schema.sql` muss neu ausgeführt werden. Die Grenze für anonyme Anmeldungen pro IP-Adresse stellt Supabase selbst (Dashboard → Authentication → Rate Limits), sie ist nicht im Code. Eine CSP über HTTP-Header (z. B. `frame-ancestors`) erlaubt GitHub Pages nicht.
 
+## D-050 · Wöchentliche verschlüsselte Sicherung der Datenbank
+
+- **Entscheidung:** Der GitHub-Workflow „Datenbank sichern“ (`.github/workflows/backup.yml`) sichert montags früh und auf Knopfdruck das Schema `public` (Tabellen, Funktionen, Regeln, Daten) und die Kennungen der anonymen Konten (`auth.users`) mit `pg_dump`. Die Sicherung wird mit GPG (AES-256) verschlüsselt und als Artefakt des Laufs 90 Tage bei GitHub aufbewahrt. Nötig sind zwei Secrets: `SUPABASE_DB_URL` (Verbindung „Session pooler“ mit Passwort) und `BACKUP_PASSPHRASE`. Die Passphrase muss der Inhaber zusätzlich sicher aufbewahren, sonst ist die Sicherung wertlos. Wiederherstellen: siehe Kommentar im Workflow.
+- **Begründung:** Der Gratis-Tarif von Supabase hat keine Backups. Solange die Secrets fehlen, läuft die Sicherung nicht (S-035). Ein Workflow kostet nichts und braucht keinen weiteren Dienst. Das Repo ist öffentlich, darum nur verschlüsselt.
+- **Folgen:** Gelöschte Daten bleiben bis zu 90 Tage in den Sicherungen, das steht in der Datenschutzerklärung. Die Wiederherstellung ist nicht geübt (S-041).
+

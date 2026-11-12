@@ -1,0 +1,70 @@
+# Datenbank sichern (D-050): Supabase sichert im Gratis-Tarif nicht selbst.
+# Läuft wöchentlich und auf Knopfdruck. Die Sicherung wird verschlüsselt (GPG, AES-256) und als
+# Artefakt dieses Laufs 90 Tage aufbewahrt. Das Repo ist öffentlich: unverschlüsselt darf hier nichts liegen.
+#
+# Nötige Secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_DB_URL     Verbindungs-URL „Session pooler“ aus Supabase (Connect → Session pooler), mit Passwort
+#   BACKUP_PASSPHRASE   langes Passwort zum Verschlüsseln, zusätzlich sicher aufbewahren (Passwort-Manager)
+#
+# Wiederherstellen (siehe auch docs/betrieb.md, sobald vorhanden):
+#   1. Artefakt herunterladen und entpacken
+#   2. gpg --decrypt backup-….sql.gz.gpg | gunzip > backup.sql
+#   3. In einem leeren Supabase-Projekt: psql "<neue DB-URL>" -f backup.sql
+
+name: Datenbank sichern
+
+on:
+  schedule:
+    - cron: '17 3 * * 1' # montags 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Secrets prüfen
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$DB_URL" ] || [ -z "$PASS" ]; then
+            echo "::error::Secrets SUPABASE_DB_URL und BACKUP_PASSPHRASE fehlen (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+
+      - name: pg_dump installieren (PostgreSQL 18, sichert auch ältere Server)
+        run: |
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y >/dev/null
+          sudo apt-get install -y -qq postgresql-client-18 >/dev/null
+          /usr/lib/postgresql/18/bin/pg_dump --version
+
+      - name: Sichern und verschlüsseln
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -o pipefail
+          umask 077
+          STAMP=$(date -u +%Y-%m-%d)
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+          {
+            # Tabellen, Funktionen, Regeln und Daten der App
+            /usr/lib/postgresql/18/bin/pg_dump "$DB_URL" --schema=public --no-owner --no-privileges
+            # Anonyme Konten (nur die Kennungen), damit Mitgliedschaften zugeordnet bleiben
+            /usr/lib/postgresql/18/bin/pg_dump "$DB_URL" --data-only --table=auth.users --column-inserts --no-owner
+          } | gzip -9 | gpg --batch --yes --pinentry-mode loopback --passphrase "$PASS" \
+                --symmetric --cipher-algo AES256 -o "backup-$STAMP.sql.gz.gpg"
+          ls -l "backup-$STAMP.sql.gz.gpg"
+          # Plausibilität: entschlüsseln und zählen, ohne den Inhalt auszugeben
+          gpg --batch --quiet --pinentry-mode loopback --passphrase "$PASS" --decrypt "backup-$STAMP.sql.gz.gpg" \
+            | gunzip | grep -c "^COPY \|^INSERT " | xargs echo "Datenblöcke:"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backup-${{ env.STAMP }}
+          path: backup-*.sql.gz.gpg
+          retention-days: 90
+          if-no-files-found: error
