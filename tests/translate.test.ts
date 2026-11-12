@@ -1,7 +1,10 @@
 // Prüft die Zuordnung Eingabe → Wörterbuch (S-002).
-import { describe, expect, it } from 'vitest'
-import { exactConcept, findConcept, nameIn, normalize, splitQuantity, suggest } from '../src/lib/translate'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { LANGS } from '../src/data/dictionary'
+import { exactConcept, findConcept, loadLanguages, nameIn, normalize, splitQuantity, suggest } from '../src/lib/translate'
 import { listIdFrom } from '../src/lib/links'
+
+beforeAll(() => loadLanguages(LANGS))
 
 describe('normalize', () => {
   it('entfernt Akzente, ß und Satzzeichen', () => {
@@ -78,6 +81,21 @@ describe('nameIn und suggest', () => {
   it('schlägt passende Artikel vor', () => {
     expect(suggest('Milc', 'de').map((e) => e.id)).toContain('milch')
     expect(suggest('x', 'de')).toEqual([])
+  })
+})
+
+describe('Länder-Abweichungen (D-053)', () => {
+  it('zeigt den Begriff des Landes, sonst den allgemeinen', () => {
+    expect(nameIn('sahne', 'de', 'de-CH')).toBe('Rahm')
+    expect(nameIn('milch', 'de', 'de-CH')).toBe('Milch')
+    expect(nameIn('schinken', 'pt', 'pt-BR')).toBe('presunto')
+  })
+
+  it('erkennt Begriffe aus Abweichungen, ohne allgemeine Namen umzudeuten', () => {
+    expect(findConcept('Rahm', 'de')).toBe('sahne')
+    expect(findConcept('Poulet', 'de')).toBe('haehnchen')
+    // „presunto“ heisst in Portugal Rohschinken und bleibt es auch, wenn pt-BR geladen ist
+    expect(findConcept('presunto', 'pt')).toBe('rohschinken')
   })
 })
 

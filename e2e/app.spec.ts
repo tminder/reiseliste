@@ -18,16 +18,16 @@ const test = base.extend<{ problems: string[] }>({
 })
 
 /** Profil und eine leere Liste „Testing“ (Spanien) ins Gerät legen */
-async function seed(page: Page, items: object[] = []) {
+async function seed(page: Page, items: object[] = [], country = 'ES') {
   await page.addInitScript(
-    ({ id, items }) => {
+    ({ id, items, country }) => {
       if (localStorage.getItem('rl:seeded')) return
       localStorage.setItem('rl:seeded', '1')
       localStorage.setItem('rl:profile', JSON.stringify({ name: 'Tobias', lang: 'de', home: 'CH-DE' }))
       localStorage.setItem('rl:lists', JSON.stringify([id]))
-      localStorage.setItem('rl:list:' + id, JSON.stringify({ list: { id, name: 'Testing', country: 'ES', updatedAt: '2026-01-01T00:00:00Z' }, items }))
+      localStorage.setItem('rl:list:' + id, JSON.stringify({ list: { id, name: 'Testing', country, updatedAt: '2026-01-01T00:00:00Z' }, items }))
     },
-    { id: LIST, items },
+    { id: LIST, items, country },
   )
 }
 
@@ -56,6 +56,18 @@ test('Profil anlegen, Liste erstellen, Artikel übersetzt', async ({ page, probl
   await expect(page.locator('.add input')).toBeVisible()
   await add(page, 'Milch')
   await expect(page.locator('.item').first()).toContainText('leche')
+})
+
+test('Länder-Abweichung: in Mexiko „crema“ statt „nata“, Wörterbuch wird nachgeladen (D-053)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [item(1, 'Sahne', 'sahne')], 'MX')
+  await page.goto(`/#/l/${LIST}`)
+  await expect(page.locator('.item').first()).toContainText('crema')
+  await expect(page.locator('.item').first()).not.toContainText('nata')
+  // Schweizer Wort aus de-CH wird erkannt und zum selben Artikel gezählt
+  await add(page, 'Rahm')
+  await expect(page.locator('.undo-bar')).toContainText('war schon auf der Liste')
+  await expect(rows(page)).toHaveCount(1)
 })
 
 test('Mengen: gleiche Einheit wird addiert, andere Einheit eigene Zeile', async ({ page, problems }) => {

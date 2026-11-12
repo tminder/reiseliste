@@ -1,367 +1,14 @@
-// Texte der Bedienoberfläche. Sprache = Sprache aus dem Profil; fehlt eine Übersetzung, gilt Englisch.
-// Neue Sprache: Objekt wie `en` anlegen, in MESSAGES eintragen – TypeScript meldet fehlende Schlüssel.
+// Texte der Bedienoberfläche (D-053): eine JSON-Datei pro Sprache in src/locales, Format ICU MessageFormat
+// („{name}“, „{n, plural, one {# Artikel} other {# Artikel}}“). Sprache = Sprache aus dem Profil; fehlt ein Text, gilt Englisch.
+// Neue Sprache: src/locales/<lang>.json anlegen und in MESSAGES eintragen. Der Test meldet fehlende Schlüssel.
 
 import type { Category, Lang } from './data/dictionary'
-
-const de = {
-  appName: 'Proviant',
-  tagline: 'Du schreibst in deiner Sprache – im Laden siehst du jeden Artikel in der Landessprache.',
-  yourName: 'Dein Name',
-  namePlaceholder: 'z. B. Tobias',
-  whichLanguage: 'In welcher Sprache schreibst du?',
-  letsGo: "Los geht's",
-  showStaff: 'Dem Personal zeigen',
-  claim: 'Ich hole das',
-  unclaim: 'Doch nicht holen',
-  claimedBy: '🙋 {name} holt das',
-  claimedByMe: '🙋 Du holst das',
-  buyAgain: 'Schon mal gekauft – antippen zum Hinzufügen:',
-  removeChecked: 'Erledigte entfernen',
-  knownMember: 'Schon in dieser Liste? Tippe auf deinen Namen:',
-  orNewProfile: 'Oder neu:',
-  newList: 'Neue Liste',
-  travelCountry: 'Reiseland',
-  currentLocation: 'Dein aktueller Standort',
-  nameOptional: 'Name (optional)',
-  listNamePlaceholder: 'z. B. Ferienwohnung Lissabon',
-  createList: 'Liste erstellen',
-  defaultListName: 'Einkauf {country}',
-  yourLists: 'Deine Listen',
-  removeList: 'Liste entfernen',
-  removeListConfirm: '⚠️ Die Liste verschwindet aus deinen Listen. Für die anderen Mitglieder bleibt sie bestehen. Mit dem Link oder QR-Code kannst du wieder beitreten.',
-  removeYes: 'Entfernen',
-  deleteList: 'Liste löschen',
-  deleteListTitle: '„{name}“ löschen?',
-  deleteListConfirm: '⚠️ Du bist das einzige Mitglied. Die Liste wird mit allen Artikeln endgültig gelöscht.',
-  deleteYes: 'Löschen',
-  listDeleted: '„{name}“ gelöscht',
-  countryChanged: 'Reiseland auf {country} geändert',
-  undo: 'Rückgängig',
-  added: 'hinzugefügt',
-  qtyIncreased: 'Menge erhöht',
-  version: 'Version',
-  motionOff: 'Animationen aus (Bewegung reduzieren)',
-  qtyMerged: '{name} war schon auf der Liste: jetzt {qty}',
-  alreadyOnList: '{qty} auf der Liste',
-  onList: 'auf der Liste',
-  autoClear: 'Erledigte automatisch entfernen',
-  autoClearHint: 'Abgehakte Artikel verschwinden, sobald du den Laden verlassen hast, spätestens nach 1 Tag. Unter „Schon mal gekauft“ bleiben sie verfügbar.',
-  autoClearedDay: 'Erledigte entfernt: {n} (älter als 1 Tag)',
-  autoClearedShop: 'Erledigte entfernt: {n} (Laden verlassen)',
-  deletedOne: '„{name}“ gelöscht',
-  deletedMany: '{n} Artikel entfernt',
-  removeListTitle: '„{name}“ entfernen?',
-  lastChange: 'Geändert {when}',
-  today: 'heute',
-  yesterday: 'gestern',
-  demoMode: 'Demo-Modus: Supabase ist nicht verbunden, Listen bleiben auf diesem Gerät.',
-  allLists: 'Alle Listen',
-  listNotFound: 'Diese Liste gibt es nicht (mehr).',
-  listLoading: 'Liste wird geladen …',
-  listNotOnDevice: 'Diese Liste ist auf diesem Gerät nicht gespeichert.',
-  syncOffline: 'Offline – Änderungen werden gespeichert und übertragen, sobald wieder Netz da ist.',
-  syncLocal: 'Nur auf diesem Gerät – Teilen ist nicht verbunden.',
-  syncError: 'Synchronisieren fehlgeschlagen – neuer Versuch automatisch.',
-  syncErrorLabel: 'Sync-Fehler',
-  offline: 'Offline',
-  menu: 'Menü',
-  share: 'Teilen',
-  members: 'Mitglieder',
-  shopMode: 'Ladenansicht',
-  shopModeEnd: 'Ladenansicht beenden',
-  editList: 'Listen-Einstellungen',
-  thisList: 'Diese Liste',
-  myProfile: 'Mein Profil',
-  removeFromDevice: 'Aus meinen Listen entfernen',
-  autoShopMode: 'Ladenansicht – du bist bei',
-  checkShopMode: 'Ladenansicht eingeschaltet',
-  back: 'zurück',
-  addPlaceholder: 'Artikel auf {lang}, z. B. „{example}“',
-  addExample: '2 Milch',
-  addItem: 'Artikel hinzufügen',
-  add: 'Hinzufügen',
-  edit: 'Bearbeiten',
-  counts: '{open} offen · {done} erledigt',
-  empty: 'Noch leer. Tippe oben einen Artikel in deiner Sprache ein.',
-  other: 'Sonstiges',
-  inCart: 'Im Wagen',
-  markOpen: 'Als offen markieren',
-  check: 'Abhaken',
-  noTranslation: 'keine Übersetzung',
-  enterLocalTerm: 'Landesbegriff selbst eintragen',
-  localTermPlaceholder: 'Begriff in Landessprache',
-  tip: 'Tipp',
-  photos: 'Produktfotos',
-  delete: 'Löschen',
-  searchingShop: 'Suche Laden …',
-  allowLocation: 'Standort freigeben',
-  help: 'Hilfe',
-  helpIphone: 'iPhone/Safari:',
-  help1: 'Einstellungen → Datenschutz & Sicherheit → Ortungsdienste: eingeschaltet, und bei „Safari-Websites“ „Beim Verwenden der App“.',
-  help2: 'In Safari links in der Adressleiste auf „aA“ (bzw. das Seiten-Symbol) → Website-Einstellungen → Standort: „Erlauben“. Dann fragt Safari nicht mehr bei jedem Öffnen.',
-  help3: 'Seite neu laden.',
-  retryIn: 'Neuer Versuch in {s} s',
-  now: 'jetzt',
-  noSupermarketWithin: 'Kein Supermarkt bis {dist}',
-  noShop: 'Kein Laden',
-  searchShop: 'Laden suchen',
-  changeShop: 'Laden ändern',
-  searching: 'Suche …',
-  searchAgain: 'Neu suchen',
-  photosSearching: 'Fotos werden gesucht …',
-  noPhotos: 'Keine passenden Fotos gefunden.',
-  photosFromShop: 'Bei {shop}',
-  photosNotFromShop: 'Keine Treffer für {shop}, übliche Produkte im Land',
-  photosCredit: 'Fotos',
-  loading: 'Wird geladen …',
-  unknown: 'Unbekannt',
-  you: 'du',
-  membersHint: 'Wer den Link zur Liste öffnet, wird Mitglied. Den eigenen Namen änderst du unter „Mein Profil“ im Menü.',
-  close: 'Schliessen',
-  editListTitle: 'Listen-Einstellungen',
-  name: 'Name',
-  countryChangeHint: 'Ändert das Land für alle, mit denen die Liste geteilt ist.',
-  save: 'Speichern',
-  cancel: 'Abbrechen',
-  shareList: 'Liste teilen',
-  demoShare: 'Demo-Modus: Ohne Supabase sehen andere die Liste nicht.',
-  qrAlt: 'QR-Code zur Liste',
-  copied: 'Kopiert ✓',
-  openByLink: 'Link einfügen',
-  openByLinkHint: 'Hast du einen Link zu einer Liste bekommen? Hier einfügen. Auf dem iPhone ist das nötig, wenn du Proviant vom Home-Bildschirm nutzt.',
-  linkPlaceholder: 'Link einfügen',
-  linkInvalid: 'Das ist kein Link zu einer Liste.',
-  openList: 'Öffnen',
-  paste: 'Einfügen',
-  scanQr: 'QR-Code scannen',
-  joinList: 'Liste beitreten',
-  orPasteLink: 'oder Link einfügen:',
-  pasteLinkInstead: 'Stattdessen Link einfügen',
-  qrScanHint: 'QR-Code der Liste in den Rahmen halten',
-  qrWrong: 'Das ist kein QR-Code einer Liste.',
-  cameraDenied: 'Kein Zugriff auf die Kamera. Erlaube ihn in den Einstellungen des Browsers.',
-  cameraUnavailable: 'Dieser Browser kann die Kamera nicht nutzen.',
-  copyLink: 'Link kopieren',
-  iosHint: 'Nutzt du Proviant als App auf dem Home-Bildschirm? Das iPhone öffnet Links immer in Safari. Kopiere den Link und füge ihn in der App unter „Liste beitreten“ ein.',
-  iosHintDismiss: 'Nicht mehr zeigen',
-  shareIosHint: 'iPhone mit Proviant auf dem Home-Bildschirm: in der App „Liste beitreten“ → „QR-Code scannen“ antippen und diesen Code scannen.',
-  shareLink: 'Link teilen',
-  // Fehlermeldungen
-  errNoGeo: 'Dieses Gerät kann den Standort nicht bestimmen.',
-  errGeoDenied: 'Standort nicht freigegeben.',
-  errGeoFailed: 'Standort konnte nicht bestimmt werden.',
-  errOsmBusy: 'OpenStreetMap ist ausgelastet.',
-  errOsmUnreachable: 'OpenStreetMap ist nicht erreichbar oder ausgelastet.',
-  errOsmStatus: 'OpenStreetMap antwortet nicht (Fehler {status}).',
-  errShopUnknown: 'Laden nicht erkannt.',
-  errOffUnreachable: 'Open Food Facts ist nicht erreichbar oder ausgelastet.',
-  errOffBusy: 'Open Food Facts ist ausgelastet (Fehler {status}).',
-  errOffStatus: 'Open Food Facts antwortet nicht (Fehler {status}).',
-  errPhotos: 'Fotos konnten nicht gesucht werden.',
-  // Regionen bei mehrsprachigen Ländern
-  regionFlanders: 'Flandern',
-  regionWallonia: 'Wallonie',
-  regionRomandy: 'Romandie',
-  regionTicino: 'Tessin',
-  regionGermanSwiss: 'Deutschschweiz',
-  correctTerm: 'Begriff korrigieren',
-  correctionHint: 'Gilt sofort für alle in dieser Liste und hilft, das Wörterbuch zu verbessern.',
-  privacy: 'Datenschutz & Kontakt',
-  locationNotice: 'Für Reiseland und Ladensuche nutzt die App deinen Standort (nur mit deiner Erlaubnis). Die Koordinaten gehen an OpenStreetMap und werden nicht auf einem Server gespeichert.',
-  ok: 'OK',
-  cat_obst: 'Obst & Gemüse',
-  cat_milch: 'Milchprodukte & Eier',
-  cat_brot: 'Brot & Frühstück',
-  cat_fleisch: 'Fleisch & Fisch',
-  cat_vorrat: 'Vorrat',
-  cat_getraenke: 'Getränke',
-  cat_tk: 'Tiefkühl',
-  cat_haushalt: 'Haushalt',
-  cat_kueche: 'Küche & Geschirr',
-  cat_hygiene: 'Drogerie',
-  cat_baby: 'Baby',
-}
+import de from './locales/de.json'
+import en from './locales/en.json'
 
 export type MessageKey = keyof typeof de
 
-const en: Record<MessageKey, string> = {
-  appName: 'Proviant',
-  tagline: 'Write in your language – in the shop you see every item in the local language.',
-  yourName: 'Your name',
-  namePlaceholder: 'e.g. Anna',
-  whichLanguage: 'Which language do you write in?',
-  letsGo: "Let's go",
-  showStaff: 'Show to staff',
-  claim: "I'll get this",
-  unclaim: "Won't get this after all",
-  claimedBy: '🙋 {name} is getting this',
-  claimedByMe: "🙋 You're getting this",
-  buyAgain: 'Bought before – tap to add:',
-  removeChecked: 'Remove checked',
-  knownMember: 'Already in this list? Tap your name:',
-  orNewProfile: 'Or new:',
-  newList: 'New list',
-  travelCountry: 'Travel country',
-  currentLocation: 'Your current location',
-  nameOptional: 'Name (optional)',
-  listNamePlaceholder: 'e.g. Lisbon apartment',
-  createList: 'Create list',
-  defaultListName: 'Shopping {country}',
-  yourLists: 'Your lists',
-  removeList: 'Remove list',
-  removeListConfirm: '⚠️ The list disappears from your lists. It stays for the other members. You can rejoin with the link or QR code.',
-  removeYes: 'Remove',
-  deleteList: 'Delete list',
-  deleteListTitle: 'Delete “{name}”?',
-  deleteListConfirm: '⚠️ You are the only member. The list and all its items will be deleted for good.',
-  deleteYes: 'Delete',
-  listDeleted: '“{name}” deleted',
-  countryChanged: 'Travel country changed to {country}',
-  undo: 'Undo',
-  added: 'added',
-  qtyIncreased: 'quantity increased',
-  version: 'Version',
-  motionOff: 'animations off (reduce motion)',
-  qtyMerged: '{name} was already on the list: now {qty}',
-  alreadyOnList: '{qty} on the list',
-  onList: 'on the list',
-  autoClear: 'Remove checked items automatically',
-  autoClearHint: 'Checked items disappear once you have left the shop, at the latest after 1 day. They stay available under “Bought before”.',
-  autoClearedDay: 'Checked items removed: {n} (older than 1 day)',
-  autoClearedShop: 'Checked items removed: {n} (left the shop)',
-  deletedOne: '“{name}” deleted',
-  deletedMany: '{n} items removed',
-  removeListTitle: 'Remove “{name}”?',
-  lastChange: 'Changed {when}',
-  today: 'today',
-  yesterday: 'yesterday',
-  demoMode: 'Demo mode: Supabase is not connected, lists stay on this device.',
-  allLists: 'All lists',
-  listNotFound: 'This list does not exist (anymore).',
-  listLoading: 'Loading list …',
-  listNotOnDevice: 'This list is not stored on this device.',
-  syncOffline: 'Offline – changes are saved and sent as soon as you are back online.',
-  syncLocal: 'Only on this device – sharing is not connected.',
-  syncError: 'Sync failed – retrying automatically.',
-  syncErrorLabel: 'Sync error',
-  offline: 'Offline',
-  menu: 'Menu',
-  share: 'Share',
-  members: 'Members',
-  shopMode: 'Shop view',
-  shopModeEnd: 'Leave shop view',
-  editList: 'List settings',
-  thisList: 'This list',
-  myProfile: 'My profile',
-  removeFromDevice: 'Remove from my lists',
-  autoShopMode: 'Shop view – you are at',
-  checkShopMode: 'Shop view on',
-  back: 'back',
-  addPlaceholder: 'Item in {lang}, e.g. “{example}”',
-  addExample: '2 milk',
-  addItem: 'Add item',
-  add: 'Add',
-  edit: 'Edit',
-  counts: '{open} open · {done} done',
-  empty: 'Still empty. Type an item in your language above.',
-  other: 'Other',
-  inCart: 'In the cart',
-  markOpen: 'Mark as open',
-  check: 'Check off',
-  noTranslation: 'no translation',
-  enterLocalTerm: 'Enter local term yourself',
-  localTermPlaceholder: 'Term in local language',
-  tip: 'Tip',
-  photos: 'Product photos',
-  delete: 'Delete',
-  searchingShop: 'Finding shop …',
-  allowLocation: 'Allow location',
-  help: 'Help',
-  helpIphone: 'iPhone/Safari:',
-  help1: 'Settings → Privacy & Security → Location Services: on, and for “Safari Websites” choose “While Using the App”.',
-  help2: 'In Safari tap “aA” (or the page icon) in the address bar → Website Settings → Location: “Allow”. Then Safari stops asking every time.',
-  help3: 'Reload the page.',
-  retryIn: 'Retrying in {s} s',
-  now: 'now',
-  noSupermarketWithin: 'No supermarket within {dist}',
-  noShop: 'No shop',
-  searchShop: 'Find shop',
-  changeShop: 'Change shop',
-  searching: 'Searching …',
-  searchAgain: 'Search again',
-  photosSearching: 'Searching photos …',
-  noPhotos: 'No matching photos found.',
-  photosFromShop: 'At {shop}',
-  photosNotFromShop: 'Nothing found for {shop}, common products in the country',
-  photosCredit: 'Photos',
-  loading: 'Loading …',
-  unknown: 'Unknown',
-  you: 'you',
-  membersHint: 'Anyone who opens the link becomes a member. Change your own name under “My profile” in the menu.',
-  close: 'Close',
-  editListTitle: 'List settings',
-  name: 'Name',
-  countryChangeHint: 'Changes the country for everyone the list is shared with.',
-  save: 'Save',
-  cancel: 'Cancel',
-  shareList: 'Share list',
-  demoShare: 'Demo mode: without Supabase others cannot see the list.',
-  qrAlt: 'QR code for the list',
-  copied: 'Copied ✓',
-  openByLink: 'Paste link',
-  openByLinkHint: 'Got a link to a list? Paste it here. On iPhone you need this if you use Proviant from the home screen.',
-  linkPlaceholder: 'Paste link',
-  linkInvalid: 'That is not a link to a list.',
-  openList: 'Open',
-  paste: 'Paste',
-  scanQr: 'Scan QR code',
-  joinList: 'Join a list',
-  orPasteLink: 'or paste a link:',
-  pasteLinkInstead: 'Paste a link instead',
-  qrScanHint: 'Hold the list’s QR code inside the frame',
-  qrWrong: 'That is not a list QR code.',
-  cameraDenied: 'No camera access. Allow it in your browser settings.',
-  cameraUnavailable: 'This browser cannot use the camera.',
-  copyLink: 'Copy link',
-  iosHint: 'Using Proviant as an app on your home screen? iPhone always opens links in Safari. Copy the link and paste it in the app under “Join a list”.',
-  iosHintDismiss: "Don't show again",
-  shareIosHint: 'iPhone with Proviant on the home screen: tap “Join a list” → “Scan QR code” in the app and scan this code.',
-  shareLink: 'Share link',
-  errNoGeo: 'This device cannot determine its location.',
-  errGeoDenied: 'Location not allowed.',
-  errGeoFailed: 'Location could not be determined.',
-  errOsmBusy: 'OpenStreetMap is busy.',
-  errOsmUnreachable: 'OpenStreetMap is unreachable or busy.',
-  errOsmStatus: 'OpenStreetMap is not responding (error {status}).',
-  errShopUnknown: 'Shop not recognised.',
-  errOffUnreachable: 'Open Food Facts is unreachable or busy.',
-  errOffBusy: 'Open Food Facts is busy (error {status}).',
-  errOffStatus: 'Open Food Facts is not responding (error {status}).',
-  errPhotos: 'Photos could not be searched.',
-  regionFlanders: 'Flanders',
-  regionWallonia: 'Wallonia',
-  regionRomandy: 'Romandy',
-  regionTicino: 'Ticino',
-  regionGermanSwiss: 'German-speaking',
-  correctTerm: 'Correct term',
-  correctionHint: 'Applies right away for everyone in this list and helps improve the dictionary.',
-  privacy: 'Privacy & contact',
-  locationNotice: 'The app uses your location (only with your permission) to suggest the country and find shops. Coordinates are sent to OpenStreetMap and not stored on any server.',
-  ok: 'OK',
-  cat_obst: 'Fruit & vegetables',
-  cat_milch: 'Dairy & eggs',
-  cat_brot: 'Bread & breakfast',
-  cat_fleisch: 'Meat & fish',
-  cat_vorrat: 'Pantry',
-  cat_getraenke: 'Drinks',
-  cat_tk: 'Frozen',
-  cat_haushalt: 'Household',
-  cat_kueche: 'Kitchen & tableware',
-  cat_hygiene: 'Toiletries',
-  cat_baby: 'Baby',
-}
-
-const MESSAGES: Partial<Record<Lang, Record<MessageKey, string>>> = { de, en }
+export const MESSAGES: Partial<Record<Lang, Partial<Record<MessageKey, string>>>> = { de, en }
 
 let current: Lang = 'de'
 
@@ -376,9 +23,71 @@ export function uiLang(): Lang {
 }
 
 export function t(key: MessageKey, vars?: Record<string, string | number>): string {
-  let s = (MESSAGES[current] ?? en)[key] ?? en[key] ?? key
-  if (vars) for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, String(v))
-  return s
+  const msg = MESSAGES[current]?.[key] ?? (en as Record<MessageKey, string>)[key] ?? key
+  return formatMessage(msg, vars ?? {}, current)
+}
+
+/** Ende der Klammer, die bei `open` beginnt (verschachtelt) */
+function closing(s: string, open: number): number {
+  let depth = 0
+  for (let i = open; i < s.length; i++) {
+    if (s[i] === '{') depth++
+    else if (s[i] === '}' && --depth === 0) return i
+  }
+  return -1
+}
+
+/**
+ * Kleiner ICU-Formatierer: „{name}“, „{n, plural, =0 {…} one {…} other {…}}“ mit „#“ für die Zahl
+ * und „{x, select, a {…} other {…}}“. Unbekannte Platzhalter bleiben stehen.
+ */
+export function formatMessage(msg: string, vars: Record<string, string | number>, lang: string): string {
+  let out = ''
+  let i = 0
+  while (i < msg.length) {
+    const open = msg.indexOf('{', i)
+    if (open < 0) break
+    const end = closing(msg, open)
+    if (end < 0) break
+    out += msg.slice(i, open)
+    const body = msg.slice(open + 1, end)
+    const [name, type] = body.split(',', 2).map((x) => x.trim())
+    const value = vars[name]
+    if ((type === 'plural' || type === 'select') && value !== undefined) {
+      const optsStart = body.indexOf(',', body.indexOf(',') + 1) + 1
+      const opts = new Map<string, string>()
+      let j = optsStart
+      while (j < body.length) {
+        const b = body.indexOf('{', j)
+        if (b < 0) break
+        const e = closing(body, b)
+        if (e < 0) break
+        opts.set(body.slice(j, b).trim(), body.slice(b + 1, e))
+        j = e + 1
+      }
+      let chosen: string | undefined
+      if (type === 'plural') {
+        const n = Number(value)
+        chosen = opts.get(`=${n}`) ?? opts.get(pluralRules(lang).select(n)) ?? opts.get('other')
+        if (chosen !== undefined) chosen = formatMessage(chosen.replace(/#/g, n.toLocaleString(lang)), vars, lang)
+      } else {
+        chosen = opts.get(String(value)) ?? opts.get('other')
+        if (chosen !== undefined) chosen = formatMessage(chosen, vars, lang)
+      }
+      out += chosen ?? ''
+    } else {
+      out += value !== undefined ? String(value) : msg.slice(open, end + 1)
+    }
+    i = end + 1
+  }
+  return out + msg.slice(i)
+}
+
+const rulesCache = new Map<string, Intl.PluralRules>()
+function pluralRules(lang: string): Intl.PluralRules {
+  let r = rulesCache.get(lang)
+  if (!r) rulesCache.set(lang, (r = new Intl.PluralRules(lang)))
+  return r
 }
 
 export function categoryLabel(c: Category): string {

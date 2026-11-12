@@ -5,6 +5,8 @@ export interface Country {
   name: string
   flag: string
   lang: Lang
+  /** Länder-Abweichung im Wörterbuch (src/data/dictionary/<variant>.json), z. B. „jitomate“ statt „tomate“ in Mexiko */
+  variant?: string
 }
 
 // Länder, deren Landessprache das Wörterbuch abdeckt (Reiseland)
@@ -23,14 +25,14 @@ export const COUNTRIES: Country[] = [
   { code: 'MT', name: 'Malta', flag: '🇲🇹', lang: 'en' },
   { code: 'GB', name: 'Grossbritannien', flag: '🇬🇧', lang: 'en' },
   { code: 'IE', name: 'Irland', flag: '🇮🇪', lang: 'en' },
-  { code: 'US', name: 'USA', flag: '🇺🇸', lang: 'en' },
-  { code: 'MX', name: 'Mexiko', flag: '🇲🇽', lang: 'es' },
+  { code: 'US', name: 'USA', flag: '🇺🇸', lang: 'en', variant: 'en-US' },
+  { code: 'MX', name: 'Mexiko', flag: '🇲🇽', lang: 'es', variant: 'es-MX' },
   { code: 'DE', name: 'Deutschland', flag: '🇩🇪', lang: 'de' },
   { code: 'AT', name: 'Österreich', flag: '🇦🇹', lang: 'de' },
-  { code: 'CH-DE', name: 'Schweiz (Deutschschweiz)', flag: '🇨🇭', lang: 'de' },
-  { code: 'LI', name: 'Liechtenstein', flag: '🇱🇮', lang: 'de' },
-  { code: 'BR', name: 'Brasilien', flag: '🇧🇷', lang: 'pt' },
-  { code: 'AR', name: 'Argentinien', flag: '🇦🇷', lang: 'es' },
+  { code: 'CH-DE', name: 'Schweiz (Deutschschweiz)', flag: '🇨🇭', lang: 'de', variant: 'de-CH' },
+  { code: 'LI', name: 'Liechtenstein', flag: '🇱🇮', lang: 'de', variant: 'de-CH' },
+  { code: 'BR', name: 'Brasilien', flag: '🇧🇷', lang: 'pt', variant: 'pt-BR' },
+  { code: 'AR', name: 'Argentinien', flag: '🇦🇷', lang: 'es', variant: 'es-AR' },
   { code: 'CA', name: 'Kanada', flag: '🇨🇦', lang: 'en' },
   { code: 'AU', name: 'Australien', flag: '🇦🇺', lang: 'en' },
   { code: 'NZ', name: 'Neuseeland', flag: '🇳🇿', lang: 'en' },

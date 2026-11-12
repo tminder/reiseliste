@@ -1,0 +1,10 @@
+{
+  "sahne": ["Rahm", "Vollrahm"],
+  "schlagsahne": ["Schlagrahm"],
+  "sauresahne": ["Sauerrahm"],
+  "glace": ["Glace"],
+  "haehnchen": ["Poulet"],
+  "haehnchenbrust": ["Pouletbrust"],
+  "paprika": ["Peperoni"],
+  "zucchini": ["Zucchetti"]
+}

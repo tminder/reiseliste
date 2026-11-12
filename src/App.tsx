@@ -26,7 +26,7 @@ import {
   UserRound,
   X,
 } from 'lucide-react'
-import { CATEGORY_ORDER, BY_ID, HINTS, LANGS, type Category, type Lang } from './data/dictionary'
+import { CATEGORY_ORDER, CONCEPT_BY_ID, LANGS, type Category, type Lang } from './data/dictionary'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from './data/countries'
 import { categoryLabel, countryName, setUiLang, t, uiLang } from './i18n'
 import { THANKS, WHERE_IS } from './data/phrases'
@@ -34,7 +34,8 @@ import { FEATURES } from './features'
 import { flash, reducedMotion, slideOut, useFlip } from './lib/motion'
 import { addQty, canAddQty } from './lib/qty'
 import { isIos, isStandalone, listIdFrom, listUrl } from './lib/links'
-import { exactConcept, findConcept, nameIn, normalize, splitQuantity, suggest } from './lib/translate'
+import { reportError } from './lib/errors'
+import { exactConcept, findConcept, isLoaded, loadLanguages, nameIn, normalize, onLanguagesLoaded, splitQuantity, suggest } from './lib/translate'
 import { autoShopModeBlocked, blockAutoShopMode, CHOSEN_GRACE_MS, getChosenShopAt, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
@@ -586,6 +587,27 @@ function SyncBadge({ state, error }: { state: SyncState; error: string | null })
   )
 }
 
+/** Wörterbuch-Sprachen nachladen; true, sobald die zwingend nötigen geladen sind (D-053) */
+function useLanguages(langs: Lang[], required: Lang[]): boolean {
+  const [, bump] = useState(0)
+  const [attempt, setAttempt] = useState(0)
+  const key = [...new Set(langs)].sort().join(',')
+  useEffect(() => {
+    let timer: number | undefined
+    const off = onLanguagesLoaded(() => bump((n) => n + 1))
+    loadLanguages(key.split(',') as Lang[]).catch((e: unknown) => {
+      // Offline und noch nicht zwischengespeichert: in 5 Sekunden nochmals
+      if (attempt === 0) reportError('promise', `dictionary: ${e instanceof Error ? e.message : String(e)}`)
+      timer = window.setTimeout(() => setAttempt((n) => n + 1), 5000)
+    })
+    return () => {
+      off()
+      window.clearTimeout(timer)
+    }
+  }, [key, attempt])
+  return required.every(isLoaded)
+}
+
 function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile; onEditProfile: () => void }) {
   const { store } = useStore(id, profile)
   useEffect(() => setLastList(id), [id])
@@ -754,7 +776,10 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
 
   const country = list ? COUNTRY_BY_CODE.get(list.country) : undefined
   const target: Lang = country?.lang ?? 'en'
+  const region = country?.variant
   const items = store.items.filter((i) => !i.deleted)
+  // Wörterbuch nur für die benötigten Sprachen laden (D-053): eigene, Landessprache, Sprachen der Einträge
+  const langsReady = useLanguages([profile.lang, target, ...items.map((i) => i.lang)], [profile.lang, target])
   const suggestions = suggest(input, profile.lang)
 
   // Bestehende Zeile zeigen: aufleuchten, Menge hüpft kurz (D-044). Nicht hinscrollen, die Leiste unten bestätigt.
@@ -795,14 +820,14 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
     showBar(t('qtyMerged', { name, qty: formatQty(sum) }), [{ label: t('undo'), run: () => void store.updateItem(existing.id, { qty: before }) }])
   }
 
-  if (!list) {
+  if (!list || !langsReady) {
     return (
       <main className="page narrow">
         <a href="#/" className="back">
           <ArrowLeft size={18} /> {t('allLists')}
         </a>
         <div className="card">
-          {store.notFound ? t('listNotFound') : supabase ? t('listLoading') : t('listNotOnDevice')}
+          {list ? t('listLoading') : store.notFound ? t('listNotFound') : supabase ? t('listLoading') : t('listNotOnDevice')}
         </div>
       </main>
     )
@@ -823,7 +848,7 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
   // Pro Abteilung
   const groups = new Map<Category | 'sonstiges', Item[]>()
   for (const item of open) {
-    const cat = (item.conceptId && BY_ID.get(item.conceptId)?.category) || 'sonstiges'
+    const cat = (item.conceptId && CONCEPT_BY_ID.get(item.conceptId)?.category) || 'sonstiges'
     groups.set(cat, [...(groups.get(cat) ?? []), item])
   }
   // Was schon offen auf der Liste steht, pro Artikel mit Menge („✓ 3x auf der Liste“, D-045)
@@ -997,7 +1022,7 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
                     onClick={() => {
                       if (confirmSid) return
                       const { qty } = splitQuantity(input)
-                      const text = `${qty ? qty + ' ' : ''}${s.names[profile.lang][0]}`
+                      const text = `${qty ? qty + ' ' : ''}${s.name}`
                       // Erst kurz am Vorschlag bestätigen, dann hinzufügen (D-044)
                       setConfirmSid(s.id)
                       window.setTimeout(
@@ -1010,7 +1035,7 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
                     }}
                   >
                     {confirmSid === s.id ? <Check size={16} strokeWidth={3} className="confirm-check" /> : null}
-                    {s.names[profile.lang][0]} <span className="muted">→ {s.names[target][0]}</span>
+                    {s.name} <span className="muted">→ {nameIn(s.id, target, region)}</span>
                     {confirmSid === s.id ? (
                       <span className="on-list">
                         {openQtys.get(s.id)?.some((q) => canAddQty(q, splitQuantity(input).qty)) ? t('qtyIncreased') : t('added')}
@@ -1079,7 +1104,7 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
           <section key={cat} className="group">
             <h3 data-flip={cat}>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
             {groups.get(cat)!.map((item) => (
-              <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
+              <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
             ))}
           </section>
         ))}
@@ -1100,7 +1125,7 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
             </button>
           </h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
+            <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
           ))}
         </section>
       )}
@@ -1168,6 +1193,7 @@ function ItemRow({
   item,
   store,
   target,
+  region,
   country,
   shopTag,
   shopName,
@@ -1181,6 +1207,8 @@ function ItemRow({
   item: Item
   store: ListStore
   target: Lang
+  /** Länder-Abweichung im Wörterbuch, z. B. es-MX (D-053) */
+  region?: string
   country: string
   shopTag?: string
   shopName?: string
@@ -1210,10 +1238,11 @@ function ItemRow({
   const [override, setOverride] = useState(item.localOverride ?? '')
   // Eigene Landesbegriffe gibt es nur mit dem Community-Modul (D-027)
   const override_ = FEATURES.community ? item.localOverride : null
-  const local = override_ || nameIn(item.conceptId, target)
+  const local = override_ || nameIn(item.conceptId, target, region)
   // Gross: der Artikel in der Sprache des Betrachters (sonst wie eingegeben). Klein: Landessprache.
   const own = (item.lang !== viewer && nameIn(item.conceptId, viewer)) || item.text
-  const hint = item.conceptId ? (HINTS[item.conceptId]?.[viewer] ?? HINTS[item.conceptId]?.en) : undefined
+  const hints = item.conceptId ? CONCEPT_BY_ID.get(item.conceptId)?.hint : undefined
+  const hint = hints?.[viewer] ?? hints?.en
 
   return (
     <div

@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run tests/",
     "build:e2e": "vite build --mode e2e --outDir dist-e2e",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "review:export": "node scripts/review-export.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

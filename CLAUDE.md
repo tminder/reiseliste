@@ -32,6 +32,6 @@ Regeln (Details in `docs/README.md`):
 
 - React 19, Vite, TypeScript, PWA (`vite-plugin-pwa`), Supabase. Deployment auf GitHub Pages per Push auf `main`.
 - `npm run build` muss fehlerfrei durchlaufen, bevor du pushst.
-- Wörterbuch: `src/data/dictionary.ts`, eine Zeile pro Artikel, Spalten in der Reihenfolge von `LANGS`.
+- Wörterbuch: `src/data/dictionary/` – `concepts.json` (ein Eintrag pro Artikel), eine Datei pro Sprache, Länder-Abweichungen als `<sprache>-<LAND>.json` (D-053). Oberflächentexte: `src/locales/<sprache>.json` im ICU-Format.
 - Datenbank-Änderungen immer in `supabase/schema.sql` nachziehen. Das Skript muss mehrfach ausführbar bleiben (`if not exists`, `drop policy if exists`).
 - Datenschutz: Kommt ein neuer externer Dienst dazu oder ändert sich, welche Daten wohin gehen oder wie lange sie gespeichert werden, `src/Privacy.tsx` (DE und EN) im selben Commit anpassen.

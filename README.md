@@ -8,7 +8,7 @@ Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im L
 
 - Liste pro Reise mit Reiseland (27 Länder, Landessprachen: DE, ES, PT, FR, IT, NL, HR, EL, EN). Sprache im Profil, international nutzbar, auch für Expats
 - Eingabe in 9 Sprachen (DE, EN, ES, PT, FR, IT, NL, HR, EL), inklusive Mengen („2 Milch“, „500 g Hackfleisch“)
-- Übersetzung über ein eingebautes Wörterbuch mit 358 Grundbegriffen (inkl. Küchenutensilien und Schweizer Ausdrücken wie Rahm, Poulet, Rüebli, Chriesi, Schoggi), ohne KI und ohne laufende Kosten
+- Übersetzung über ein eingebautes Wörterbuch mit 361 Grundbegriffen (inkl. Küchenutensilien und Schweizer Ausdrücken wie Rahm, Poulet, Rüebli, Chriesi, Schoggi) und eigenen Begriffen für Mexiko, Argentinien, Brasilien, die USA und die Deutschschweiz, ohne KI und ohne laufende Kosten
 - Vorschläge aus dem Wörterbuch beim Tippen
 - Sortierung nach Abteilungen, Abhaken, „Ladenansicht“ mit grosser Schrift
 - Zeigen-Karte (Ladenansicht): Landesbegriff antippen → bildschirmfüllend mit „Wo finde ich das?“ zum Vorzeigen beim Personal
@@ -17,7 +17,7 @@ Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im L
 - Produktfotos pro Reiseland aus [Open Food Facts](https://world.openfoodfacts.org) (📷 am Artikel, CC BY-SA)
 - Teilen per Link, QR-Code oder Teilen-Menü des Handys, Live-Sync über Supabase. „Liste beitreten“ per QR-Code oder Link, auch für die iPhone-App vom Home-Bildschirm
 - Offline nutzbar (PWA). Änderungen werden synchronisiert, sobald wieder Netz da ist
-- Oberfläche auf Deutsch und Englisch (folgt der Sprache im Profil, Texte in `src/i18n.ts`)
+- Oberfläche auf Deutsch und Englisch (folgt der Sprache im Profil, Texte in `src/locales/`, Format ICU)
 - Ohne Supabase läuft die App im **Demo-Modus** nur auf dem Gerät
 
 ## Lokal starten
@@ -27,6 +27,7 @@ npm install
 cp .env.example .env   # optional: Supabase-Werte eintragen
 npm run dev
 npm test               # Tests für Wörterbuch und Übersetzung (laufen auch vor jedem Deployment)
+npm run review:export  # Prüftabellen pro Sprache für Muttersprachler (CSV in review/)
 ```
 
 ## Supabase einrichten (für Teilen in Echtzeit)
@@ -66,7 +67,8 @@ Automatisch: Der Job „Korrekturvorschläge exportieren“ (`.github/workflows/
 
 | Datei | Inhalt |
 | --- | --- |
-| `src/data/dictionary.ts` | Wörterbuch: eine Zeile pro Artikel, Spalten pro Sprache, Hinweise |
+| `src/data/dictionary/` | Wörterbuch: `concepts.json` (Artikel mit Abteilung, Fotokategorie, Tipp), eine Datei pro Sprache, Länder-Abweichungen wie `es-MX.json` (D-053) |
+| `src/locales/` | Oberflächentexte pro Sprache (ICU MessageFormat) |
 | `src/data/countries.ts` | Reiseländer → Landessprache |
 | `src/lib/translate.ts` | Mengen erkennen, Eingabe dem Wörterbuch zuordnen, Vorschläge |
 | `src/lib/store.ts` | Lokaler Speicher, Offline-Warteschlange, Supabase-Sync und Echtzeit |

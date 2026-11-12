@@ -30,3 +30,6 @@ dist-ssr
 dist-e2e
 test-results
 playwright-report
+
+# Prüftabellen für Muttersprachler (npm run review:export)
+review

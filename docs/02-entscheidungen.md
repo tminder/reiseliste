@@ -23,7 +23,7 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-004 · Übersetzung im MVP nur über ein eingebautes Wörterbuch
 
-- **Entscheidung:** Artikel werden über ein festes Wörterbuch übersetzt (`src/data/dictionary.ts`, 358 Grundbegriffe inkl. Küchenutensilien in der Abteilung „Küche & Geschirr“, 9 Sprachen. In der deutschen Spalte stehen zusätzlich Schweizer Ausdrücke als Varianten, z. B. Rahm, Poulet, Rüebli, Zucchetti, Chriesi, Schoggi, Kehrichtsack, Bidon. Sie werden bei der Eingabe erkannt, angezeigt wird die erste, standarddeutsche Variante). Es gibt keine KI und keinen externen Übersetzungsdienst. Unbekannte Artikel können Nutzer mit einem eigenen Landesbegriff ergänzen.
+- **Entscheidung:** Artikel werden über ein festes Wörterbuch übersetzt (`src/data/dictionary/`, 361 Grundbegriffe inkl. Küchenutensilien in der Abteilung „Küche & Geschirr“, 9 Sprachen, Aufbau siehe D-053. In der deutschen Datei stehen zusätzlich Schweizer Ausdrücke als Varianten, z. B. Rahm, Poulet, Rüebli, Zucchetti, Chriesi, Schoggi, Kehrichtsack, Bidon. Sie werden bei der Eingabe erkannt, angezeigt wird die erste, standarddeutsche Variante; nur bei Listen für die Deutschschweiz und Liechtenstein gilt die Schweizer Abweichung). Es gibt keine KI und keinen externen Übersetzungsdienst. Unbekannte Artikel können Nutzer mit einem eigenen Landesbegriff ergänzen.
 - **Begründung:** Keine laufenden Kosten, offline verfügbar, die Begriffe sind vorhersehbar.
 - **Folgen:** Die Abdeckung ist begrenzt (siehe Ziel in Z-1). Das Wörterbuch muss geprüft werden (S-001, F-001). Die KI-Ergänzung ist offen (F-004).
 
@@ -124,9 +124,9 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-022 · Oberfläche mehrsprachig (Deutsch, Englisch)
 
-- **Entscheidung:** Alle Texte der Oberfläche stehen in `src/i18n.ts`, auf Deutsch und Englisch. Die Sprache der Oberfläche folgt der Sprache im Profil. Vor dem Anlegen des Profils gilt die Sprache des Browsers. Für Sprachen ohne eigene Texte wird Englisch verwendet. Ländernamen kommen in der Oberflächensprache vom Browser (`Intl.DisplayNames`), Abteilungen und Tipps sind übersetzt. Wechselt man im Profil die Sprache, wechselt die Oberfläche sofort mit.
+- **Entscheidung:** Alle Texte der Oberfläche stehen in `src/locales/de.json` und `en.json` (Format siehe D-053). Die Sprache der Oberfläche folgt der Sprache im Profil. Vor dem Anlegen des Profils gilt die Sprache des Browsers. Für Sprachen ohne eigene Texte wird Englisch verwendet. Ländernamen kommen in der Oberflächensprache vom Browser (`Intl.DisplayNames`), Abteilungen und Tipps sind übersetzt. Wechselt man im Profil die Sprache, wechselt die Oberfläche sofort mit.
 - **Begründung:** Mitreisende mit anderer Sprache sollen die App bedienen können (Ziel Z-2). Englisch deckt die meisten ab, weitere Sprachen lassen sich ohne Umbau ergänzen.
-- **Folgen:** Neue Texte immer in `de` und `en` anlegen. Die übrigen Sprachen sind offen (S-008).
+- **Folgen:** Neue Texte immer in `de.json` und `en.json` anlegen, der Test meldet fehlende. Die übrigen Sprachen sind offen (S-008).
 
 ## D-023 · Datenschutzerklärung und Kontakt in der App
 
@@ -314,7 +314,19 @@ Stand: 2026-11-12 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-052 · Automatische Tests vor jeder Veröffentlichung
 
-- **Entscheidung:** Vor jedem Deployment laufen in GitHub Actions: Lint, Vitest (`npm test`: Wörterbuch, Übersetzung, Mengen, Fehlerbereinigung und das Datenbank-Schema mit PGlite, einem echten Postgres im Speicher) und Playwright-Oberflächentests (`npm run e2e`, Ordner `e2e/`). Die Oberflächentests laufen gegen einen eigenen Build ohne Supabase, alle fremden Server sind gesperrt. Sie spielen durch: Profil und Liste anlegen, Übersetzung, Mengen zusammenzählen, Abhaken mit Wechsel in die Ladenansicht, Menü und Profil, Teilen mit QR-Code, Liste löschen mit Rückgängig, Datenschutzseite. Jeder Test schlägt zusätzlich fehl, wenn ein JavaScript-Fehler oder ein Verstoss gegen die Content-Security-Policy auftritt. Schlägt etwas fehl, wird nicht veröffentlicht; der Bericht liegt 7 Tage als Artefakt beim Lauf.
+- **Entscheidung:** Vor jedem Deployment laufen in GitHub Actions: Lint, Vitest (`npm test`: Wörterbuch und Oberflächentexte auf fehlende Übersetzungen, Übersetzung, Mengen, Fehlerbereinigung und das Datenbank-Schema mit PGlite, einem echten Postgres im Speicher) und Playwright-Oberflächentests (`npm run e2e`, Ordner `e2e/`). Die Oberflächentests laufen gegen einen eigenen Build ohne Supabase, alle fremden Server sind gesperrt. Sie spielen durch: Profil und Liste anlegen, Übersetzung, Länder-Abweichung (Mexiko), Mengen zusammenzählen, Abhaken mit Wechsel in die Ladenansicht, Menü und Profil, Teilen mit QR-Code, Liste löschen mit Rückgängig, Datenschutzseite. Jeder Test schlägt zusätzlich fehl, wenn ein JavaScript-Fehler oder ein Verstoss gegen die Content-Security-Policy auftritt. Schlägt etwas fehl, wird nicht veröffentlicht; der Bericht liegt 7 Tage als Artefakt beim Lauf.
 - **Begründung:** Befund der MVP-Beurteilung, vom Inhaber freigegeben. Änderungen werden damit sicherer, Voraussetzung für das Aufteilen von `App.tsx` (S-007).
 - **Folgen:** Ein Deployment dauert rund 2 Minuten länger. Neue Funktionen bekommen einen Ablauf in `e2e/app.spec.ts`, Schema-Änderungen einen Fall in `tests/schema.test.ts`.
+
+## D-053 · Übersetzungen als Datendateien pro Sprache, mit Länder-Abweichungen
+
+- **Entscheidung:** Vom Inhaber gewählt, noch im MVP umgesetzt.
+  - **Artikel:** `src/data/dictionary/concepts.json` führt jeden Artikel einmal mit allen sprachunabhängigen Angaben: ID, Abteilung, Open-Food-Facts-Kategorie (`off`), Tipp (`hint`).
+  - **Begriffe:** eine Datei pro Sprache (`de.json`, `es.json` …), pro Artikel eine Liste von Namen. Der erste Name wird angezeigt, alle werden bei der Eingabe erkannt.
+  - **Länder-Abweichungen:** eigene Dateien wie `es-MX.json`, die nur die abweichenden Artikel enthalten. Das Land verweist darauf (`variant` in `src/data/countries.ts`). Bisher: en-US, es-MX, es-AR, pt-BR, de-CH (gilt auch für Liechtenstein). Abweichende Begriffe werden in der ganzen Sprache erkannt, aber nur, wenn sie nicht schon einen anderen Artikel bezeichnen (brasilianisch „presunto“ = Kochschinken, in Portugal bleibt es Rohschinken).
+  - **Laden:** Die App lädt nur die nötigen Sprachen nach (eigene, Landessprache, Sprachen der Einträge), jede als eigene kleine Datei. Die Liste erscheint, sobald eigene und Landessprache da sind. Die Dateien liegen im Offline-Speicher der App.
+  - **Oberfläche:** `src/locales/<sprache>.json` im Standardformat ICU MessageFormat mit Einzahl/Mehrzahl (`{n, plural, one {…} other {…}}`) und Auswahl (`select`). Ein kleiner eigener Formatierer in `src/i18n.ts` nutzt die Mehrzahlregeln des Browsers (`Intl.PluralRules`), keine Zusatzbibliothek.
+  - **Prüfen:** Tests melden fehlende oder unbekannte Begriffe pro Sprache, Doppeldeutigkeiten, fehlende Oberflächentexte und abweichende Platzhalter. `npm run review:export` erzeugt pro Sprache eine Prüftabelle (CSV) für Muttersprachler im Ordner `review/` (nicht im Repo).
+- **Begründung:** Neue Sprachen und Länder kommen ohne Umbau dazu, Übersetzer arbeiten mit Dateien statt Code, Mexiko, Argentinien, Brasilien, die USA und die Schweiz bekommen ihre eigenen Begriffe. Jetzt umbauen ist günstiger als nach dem Start der nativen App.
+- **Folgen:** Neuer Artikel: Eintrag in `concepts.json` und in jeder Sprachdatei (der Test meldet Lücken). Eine Übersetzungsplattform (z. B. Weblate) und das Wörterbuch in Supabase mit Prüfstatus folgen später, die Dateien sind dafür schon im passenden Format.
 

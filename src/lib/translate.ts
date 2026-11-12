@@ -1,4 +1,4 @@
-import { BY_ID, DICTIONARY, LANGS, type Entry, type Lang } from '../data/dictionary'
+import { CONCEPTS, LANGS, loadLangFiles, type Lang, type Names } from '../data/dictionary'
 
 export function normalize(s: string): string {
   return s
@@ -26,6 +26,9 @@ interface IndexHit {
   lang: Lang
 }
 
+// Geladene Sprachen (D-053): Anzeige-Namen pro Sprache, Abweichungen pro Land, Suchindizes
+const BASE = new Map<Lang, Names>()
+const REGION = new Map<string, Names>()
 const exactIndex = new Map<string, IndexHit[]>()
 const stemIndex = new Map<string, IndexHit[]>()
 // Aliase pro Sprache, längste zuerst – für die Suche nach enthaltenen Wörtern ("Milch fettarm")
@@ -37,19 +40,71 @@ function push(map: Map<string, IndexHit[]>, key: string, hit: IndexHit) {
   map.set(key, list)
 }
 
-for (const entry of DICTIONARY) {
-  for (const lang of LANGS) {
-    for (const name of entry.names[lang]) {
-      const n = normalize(name)
-      push(exactIndex, n, { id: entry.id, lang })
-      for (const s of stems(n)) push(stemIndex, s, { id: entry.id, lang })
-      const arr = aliasesByLang.get(lang) ?? []
-      arr.push({ alias: n, id: entry.id })
-      aliasesByLang.set(lang, arr)
-    }
+/**
+ * Sprache in die Suchindizes aufnehmen. Erkannt werden alle Namen, auch die Länder-Abweichungen –
+ * diese aber nur, wenn sie nicht schon einen anderen Artikel bezeichnen (Brasilien „presunto“ = gekochter Schinken,
+ * Portugal „presunto“ = Rohschinken: in Portugiesisch bleibt der allgemeine Name massgebend).
+ */
+function addLanguage(lang: Lang, base: Names, variants: Record<string, Names>) {
+  BASE.set(lang, base)
+  for (const [code, names] of Object.entries(variants)) REGION.set(code, names)
+  const arr = aliasesByLang.get(lang) ?? []
+  const owner = new Map<string, string>() // normalisierter Name → Artikel (allgemeine Namen)
+  const add = (id: string, name: string) => {
+    const n = normalize(name)
+    push(exactIndex, n, { id, lang })
+    for (const st of stems(n)) push(stemIndex, st, { id, lang })
+    arr.push({ alias: n, id })
   }
+  for (const c of CONCEPTS)
+    for (const name of base[c.id] ?? []) {
+      owner.set(normalize(name), c.id)
+      add(c.id, name)
+    }
+  for (const names of Object.values(variants))
+    for (const [id, list] of Object.entries(names))
+      for (const name of list) {
+        const n = normalize(name)
+        if (owner.has(n)) continue // gleicher Name: schon erfasst oder gehört einem anderen Artikel
+        owner.set(n, id)
+        add(id, name)
+      }
+  arr.sort((x, y) => y.alias.length - x.alias.length)
+  aliasesByLang.set(lang, arr)
 }
-for (const arr of aliasesByLang.values()) arr.sort((a, b) => b.alias.length - a.alias.length)
+
+const loading = new Map<Lang, Promise<void>>()
+const listeners = new Set<() => void>()
+
+/** Sprachen nachladen (eigene Sprache, Landessprache, Sprachen der Mitglieder). Mehrfach aufrufbar. */
+export function loadLanguages(langs: Iterable<Lang>): Promise<void> {
+  const jobs: Promise<void>[] = []
+  for (const lang of new Set(langs)) {
+    if (!LANGS.includes(lang)) continue
+    let job = loading.get(lang)
+    if (!job) {
+      job = loadLangFiles(lang).then(({ base, variants }) => {
+        addLanguage(lang, base, variants)
+        for (const fn of listeners) fn()
+      })
+      // Fehlgeschlagen (z. B. offline und noch nicht zwischengespeichert): später neu versuchen
+      job.catch(() => loading.delete(lang))
+      loading.set(lang, job)
+    }
+    jobs.push(job)
+  }
+  return Promise.all(jobs).then(() => undefined)
+}
+
+export const isLoaded = (lang: Lang) => BASE.has(lang)
+/** Benachrichtigung, sobald eine Sprache geladen ist (für React) */
+export function onLanguagesLoaded(fn: () => void): () => void {
+  listeners.add(fn)
+  return () => listeners.delete(fn)
+}
+
+/** Namen eines Artikels in einer Sprache (leer, wenn die Sprache nicht geladen ist) */
+export const namesIn = (id: string, lang: Lang): string[] => BASE.get(lang)?.[id] ?? []
 
 function pick(hits: IndexHit[] | undefined, lang: Lang): string | null {
   if (!hits?.length) return null
@@ -137,21 +192,27 @@ export function exactConcept(text: string, lang: Lang): string | null {
   return null
 }
 
-export function nameIn(conceptId: string | null | undefined, lang: Lang): string | null {
+/**
+ * Anzeige-Name eines Artikels. region: Länder-Abweichung (z. B. "es-MX"), gilt vor dem allgemeinen Namen.
+ * null, wenn der Artikel unbekannt oder die Sprache nicht geladen ist.
+ */
+export function nameIn(conceptId: string | null | undefined, lang: Lang, region?: string): string | null {
   if (!conceptId) return null
-  return BY_ID.get(conceptId)?.names[lang][0] ?? null
+  return (region && REGION.get(region)?.[conceptId]?.[0]) || namesIn(conceptId, lang)[0] || null
 }
 
-/** Vorschläge beim Tippen: Einträge, deren Name (in der eigenen Sprache) mit der Eingabe beginnt oder sie enthält. */
-export function suggest(input: string, lang: Lang, limit = 5): Entry[] {
+/** Vorschläge beim Tippen: Artikel, deren Name (in der eigenen Sprache) mit der Eingabe beginnt oder sie enthält. */
+export function suggest(input: string, lang: Lang, limit = 5): { id: string; name: string }[] {
   const n = normalize(splitQuantity(input).text)
   if (n.length < 2) return []
-  const starts: Entry[] = []
-  const contains: Entry[] = []
-  for (const entry of DICTIONARY) {
-    const names = entry.names[lang].map(normalize)
-    if (names.some((x) => x.startsWith(n))) starts.push(entry)
-    else if (names.some((x) => x.includes(n))) contains.push(entry)
+  const starts: { id: string; name: string }[] = []
+  const contains: { id: string; name: string }[] = []
+  for (const c of CONCEPTS) {
+    const raw = namesIn(c.id, lang)
+    if (!raw.length) continue
+    const names = raw.map(normalize)
+    if (names.some((x) => x.startsWith(n))) starts.push({ id: c.id, name: raw[0] })
+    else if (names.some((x) => x.includes(n))) contains.push({ id: c.id, name: raw[0] })
   }
   return [...starts, ...contains].slice(0, limit)
 }
