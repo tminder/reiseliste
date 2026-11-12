@@ -221,6 +221,19 @@ export function getChosenShop(listId: string): Shop | null {
   }
 }
 
+/** Wann der Laden von Hand gewählt wurde (null = keiner gewählt) */
+export function getChosenShopAt(listId: string): number | null {
+  try {
+    const raw = localStorage.getItem(`rl:shop:${listId}`)
+    return raw ? (JSON.parse(raw) as { at: number }).at : null
+  } catch {
+    return null
+  }
+}
+
+/** So lange gilt eine Wahl von Hand, egal wo man gerade ist (D-033): man wählt oft einen Laden, zu dem man erst hingeht */
+export const CHOSEN_GRACE_MS = 30 * 60 * 1000
+
 export function setChosenShop(listId: string, shop: Shop | null) {
   try {
     if (shop) localStorage.setItem(`rl:shop:${listId}`, JSON.stringify({ at: Date.now(), shop }))

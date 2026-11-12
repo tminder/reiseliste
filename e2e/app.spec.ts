@@ -132,3 +132,35 @@ test('Datenschutzseite lädt nach', async ({ page, problems }) => {
   await expect(page.locator('h1')).toBeVisible()
   await expect(page.locator('body')).toContainText('Fehlermeldungen')
 })
+
+test.describe('Laden', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
+
+  test('Laden von Hand wählen bleibt, auch weiter weg und beim Wechsel in die Ladenansicht (D-033)', async ({ page, problems }) => {
+    void problems
+    const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
+    await page.route(/interpreter/, (r) =>
+      r.fulfill(
+        json({
+          elements: [
+            { type: 'node', id: 1, lat: 41.3927, lon: 2.17, tags: { shop: 'supermarket', name: 'Mercadona' } },
+            { type: 'node', id: 2, lat: 41.3935, lon: 2.17, tags: { shop: 'supermarket', name: 'Dia' } },
+            { type: 'node', id: 3, lat: 41.401, lon: 2.17, tags: { shop: 'supermarket', name: 'Lidl' } },
+          ],
+        }),
+      ),
+    )
+    await seed(page, [item(1, 'Milch', 'milch')])
+    await page.goto(`/#/l/${LIST}`)
+    await expect(page.locator('.shopline')).toContainText('Mercadona')
+    await page.getByRole('button', { name: 'Laden ändern' }).click()
+    await page.locator('.shop-alts .chip', { hasText: 'Lidl' }).click()
+    await page.waitForTimeout(1500)
+    await expect(page.locator('.shopline')).toContainText('Lidl') // 1,2 km entfernt, trotzdem gewählt
+    await page.locator('.item').first().locator('.check').click() // schaltet in die Ladenansicht (D-047)
+    await expect(page.locator('main')).toHaveClass(/shop/)
+    await page.waitForTimeout(1500)
+    await expect(page.locator('.shopline')).toContainText('Lidl')
+  })
+})

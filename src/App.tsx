@@ -35,7 +35,7 @@ import { flash, reducedMotion, slideOut, useFlip } from './lib/motion'
 import { addQty, canAddQty } from './lib/qty'
 import { isIos, isStandalone, listIdFrom, listUrl } from './lib/links'
 import { exactConcept, findConcept, nameIn, normalize, splitQuantity, suggest } from './lib/translate'
-import { autoShopModeBlocked, blockAutoShopMode, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
+import { autoShopModeBlocked, blockAutoShopMode, CHOSEN_GRACE_MS, getChosenShopAt, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, getChosenShop, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, setChosenShop, shopTag, type Shop } from './lib/nearby'
 import { detectCountry } from './lib/country'
 import { hasPhotos, loadPhotos, PhotoError, type Photo } from './lib/photos'
 import { MAX } from './lib/limits'
@@ -672,6 +672,7 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
     if (showMenu) void isSoleMember(id).then(setSole)
   }, [showMenu, id])
   const [shop, setShop] = useState<Shop | null>(() => getChosenShop(id))
+  const [shopChosenAt, setShopChosenAt] = useState<number | null>(() => getChosenShopAt(id))
   // Für die Fotos zählt der gewählte Laden, sonst der angezeigte Vorschlag
   const [suggested, setSuggested] = useState<Shop | null>(null)
   const photoShop = shop ?? suggested
@@ -700,6 +701,7 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
   const chooseShop = (s: Shop | null) => {
     setChosenShop(id, s)
     setShop(s)
+    setShopChosenAt(s ? Date.now() : null)
   }
 
   // Laden verlassen (D-043): Steht man in der Ladenansicht wirklich beim Laden (höchstens 100 m, GPS genau genug),
@@ -862,7 +864,7 @@ function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile
           <span className="sub">
             {country?.flag} {countryName(list.country)} · {LANG_LABEL[target]}
           </span>
-          <ShopBar shop={shop} shopMode={shopMode} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
+          <ShopBar shop={shop} chosenAt={shopChosenAt} shopMode={shopMode} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
         </div>
         <SyncBadge state={store.sync} error={lastSyncError} />
         {/* Teilen direkt in der Kopfzeile, das Menü ist für den Rest (D-017) */}
@@ -1402,12 +1404,15 @@ const RETRY_S = [15, 30, 60, 120, 300]
 
 function ShopBar({
   shop,
+  chosenAt,
   shopMode,
   onChoose,
   onSuggest,
   onArrived,
 }: {
   shop: Shop | null
+  /** Zeitpunkt der Wahl von Hand: in den ersten 30 Minuten wird der Laden nie automatisch verworfen */
+  chosenAt: number | null
   /** Wechsel in die Ladenansicht löst eine genauere Prüfung im Hintergrund aus (D-046) */
   shopMode: boolean
   onChoose: (s: Shop | null) => void
@@ -1470,6 +1475,8 @@ function ShopBar({
   /** Gewählter Laden: verwerfen, wenn man sich weiter als LEFT_SHOP_M entfernt hat (D-033) */
   async function checkLeft(limitM = LEFT_SHOP_M): Promise<boolean> {
     if (!shop || shop.lat == null || shop.lon == null) return false
+    // Gerade erst von Hand gewählt (oft ein Laden, zu dem man erst hingeht): stehen lassen
+    if (chosenAt && Date.now() - chosenAt < CHOSEN_GRACE_MS) return false
     lastCheck.current = Date.now()
     try {
       const { latitude, longitude, accuracy } = (await getPosition(limitM < LEFT_SHOP_M ? 10_000 : undefined)).coords
