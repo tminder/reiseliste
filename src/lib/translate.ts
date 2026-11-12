@@ -60,10 +60,40 @@ const QTY_UNITS = '(?:x|×|kg|g|gr|l|ml|cl|stk|stück|st|pack|packung|packungen|
 const LEADING_QTY = new RegExp(`^(\\d+(?:[.,]\\d+)?\\s*${QTY_UNITS}?\\.?)\\s+(.+)$`, 'iu')
 const TRAILING_QTY = new RegExp(`^(.+?)\\s+(\\d+(?:[.,]\\d+)?\\s*${QTY_UNITS}?\\.?)$`, 'iu')
 
-/** Trennt eine Mengenangabe ab: "2 Packungen Milch" → { qty: "2 Packungen", text: "Milch" } */
+// Anzahl × Grösse, z. B. „2 100g Schokolade“, „2x 100 g“, „6 x 1,5 l Wasser“, „2 Packungen à 500g Nudeln“ (D-048)
+const NUM = '\\d+(?:[.,]\\d+)?'
+const SIZE = `(${NUM})\\s*(kg|gr|g|ml|cl|l)\\.?`
+/** Packungswörter, die zur Menge gehören („2 Tafeln Schokolade“). Werden nicht übersetzt. */
+const PACK =
+  '(?:tafeln?|packungen?|packs?|päckchen|pkg|flaschen?|dosen?|beutel|tüten?|becher|gläser|glas|bund|netze?|schalen?|kisten?|rollen?|stück|stk|bars?|bottles?|cans?|bags?|boxe?s?|jars?|paquetes?|botellas?|latas?|bolsas?|paquets?|bouteilles?|boîtes?|sachets?|confezion[ei]|bottiglie|bottiglia|lattin[ae]|pacchi|pacco)'
+// Zwischen Anzahl und Grösse steht „x“/„×“ oder ein Leerzeichen (sonst wäre „100g“ = 1 × 00 g)
+const SEP = `(?:\\s*[x×]\\s*|\\s+(?:(?:à|a|je|zu|of|de)\\s+)?)`
+const COMPOUND_LEAD = new RegExp(`^(\\d+)(?:\\s*(${PACK}))?${SEP}${SIZE}\\s+(?:(?:of|de|di|d')\\s*)?(.+)$`, 'iu')
+const COMPOUND_TRAIL = new RegExp(`^(.+?)\\s+(\\d+)(?:\\s*(${PACK}))?\\s*[x×à]\\s*${SIZE}$`, 'iu')
+const PACK_LEAD = new RegExp(`^(\\d+(?:[.,]\\d+)?)\\s*(${PACK})\\.?\\s+(?:(?:of|de|di|du|des|d')\\s*)?(.+)$`, 'iu')
+
+function sizeText(n: string, unit: string): string {
+  const u = unit.toLowerCase()
+  return `${n.replace('.', ',')} ${u === 'gr' ? 'g' : u}`
+}
+
+function compoundQty(count: string, pack: string | undefined, n: string, unit: string): string {
+  return `${count}${pack ? ` ${pack}` : ''} × ${sizeText(n, unit)}`
+}
+
+/**
+ * Trennt eine Mengenangabe ab: "2 Packungen Milch" → { qty: "2 Packungen", text: "Milch" }.
+ * Anzahl und Grösse werden einheitlich als „2 × 100 g“ gespeichert (D-048).
+ */
 export function splitQuantity(input: string): { qty: string | null; text: string } {
   const s = input.trim().replace(/\s+/g, ' ')
-  let m = s.match(LEADING_QTY)
+  let m = s.match(COMPOUND_LEAD)
+  if (m) return { qty: compoundQty(m[1], m[2], m[3], m[4]), text: m[5].trim() }
+  m = s.match(COMPOUND_TRAIL)
+  if (m) return { qty: compoundQty(m[2], m[3], m[4], m[5]), text: m[1].trim() }
+  m = s.match(PACK_LEAD)
+  if (m) return { qty: `${m[1]} ${m[2]}`, text: m[3].trim() }
+  m = s.match(LEADING_QTY)
   if (m) return { qty: m[1].trim(), text: m[2].trim() }
   m = s.match(TRAILING_QTY)
   if (m) return { qty: m[2].trim(), text: m[1].trim() }

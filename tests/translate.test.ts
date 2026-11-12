@@ -18,6 +18,21 @@ describe('splitQuantity', () => {
     ['Bier 6', '6', 'Bier'],
     ['1,5 l Wasser', '1,5 l', 'Wasser'],
     ['Milch', null, 'Milch'],
+    // Anzahl × Grösse (D-048)
+    ['2 100g Schokolade', '2 × 100 g', 'Schokolade'],
+    ['2x 100g Schokolade', '2 × 100 g', 'Schokolade'],
+    ['2 x 100 g Schokolade', '2 × 100 g', 'Schokolade'],
+    ['2x100g Schokolade', '2 × 100 g', 'Schokolade'],
+    ['Schokolade 2x100g', '2 × 100 g', 'Schokolade'],
+    ['6 x 1,5 l Wasser', '6 × 1,5 l', 'Wasser'],
+    ['6 x 1.5l Wasser', '6 × 1,5 l', 'Wasser'],
+    ['2 Packungen à 500g Nudeln', '2 Packungen × 500 g', 'Nudeln'],
+    ['3 x 250 gr de arroz', '3 × 250 g', 'arroz'],
+    ['100g Schokolade', '100g', 'Schokolade'],
+    // Packungswörter gehören zur Menge
+    ['2 Tafeln Schokolade', '2 Tafeln', 'Schokolade'],
+    ['2 bars of chocolate', '2 bars', 'chocolate'],
+    ['2 paquetes de arroz', '2 paquetes', 'arroz'],
   ])('%s', (input, qty, text) => {
     expect(splitQuantity(input)).toEqual({ qty, text })
   })

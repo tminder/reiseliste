@@ -15,6 +15,10 @@ describe('addQty', () => {
     ['2 Packungen', '1 Packungen', '3 Packungen'],
     ['1 Packung', '500 g', '1 Packung + 500 g'],
     [null, '500 g', '1 + 500 g'],
+    ['2 × 100 g', '1 × 100 g', '3 × 100 g'],
+    ['2 Packungen × 500 g', '2 Packungen × 500 g', '4 Packungen × 500 g'],
+    ['2 × 100 g', '1 × 200 g', '2 × 100 g + 1 × 200 g'],
+    ['2 × 100 g', null, '2 × 100 g + 1'],
   ])('%s + %s = %s', (a, b, out) => {
     expect(addQty(a, b)).toBe(out)
   })

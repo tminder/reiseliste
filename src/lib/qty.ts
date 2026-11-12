@@ -7,6 +7,9 @@ const COUNT = new Set(['', 'x', '×', 'stk', 'stück', 'st', 'pcs'])
 
 function parse(q: string | null): Parsed | null {
   if (q === null || !q.trim()) return { n: 1, unit: '' } // ohne Menge = 1 Stück
+  // „2 × 100 g“ oder „2 Packungen × 500 g“ (D-048): Anzahl zählt, Grösse gehört zur Einheit
+  const c = q.trim().match(/^(\d+)\s*(.*?×\s*.+)$/u)
+  if (c) return { n: Number(c[1]), unit: c[2].trim().replace(/\s+/g, ' ') }
   const m = q.trim().match(/^(\d+(?:[.,]\d+)?)\s*([^\d\s].*)?$/u)
   if (!m) return null
   const n = Number(m[1].replace(',', '.'))
