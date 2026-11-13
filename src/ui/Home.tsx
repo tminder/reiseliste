@@ -97,7 +97,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
     <main className="page narrow">
       <header className="topbar">
         <h1 className="brand">
-          <AppLogo /> {t('appName')}
+          <AppLogo /> <span className="brand-name">{t('appName')}</span>
         </h1>
         <button className="ghost small" onClick={onEditProfile} title={profileLangLabel(profile)}>
           {profile.name} · {profileLangShort(profile)}

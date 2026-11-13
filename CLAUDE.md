@@ -1,4 +1,4 @@
-# Proviant – Anweisungen für Claude
+# Cart on the Road – Anweisungen für Claude
 
 Geteilte Reise-Einkaufsliste: Eingabe in der eigenen Sprache, Anzeige in der Landessprache. Überblick: `README.md`.
 Kommuniziere mit dem Projektinhaber auf Deutsch.

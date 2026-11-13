@@ -567,6 +567,15 @@ button svg,
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+}
+.brand-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.topbar > button {
+  flex: none;
 }
 .toolbar button,
 .menu button {

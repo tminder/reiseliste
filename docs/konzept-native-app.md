@@ -1,6 +1,6 @@
 # Konzept: Native App für iPhone und Android
 
-Stand: 2026-11-12 · Entwurf von Claude. Entschieden ist noch nichts. Wann sich der Schritt lohnt, ist als F-006 offen.
+Stand: 2026-11-13 · Entwurf von Claude. Entschieden ist noch nichts. Wann sich der Schritt lohnt, ist als F-006 offen.
 
 ## 1. Warum überhaupt eine native App?
 
@@ -159,7 +159,7 @@ Die native App lohnt sich, sobald **alle** drei Punkte zutreffen:
 
 ## 11. Offene Punkte für den Inhaber
 
-- Eigene Domain: welcher Name (hängt an F-005)?
+- Eigene Domain: cartontheroad.app o. ä. (F-005)?
 - Privates Konto oder Organisations-Konto (D-U-N-S) bei Google und Apple?
 - Mac vorhanden, oder Cloud-Build?
 - Sollen Push-Mitteilungen und Geofencing Teil der ersten Version sein (empfohlen wegen Apple 4.2)?

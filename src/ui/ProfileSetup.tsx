@@ -35,7 +35,7 @@ export function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile
   return (
     <main className="page narrow">
       <h1 className="brand">
-        <AppLogo /> {t('appName')}
+        <AppLogo /> <span className="brand-name">{t('appName')}</span>
       </h1>
       <p className="lead">{t('tagline')}</p>
       {known.length > 0 && (

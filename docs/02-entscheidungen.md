@@ -101,7 +101,7 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Oben rechts in der Liste sitzen zwei Knöpfe: **Teilen** (Symbol) und das **Menü ☰**. Das Menü hat zwei Gruppen mit Trennlinie:
   - **Diese Liste:** Mitglieder, Listen-Einstellungen (Name, Reiseland, „Erledigte automatisch entfernen“), Aus meinen Listen entfernen bzw. Liste löschen, wenn man das einzige Mitglied ist (rot, D-036).
-  - **Proviant:** Mein Profil (Name, Sprache; mit „Abbrechen“, danach zurück in die Liste), Datenschutz & Kontakt. Die Version steht nicht im Menü, nur in der Fusszeile der Startseite und des Profils.
+  - **Cart on the Road:** Mein Profil (Name, Sprache; mit „Abbrechen“, danach zurück in die Liste), Datenschutz & Kontakt. Die Version steht nicht im Menü, nur in der Fusszeile der Startseite und des Profils.
   - Nicht im Menü: „Alle Listen“ (Pfeil oben links).
 - **Begründung:** Wunsch des Inhabers nach einer Durchsicht: Teilen ist für eine geteilte Liste die wichtigste Aktion, Doppeltes fällt weg, die Einstellung zum automatischen Entfernen war unter „Name & Reiseland“ versteckt, das Profil liess sich nur auf der Startseite ändern.
 - **Folgen:** Die Kopfzeile ist etwas enger, lange Listennamen werden früher gekürzt. Ein Feedback-Eintrag ist bewusst noch nicht dabei.
@@ -140,17 +140,17 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Entscheidung des Inhabers. Kein Risiko durch Spam oder Manipulation, und die Nutzer profitieren trotzdem sofort in ihrer Liste.
 - **Folgen:** Das Wörterbuch wird nur besser, wenn regelmässig ausgewertet wird. Die Zusammenfassung ist öffentlich, weil das Repo öffentlich ist (nur Begriffe, keine Kennungen). Die Vorschläge und der Export sind in der Datenschutzerklärung aufgeführt (D-023).
 
-## D-025 · Die App heisst „Proviant“
+## D-025 · Die App heisst „Cart on the Road“
 
-- **Entscheidung:** Der Name der App ist „Proviant“ (Oberfläche DE und EN, Manifest, Seitentitel, Datenschutz, README). Untertitel im Manifest: „Einkaufsliste für Reisen“. Der Markenname bekommt später einen Zusatz (F-005). Repo `tminder/reiseliste`, URL und interne Schlüssel (`rl:`) bleiben unverändert.
-- **Begründung:** Entscheidung des Inhabers. Positionierung als Einkaufsliste mit Reisebezug, Sprache zweitrangig, ohne „shop“. „Proviant“ verstehen viele Sprachen (DE, SV, DA, NO, NL „proviand“, EN/FR „provisions“). „Travel List“ wäre auf Englisch als Packliste missverstanden worden.
-- **Folgen:** „Proviant“ allein ist generisch und schon belegt, deshalb nicht als Marke schützbar (F-005). Zudem ist „Proviant“ eine bekannte deutsche Getränkemarke (Proviant Fruchtmanufaktur Berlin, Bio-Limonaden im Detailhandel). International verstehen das Wort vor allem Deutsch-, Skandinavisch- und Niederländischsprachige, auf Englisch, Spanisch, Italienisch und Französisch ist es ein Fremdwort. Als Arbeitstitel fürs MVP tauglich, als internationale Marke fraglich. Bereits installierte PWAs zeigen den neuen Namen erst nach einem Update bzw. neuem Hinzufügen zum Home-Bildschirm.
+- **Entscheidung:** Der Name der App ist „Cart on the Road“ (Oberfläche DE und EN, Manifest, Seitentitel, Datenschutz, README). Kurzname unter dem Icon: „Cart on Road“. Untertitel im Manifest: „Einkaufsliste für Reisen“. Repo `tminder/reiseliste`, URL und interne Schlüssel (`rl:`) bleiben unverändert.
+- **Begründung:** Vorschlag des Inhabers, Ersatz für den Arbeitstitel „Proviant“ (generisch, Getränkemarke aus Berlin, ausserhalb des deutschen Sprachraums kaum verständlich). Anspielung auf „On the Road“, beschreibt das Icon (Einkaufswagen auf Strasse, D-026), auf Englisch international verständlich. Websuche ohne gleichnamige App, Marke oder Firma.
+- **Folgen:** Der Name beschreibt das Produkt und ist darum schwer als Marke zu schützen. Websuchen nach dem Namen zeigen vor allem Golfwagen-Verkehrsrecht, im Store braucht es den Untertitel. 16 Zeichen, deshalb der Kurzname für den Home-Bildschirm. Domains und Markenregister sind noch nicht geprüft (F-005). Bereits installierte PWAs zeigen den neuen Namen erst nach einem Update bzw. neuem Hinzufügen zum Home-Bildschirm.
 
 ## D-026 · App-Icon: gefüllter Einkaufswagen auf geschwungener Strasse
 
 - **Entscheidung:** Das Icon zeigt einen weiss gefüllten Einkaufswagen, der leicht schräg auf einer dunklen, S-förmig geschwungenen Strasse (#1e293b) fährt. Petrolfarbener Grund (#14b8a6), keine weiteren Details. Quelle ist `public/favicon.svg`. Daraus entstehen mit `rsvg-convert` favicon-32, icon-192/512, apple-touch-icon (180 px, ohne Rundung, weil iOS selbst rundet) und icon-maskable-512 (Motiv auf 80 % verkleinert, Strasse läuft bis zum Rand).
 - **Begründung:** Entscheidung des Inhabers (Variante „i-b“). Der gefüllte Wagen bleibt auch in Home-Bildschirm-Grösse gut lesbar. Die Strasse verbindet Einkaufen und Unterwegs-Sein. iOS zeigt auf dem Home-Bildschirm nur PNG-Symbole, deshalb die PNG-Dateien.
-- **Folgen:** Bereits installierte PWAs zeigen das neue Icon erst nach dem Entfernen und erneuten Hinzufügen zum Home-Bildschirm. Dasselbe Icon steht in der App neben dem Namen „Proviant“ (Listenübersicht und Profil).
+- **Folgen:** Bereits installierte PWAs zeigen das neue Icon erst nach dem Entfernen und erneuten Hinzufügen zum Home-Bildschirm. Dasselbe Icon steht in der App neben dem App-Namen (Listenübersicht und Profil).
 
 ## D-027 · Community-Funktionen nicht im MVP, später als Modul
 
@@ -253,7 +253,7 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
   - **Nach 1 Tag:** Artikel, die vor mehr als 24 Stunden abgehakt wurden, werden beim Öffnen der Liste und alle 5 Minuten entfernt.
   - **Einstellung pro Liste:** „Erledigte automatisch entfernen“ unter Menü → Listen-Einstellungen, Standard an. Gespeichert in `lists.auto_clear`, gilt für alle Mitglieder.
 - **Begründung:** Wunsch des Inhabers. Nach dem Einkauf soll die Liste ohne Handgriff wieder nur zeigen, was noch fehlt. Entfernte Artikel bleiben unter „Schon mal gekauft“ verfügbar.
-- **Folgen:** Als Web-App prüft Proviant nur, wenn sie offen ist oder wieder geöffnet wird, nicht im Hintergrund. `supabase/schema.sql` muss erneut ausgeführt werden (neue Spalte), bis dahin funktioniert alles, nur das Abschalten wird nicht synchronisiert. Ohne Standortfreigabe greift nur die 1-Tages-Regel.
+- **Folgen:** Als Web-App prüft die App nur, wenn sie offen ist oder wieder geöffnet wird, nicht im Hintergrund. `supabase/schema.sql` muss erneut ausgeführt werden (neue Spalte), bis dahin funktioniert alles, nur das Abschalten wird nicht synchronisiert. Ohne Standortfreigabe greift nur die 1-Tages-Regel.
 
 ## D-044 · Weiche Übergänge bei Statuswechseln
 

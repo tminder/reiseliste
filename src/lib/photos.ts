@@ -123,7 +123,7 @@ async function byCategory(country: string, category: string, store?: string): Pr
     sort_by: 'unique_scans_n',
     page_size: '8',
     fields: FIELDS,
-    app_name: 'Proviant',
+    app_name: 'CartOnTheRoad',
   })
   if (store) params.set('stores_tags', store)
   return toPhotos(await fetchJson(`https://world.openfoodfacts.org/api/v2/search?${params}`)).slice(0, MAX)
@@ -142,7 +142,7 @@ async function byText(country: string, term: string, store?: string): Promise<Ph
     page_size: '20',
     json: '1',
     fields: FIELDS,
-    app_name: 'Proviant',
+    app_name: 'CartOnTheRoad',
   })
   if (store) {
     params.set('tagtype_1', 'stores')

@@ -19,7 +19,7 @@ const DE: { title: string; back: string; updated: string; sections: Section[] } 
     {
       h: 'Wer ist verantwortlich?',
       p: [
-        `Tobias Minder, Schweiz, E-Mail: ${CONTACT}. Proviant ist ein privates, nicht kommerzielles Projekt in der Testphase. Es gibt keine Werbung, kein Tracking und keine Analyse-Tools, nur eine eigene Fehlerüberwachung (siehe unten).`,
+        `Tobias Minder, Schweiz, E-Mail: ${CONTACT}. Cart on the Road ist ein privates, nicht kommerzielles Projekt in der Testphase. Es gibt keine Werbung, kein Tracking und keine Analyse-Tools, nur eine eigene Fehlerüberwachung (siehe unten).`,
       ],
     },
     {
@@ -89,7 +89,7 @@ const EN: typeof DE = {
     {
       h: 'Who is responsible?',
       p: [
-        `Tobias Minder, Switzerland, email: ${CONTACT}. Proviant is a private, non-commercial project in a test phase. There are no ads, no tracking and no analytics tools, only our own error monitoring (see below).`,
+        `Tobias Minder, Switzerland, email: ${CONTACT}. Cart on the Road is a private, non-commercial project in a test phase. There are no ads, no tracking and no analytics tools, only our own error monitoring (see below).`,
       ],
     },
     {

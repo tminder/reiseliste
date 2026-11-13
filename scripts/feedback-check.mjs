@@ -30,7 +30,7 @@ async function offCount(term, country) {
   })
   let result = 'Fehler'
   try {
-    const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?${params}`, { headers: { 'User-Agent': 'Proviant-Feedback/1.0 (github.com/tminder/reiseliste)' } })
+    const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?${params}`, { headers: { 'User-Agent': 'CartOnTheRoad-Feedback/1.0 (github.com/tminder/reiseliste)' } })
     if (res.ok) result = String((await res.json()).count ?? 0)
   } catch {
     /* bleibt „Fehler“ */

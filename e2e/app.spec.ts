@@ -1,4 +1,4 @@
-// Hauptabläufe von Proviant im Browser (S-002). Build ohne Supabase: Listen leben nur auf dem Gerät.
+// Hauptabläufe von Cart on the Road im Browser (S-002). Build ohne Supabase: Listen leben nur auf dem Gerät.
 import { expect, test as base, type Page } from '@playwright/test'
 
 const LIST = '11111111-2222-3333-4444-555555555555'
