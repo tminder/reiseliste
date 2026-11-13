@@ -188,7 +188,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   const [showEdit, setShowEdit] = useState(false)
   const [showMembers, setShowMembers] = useState(false)
   const [confirmLeave, setConfirmLeave] = useState(false)
-  // Einziges Mitglied? Dann „Liste löschen“ statt „Aus meinen Listen entfernen“ (D-036). Geprüft beim Öffnen des Menüs.
+  // Einziges Mitglied? Dann „Liste löschen“ statt „Liste verlassen“ (D-036). Geprüft beim Öffnen des Menüs.
   // Startwert: zuletzt bekanntes Ergebnis, damit Menü und Warnung nicht kurz den falschen Text zeigen. undefined = unbekannt
   const [sole, setSole] = useState<boolean | null | undefined>(() => knownSole(id))
   useEffect(() => {
@@ -426,7 +426,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
                     setConfirmLeave(true)
                   }}
                 >
-                  <Trash2 size={18} /> {sole === undefined ? t('removeList') : sole ? t('deleteList') : t('removeFromDevice')}
+                  <Trash2 size={18} /> {sole ? t('deleteList') : t('leaveList')}
                 </button>
                 <div className="menu-sep" role="separator" />
                 <div className="menu-label">{t('appName')}</div>
@@ -635,7 +635,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
         // Warnung vor dem Entfernen (D-036)
         <div className="sheet-backdrop" onClick={() => setConfirmLeave(false)}>
           <div className="sheet" role="alertdialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <h2>{sole === undefined ? t('removeList') : sole ? t('deleteListTitle', { name: list.name }) : t('removeListTitle', { name: list.name })}</h2>
+            <h2>{sole ? t('deleteListTitle', { name: list.name }) : t('removeListTitle', { name: list.name })}</h2>
             <p>{sole === undefined ? '…' : sole ? t('deleteListConfirm') : t('removeListConfirm')}</p>
             <button
               className="danger-btn"
