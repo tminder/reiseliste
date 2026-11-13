@@ -86,7 +86,7 @@ test('Profil Deutsch (Schweiz): Artikel anderer erscheinen mit Schweizer Begriff
   await expect(page.locator('.item .main').first()).toContainText('Rahm')
   await expect(page.locator('.item .main', { hasText: 'Schwarze Schokolade' })).toHaveCount(1)
   await page.locator('a.back').click()
-  await expect(page.locator('header')).toContainText('Tobias · DE-CH')
+  await expect(page.locator('header')).toContainText('Tobias · 🇨🇭 DE')
 })
 
 test('Mengen: gleiche Einheit wird addiert, andere Einheit eigene Zeile', async ({ page, problems }) => {

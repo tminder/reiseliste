@@ -65,9 +65,14 @@ export function profileLangLabel(p: { lang: Lang; region?: string }): string {
   return PROFILE_LANGS.find((o) => o.value === (p.region ?? p.lang))?.label ?? LANG_LABEL[p.lang]
 }
 
-/** Kurzform für knappe Stellen, z. B. „DE-CH“, „DE“, „ES“ */
+/** Land, für das eine Sprache ohne Abweichung steht (für die Flagge im Profil-Knopf) */
+const LANG_HOME: Record<Lang, string> = { de: 'DE', en: 'GB', es: 'ES', pt: 'PT', fr: 'FR', it: 'IT', nl: 'NL', hr: 'HR', el: 'GR' }
+const flagOf = (cc: string) => String.fromCodePoint(...[...cc.toUpperCase()].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65))
+
+/** Kurzform für knappe Stellen: Flagge und Sprachkürzel, z. B. „🇨🇭 DE“, „🇩🇪 DE“, „🇪🇸 ES“ */
 export function profileLangShort(p: { lang: Lang; region?: string }): string {
-  return (p.region ?? p.lang).toUpperCase()
+  const cc = p.region?.split('-')[1] ?? LANG_HOME[p.lang]
+  return `${flagOf(cc)} ${p.lang.toUpperCase()}`
 }
 
 export const LANG_LABEL: Record<Lang, string> = {
