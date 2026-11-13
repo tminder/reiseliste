@@ -1,6 +1,6 @@
 # Ziele
 
-Stand: 2026-11-12
+Stand: 2026-11-13
 
 **Kurz:** Eine geteilte Einkaufsliste für Reisegruppen. Jeder schreibt in seiner Sprache, und im Laden steht jeder Artikel in der Landessprache, so wie er im Regal heisst.
 
@@ -12,7 +12,7 @@ Stand: 2026-11-12
 | Z-2 | **Eine Liste für die ganze Gruppe.** Alle bearbeiten und haken live auf derselben Liste ab, auch bei gemischten Sprachen. | Eine Gruppe nutzt auf einer Reise eine gemeinsame Liste statt mehrerer. |
 | Z-3 | **Keine Hürde beim Mitmachen.** Beitreten per Link oder QR-Code, ohne Konto und ohne Installation. | Beitreten dauert unter 30 Sekunden. |
 | Z-4 | **Funktioniert ohne Netz.** Liste und Übersetzungen sind auch im Funkloch oder ohne Roaming verfügbar. | Abhaken und Hinzufügen gehen offline und werden später synchronisiert. |
-| Z-5 | **Schnell im Laden.** Grosse Schrift, Sortierung nach Abteilungen, später Produktfotos, damit man Artikel ohne Nachdenken wiederfindet. | Testpersonen finden Artikel ohne zusätzliche Übersetzungs-App. |
+| Z-5 | **Schnell im Laden.** Sortierung nach Abteilungen, Produktfotos und Zeigen-Karte fürs Personal, damit man Artikel ohne Nachdenken wiederfindet. | Testpersonen finden Artikel ohne zusätzliche Übersetzungs-App. |
 
 ## Bewusst nicht (vorerst)
 
