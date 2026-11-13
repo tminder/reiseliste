@@ -164,5 +164,7 @@
   "cat_haushalt": "Household",
   "cat_kueche": "Kitchen & tableware",
   "cat_hygiene": "Toiletries",
-  "cat_baby": "Baby"
+  "cat_baby": "Baby",
+  "autoCountry": "Automatic ({country})",
+  "autoCountryHint": "Follows your location, e.g. on a round trip. In a country of your own language it keeps the previous country."
 }

@@ -1,7 +1,7 @@
 // Untere Blätter der Liste: Mitglieder, Liste bearbeiten, Teilen
 import { useEffect, useState } from 'react'
 import { type Lang } from '../../data/dictionary'
-import { COUNTRIES, LANG_LABEL } from '../../data/countries'
+import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
 import { countryName, t } from '../../i18n'
 import { listUrl } from '../../lib/links'
 import { MAX } from '../../lib/limits'
@@ -45,17 +45,21 @@ export function EditSheet({
   name,
   country,
   autoClear,
+  autoCountry,
   onSave,
   onClose,
 }: {
   name: string
   country: string
   autoClear: boolean
-  onSave: (name: string, country: string, autoClear: boolean) => void
+  /** Reiseland automatisch nach Standort (D-057) */
+  autoCountry: boolean
+  onSave: (name: string, country: string, autoClear: boolean, autoCountry: boolean) => void
   onClose: () => void
 }) {
   const [n, setN] = useState(name)
   const [c, setC] = useState(country)
+  const [auto, setAuto] = useState(autoCountry)
   const [ac, setAc] = useState(autoClear)
   return (
     <div className="sheet-backdrop" onClick={onClose}>
@@ -64,7 +68,7 @@ export function EditSheet({
         onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
           e.preventDefault()
-          onSave(n.trim() || name, c, ac)
+          onSave(n.trim() || name, c, ac, auto)
         }}
       >
         <h2>{t('editListTitle')}</h2>
@@ -74,7 +78,15 @@ export function EditSheet({
         </label>
         <label>
           {t('travelCountry')}
-          <select value={c} onChange={(e) => setC(e.target.value)}>
+          <select
+            value={auto ? 'auto' : c}
+            onChange={(e) => {
+              if (e.target.value === 'auto') return setAuto(true)
+              setAuto(false)
+              setC(e.target.value)
+            }}
+          >
+            <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(c)?.flag ?? ''} ${countryName(c)}` })}</option>
             {COUNTRIES.map((x) => (
               <option key={x.code} value={x.code}>
                 {x.flag} {countryName(x.code)} – {LANG_LABEL[x.lang]}
@@ -82,7 +94,7 @@ export function EditSheet({
             ))}
           </select>
         </label>
-        <p className="muted small-text">{t('countryChangeHint')}</p>
+        <p className="muted small-text">{auto ? t('autoCountryHint') : t('countryChangeHint')}</p>
         <label className="check-row">
           <input type="checkbox" checked={ac} onChange={(e) => setAc(e.target.checked)} />
           <span>

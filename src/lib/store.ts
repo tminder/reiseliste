@@ -12,6 +12,8 @@ export interface ShoppingList {
   country: string
   /** Erledigte automatisch entfernen (D-043). undefined = Standard (an) bzw. Spalte fehlt */
   autoClear?: boolean
+  /** Reiseland folgt dem Standort (D-057). undefined = Standard (automatisch) bzw. Spalte fehlt */
+  autoCountry?: boolean
   updatedAt: string
 }
 
@@ -326,6 +328,7 @@ const toRemoteList = (l: ShoppingList) => ({
   updated_at: l.updatedAt,
   // Nur mitschicken, wenn gesetzt – so klappt der Sync auch, solange die Spalte in Supabase noch fehlt
   ...(l.autoClear !== undefined ? { auto_clear: l.autoClear } : {}),
+  ...(l.autoCountry !== undefined ? { auto_country: l.autoCountry } : {}),
 })
 const toRemoteItem = (i: Item) => ({
   id: i.id,
@@ -344,7 +347,7 @@ const toRemoteItem = (i: Item) => ({
   ...(i.claimedBy !== undefined ? { claimed_by: i.claimedBy } : {}),
 })
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const fromRemoteList = (r: any): ShoppingList => ({ id: r.id, name: r.name, country: r.country, autoClear: r.auto_clear ?? undefined, updatedAt: r.updated_at })
+const fromRemoteList = (r: any): ShoppingList => ({ id: r.id, name: r.name, country: r.country, autoClear: r.auto_clear ?? undefined, autoCountry: r.auto_country ?? undefined, updatedAt: r.updated_at })
 const fromRemoteItem = (r: any): Item => ({
   id: r.id,
   listId: r.list_id,
@@ -570,13 +573,13 @@ export class ListStore {
     this.setSync(ok ? 'synced' : navigator.onLine ? 'error' : 'offline')
   }
 
-  create(name: string, country: string) {
-    this.list = { id: this.id, name: clip(name, MAX.listName), country, updatedAt: now() }
+  create(name: string, country: string, autoCountry = true) {
+    this.list = { id: this.id, name: clip(name, MAX.listName), country, ...(autoCountry ? {} : { autoCountry: false }), updatedAt: now() }
     rememberList(this.id)
     return this.write({ table: 'lists', row: this.list })
   }
 
-  updateList(patch: Partial<Pick<ShoppingList, 'name' | 'country' | 'autoClear'>>) {
+  updateList(patch: Partial<Pick<ShoppingList, 'name' | 'country' | 'autoClear' | 'autoCountry'>>) {
     if (!this.list) return
     if (patch.name !== undefined) patch = { ...patch, name: clip(patch.name, MAX.listName) }
     this.list = { ...this.list, ...patch, updatedAt: now() }

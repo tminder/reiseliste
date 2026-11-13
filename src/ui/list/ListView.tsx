@@ -262,8 +262,10 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   // oder in einem nicht unterstützten Land.
   const [countryMoved, setCountryMoved] = useState<{ from: string; to: string } | null>(null)
   const listCountry = list?.country
+  const autoCountry = list ? list.autoCountry !== false : false
   useEffect(() => {
-    if (!listCountry) return
+    // Nur bei „Automatisch“ (D-057); bei fest gewähltem Land bleibt es dabei
+    if (!listCountry || !autoCountry) return
     let alive = true
     void detectCountry(30 * 60 * 1000).then((code) => {
       if (!alive || !code || code === listCountry || !COUNTRY_BY_CODE.has(code)) return
@@ -275,9 +277,9 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
     return () => {
       alive = false
     }
-    // Nur beim Öffnen der Liste bzw. wenn sie geladen ist
+    // Nur beim Öffnen der Liste bzw. wenn sie geladen ist oder auf „Automatisch“ gestellt wird
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, !!listCountry])
+  }, [id, !!listCountry, autoCountry])
 
   const country = list ? COUNTRY_BY_CODE.get(list.country) : undefined
   const target: Lang = country?.lang ?? 'en'
@@ -636,8 +638,14 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           name={list.name}
           country={list.country}
           autoClear={list.autoClear !== false}
-          onSave={(name, country, autoClear) => {
-            void store.updateList({ name, country, ...(autoClear !== (list.autoClear !== false) ? { autoClear } : {}) })
+          autoCountry={list.autoCountry !== false}
+          onSave={(name, country, autoClear, autoCountry) => {
+            void store.updateList({
+              name,
+              country,
+              ...(autoClear !== (list.autoClear !== false) ? { autoClear } : {}),
+              ...(autoCountry !== (list.autoCountry !== false) ? { autoCountry } : {}),
+            })
             setShowEdit(false)
           }}
           onClose={() => setShowEdit(false)}

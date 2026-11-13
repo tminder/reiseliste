@@ -18,6 +18,8 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
   const [country, setCountry] = useState(() => ['ES', 'IT', 'FR'].find((c) => COUNTRY_BY_CODE.get(c)?.lang !== profile.lang) ?? 'ES')
   const [detected, setDetected] = useState<string | null>(null)
   const touched = useRef(false)
+  // Reiseland: standardmässig automatisch nach Standort (D-057), sonst fest gewähltes Land
+  const [auto, setAuto] = useState(true)
   const [lists, setLists] = useState(knownLists)
   // „Neue Liste“ ist eingeklappt, sobald es Listen gibt; ohne Listen direkt offen
   const [panel, setPanel] = useState<'new' | 'join' | 'link' | null>(lists.length === 0 ? 'new' : null)
@@ -86,7 +88,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
     e.preventDefault()
     const id = crypto.randomUUID()
     const store = new ListStore(id)
-    void store.create(name.trim() || t('defaultListName', { country: countryName(country) }), country)
+    void store.create(name.trim() || t('defaultListName', { country: countryName(country) }), country, auto)
     go(`/l/${id}`)
   }
 
@@ -139,12 +141,15 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
           <label>
             {t('travelCountry')}
             <select
-              value={country}
+              value={auto ? 'auto' : country}
               onChange={(e) => {
+                if (e.target.value === 'auto') return setAuto(true)
                 touched.current = true
+                setAuto(false)
                 setCountry(e.target.value)
               }}
             >
+              <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(country)?.flag ?? ''} ${countryName(country)}` })}</option>
               {COUNTRIES.map((c) => (
                 <option key={c.code} value={c.code}>
                   {c.flag} {countryName(c.code)} – {LANG_LABEL[c.lang]}
@@ -154,6 +159,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
             {detected && detected === country && <span className="hint-ok">
                 <LocateFixed size={14} /> {t('currentLocation')}
               </span>}
+            {auto && <span className="muted small-text block">{t('autoCountryHint')}</span>}
           </label>
           <label>
             {t('nameOptional')}

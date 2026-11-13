@@ -37,6 +37,8 @@ create table if not exists public.items (
 -- Für Datenbanken, die mit einer älteren Version dieses Skripts angelegt wurden
 -- Erledigte automatisch entfernen, pro Liste abschaltbar (D-043)
 alter table public.lists add column if not exists auto_clear boolean not null default true;
+-- Reiseland automatisch nach Standort (D-057). Bestehende Listen: automatisch, wie bisher (D-040)
+alter table public.lists add column if not exists auto_country boolean not null default true;
 -- Wer holt den Artikel (Name, D-031)
 alter table public.items add column if not exists claimed_by text;
 alter table public.lists add column if not exists created_by uuid default auth.uid();

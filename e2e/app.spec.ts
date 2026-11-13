@@ -202,19 +202,19 @@ test.describe('Reiseland nach Sprache (D-041)', () => {
   test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
   const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
 
-  async function open(page: Page, lang: string) {
+  async function open(page: Page, lang: string, autoCountry?: boolean) {
     await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
     await page.route(/interpreter/, (r) => r.fulfill(json({ elements: [] })))
     await page.addInitScript(
-      ({ id, lang }) => {
+      ({ id, lang, autoCountry }) => {
         if (localStorage.getItem('rl:seeded')) return
         localStorage.setItem('rl:seeded', '1')
         // Altes Profil mit Wohnland Spanien: darf keine Rolle mehr spielen
         localStorage.setItem('rl:profile', JSON.stringify({ name: 'Anna', lang, home: 'ES' }))
         localStorage.setItem('rl:lists', JSON.stringify([id]))
-        localStorage.setItem('rl:list:' + id, JSON.stringify({ list: { id, name: 'Wochenende', country: 'IT', updatedAt: '2026-01-01T00:00:00Z' }, items: [] }))
+        localStorage.setItem('rl:list:' + id, JSON.stringify({ list: { id, name: 'Wochenende', country: 'IT', autoCountry, updatedAt: '2026-01-01T00:00:00Z' }, items: [] }))
       },
-      { id: LIST, lang },
+      { id: LIST, lang, autoCountry },
     )
     await page.goto(`/#/l/${LIST}`)
   }
@@ -224,6 +224,21 @@ test.describe('Reiseland nach Sprache (D-041)', () => {
     await open(page, 'de')
     await expect(page.locator('.topbar .sub')).toContainText('Spanien', { timeout: 10_000 })
     await expect(page.locator('.toast')).toContainText('Reiseland')
+  })
+
+  test('Fest gewähltes Reiseland (D-057): Liste bleibt bei Italien', async ({ page, problems }) => {
+    void problems
+    await open(page, 'de', false)
+    await page.waitForTimeout(3000)
+    await expect(page.locator('.topbar .sub')).toContainText(/Ital/)
+  })
+
+  test('Neue Liste: Reiseland steht auf „Automatisch (🇪🇸 Spanien)“', async ({ page, problems }) => {
+    void problems
+    await open(page, 'de')
+    await page.locator('a.back').click()
+    if (!(await page.locator('form select').first().isVisible())) await page.getByRole('button', { name: /Neue Liste/ }).click()
+    await expect(page.locator('form select').first().locator('option:checked')).toHaveText(/Automatisch \(🇪🇸 Spanien\)/, { timeout: 10_000 })
   })
 
   test('Spanischsprachig in Spanien: Liste bleibt beim bisherigen Land', async ({ page, problems }) => {
