@@ -59,7 +59,7 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-010 · Produktfotos aus Open Food Facts, über die Produktkategorie
 
-- **Entscheidung:** Ein Kamera-Knopf am Artikel zeigt bis zu 4 Packungsfotos aus Open Food Facts, als eigene Zeile über die ganze Breite der Artikelkarte (Wunsch des Inhabers). Den Knopf gibt es nur in der Ladenansicht und nur, wenn ein Laden gefunden oder gewählt ist (D-011). Ohne Laden sind allgemeine Landesfotos wenig hilfreich. Gesucht wird über die **Produktkategorie** (z. B. Milch → `en:milks`), nicht per Freitext. Die Suche ist auf Produkte im Reiseland beschränkt, die meistgescannten kommen zuerst. Zuerst kommen Produkte der Kette dieses Ladens, sonst die üblichen Produkte im Land. Für lose Ware (Obst, Gemüse, Frischfleisch, Fisch) und für Non-Food (Haushalt, Drogerie, Baby) gibt es keinen Foto-Knopf. Für eigene Landesbegriffe ohne Eintrag im Wörterbuch wird per Freitext gesucht. Dabei zählen nur Produkte, deren Name mit dem Begriff beginnt oder ihn als ganzes Wort enthält. Die Fotos werden nur auf Antippen gesucht („Fotos werden gesucht …“), 30 Tage lokal gespeichert und bleiben offline verfügbar. Ist Open Food Facts ausgelastet oder nicht erreichbar, versucht es die App automatisch erneut, mit denselben Wartezeiten wie bei der Ladensuche (15 s, 30 s, 1, 2, dann alle 5 Min.), mit Countdown und „jetzt“. Die Quelle wird genannt (CC BY-SA). Es gibt keine KI-Bilder und keine Fotos aus Online-Shops von Supermärkten oder Herstellern.
+- **Entscheidung:** Ein Kamera-Knopf am Artikel zeigt bis zu 4 Packungsfotos aus Open Food Facts, als eigene Zeile über die ganze Breite der Artikelkarte (Wunsch des Inhabers). Den Knopf gibt es nur bei offenen Artikeln und nur, wenn ein Laden gefunden oder gewählt ist (D-011). Ohne Laden sind allgemeine Landesfotos wenig hilfreich. Gesucht wird über die **Produktkategorie** (z. B. Milch → `en:milks`), nicht per Freitext. Die Suche ist auf Produkte im Reiseland beschränkt, die meistgescannten kommen zuerst. Zuerst kommen Produkte der Kette dieses Ladens, sonst die üblichen Produkte im Land. Für lose Ware (Obst, Gemüse, Frischfleisch, Fisch) und für Non-Food (Haushalt, Drogerie, Baby) gibt es keinen Foto-Knopf. Für eigene Landesbegriffe ohne Eintrag im Wörterbuch wird per Freitext gesucht. Dabei zählen nur Produkte, deren Name mit dem Begriff beginnt oder ihn als ganzes Wort enthält. Die Fotos werden nur auf Antippen gesucht („Fotos werden gesucht …“), 30 Tage lokal gespeichert und bleiben offline verfügbar. Ist Open Food Facts ausgelastet oder nicht erreichbar, versucht es die App automatisch erneut, mit denselben Wartezeiten wie bei der Ladensuche (15 s, 30 s, 1, 2, dann alle 5 Min.), mit Countdown und „jetzt“. Die Quelle wird genannt (CC BY-SA). Es gibt keine KI-Bilder und keine Fotos aus Online-Shops von Supermärkten oder Herstellern.
 - **Begründung:** Die Freitextsuche lieferte oft Unpassendes, z. B. bei „tomates“ Ketchup und Pastasauce (Rückmeldung des Inhabers). Kategorien sind deutlich treffsicherer. Open Food Facts kennt fast nur verpackte Lebensmittel, ein Knopf ohne sinnvolle Treffer wäre schlechter als gar keiner. Es sind nur wenige Suchanfragen pro Minute erlaubt, deshalb wird nur auf Antippen geladen und zwischengespeichert.
 
 ## D-011 · Supermarkt erkennen: Vorschlag über OpenStreetMap, Bestätigung durch den Nutzer
@@ -88,7 +88,7 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-015 · Eigene Sprache gross, Landessprache klein mit Flagge
 
-- **Entscheidung:** Jeder Artikel zeigt gross den Namen in der Sprache des Betrachters, wie eingegeben oder aus dem Wörterbuch übersetzt. Darunter steht klein der Begriff in der Landessprache, mit der Flagge des Reiselands davor („🇪🇸 leche“). Reine Zahlen werden als Anzahl angezeigt („2x“), Mengen mit Einheit bleiben unverändert („500 g“). Im Kopf der Liste stehen nur Land und Sprache, z. B. „Spanien · Español“. Tipps zu Artikeln (z. B. „Kochsahne und Schlagsahne sind oft getrennt beschriftet“) erscheinen nur in der Ladenansicht und nur auf Antippen des Glühbirnen-Symbols.
+- **Entscheidung:** Jeder Artikel zeigt gross den Namen in der Sprache des Betrachters, wie eingegeben oder aus dem Wörterbuch übersetzt. Darunter steht klein der Begriff in der Landessprache, mit der Flagge des Reiselands davor („🇪🇸 leche“). Reine Zahlen werden als Anzahl angezeigt („2x“), Mengen mit Einheit bleiben unverändert („500 g“). Im Kopf der Liste stehen nur Land und Sprache, z. B. „Spanien · Español“. Tipps zu Artikeln (z. B. „Kochsahne und Schlagsahne sind oft getrennt beschriftet“) erscheinen bei offenen Artikeln auf Antippen des Glühbirnen-Symbols.
 - **Begründung:** Wunsch des Inhabers: Die eigene Sprache ist schneller lesbar, die Ansicht wird kompakter, und die Tipps stören beim Schreiben der Liste nicht.
 
 ## D-016 · Automatisch aktuell: neue App-Versionen und Listendaten
@@ -102,7 +102,7 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Oben rechts in der Liste sitzen zwei Knöpfe: **Teilen** (Symbol) und das **Menü ☰**. Das Menü hat zwei Gruppen mit Trennlinie:
   - **Diese Liste:** Mitglieder, Listen-Einstellungen (Name, Reiseland, „Erledigte automatisch entfernen“), Aus meinen Listen entfernen bzw. Liste löschen, wenn man das einzige Mitglied ist (rot, D-036).
   - **Proviant:** Mein Profil (Name, Sprache; mit „Abbrechen“, danach zurück in die Liste), Datenschutz & Kontakt. Die Version steht nicht im Menü, nur in der Fusszeile der Startseite und des Profils.
-  - Nicht im Menü: die Ladenansicht (Knopf über der Liste, Abhaken schaltet um, D-047) und „Alle Listen“ (Pfeil oben links).
+  - Nicht im Menü: „Alle Listen“ (Pfeil oben links).
 - **Begründung:** Wunsch des Inhabers nach einer Durchsicht: Teilen ist für eine geteilte Liste die wichtigste Aktion, Doppeltes fällt weg, die Einstellung zum automatischen Entfernen war unter „Name & Reiseland“ versteckt, das Profil liess sich nur auf der Startseite ändern.
 - **Folgen:** Die Kopfzeile ist etwas enger, lange Listennamen werden früher gekürzt. Ein Feedback-Eintrag ist bewusst noch nicht dabei.
 
@@ -116,11 +116,11 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Es gibt keine Statuszeile „Synchronisiert“ mehr. Läuft alles normal, ist nichts zu sehen. Offline erscheint im Kopf eine Wolke mit Strich, bei einem Fehler eine orange Wolke mit Ausrufezeichen. Ein Tipp darauf erklärt den Zustand, bei Fehlern mit der Meldung von Supabase. Während des Abgleichs wird nichts angezeigt.
 - **Begründung:** Wunsch des Inhabers, die Zeile störte. Synchron ist der Normalzustand, nur Abweichungen sind für den Nutzer relevant.
 
-## D-020 · Automatisch in die Ladenansicht, wenn man im Supermarkt ist
+## D-020 · Beim Öffnen im Supermarkt: Einkauf beginnt
 
-- **Entscheidung:** Ergibt die Ladensuche **beim Öffnen einer Liste** (innerhalb von 30 s), dass ein **Supermarkt** höchstens 50 m entfernt ist, bei einer GPS-Genauigkeit von höchstens 60 m, wechselt die App in die Ladenansicht. Ein Hinweis erscheint: „Ladenansicht – du bist bei Spar · zurück“. Kein Wechsel, wenn im Eingabefeld Text steht, die Ladenansicht schon aktiv ist, es nur ein Kiosk, eine Drogerie o. ä. ist, oder der Nutzer bei diesem Laden in den letzten 3 Stunden „zurück“ getippt hat. Während der Bearbeitung wird nie gewechselt.
-- **Begründung:** Wunsch des Inhabers. Im Laden sind große Schrift und Tipps sofort da, ohne Tippen. Die Leitplanken verhindern ungewollte Wechsel durch ungenaues GPS, z. B. wenn man neben einem Supermarkt wohnt oder vorbeigeht.
-- **Folgen:** Eine Web-App kann den Standort nicht im Hintergrund prüfen. Der Wechsel passiert also nur beim Öffnen der Liste, nicht beim Betreten des Ladens. Das ginge erst mit nativen Apps (D-009).
+- **Entscheidung:** Ergibt die Ladensuche **beim Öffnen einer Liste** (innerhalb von 30 s), dass ein **Supermarkt** höchstens 50 m entfernt ist, bei einer GPS-Genauigkeit von höchstens 60 m, gilt der Einkauf als begonnen (D-055): Dieser Laden zählt für den Ladenbesuch (D-043), und die genauere Laden-Prüfung startet (D-046). An der Anzeige ändert sich nichts, es gibt keinen Hinweis. Kiosk, Drogerie o. ä. lösen nichts aus.
+- **Begründung:** Wunsch des Inhabers. Die Leitplanken verhindern Fehlauslösungen durch ungenaues GPS, z. B. wenn man neben einem Supermarkt wohnt oder vorbeigeht.
+- **Folgen:** Eine Web-App kann den Standort nicht im Hintergrund prüfen. Das passiert also nur beim Öffnen der Liste, nicht beim Betreten des Ladens. Das ginge erst mit nativen Apps (D-009).
 
 ## D-022 · Oberfläche mehrsprachig (Deutsch, Englisch)
 
@@ -173,19 +173,19 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-030 · Nach dem Einkauf: Erledigte entfernen, schon Gekauftes wieder hinzufügen
 
-- **Entscheidung:** Über der Gruppe „Im Wagen“ steht der Knopf „Erledigte entfernen“ (automatisch: D-043). Er entfernt alle abgehakten Artikel (Soft-Delete) ohne Rückfrage, danach ist „Rückgängig“ möglich (D-042). Unter dem Eingabefeld zeigt „Schon mal gekauft“ bis zu 8 entfernte Artikel dieser Liste, die gerade nicht auf der Liste stehen (neueste zuerst, ohne Doppelte). Ein Tipp setzt den Artikel ohne Menge wieder auf die Liste, in der Sprache des Tippenden. Nur in der Bearbeiten-Ansicht, nur bei leerem Eingabefeld und nur, solange man ins Eingabefeld getippt hat (Wunsch des Inhabers).
+- **Entscheidung:** Über der Gruppe „Im Wagen“ steht der Knopf „Erledigte entfernen“ (automatisch: D-043). Er entfernt alle abgehakten Artikel (Soft-Delete) ohne Rückfrage, danach ist „Rückgängig“ möglich (D-042). Unter dem Eingabefeld zeigt „Schon mal gekauft“ bis zu 8 entfernte Artikel dieser Liste, die gerade nicht auf der Liste stehen (neueste zuerst, ohne Doppelte). Ein Tipp setzt den Artikel ohne Menge wieder auf die Liste, in der Sprache des Tippenden. Nur bei leerem Eingabefeld und nur, solange man ins Eingabefeld getippt hat (Wunsch des Inhabers).
 - **Begründung:** Auf Reisen kauft man fast täglich ein, eine Liste wird immer wieder verwendet (Vorschlag „wenige, aber gute Funktionen“, vom Inhaber gewählt).
 - **Folgen:** Auch ohne Kauf gelöschte Artikel erscheinen unter „Schon mal gekauft“. Keine Datenbank-Änderung nötig.
 
 ## D-031 · Wer holt was: „Ich hole das“
 
-- **Entscheidung:** In der Ladenansicht hat jeder offene Artikel einen Hand-Knopf (✋). In der Bearbeiten-Ansicht fehlt er, der Hinweis „holt das“ ist aber in beiden Ansichten sichtbar. Ein Tipp trägt den eigenen Namen ein (Spalte `items.claimed_by`), alle sehen „🙋 Anna holt das“ bzw. „Du holst das“. Nochmals tippen gibt ihn frei. Tippt jemand anderes, übernimmt er den Artikel. Beim Abhaken wird der Eintrag zurückgesetzt (Wunsch des Inhabers). Der Hinweis bricht nicht um.
-- **Begründung:** Verhindert Doppelkäufe, wenn sich die Gruppe im Laden aufteilt. Hauptnutzen einer geteilten Liste. Nur in der Ladenansicht, damit die Bearbeiten-Ansicht ruhig bleibt (Wunsch des Inhabers).
+- **Entscheidung:** Jeder offene Artikel hat einen Hand-Knopf (✋). Ein Tipp trägt den eigenen Namen ein (Spalte `items.claimed_by`), alle sehen „🙋 Anna holt das“ bzw. „Du holst das“. Nochmals tippen gibt ihn frei. Tippt jemand anderes, übernimmt er den Artikel. Beim Abhaken wird der Eintrag zurückgesetzt (Wunsch des Inhabers). Der Hinweis bricht nicht um.
+- **Begründung:** Verhindert Doppelkäufe, wenn sich die Gruppe im Laden aufteilt. Hauptnutzen einer geteilten Liste.
 - **Folgen:** `supabase/schema.sql` muss erneut ausgeführt werden (neue Spalte). Bis dahin schlägt nur das Speichern eines „Ich hole das“ fehl, alle anderen Änderungen werden weiter synchronisiert, weil `claimed_by` nur mitgeschickt wird, wenn es gesetzt ist. Der Name wird in der Datenschutzerklärung erwähnt.
 
 ## D-032 · Zeigen-Karte fürs Personal
 
-- **Entscheidung:** In der Ladenansicht öffnet ein Tipp auf den Begriff in der Landessprache (z. B. „🇪🇸 nata“) eine bildschirmfüllende Karte. In der Bearbeiten-Ansicht ist der Begriff nicht antippbar (Wunsch des Inhabers). Inhalt der Karte: oben „Entschuldigung, wo finde ich das?“, gross der Begriff (mit Menge), darunter „Danke!“, alles in der Landessprache, klein der Artikel in der eigenen Sprache. Antippen oder ✕ schliesst sie. Die Sätze stehen in `src/data/phrases.ts` und enthalten den Begriff bewusst nicht, damit Fall und Artikel in keiner Sprache falsch werden. Ist das Community-Modul eingeschaltet, öffnet der Tipp in der Bearbeiten-Ansicht „Begriff korrigieren“.
+- **Entscheidung:** Ein Tipp auf den Begriff in der Landessprache (z. B. „🇪🇸 nata“) öffnet eine bildschirmfüllende Karte. Inhalt der Karte: oben „Entschuldigung, wo finde ich das?“, gross der Begriff (mit Menge), darunter „Danke!“, alles in der Landessprache, klein der Artikel in der eigenen Sprache. Antippen oder ✕ schliesst sie. Die Sätze stehen in `src/data/phrases.ts` und enthalten den Begriff bewusst nicht, damit Fall und Artikel in keiner Sprache falsch werden. Mit eingeschaltetem Community-Modul gibt es „Begriff korrigieren“ nur noch für Artikel ohne Landesbegriff (S-045).
 - **Begründung:** Hilft genau dann, wenn man im Laden nicht weiterkommt, ohne die Sprache sprechen zu müssen.
 - **Folgen:** Die Sätze sind nicht von Muttersprachlern geprüft (S-001).
 
@@ -242,14 +242,14 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-042 · „Rückgängig“ nach dem Löschen statt Swipen
 
-- **Entscheidung:** Nach dem Löschen eines Artikels (✕) oder nach „Erledigte entfernen“ erscheint unten 5 Sekunden lang „„Milch“ gelöscht · Rückgängig“ bzw. „2 Artikel entfernt · Rückgängig“. „Rückgängig“ stellt die Artikel mit Menge, Autor und Status wieder her. Gelöscht wird weiterhin über das sichtbare ✕, Swipen gibt es vorerst nicht.
+- **Entscheidung:** Nach dem Löschen eines Artikels (✕) oder nach „Erledigte entfernen“ erscheint unten 5 Sekunden lang „„Milch“ gelöscht · Rückgängig“ bzw. „2 Artikel entfernt · Rückgängig“. „Rückgängig“ stellt die Artikel mit Menge, Autor und Status wieder her. Gelöscht wird über das sichtbare ✕, das nur abgehakte Artikel haben (D-055). Swipen gibt es vorerst nicht.
 - **Begründung:** Empfehlung von Claude, vom Inhaber bestätigt. Testpersonen sollen die App ohne Erklärung bedienen können, ein sichtbares ✕ ist dafür besser als eine versteckte Wischgeste. Das grössere Problem war, dass versehentlich Gelöschtes weg war.
 - **Folgen:** Ob die Zeilen ohne Swipen zu voll wirken, zeigt der Test mit Testpersonen. Swipen liesse sich dann mit wenig Aufwand ergänzen, das Rückgängig ist schon da.
 
 ## D-043 · Erledigte automatisch entfernen: nach dem Ladenbesuch oder nach 1 Tag
 
 - **Entscheidung:** Abgehakte Artikel werden automatisch entfernt (Soft-Delete, danach „Rückgängig“ wie in D-042):
-  - **Laden verlassen:** Ist die Ladenansicht mit einem Laden offen und ist man nachweislich dort (höchstens 100 m vom Laden, GPS-Genauigkeit höchstens 100 m), merkt sich das Gerät den Besuch (Lage des Ladens, `rl:shopvisit:<Liste>`, höchstens 12 Stunden). Ein bloss vorgeschlagener Laden in der Nähe zählt nicht, auch nicht, wenn das Abhaken in die Ladenansicht schaltet (D-047). Beim Zurückkehren in die App und alle 2 Minuten, solange sie offen ist, prüft es den Standort (und ob man inzwischen beim Laden angekommen ist). Ist man nach einem Besuch mehr als 150 m weg (mindestens die GPS-Ungenauigkeit), werden alle Erledigten entfernt: „Erledigte entfernt: 2 (Laden verlassen) · Rückgängig“.
+  - **Laden verlassen:** Hat der Einkauf begonnen (D-055) und ist man nachweislich beim Laden (höchstens 100 m vom Laden, GPS-Genauigkeit höchstens 100 m), merkt sich das Gerät den Besuch (Lage des Ladens, `rl:shopvisit:<Liste>`, höchstens 12 Stunden). Ein bloss vorgeschlagener Laden in der Nähe zählt nur, wenn man wirklich dort steht. Beim Zurückkehren in die App und alle 2 Minuten, solange sie offen ist, prüft es den Standort (und ob man inzwischen beim Laden angekommen ist). Ist man nach einem Besuch mehr als 150 m weg (mindestens die GPS-Ungenauigkeit), werden alle Erledigten entfernt: „Erledigte entfernt: 2 (Laden verlassen) · Rückgängig“.
   - **Nach 1 Tag:** Artikel, die vor mehr als 24 Stunden abgehakt wurden, werden beim Öffnen der Liste und alle 5 Minuten entfernt.
   - **Einstellung pro Liste:** „Erledigte automatisch entfernen“ unter Menü → Listen-Einstellungen, Standard an. Gespeichert in `lists.auto_clear`, gilt für alle Mitglieder.
 - **Begründung:** Wunsch des Inhabers. Nach dem Einkauf soll die Liste ohne Handgriff wieder nur zeigen, was noch fehlt. Entfernte Artikel bleiben unter „Schon mal gekauft“ verfügbar.
@@ -279,17 +279,11 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Entscheidung des Inhabers: Zusammenfassen über verschiedene Einheiten schuf unverständliche Mengen („1 + 2 × 100 g + 2“) und falsche Verschmelzungen (schwarze Schokolade mit Schokolade). Nachfragen ist umständlich.
 - **Folgen:** Werden derselbe Artikel und dieselbe Einheit gleichzeitig auf zwei Geräten eingetragen, entstehen zwei Zeilen (selten, kein automatisches Aufräumen).
 
-## D-046 · Wechsel in die Ladenansicht prüft den Laden genauer
+## D-046 · Beginn des Einkaufs prüft den Laden genauer
 
-- **Entscheidung:** Beim Wechsel in die Ladenansicht (von Hand oder automatisch) prüft die App im Hintergrund, ob der angezeigte Laden stimmt: frischer Standort (höchstens 10 Sekunden alt), neue Suche bei OpenStreetMap schon ab 75 m Abstand zur letzten Suche (sonst gilt D-033 mit 300 m) oder wenn die letzte Suche älter als 30 Minuten ist. Ein von Hand gewählter Laden wird verworfen, wenn man mehr als 150 m davon entfernt ist (ausser in den ersten 30 Minuten nach der Wahl, D-033), danach sucht die App den Laden am aktuellen Standort. Der bisherige Laden bleibt bis zum Ergebnis stehen, ohne „Suche …“ und ohne Fehlermeldung. Höchstens eine solche Prüfung pro Minute.
-- **Begründung:** Wunsch des Inhabers. Wer in die Ladenansicht wechselt, steht meist im Laden. In Städten liegen oft mehrere Supermärkte innerhalb von 300 m, die Regel aus D-033 hätte dann den falschen Laden stehen lassen. Der richtige Laden zählt für Fotos und „Laden verlassen“ (D-043).
-- **Folgen:** Etwas mehr Anfragen an OpenStreetMap, aber nur beim Wechsel in die Ladenansicht.
-
-## D-047 · Abhaken schaltet in die Ladenansicht
-
-- **Entscheidung:** Wird in der normalen Ansicht ein Artikel abgehakt, wechselt die App nach der Abhak-Animation in die Ladenansicht. Ein Hinweis erscheint: „Ladenansicht eingeschaltet · zurück“. Nach „zurück“ wechselt die App nicht mehr, solange die Liste offen ist. Wieder-Öffnen eines Artikels löst nichts aus. Die Laden-Prüfung aus D-046 startet dabei wie bei jedem Wechsel.
-- **Begründung:** Entscheidung des Inhabers nach einem Test. Abhaken ist das deutlichste Zeichen, dass jemand gerade einkauft, und funktioniert auch ohne Standort.
-- **Folgen:** Schon der erste Haken schaltet um, auch beim Aufräumen zu Hause. Wer das nicht will, tippt einmal auf „zurück“.
+- **Entscheidung:** Beginnt der Einkauf (erstes Abhaken oder beim Öffnen im Supermarkt, D-055), prüft die App im Hintergrund, ob der angezeigte Laden stimmt: frischer Standort (höchstens 10 Sekunden alt), neue Suche bei OpenStreetMap schon ab 75 m Abstand zur letzten Suche (sonst gilt D-033 mit 300 m) oder wenn die letzte Suche älter als 30 Minuten ist. Ein von Hand gewählter Laden wird verworfen, wenn man mehr als 150 m davon entfernt ist (ausser in den ersten 30 Minuten nach der Wahl, D-033), danach sucht die App den Laden am aktuellen Standort. Der bisherige Laden bleibt bis zum Ergebnis stehen, ohne „Suche …“ und ohne Fehlermeldung. Höchstens eine solche Prüfung pro Minute.
+- **Begründung:** Wunsch des Inhabers. Wer abhakt, steht meist im Laden. In Städten liegen oft mehrere Supermärkte innerhalb von 300 m, die Regel aus D-033 hätte dann den falschen Laden stehen lassen. Der richtige Laden zählt für Fotos und „Laden verlassen“ (D-043).
+- **Folgen:** Etwas mehr Anfragen an OpenStreetMap, aber nur einmal zu Beginn des Einkaufs.
 
 ## D-049 · Grenzen gegen Missbrauch und Content-Security-Policy
 
@@ -314,7 +308,7 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-052 · Automatische Tests vor jeder Veröffentlichung
 
-- **Entscheidung:** Vor jedem Deployment laufen in GitHub Actions: Lint, Vitest (`npm test`: Wörterbuch und Oberflächentexte auf fehlende Übersetzungen, Übersetzung, Mengen, Fehlerbereinigung und das Datenbank-Schema mit PGlite, einem echten Postgres im Speicher) und Playwright-Oberflächentests (`npm run e2e`, Ordner `e2e/`). Die Oberflächentests laufen gegen einen eigenen Build ohne Supabase, alle fremden Server sind gesperrt. Sie spielen durch: Profil und Liste anlegen, Übersetzung, Länder-Abweichung (Mexiko), Mengen zusammenzählen, Abhaken mit Wechsel in die Ladenansicht, Menü und Profil, Teilen mit QR-Code, Liste löschen mit Rückgängig, Datenschutzseite. Jeder Test schlägt zusätzlich fehl, wenn ein JavaScript-Fehler oder ein Verstoss gegen die Content-Security-Policy auftritt. Schlägt etwas fehl, wird nicht veröffentlicht; der Bericht liegt 7 Tage als Artefakt beim Lauf.
+- **Entscheidung:** Vor jedem Deployment laufen in GitHub Actions: Lint, Vitest (`npm test`: Wörterbuch und Oberflächentexte auf fehlende Übersetzungen, Übersetzung, Mengen, Fehlerbereinigung und das Datenbank-Schema mit PGlite, einem echten Postgres im Speicher) und Playwright-Oberflächentests (`npm run e2e`, Ordner `e2e/`). Die Oberflächentests laufen gegen einen eigenen Build ohne Supabase, alle fremden Server sind gesperrt. Sie spielen durch: Profil und Liste anlegen, Übersetzung, Länder-Abweichung (Mexiko), Mengen zusammenzählen, eine Ansicht mit Löschen nur bei Abgehakten und Zeigen-Karte, Menü und Profil, Teilen mit QR-Code, Liste löschen mit Rückgängig, Datenschutzseite. Jeder Test schlägt zusätzlich fehl, wenn ein JavaScript-Fehler oder ein Verstoss gegen die Content-Security-Policy auftritt. Schlägt etwas fehl, wird nicht veröffentlicht; der Bericht liegt 7 Tage als Artefakt beim Lauf.
 - **Begründung:** Befund der MVP-Beurteilung, vom Inhaber freigegeben. Änderungen werden damit sicherer, auch grössere Umbauten wie das Aufteilen der Oberfläche in `src/ui/`.
 - **Folgen:** Ein Deployment dauert rund 2 Minuten länger. Neue Funktionen bekommen einen Ablauf in `e2e/app.spec.ts`, Schema-Änderungen einen Fall in `tests/schema.test.ts`.
 
@@ -335,4 +329,11 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Unter der letzten Änderung steht in „Deine Listen“ pro Liste eine Zeile mit den anderen Mitgliedern (ohne einen selbst), jüngste Aktivität zuerst, z. B. „Anna, Bea, Carl“. Höchstens eine Zeile, der Rest wird mit „…“ abgeschnitten. Aktivität ist der jüngste Zeitpunkt aus Beitritt, selbst hinzugefügten Artikeln und Artikeln, die jemand holt. Dieselbe Person auf mehreren Geräten (gleicher Name und Sprache) erscheint einmal. Die Daten kommen in derselben Abfrage wie die letzte Änderung aus Supabase und werden auf dem Gerät gemerkt (`rl:people:`); ohne diese Angabe (offline, ohne Supabase) zeigt die App die Autoren der Artikel. Allein in einer Liste: keine Zeile. Logik in `src/lib/people.ts`.
 - **Begründung:** Wunsch des Inhabers: auf einen Blick sehen, mit wem man eine Liste teilt.
 - **Folgen:** Wer zuletzt etwas abgehakt hat, zählt nicht als Aktivität, weil die Datenbank nicht speichert, wer abhakt. Die Übersicht fragt zusätzlich die Mitglieder aller Listen ab (eine Abfrage mehr beim Öffnen der Startseite).
+
+## D-055 · Eine Ansicht statt Laden- und Bearbeiten-Ansicht
+
+- **Entscheidung:** Die Liste hat nur noch eine Ansicht, Wunsch des Inhabers. Das Eingabefeld steht immer oben. Jeder offene Artikel zeigt Tipp (💡), Fotos (📷, mit Laden) und „Ich hole das“ (✋); der Begriff in der Landessprache öffnet die Zeigen-Karte (D-032). Die Schrift hat die Grösse der früheren Bearbeiten-Ansicht. Löschen (✕) gibt es nur bei abgehakten Artikeln, damit offene nicht versehentlich verschwinden. Wer einen offenen Artikel loswerden will, hakt ihn ab und löscht ihn dann. Der Knopf „Ladenansicht/Bearbeiten“ und die Hinweise „Ladenansicht eingeschaltet · zurück“ entfallen.
+- **Einkauf beginnt** (unsichtbar): beim ersten Abhaken oder beim Öffnen direkt im Supermarkt (D-020). Ab dann wird ein Ladenbesuch erfasst (D-043), und der Laden wird einmal genauer geprüft (D-046).
+- **Begründung:** Zwei Ansichten mit automatischem Wechsel waren schwer zu verstehen; im Laden will man auch schnell etwas ergänzen.
+- **Folgen:** Mehr Knöpfe pro Zeile. Die grosse Ladenschrift fällt weg.
 

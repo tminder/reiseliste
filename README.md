@@ -10,9 +10,9 @@ Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im L
 - Eingabe in 9 Sprachen (DE, EN, ES, PT, FR, IT, NL, HR, EL), inklusive Mengen („2 Milch“, „500 g Hackfleisch“)
 - Übersetzung über ein eingebautes Wörterbuch mit 361 Grundbegriffen (inkl. Küchenutensilien und Schweizer Ausdrücken wie Rahm, Poulet, Rüebli, Chriesi, Schoggi) und eigenen Begriffen für Mexiko, Argentinien, Brasilien, die USA und die Deutschschweiz, ohne KI und ohne laufende Kosten
 - Vorschläge aus dem Wörterbuch beim Tippen
-- Sortierung nach Abteilungen, Abhaken, „Ladenansicht“ mit grosser Schrift
-- Zeigen-Karte (Ladenansicht): Landesbegriff antippen → bildschirmfüllend mit „Wo finde ich das?“ zum Vorzeigen beim Personal
-- „Ich hole das“ (✋, in der Ladenansicht): zeigt allen, wer welchen Artikel kauft
+- Sortierung nach Abteilungen, Abhaken, eine Ansicht für Planen und Einkaufen (Löschen nur bei Abgehakten)
+- Zeigen-Karte: Landesbegriff antippen → bildschirmfüllend mit „Wo finde ich das?“ zum Vorzeigen beim Personal
+- „Ich hole das“ (✋): zeigt allen, wer welchen Artikel kauft
 - „Erledigte entfernen“ (automatisch nach dem Ladenbesuch bzw. nach 1 Tag, pro Liste abschaltbar) und „Schon mal gekauft“ zum schnellen Wieder-Hinzufügen
 - Produktfotos pro Reiseland aus [Open Food Facts](https://world.openfoodfacts.org) (📷 am Artikel, CC BY-SA)
 - Teilen per Link, QR-Code oder Teilen-Menü des Handys, Live-Sync über Supabase. „Liste beitreten“ per QR-Code oder Link, auch für die iPhone-App vom Home-Bildschirm

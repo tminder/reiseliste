@@ -134,7 +134,7 @@ function relocate(result: NearbyResult, lat: number, lon: number): NearbyResult 
  * Sonst die nächsten Supermärkte; pro Stufe (1, 3, 10, 20 km) höchstens 40 Treffer, damit die Antwort klein bleibt.
  */
 /**
- * precise: Wechsel in die Ladenansicht (D-046). Frischer Standort (höchstens 10 s alt), neue Suche schon ab
+ * precise: Beginn des Einkaufs (D-046). Frischer Standort (höchstens 10 s alt), neue Suche schon ab
  * 75 m Abstand oder wenn die letzte Suche älter als 30 Minuten ist – in Städten liegen Läden oft nah beieinander.
  */
 export async function findNearbyShops(force = false, precise = false): Promise<NearbyResult & { fresh: boolean }> {
@@ -253,7 +253,7 @@ export function shopTag(shop: Shop): string {
     .replace(/^-|-$/g, '')
 }
 
-// ---------- Automatischer Wechsel in die Ladenansicht ----------
+// ---------- Beim Öffnen im Supermarkt (D-020) ----------
 
 /** Supermarkt sehr nahe und GPS genau genug → man ist wohl drin */
 export function isInsideSupermarket(r: NearbyResult): Shop | null {
@@ -261,22 +261,4 @@ export function isInsideSupermarket(r: NearbyResult): Shop | null {
   if (!r.inside || !first?.supermarket) return null
   if (first.distance > 50 || (r.accuracy ?? 999) > 60) return null
   return first
-}
-
-const NO_AUTO_MS = 3 * 60 * 60 * 1000
-/** Nutzer hat „zurück“ getippt: bei diesem Laden 3 Stunden nicht mehr automatisch wechseln */
-export function autoShopModeBlocked(shopId: string): boolean {
-  try {
-    const at = Number(localStorage.getItem(`rl:noauto:${shopId}`) ?? 0)
-    return Date.now() - at < NO_AUTO_MS
-  } catch {
-    return false
-  }
-}
-export function blockAutoShopMode(shopId: string) {
-  try {
-    localStorage.setItem(`rl:noauto:${shopId}`, String(Date.now()))
-  } catch {
-    /* egal */
-  }
 }

@@ -2,7 +2,7 @@
 
 Priorität: **hoch**: vor dem Test mit echten Nutzern beheben · **mittel**: vor einem öffentlichen Start · **niedrig**: wenn es stört
 
-Stand: 2026-11-12 · Nur Schulden, die aktuell im Code bestehen.
+Stand: 2026-11-13 · Nur Schulden, die aktuell im Code bestehen.
 
 | ID | Schuld | Auswirkung | Lösungsidee | Prio |
 | --- | --- | --- | --- | --- |
@@ -34,4 +34,5 @@ Stand: 2026-11-12 · Nur Schulden, die aktuell im Code bestehen.
 | S-034 | Die Datenschutzerklärung (`src/Privacy.tsx`) hat Claude verfasst, keine Fachperson hat sie geprüft (F-013). | Rechtliche Lücken bei einem Start über den privaten Testkreis hinaus. | Vor dem öffentlichen Start von einer Fachperson prüfen lassen. | mittel |
 | S-035 | Es gibt keine Sicherung der Datenbank (Gratis-Tarif ohne Backups). Der Workflow „Datenbank sichern“ ist vorbereitet, aber nicht eingeschaltet (D-050). | Ein Fehler oder versehentliches Löschen kann alle Listen unwiederbringlich löschen. Für den privaten Test bewusst in Kauf genommen. | Spätestens vor der nativen App einschalten: Secrets setzen, Zeitplan aktivieren, Datenschutzerklärung ergänzen (D-050). Danach die Wiederherstellung einmal in ein leeres Supabase-Test-Projekt üben und die Schritte in `docs/betrieb.md` festhalten (S-033). | mittel |
 | S-043 | Der ICU-Formatierer in `src/i18n.ts` ist selbst geschrieben und kann nur Platzhalter, `plural` und `select`, keine Zahlen-, Datums- oder Ordinalformate und keine Escapes mit Apostroph. Alle Texte ausser „Artikel entfernt“ (englisch) nutzen noch keine Mehrzahlformen. | Übersetzer, die volles ICU erwarten, schreiben Formen, die falsch angezeigt werden. | Bei Anschluss einer Übersetzungsplattform auf eine Bibliothek wechseln (z. B. `intl-messageformat`) oder den Test um eine Formatprüfung ergänzen. | niedrig |
-| S-044 | `src/ui/list/ListView.tsx` hat noch rund 700 Zeilen. Darin stecken viele Abläufe als Effekte: Erledigte automatisch entfernen, Wechsel in die Ladenansicht, Ladenbesuch, automatisches Reiseland, Sprachen laden. | Schwer zu überblicken, Abläufe lassen sich nur über die Oberflächentests prüfen. | Jeden Ablauf in einen eigenen Hook auslagern (z. B. `useAutoClear`, `useShopMode`, `useCountryDetect`) und einzeln testen. Vor dem Bau der nativen App. | niedrig |
+| S-044 | `src/ui/list/ListView.tsx` hat noch rund 700 Zeilen. Darin stecken viele Abläufe als Effekte: Erledigte automatisch entfernen, Beginn des Einkaufs, Ladenbesuch, automatisches Reiseland, Sprachen laden. | Schwer zu überblicken, Abläufe lassen sich nur über die Oberflächentests prüfen. | Jeden Ablauf in einen eigenen Hook auslagern (z. B. `useAutoClear`, `useShopping`, `useCountryDetect`) und einzeln testen. Vor dem Bau der nativen App. | niedrig |
+| S-045 | Mit eingeschaltetem Community-Modul (D-027) lässt sich ein vorhandener Landesbegriff nicht mehr korrigieren: Ein Tipp auf den Begriff öffnet seit D-055 immer die Zeigen-Karte, „Begriff korrigieren“ gibt es nur noch bei Artikeln ohne Übersetzung. | Betrifft erst das Einschalten des Moduls. | Beim Einschalten einen eigenen Einstieg vorsehen, z. B. „Begriff korrigieren“ auf der Zeigen-Karte. | niedrig |

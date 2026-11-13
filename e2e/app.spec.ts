@@ -95,18 +95,21 @@ test('Mengen: gleiche Einheit wird addiert, andere Einheit eigene Zeile', async 
   await expect(page.locator('.add li').first()).toContainText('✓ auf der Liste')
 })
 
-test('Abhaken schaltet in die Ladenansicht, „zurück“ schaltet nicht mehr um', async ({ page, problems }) => {
+test('Eine Ansicht (D-055): Eingabe immer da, Löschen nur bei Abgehakten, Zeigen-Karte', async ({ page, problems }) => {
   void problems
   await seed(page, [item(1, 'Milch', 'milch'), item(2, 'Brot', 'brot')])
   await page.goto(`/#/l/${LIST}`)
-  await page.locator('.item').first().locator('.check').click()
-  await expect(page.locator('main')).toHaveClass(/shop/)
-  await expect(page.locator('.toast')).toContainText('Ladenansicht eingeschaltet')
-  await page.locator('.toast').getByRole('button', { name: 'zurück' }).click()
-  await expect(page.locator('main')).not.toHaveClass(/shop/)
-  await page.locator('.item:not(.checked)').first().locator('.check').click()
+  const first = page.locator('.item').first()
+  await expect(first.getByRole('button', { name: 'Löschen' })).toHaveCount(0)
+  await first.locator('.check').click()
   await page.waitForTimeout(600)
-  await expect(page.locator('main')).not.toHaveClass(/shop/)
+  await expect(page.locator('.add input')).toBeVisible()
+  const checked = page.locator('.item.checked').first()
+  await checked.getByRole('button', { name: 'Löschen' }).click()
+  await expect(page.locator('.undo-bar')).toContainText('gelöscht')
+  // Begriff in der Landessprache antippen → Zeigen-Karte
+  await page.locator('.item').first().locator('.term-btn').click()
+  await expect(page.locator('.showcard')).toBeVisible()
 })
 
 test('Menü, Profil ändern und abbrechen, Teilen mit QR-Code', async ({ page, problems }) => {
@@ -156,7 +159,7 @@ test('Datenschutzseite lädt nach', async ({ page, problems }) => {
 test.describe('Laden', () => {
   test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
 
-  test('Laden von Hand wählen bleibt, auch weiter weg und beim Wechsel in die Ladenansicht (D-033)', async ({ page, problems }) => {
+  test('Laden von Hand wählen bleibt, auch weiter weg und nach dem ersten Abhaken (D-033)', async ({ page, problems }) => {
     void problems
     const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
     await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
@@ -178,8 +181,7 @@ test.describe('Laden', () => {
     await page.locator('.shop-alts .chip', { hasText: 'Lidl' }).click()
     await page.waitForTimeout(1500)
     await expect(page.locator('.shopline')).toContainText('Lidl') // 1,2 km entfernt, trotzdem gewählt
-    await page.locator('.item').first().locator('.check').click() // schaltet in die Ladenansicht (D-047)
-    await expect(page.locator('main')).toHaveClass(/shop/)
+    await page.locator('.item').first().locator('.check').click() // Einkauf läuft: Laden wird genauer geprüft (D-046)
     await page.waitForTimeout(1500)
     await expect(page.locator('.shopline')).toContainText('Lidl')
   })

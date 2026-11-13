@@ -1,6 +1,6 @@
-// Ansicht einer Liste: Eingabe, Artikel nach Abteilung, Ladenansicht, Menü, automatisches Reiseland
+// Ansicht einer Liste: Eingabe, Artikel nach Abteilung, Laden, Menü, automatisches Reiseland
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
-import { ArrowLeft, Shield, Users, CloudAlert, CloudOff, Check, RotateCcw, MapPin, Menu, Pencil, Plus, Settings, Share2, ShoppingCart, Trash2, UserRound, X } from 'lucide-react'
+import { ArrowLeft, Shield, Users, CloudAlert, CloudOff, Check, RotateCcw, MapPin, Menu, Plus, Settings, Share2, Trash2, UserRound, X } from 'lucide-react'
 import { CATEGORY_ORDER, CONCEPT_BY_ID, type Category, type Lang } from '../../data/dictionary'
 import { COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
 import { categoryLabel, countryName, t } from '../../i18n'
@@ -9,7 +9,7 @@ import { addQty, canAddQty } from '../../lib/qty'
 import { isIos, isStandalone, listUrl } from '../../lib/links'
 import { reportError } from '../../lib/errors'
 import { findConcept, isLoaded, loadLanguages, nameIn, onLanguagesLoaded, splitQuantity, suggest } from '../../lib/translate'
-import { autoShopModeBlocked, blockAutoShopMode, getChosenShopAt, getPosition, getChosenShop, meters, setChosenShop, shopTag, type Shop } from '../../lib/nearby'
+import { getChosenShopAt, getPosition, getChosenShop, meters, setChosenShop, shopTag, type Shop } from '../../lib/nearby'
 import { detectCountry } from '../../lib/country'
 import { MAX } from '../../lib/limits'
 import { ListStore, scheduleDelete, isSoleMember, knownSole, leaveList, setLastList, lastSyncError, supabase, type Item, type Profile, type SyncState } from '../../lib/store'
@@ -179,14 +179,9 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   // „Schon mal gekauft“ nur, solange das Eingabefeld aktiv ist (D-030)
   const [inputFocused, setInputFocused] = useState(false)
   const blurTimer = useRef<number | undefined>(undefined)
-  const [shopMode, setShopModeState] = useState(false)
-  const setShopMode = (v: boolean) => {
-    if (!v) {
-      setAutoShop(null)
-      setCheckShop(false)
-    }
-    setShopModeState(v)
-  }
+  // Einkauf läuft (D-055): beim Öffnen direkt beim Laden oder nach dem ersten Abhaken. Ändert nichts an der Anzeige,
+  // entscheidet nur, ob ein Ladenbesuch erfasst wird (D-043) und ob der Laden genauer geprüft wird (D-046).
+  const [shopping, setShopping] = useState(false)
   const [showShare, setShowShare] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
@@ -204,37 +199,25 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   const [suggested, setSuggested] = useState<Shop | null>(null)
   const photoShop = shop ?? suggested
 
-  // Automatisch in die Ladenansicht, wenn beim Öffnen ein Supermarkt sehr nahe ist (D-020)
+  // Beim Öffnen sehr nahe bei einem Supermarkt (D-020): Einkauf läuft, dieser Laden zählt für den Besuch
   const [mountedAt] = useState(() => Date.now())
   const [autoShop, setAutoShop] = useState<Shop | null>(null)
-  const inputRef = useRef('')
-  const shopModeRef = useRef(false)
-  inputRef.current = input
-  shopModeRef.current = shopMode
   const onArrived = (s: Shop) => {
     if (Date.now() - mountedAt > 30_000) return // nur direkt nach dem Öffnen der Liste
-    if (inputRef.current.trim() || shopModeRef.current || autoShopModeBlocked(s.id)) return
-    setShopMode(true)
+    setShopping(true)
     setAutoShop(s)
   }
-  // Beim ersten Abhaken in die Ladenansicht wechseln (D-047). Nach „zurück“ nicht mehr, solange die Liste offen ist.
-  const [checkShop, setCheckShop] = useState(false)
-  const checkShopBlocked = useRef(false)
-  const onChecked = () => {
-    if (shopModeRef.current || checkShopBlocked.current) return
-    setShopMode(true)
-    setCheckShop(true)
-  }
+  const onChecked = () => setShopping(true)
   const chooseShop = (s: Shop | null) => {
     setChosenShop(id, s)
     setShop(s)
     setShopChosenAt(s ? Date.now() : null)
   }
 
-  // Laden verlassen (D-043): Steht man in der Ladenansicht wirklich beim Laden (höchstens 100 m, GPS genau genug),
+  // Laden verlassen (D-043): Hat der Einkauf begonnen (D-055) und steht man wirklich beim Laden (höchstens 100 m, GPS genau genug),
   // merkt sich die App den Besuch. Ist man später (beim Zurückkehren in die App oder alle 2 Minuten) weiter als 150 m weg,
   // werden Erledigte entfernt. Ein bloss vorgeschlagener Laden in der Nähe zählt nicht als Besuch.
-  const visitShop = shopMode ? (autoShop ?? photoShop) : null
+  const visitShop = shopping ? (autoShop ?? photoShop) : null
   const visitShopRef = useRef(visitShop)
   visitShopRef.current = visitShop
   useEffect(() => {
@@ -385,7 +368,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   const order: (Category | 'sonstiges')[] = [...CATEGORY_ORDER, 'sonstiges']
 
   return (
-    <main ref={mainRef} className={`page ${shopMode ? 'shop' : ''}`}>
+    <main ref={mainRef} className="page">
       <header className="topbar">
         <a href="#/" className="back" aria-label={t('allLists')}>
           <ArrowLeft size={22} />
@@ -395,7 +378,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           <span className="sub">
             {country?.flag} {countryName(list.country)} · {LANG_LABEL[target]}
           </span>
-          <ShopBar shop={shop} chosenAt={shopChosenAt} shopMode={shopMode} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
+          <ShopBar shop={shop} chosenAt={shopChosenAt} shopping={shopping} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
         </div>
         <SyncBadge state={store.sync} error={lastSyncError} />
         {/* Teilen direkt in der Kopfzeile, das Menü ist für den Rest (D-017) */}
@@ -479,38 +462,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
         </div>
       )}
 
-      {shopMode && autoShop && (
-        <div className="toast">
-          <ShoppingCart size={16} /> {t('autoShopMode')} <strong>{autoShop.name}</strong>
-          <button
-            className="link"
-            onClick={() => {
-              blockAutoShopMode(autoShop.id)
-              setShopMode(false)
-            }}
-          >
-            {t('back')}
-          </button>
-        </div>
-      )}
-
-      {shopMode && checkShop && !autoShop && (
-        <div className="toast">
-          <ShoppingCart size={16} /> {t('checkShopMode')}
-          <button
-            className="link"
-            onClick={() => {
-              checkShopBlocked.current = true
-              setShopMode(false)
-            }}
-          >
-            {t('back')}
-          </button>
-        </div>
-      )}
-
-      {!shopMode && (
-        <form
+      <form
           className="add"
           onSubmit={(e) => {
             e.preventDefault()
@@ -571,9 +523,8 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
             </ul>
           )}
         </form>
-      )}
 
-      {!shopMode && inputFocused && !input && again.length > 0 && (
+      {inputFocused && !input && again.length > 0 && (
         <div className="again">
           <span className="muted small-text">
             <RotateCcw size={14} /> {t('buyAgain')}
@@ -602,17 +553,6 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
       )}
 
       <div className="toolbar">
-        <button className={shopMode ? 'primary' : 'ghost'} onClick={() => setShopMode(!shopMode)}>
-          {shopMode ? (
-            <>
-              <Pencil size={16} /> {t('edit')}
-            </>
-          ) : (
-            <>
-              <ShoppingCart size={16} /> {t('shopMode')}
-            </>
-          )}
-        </button>
         <span className="muted">
           {t('counts', { open: open.length, done: done.length })}
         </span>
@@ -626,7 +566,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           <section key={cat} className="group">
             <h3 data-flip={cat}>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
             {groups.get(cat)!.map((item) => (
-              <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
+              <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
             ))}
           </section>
         ))}
@@ -647,7 +587,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
             </button>
           </h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} shopMode={shopMode} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
+            <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
           ))}
         </section>
       )}

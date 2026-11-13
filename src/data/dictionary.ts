@@ -28,7 +28,7 @@ export interface Concept {
   category: Category
   /** Kategorie in Open Food Facts; ohne Eintrag kein Foto-Knopf */
   off?: string
-  /** Tipp in der Ladenansicht; fehlt die Sprache des Betrachters, gilt Englisch */
+  /** Tipp zum Artikel (💡); fehlt die Sprache des Betrachters, gilt Englisch */
   hint?: Partial<Record<Lang, string>>
 }
 

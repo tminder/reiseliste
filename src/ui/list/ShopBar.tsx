@@ -8,7 +8,7 @@ import { RETRY_S } from './helpers'
 export function ShopBar({
   shop,
   chosenAt,
-  shopMode,
+  shopping,
   onChoose,
   onSuggest,
   onArrived,
@@ -16,8 +16,8 @@ export function ShopBar({
   shop: Shop | null
   /** Zeitpunkt der Wahl von Hand: in den ersten 30 Minuten wird der Laden nie automatisch verworfen */
   chosenAt: number | null
-  /** Wechsel in die Ladenansicht löst eine genauere Prüfung im Hintergrund aus (D-046) */
-  shopMode: boolean
+  /** Einkauf hat begonnen: löst eine genauere Prüfung im Hintergrund aus (D-046, D-055) */
+  shopping: boolean
   onChoose: (s: Shop | null) => void
   onSuggest: (s: Shop | null) => void
   onArrived: (s: Shop) => void
@@ -93,11 +93,11 @@ export function ShopBar({
     return false
   }
 
-  // Wechsel in die Ladenansicht (D-046): genauer prüfen, ob man beim angezeigten Laden steht. Höchstens 1× pro Minute.
-  const lastShopModeCheck = useRef(0)
+  // Beginn des Einkaufs (D-046): genauer prüfen, ob man beim angezeigten Laden steht. Höchstens 1× pro Minute.
+  const lastShoppingCheck = useRef(0)
   useEffect(() => {
-    if (!shopMode || Date.now() - lastShopModeCheck.current < 60_000) return
-    lastShopModeCheck.current = Date.now()
+    if (!shopping || Date.now() - lastShoppingCheck.current < 60_000) return
+    lastShoppingCheck.current = Date.now()
     // Gewählter Laden mehr als 150 m entfernt: verwerfen, dann sucht die App den Laden, in dem man steht
     if (shop)
       void checkLeft(150).then((left) => {
@@ -105,7 +105,7 @@ export function ShopBar({
       })
     else void detect(false, true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shopMode])
+  }, [shopping])
 
   // Beim Öffnen der Liste still prüfen: ohne gewählten Laden den Vorschlag, mit Laden ob man noch dort ist
   useEffect(() => {

@@ -23,7 +23,6 @@ export function ItemRow({
   shopTag,
   shopName,
   viewer,
-  shopMode,
   me,
   onDeleted,
   onLocalChange,
@@ -38,14 +37,13 @@ export function ItemRow({
   shopTag?: string
   shopName?: string
   viewer: Lang
-  shopMode: boolean
   /** Name aus dem Profil (für „Ich hole das“, D-031) */
   me: string
   /** Für „Gelöscht · Rückgängig“ (D-042) */
   onDeleted: (ids: string[], name: string) => void
   /** Eigene Änderung melden, damit sie nicht als „von anderen“ aufleuchtet (D-044) */
   onLocalChange: (id: string) => void
-  /** Nach dem Abhaken (nicht beim Wieder-Öffnen), z. B. für den Wechsel in die Ladenansicht (D-047) */
+  /** Nach dem Abhaken (nicht beim Wieder-Öffnen), Beginn des Einkaufs (D-055) */
   onChecked?: () => void
 }) {
   const [editing, setEditing] = useState(false)
@@ -107,37 +105,19 @@ export function ItemRow({
         </div>
         <div className="orig">
           {local ? (
-            shopMode ? (
-              // Antippen → Zeigen-Karte fürs Personal, nur in der Ladenansicht (D-032)
-              <button className="local term-btn" title={t('showStaff')} onClick={() => setShowCard(true)}>
-                <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
-              </button>
-            ) : !FEATURES.community ? (
-              <span className="local">
-                <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
-              </span>
-            ) : (
-              // Antippen → Begriff korrigieren (gilt für die ganze Liste, wird als Vorschlag gesammelt)
-              <button
-                className="local term-btn"
-                title={t('correctTerm')}
-                onClick={() => {
-                  setOverride(local)
-                  setEditing(true)
-                }}
-              >
-                <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
-              </button>
-            )
+            // Antippen → Zeigen-Karte fürs Personal (D-032)
+            <button className="local term-btn" title={t('showStaff')} onClick={() => setShowCard(true)}>
+              <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
+            </button>
           ) : (
             <span className="missing">{t('noTranslation')}</span>
           )}
-          {!shopMode && <span className="muted"> · {author}</span>}
+          <span className="muted"> · {author}</span>
           {claimedBy && !item.checked && (
             <span className="claim"> · {claimedBy === me ? t('claimedByMe') : t('claimedBy', { name: claimedBy })}</span>
           )}
         </div>
-        {FEATURES.community && !local && !shopMode && !editing && (
+        {FEATURES.community && !local && !editing && (
           <button className="link" onClick={() => setEditing(true)}>
             {t('enterLocalTerm')}
           </button>
@@ -163,14 +143,14 @@ export function ItemRow({
         {editing && (
           <p className="muted small-text correction-hint">{t('correctionHint')}</p>
         )}
-        {shopMode && showHint && hint && !item.checked && <div className="hint">{hint}</div>}
+        {showHint && hint && !item.checked && <div className="hint">{hint}</div>}
       </div>
-      {shopMode && hint && !item.checked && (
+      {hint && !item.checked && (
         <button className={`ghost small ${showHint ? 'active' : ''}`} aria-label={t('tip')} onClick={() => setShowHint(!showHint)}>
           <Lightbulb size={18} />
         </button>
       )}
-      {shopMode && local && !item.checked && shopTag && hasPhotos(item.conceptId, override_) && (
+      {local && !item.checked && shopTag && hasPhotos(item.conceptId, override_) && (
         <button
           className={`ghost small ${showPhotos ? 'active' : ''}`}
           aria-label={t('photos')}
@@ -179,8 +159,8 @@ export function ItemRow({
           <Camera size={18} />
         </button>
       )}
-      {shopMode && !item.checked && (
-        // „Ich hole das“ (D-031), nur in der Ladenansicht: antippen übernimmt den Artikel, nochmals antippen gibt ihn frei
+      {!item.checked && (
+        // „Ich hole das“ (D-031): antippen übernimmt den Artikel, nochmals antippen gibt ihn frei
         <button
           className={`ghost small ${claimedBy === me ? 'active' : ''}`}
           aria-label={claimedBy === me ? t('unclaim') : t('claim')}
@@ -193,7 +173,8 @@ export function ItemRow({
           <Hand size={18} />
         </button>
       )}
-      {!shopMode && (
+      {item.checked && (
+        // Löschen nur bei Abgehakten (D-055): ein offener Artikel verschwindet nicht versehentlich
         <button className="ghost small" aria-label={t('delete')} onClick={() => {
           onLocalChange(item.id)
           void slideOut(rowRef.current ? [rowRef.current] : []).then(() => {
@@ -205,7 +186,7 @@ export function ItemRow({
         </button>
       )}
       {/* Fotos über die ganze Breite der Karte, unter Text und Knöpfen */}
-      {shopMode && showPhotos && local && (
+      {showPhotos && local && (
         <div className="item-wide">
           <PhotoStrip country={country} conceptId={item.conceptId} term={local} store={shopTag} storeName={shopName} />
         </div>
