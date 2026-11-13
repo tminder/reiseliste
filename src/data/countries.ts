@@ -28,7 +28,7 @@ export const COUNTRIES: Country[] = [
   { code: 'US', name: 'USA', flag: '🇺🇸', lang: 'en', variant: 'en-US' },
   { code: 'MX', name: 'Mexiko', flag: '🇲🇽', lang: 'es', variant: 'es-MX' },
   { code: 'DE', name: 'Deutschland', flag: '🇩🇪', lang: 'de' },
-  { code: 'AT', name: 'Österreich', flag: '🇦🇹', lang: 'de' },
+  { code: 'AT', name: 'Österreich', flag: '🇦🇹', lang: 'de', variant: 'de-AT' },
   { code: 'CH-DE', name: 'Schweiz (Deutschschweiz)', flag: '🇨🇭', lang: 'de', variant: 'de-CH' },
   { code: 'LI', name: 'Liechtenstein', flag: '🇱🇮', lang: 'de', variant: 'de-CH' },
   { code: 'BR', name: 'Brasilien', flag: '🇧🇷', lang: 'pt', variant: 'pt-BR' },
@@ -44,10 +44,11 @@ export const COUNTRY_BY_CODE = new Map(COUNTRIES.map((c) => [c.code, c]))
 
 /**
  * Sprachauswahl im Profil (D-056): Sprachen mit eigener Länder-Abweichung im Wörterbuch erscheinen getrennt,
- * z. B. Deutsch (Schweiz) mit „Rahm“, „Poulet“, „Peperoni“. value = Sprache bzw. Abweichung wie „de-CH“.
+ * z. B. Deutsch (Schweiz) mit „Rahm“, „Poulet“, „Peperoni“, Deutsch (Österreich) mit „Obers“, „Topfen“, „Paradeiser“. value = Sprache bzw. Abweichung wie „de-CH“.
  */
 export const PROFILE_LANGS: { value: string; lang: Lang; region?: string; label: string }[] = [
-  { value: 'de', lang: 'de', label: 'Deutsch (Deutschland, Österreich)' },
+  { value: 'de', lang: 'de', label: 'Deutsch (Deutschland)' },
+  { value: 'de-AT', lang: 'de', region: 'de-AT', label: 'Deutsch (Österreich)' },
   { value: 'de-CH', lang: 'de', region: 'de-CH', label: 'Deutsch (Schweiz)' },
   { value: 'en', lang: 'en', label: 'English' },
   { value: 'es', lang: 'es', label: 'Español' },

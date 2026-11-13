@@ -102,6 +102,9 @@ describe('Länder-Abweichungen (D-053)', () => {
     expect(suggest('Sahn', 'de', 5, 'de-CH').find((s) => s.id === 'sahne')?.name).toBe('Rahm')
     expect(suggest('Rah', 'de', 5, 'de-CH').find((s) => s.id === 'sahne')?.name).toBe('Rahm')
     expect(suggest('Sahn', 'de').find((s) => s.id === 'sahne')?.name).toBe('Sahne')
+    expect(suggest('Sahn', 'de', 5, 'de-AT').find((s) => s.id === 'sahne')?.name).toBe('Obers')
+    expect(nameIn('quark', 'de', 'de-AT')).toBe('Topfen')
+    expect(findConcept('Paradeiser', 'de')).toBe('tomaten')
   })
 })
 

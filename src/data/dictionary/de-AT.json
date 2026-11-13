@@ -1,0 +1,70 @@
+{
+  "sahne": [
+    "Obers"
+  ],
+  "schlagsahne": [
+    "Schlagobers"
+  ],
+  "sauresahne": [
+    "Sauerrahm"
+  ],
+  "quark": [
+    "Topfen"
+  ],
+  "tomaten": [
+    "Paradeiser"
+  ],
+  "kartoffeln": [
+    "Erdäpfel",
+    "Erdapfel"
+  ],
+  "aprikosen": [
+    "Marillen",
+    "Marille"
+  ],
+  "pflaumen": [
+    "Zwetschken"
+  ],
+  "blumenkohl": [
+    "Karfiol"
+  ],
+  "hack": [
+    "Faschiertes"
+  ],
+  "randen": [
+    "Rote Rüben"
+  ],
+  "gruenebohnen": [
+    "Fisolen"
+  ],
+  "aubergine": [
+    "Melanzani"
+  ],
+  "broetchen": [
+    "Semmeln",
+    "Semmel"
+  ],
+  "semmelbroesel": [
+    "Semmelbrösel"
+  ],
+  "puderzucker": [
+    "Staubzucker"
+  ],
+  "hefe": [
+    "Germ"
+  ],
+  "tueten": [
+    "Sackerl"
+  ],
+  "haehnchen": [
+    "Hendl",
+    "Huhn"
+  ],
+  "haehnchenbrust": [
+    "Hühnerbrust"
+  ],
+  "kohl": [
+    "Weißkraut",
+    "Kraut"
+  ]
+}

@@ -11,9 +11,11 @@ export function guessLang(): Lang {
   return LANGS.includes(l) ? l : 'de'
 }
 
-/** Profilsprache aus dem Browser, z. B. „de-CH“ für Schweizer Browser, sonst die Sprache (D-056) */
+/** Profilsprache aus dem Browser, z. B. „de-CH“ für Schweizer, „de-AT“ für österreichische Browser, sonst die Sprache (D-056) */
 export function guessProfileLang(): string {
-  return /^de-(CH|LI)$/i.test(navigator.language) ? 'de-CH' : guessLang()
+  if (/^de-(CH|LI)$/i.test(navigator.language)) return 'de-CH'
+  if (/^de-AT$/i.test(navigator.language)) return 'de-AT'
+  return guessLang()
 }
 
 /** „heute 10:58“, „gestern 18:20“ oder „3.11. 09:15“ (D-036) */
