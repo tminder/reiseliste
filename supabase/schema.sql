@@ -86,6 +86,10 @@ begin
     if (select count(*) from client_errors where user_id = auth.uid() and created_at > now() - interval '1 hour') >= 50 then
       raise exception 'limit: zu viele Fehlermeldungen';
     end if;
+  elsif tg_table_name = 'dictionary_feedback' then
+    if (select count(*) from dictionary_feedback where user_id = auth.uid() and created_at > now() - interval '1 hour') >= 100 then
+      raise exception 'limit: zu viele Rückmeldungen';
+    end if;
   end if;
   return new;
 end $$;
@@ -266,10 +270,47 @@ revoke all on public.client_errors_summary from public, anon, authenticated;
 -- Eine kleine Schreibaktion zählt sicher als Datenbank-Aktivität (Gratis-Projekte pausieren nach 7 Tagen ohne).
 create table if not exists public.keepalive (id int primary key default 1 check (id = 1), at timestamptz not null default now());
 alter table public.keepalive enable row level security; -- kein direkter Zugriff, nur über ping()
+-- Rückmeldungen zum Wörterbuch (D-059): unbekannte Eingaben („miss“) und „Begriff stimmt nicht“ („wrong“).
+-- Nutzer können nur eintragen, nicht lesen. Ausgewertet über die Zusammenfassung (Export-Workflow, SQL Editor):
+--   select * from public.dictionary_feedback_summary;
+create table if not exists public.dictionary_feedback (
+  id bigint generated always as identity primary key,
+  kind text not null,          -- 'miss' = keine Übersetzung gefunden, 'wrong' = Begriff stimmt nicht
+  item_text text not null,     -- Eingabe ohne Menge (bei 'wrong': angezeigter Artikel)
+  item_lang text not null,     -- Sprache der Eingabe
+  concept_id text,             -- Wörterbuch-ID (bei 'wrong')
+  country text not null,       -- Reiseland der Liste
+  target_lang text not null,   -- Landessprache
+  term text,                   -- angezeigter Begriff in der Landessprache (bei 'wrong')
+  suggestion text,             -- besserer Begriff, freiwillig
+  user_id uuid not null default auth.uid(),
+  created_at timestamptz not null default now()
+);
+alter table public.dictionary_feedback drop constraint if exists dictionary_feedback_len;
+alter table public.dictionary_feedback add constraint dictionary_feedback_len
+  check (kind in ('miss', 'wrong') and char_length(item_text) between 1 and 200 and char_length(item_lang) <= 5
+    and char_length(coalesce(concept_id, '')) <= 40 and char_length(country) <= 8 and char_length(target_lang) <= 5
+    and char_length(coalesce(term, '')) <= 80 and char_length(coalesce(suggestion, '')) <= 80) not valid;
+alter table public.dictionary_feedback enable row level security;
+drop policy if exists "feedback: insert own" on public.dictionary_feedback;
+create policy "feedback: insert own" on public.dictionary_feedback for insert to authenticated with check (user_id = auth.uid());
+drop trigger if exists dictionary_feedback_limits on public.dictionary_feedback;
+create trigger dictionary_feedback_limits before insert on public.dictionary_feedback for each row execute function public.enforce_limits();
+
+create or replace view public.dictionary_feedback_summary as
+  select kind, item_lang, lower(trim(item_text)) as item_text, concept_id, target_lang, min(country) as country,
+         min(term) as term, lower(trim(coalesce(suggestion, ''))) as suggestion,
+         count(distinct user_id) as users, count(*) as total, max(created_at) as last_at
+  from public.dictionary_feedback
+  group by kind, item_lang, lower(trim(item_text)), concept_id, target_lang, lower(trim(coalesce(suggestion, '')))
+  order by users desc, total desc, last_at desc;
+revoke all on public.dictionary_feedback_summary from anon, authenticated;
+
 create or replace function public.ping()
 returns timestamptz language sql volatile security definer set search_path = public as $$
-  -- Nebenbei: Fehlermeldungen nach 30 Tagen löschen (D-051)
-  with old as (delete from client_errors where created_at < now() - interval '30 days')
+  -- Nebenbei: Fehlermeldungen nach 30 Tagen löschen (D-051), Rückmeldungen zum Wörterbuch nach 180 Tagen (D-059)
+  with old as (delete from client_errors where created_at < now() - interval '30 days'),
+       old_feedback as (delete from dictionary_feedback where created_at < now() - interval '180 days')
   insert into keepalive (id, at) values (1, now()) on conflict (id) do update set at = excluded.at returning at;
 $$;
 revoke all on function public.ping() from public;

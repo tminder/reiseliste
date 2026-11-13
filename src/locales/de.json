@@ -164,5 +164,10 @@
   "cat_baby": "Baby",
   "autoCountry": "Automatisch ({country})",
   "autoCountryHint": "Wechselt mit deinem Standort, z. B. auf einer Rundreise. Im Land deiner eigenen Sprache bleibt es beim bisherigen Land.",
-  "examples": "Zum Beispiel – antippen zum Hinzufügen:"
+  "examples": "Zum Beispiel – antippen zum Hinzufügen:",
+  "wrongTerm": "Begriff stimmt nicht?",
+  "betterTermOptional": "Besserer Begriff (freiwillig)",
+  "send": "Senden",
+  "feedbackThanks": "Danke! Wir prüfen das.",
+  "feedbackFailed": "Gerade nicht möglich (offline?). Bitte später nochmals."
 }

@@ -752,6 +752,24 @@ button.term-btn {
   color: var(--muted);
   margin: 12px 0 0;
 }
+/* „Begriff stimmt nicht?“ (D-059): unauffällig unten */
+.showcard-report {
+  position: absolute;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: center;
+}
+.showcard-report .link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+.showcard-report form {
+  width: min(360px, 100%);
+}
 .showcard-close {
   position: absolute;
   top: calc(12px + env(safe-area-inset-top));

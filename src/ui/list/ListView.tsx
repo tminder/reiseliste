@@ -8,6 +8,7 @@ import { flash, reducedMotion, slideOut, useFlip } from '../../lib/motion'
 import { addQty, canAddQty } from '../../lib/qty'
 import { isIos, isStandalone, listUrl } from '../../lib/links'
 import { reportError } from '../../lib/errors'
+import { sendFeedback } from '../../lib/feedback'
 import { findConcept, isLoaded, loadLanguages, nameIn, onLanguagesLoaded, splitQuantity, suggest } from '../../lib/translate'
 import { getChosenShopAt, getPosition, getChosenShop, meters, setChosenShop, shopTag, type Shop } from '../../lib/nearby'
 import { detectCountry } from '../../lib/country'
@@ -308,6 +309,9 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
     const { qty, text: clean } = splitQuantity(text)
     if (!clean) return
     const data = { text: clean, qty, lang: profile.lang, conceptId: conceptId ?? findConcept(clean, profile.lang), author: profile.name }
+    // Keine Übersetzung gefunden: anonym melden, damit das Wörterbuch wächst (D-059). In der eigenen Sprache braucht es keine.
+    if (!data.conceptId && list && profile.lang !== target)
+      void sendFeedback({ kind: 'miss', itemText: clean, itemLang: profile.lang, country: list.country, targetLang: target })
     setInput('')
     pulseAdded()
     // Gleicher Artikel mit gleicher Einheit schon offen auf der Liste: Menge addieren (D-045).

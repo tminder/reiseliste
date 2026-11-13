@@ -164,5 +164,10 @@
   "cat_baby": "Baby",
   "autoCountry": "Automatic ({country})",
   "autoCountryHint": "Follows your location, e.g. on a round trip. In a country of your own language it keeps the previous country.",
-  "examples": "For example – tap to add:"
+  "examples": "For example – tap to add:",
+  "wrongTerm": "Wrong term?",
+  "betterTermOptional": "Better term (optional)",
+  "send": "Send",
+  "feedbackThanks": "Thanks! We will check it.",
+  "feedbackFailed": "Not possible right now (offline?). Please try again later."
 }

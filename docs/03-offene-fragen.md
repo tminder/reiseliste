@@ -1,10 +1,9 @@
 # Offene Fragen
 
-Stand: 2026-11-12 · Nur Fragen, die aktuell offen sind.
+Stand: 2026-11-13 · Nur Fragen, die aktuell offen sind.
 
 | ID | Frage | Warum wichtig |
 | --- | --- | --- |
-| F-001 | Wer prüft das Wörterbuch pro Sprache? Muttersprachler aus dem Umfeld, Freelancer oder ein Abgleich mit den Online-Shops der Supermärkte? | Falsche Begriffe zerstören das Vertrauen (Z-1). Besonders unsicher sind Kroatisch und Griechisch. |
 | F-002 | Welche Reiseländer und Sprachen kommen zuerst, und welche fehlen noch (z. B. Türkei, Thailand, Polen)? | Bestimmt, für welche Sprachen das Wörterbuch geprüft und erweitert wird. |
 | F-003 | Geschäftsmodell: kostenlos, Reise-Pass als Einmalkauf (3–5 € pro Reise) oder Abo? | Seltene, saisonale Nutzung spricht eher gegen ein Abo. |
 | F-004 | Wann kommt eine KI-Übersetzung für unbekannte Artikel dazu? Mit welchem Anbieter, zu welchen Kosten, und was ist mit dem Datenschutz? | Die Abdeckung des Wörterbuchs ist begrenzt (D-004). |

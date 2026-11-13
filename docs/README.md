@@ -6,7 +6,7 @@ Die Dateien zeigen immer den **aktuellen Stand**, keine Historie. Die Historie s
 | --- | --- | --- |
 | [Ziele](01-ziele.md) | Wofür es die App gibt, was sie bewusst nicht ist, woran wir Erfolg messen | Z-1 … |
 | [Entscheidungen](02-entscheidungen.md) | Aktuell gültige Entscheidungen mit Begründung | D-001 … |
-| [Offene Fragen](03-offene-fragen.md) | Was aktuell noch zu klären ist | F-001 … |
+| [Offene Fragen](03-offene-fragen.md) | Was aktuell noch zu klären ist | F-002 … |
 | [Technische Schulden](04-technische-schulden.md) | Bekannte Schwächen, die aktuell im Code bestehen | S-001 … |
 
 Konzepte (Entwürfe, noch nicht entschieden): [Native App](konzept-native-app.md)

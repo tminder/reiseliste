@@ -1,0 +1,66 @@
+# Exportiert die Rückmeldungen zum Wörterbuch (D-059) aus Supabase nach docs/woerterbuch-feedback.csv:
+# Eingaben ohne Übersetzung („miss“) und „Begriff stimmt nicht“ („wrong“), mit Zahl der Personen.
+# Nur Einträge, die mindestens „min_users“ verschiedene Personen gemeldet haben (Mehrheit, und Einzelnes
+# Privates kommt so nicht ins öffentliche Repo). Keine Nutzer- oder Listen-Kennungen.
+# Bei Vorschlägen prüft scripts/feedback-check.mjs, ob die Begriffe in Produktnamen von Open Food Facts vorkommen.
+# Danach wertet Claude die Datei von Hand aus (Anleitung: docs/woerterbuch-feedback.md).
+#
+# Braucht das Secret SUPABASE_SECRET_KEY (wie „Korrekturvorschläge exportieren“).
+
+name: Wörterbuch-Feedback exportieren
+
+on:
+  workflow_dispatch:
+    inputs:
+      min_users:
+        description: 'Mindestens so viele verschiedene Personen'
+        default: '2'
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: export-feedback
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Rückmeldungen aus Supabase holen
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          MIN_USERS: ${{ inputs.min_users }}
+        run: |
+          if [ -z "$SUPABASE_SECRET_KEY" ]; then
+            echo "::error::Secret SUPABASE_SECRET_KEY fehlt (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+          case "$MIN_USERS" in ''|*[!0-9]*) echo "::error::min_users muss eine Zahl sein"; exit 1;; esac
+          URL=$(grep '^VITE_SUPABASE_URL=' .env.production | cut -d= -f2-)
+          curl --fail --silent --show-error \
+            -H "apikey: $SUPABASE_SECRET_KEY" \
+            "$URL/rest/v1/dictionary_feedback_summary?select=kind,users,total,item_lang,item_text,concept_id,country,target_lang,term,suggestion,last_at&users=gte.$MIN_USERS&limit=500" \
+            -o /tmp/feedback.json
+          echo "Einträge: $(node -e "console.log(JSON.parse(require('fs').readFileSync('/tmp/feedback.json','utf8')).length)")"
+
+      - name: Mit Open Food Facts abgleichen und als CSV speichern
+        run: node scripts/feedback-check.mjs /tmp/feedback.json docs/woerterbuch-feedback.csv
+
+      - name: Änderungen committen
+        run: |
+          git add docs/woerterbuch-feedback.csv
+          if git diff --cached --quiet; then
+            echo "Keine neuen Rückmeldungen."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Wörterbuch-Feedback exportieren (automatisch)"
+          git push

@@ -10,6 +10,7 @@ Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im L
 - Eingabe in 9 Sprachen (DE, EN, ES, PT, FR, IT, NL, HR, EL), inklusive Mengen („2 Milch“, „500 g Hackfleisch“)
 - Übersetzung über ein eingebautes Wörterbuch mit 361 Grundbegriffen (inkl. Küchenutensilien und Schweizer Ausdrücken wie Rahm, Poulet, Rüebli, Chriesi, Schoggi) und eigenen Begriffen für Mexiko, Argentinien, Brasilien, die USA, Österreich und die Deutschschweiz, ohne KI und ohne laufende Kosten
 - Vorschläge aus dem Wörterbuch beim Tippen
+- Wörterbuch lernt aus Rückmeldungen: fehlende Wörter und „Begriff stimmt nicht?“ werden anonym gesammelt und von Hand ausgewertet (`docs/woerterbuch-feedback.md`)
 - Sortierung nach Abteilungen, Abhaken, eine Ansicht für Planen und Einkaufen (Löschen nur bei Abgehakten)
 - Zeigen-Karte: Landesbegriff antippen → bildschirmfüllend mit „Wo finde ich das?“ zum Vorzeigen beim Personal
 - „Ich hole das“ (✋): zeigt allen, wer welchen Artikel kauft

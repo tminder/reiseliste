@@ -1,6 +1,6 @@
 // Ein Artikel der Liste: Name, Landesbegriff, Menge, Abhaken, Fotos, Tipp und Zeigen-Karte (D-032)
 import { useEffect, useRef, useState } from 'react'
-import { Camera, Check, Hand, Lightbulb, X } from 'lucide-react'
+import { Camera, Check, Hand, Lightbulb, ThumbsDown, X } from 'lucide-react'
 import { CONCEPT_BY_ID, type Lang } from '../../data/dictionary'
 import { COUNTRY_BY_CODE } from '../../data/countries'
 import { t } from '../../i18n'
@@ -9,7 +9,8 @@ import { FEATURES } from '../../features'
 import { reducedMotion, slideOut } from '../../lib/motion'
 import { exactConcept, nameIn } from '../../lib/translate'
 import { hasPhotos } from '../../lib/photos'
-import { ListStore, type Item } from '../../lib/store'
+import { ListStore, supabase, type Item } from '../../lib/store'
+import { sendFeedback, type Feedback } from '../../lib/feedback'
 import { formatQty } from '../format'
 import { PhotoStrip } from './PhotoStrip'
 import { dupKey } from './helpers'
@@ -201,14 +202,39 @@ export function ItemRow({
         </div>
       )}
       {showCard && local && (
-        <ShowCard term={local} qty={item.qty} own={own} target={target} onClose={() => setShowCard(false)} />
+        <ShowCard
+          term={local}
+          qty={item.qty}
+          own={own}
+          target={target}
+          onClose={() => setShowCard(false)}
+          // „Begriff stimmt nicht“ (D-059): Artikel in der Sprache des Betrachters, damit die Meldungen vergleichbar sind
+          feedback={{ kind: 'wrong', itemText: own, itemLang: viewer, conceptId: item.conceptId, country, targetLang: target, term: local }}
+        />
       )}
     </div>
   )
 }
 
 /** Zeigen-Karte (D-032): Artikel bildschirmfüllend in der Landessprache, zum Vorzeigen beim Personal */
-function ShowCard({ term, qty, own, target, onClose }: { term: string; qty: string | null; own: string; target: Lang; onClose: () => void }) {
+function ShowCard({
+  term,
+  qty,
+  own,
+  target,
+  onClose,
+  feedback,
+}: {
+  term: string
+  qty: string | null
+  own: string
+  target: Lang
+  onClose: () => void
+  feedback: Feedback
+}) {
+  // „Begriff stimmt nicht?“ (D-059): null = zu, 'open' = Eingabe, 'sent' = gedankt
+  const [report, setReport] = useState<null | 'open' | 'sent' | 'failed'>(null)
+  const [suggestion, setSuggestion] = useState('')
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', onKey)
@@ -223,6 +249,29 @@ function ShowCard({ term, qty, own, target, onClose }: { term: string; qty: stri
       </p>
       <p className="showcard-thanks" lang={target}>{THANKS[target]}</p>
       <p className="showcard-own">{own}</p>
+      {supabase && (
+        <div className="showcard-report" onClick={(e) => e.stopPropagation()}>
+          {report === null && (
+            <button className="link" onClick={() => setReport('open')}>
+              <ThumbsDown size={14} /> {t('wrongTerm')}
+            </button>
+          )}
+          {report === 'open' && (
+            <form
+              className="stack"
+              onSubmit={(e) => {
+                e.preventDefault()
+                void sendFeedback({ ...feedback, suggestion }).then((ok) => setReport(ok ? 'sent' : 'failed'))
+              }}
+            >
+              <input value={suggestion} onChange={(e) => setSuggestion(e.target.value)} placeholder={t('betterTermOptional')} maxLength={80} />
+              <button className="primary small">{t('send')}</button>
+            </form>
+          )}
+          {report === 'sent' && <span className="muted small-text">{t('feedbackThanks')}</span>}
+          {report === 'failed' && <span className="muted small-text">{t('feedbackFailed')}</span>}
+        </div>
+      )}
       <button className="ghost showcard-close" onClick={onClose} aria-label={t('close')}>
         <X size={28} />
       </button>

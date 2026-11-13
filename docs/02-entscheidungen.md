@@ -25,7 +25,7 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Artikel werden über ein festes Wörterbuch übersetzt (`src/data/dictionary/`, 361 Grundbegriffe inkl. Küchenutensilien in der Abteilung „Küche & Geschirr“, 9 Sprachen, Aufbau siehe D-053. In der deutschen Datei stehen zusätzlich Schweizer Ausdrücke als Varianten, z. B. Rahm, Poulet, Rüebli, Zucchetti, Chriesi, Schoggi, Kehrichtsack, Bidon. Sie werden bei der Eingabe erkannt, angezeigt wird die erste, standarddeutsche Variante; nur bei Listen für die Deutschschweiz und Liechtenstein gilt die Schweizer Abweichung). Es gibt keine KI und keinen externen Übersetzungsdienst. Unbekannte Artikel können Nutzer mit einem eigenen Landesbegriff ergänzen.
 - **Begründung:** Keine laufenden Kosten, offline verfügbar, die Begriffe sind vorhersehbar.
-- **Folgen:** Die Abdeckung ist begrenzt (siehe Ziel in Z-1). Das Wörterbuch muss geprüft werden (S-001, F-001). Die KI-Ergänzung ist offen (F-004).
+- **Folgen:** Die Abdeckung ist begrenzt (siehe Ziel in Z-1). Das Wörterbuch wird über Rückmeldungen der Nutzer verbessert (D-059, S-001). Die KI-Ergänzung ist offen (F-004).
 
 ## D-005 · Anonyme Anmeldung, Beitritt per Link
 
@@ -354,4 +354,13 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Im Formular „Neue Liste“ steht der Name zuoberst, vor dem Reiseland, und muss ausgefüllt sein; „Liste erstellen“ ist bis dahin ausgegraut. Den automatischen Namen „Einkauf Spanien“ gibt es nicht mehr. Beim Teilen ist der QR-Code grösser (bis 280 px breit, schärfer erzeugt), damit er sich leichter scannen lässt.
 - **Begründung:** Wunsch des Inhabers. Mit automatischem Reiseland (D-057) sagt das Land wenig über die Liste aus, ein eigener Name unterscheidet die Listen in der Übersicht.
 - **Folgen:** Ein Schritt mehr beim Anlegen.
+
+## D-059 · Wörterbuch verbessern aus Nutzer-Rückmeldungen, ohne Muttersprachler
+
+- **Entscheidung:** Entscheidung des Inhabers: weitgehend automatisch, einfache Rückmeldung, ohne Muttersprachler, KI vorerst nur von Hand (ohne API).
+  - **Sammeln:** Findet die App für eine Eingabe keine Übersetzung, meldet sie das anonym („miss“), ausser die eigene Sprache ist die Landessprache. Auf der Zeigen-Karte steht unten klein „👎 Begriff stimmt nicht?“, wahlweise mit besserem Begriff („wrong“). Jede Meldung pro Gerät nur einmal. Tabelle `dictionary_feedback` (nur eintragen, höchstens 100 pro Person und Stunde, nach 180 Tagen gelöscht), Zusammenfassung `dictionary_feedback_summary` mit Zahl verschiedener Personen.
+  - **Exportieren:** Workflow „Wörterbuch-Feedback exportieren“ (von Hand) schreibt `docs/woerterbuch-feedback.csv`, nur Einträge von mindestens 2 Personen (einstellbar). Bei Vorschlägen zählt `scripts/feedback-check.mjs`, wie viele Produkte im Reiseland bei Open Food Facts den alten bzw. den vorgeschlagenen Begriff im Namen tragen.
+  - **Auswerten:** Claude von Hand nach festen Regeln (`docs/woerterbuch-feedback.md`): Mehrheit, Beleg in Open Food Facts, zweiter unabhängiger Prüfdurchgang, Änderungen als Commit mit Liste für den Inhaber.
+- **Begründung:** Keine Muttersprachler verfügbar; das stärkste Signal sind fehlende Wörter. Mehrheit und Produktdaten ersetzen die menschliche Prüfung so weit wie möglich. Ohne API keine laufenden Kosten und kein Schlüssel.
+- **Folgen:** Neuer Datenfluss, in der Datenschutzerklärung beschrieben. `supabase/schema.sql` muss erneut ausgeführt werden, sonst gehen die Meldungen ins Leere. Das bestehende Community-Modul (D-024, D-027) bleibt aus. Live-Übersetzung mit KI bleibt offen (F-004).
 

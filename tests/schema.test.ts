@@ -34,7 +34,8 @@ beforeAll(async () => {
   // Supabase vergibt diese Rechte automatisch, die Regeln (RLS) schränken sie ein
   await db.exec(`grant usage on schema public to anon, authenticated;
     grant select, insert, update, delete on all tables in schema public to anon, authenticated;
-    revoke all on public.client_errors_summary from public, anon, authenticated;`)
+    revoke all on public.client_errors_summary from public, anon, authenticated;
+    revoke all on public.dictionary_feedback_summary from public, anon, authenticated;`)
 }, 30_000)
 
 describe('schema.sql', () => {
@@ -90,5 +91,22 @@ describe('schema.sql', () => {
     expect(await val(`select ping() is not null`)).toBe(true)
     await db.exec('reset role')
     expect(await val(`select count(*) from client_errors where message = 'alt'`)).toBe(0)
+  })
+
+  it('Rückmeldungen zum Wörterbuch: nur eintragen, geprüft, begrenzt, nach 180 Tagen gelöscht (D-059)', async () => {
+    await as(B)
+    const row = (kind: string, text: string) => `('${kind}','${text}','de','ES','es')`
+    await db.exec(`insert into dictionary_feedback(kind,item_text,item_lang,country,target_lang) values ${row('miss', 'Kräuterbutter')}`)
+    expect(await val(`select count(*) from dictionary_feedback`)).toBe(0) // nicht lesbar
+    expect(await fails(`insert into dictionary_feedback(kind,item_text,item_lang,country,target_lang) values ${row('spam', 'x')}`)).toMatch(/dictionary_feedback_len/)
+    expect(await fails(`select * from dictionary_feedback_summary`)).toMatch(/permission denied/)
+    await db.exec(`insert into dictionary_feedback(kind,item_text,item_lang,country,target_lang) select 'miss','w'||g,'de','ES','es' from generate_series(1,99) g`)
+    expect(await fails(`insert into dictionary_feedback(kind,item_text,item_lang,country,target_lang) values ${row('miss', 'zu viel')}`)).toMatch(/limit:/)
+    await db.exec(`reset role; select set_config('request.jwt.claim.sub','',false);
+      insert into dictionary_feedback(kind,item_text,item_lang,country,target_lang,user_id,created_at) values ('miss','alt','de','ES','es','${A}', now() - interval '181 days'); set role anon;`)
+    expect(await val(`select ping() is not null`)).toBe(true)
+    await db.exec('reset role')
+    expect(await val(`select count(*) from dictionary_feedback where item_text = 'alt'`)).toBe(0)
+    expect(await val(`select users from dictionary_feedback_summary where item_text = 'kräuterbutter'`)).toBe(1)
   })
 })
