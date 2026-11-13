@@ -103,6 +103,49 @@ export function ItemRow({
           {qty && <span className="qty">{formatQty(qty)}</span>}
           <span className="txt">{own}</span>
         </div>
+      </div>
+      {hint && !item.checked && (
+        <button className={`ghost small ${showHint ? 'active' : ''}`} aria-label={t('tip')} onClick={() => setShowHint(!showHint)}>
+          <Lightbulb size={18} />
+        </button>
+      )}
+      {local && !item.checked && shopTag && hasPhotos(item.conceptId, override_) && (
+        <button
+          className={`ghost small ${showPhotos ? 'active' : ''}`}
+          aria-label={t('photos')}
+          onClick={() => setShowPhotos(!showPhotos)}
+        >
+          <Camera size={18} />
+        </button>
+      )}
+      {!item.checked && (
+        // „Ich hole das“ (D-031): antippen übernimmt den Artikel, nochmals antippen gibt ihn frei
+        <button
+          className={`ghost small ${claimedBy === me ? 'active' : ''}`}
+          aria-label={claimedBy === me ? t('unclaim') : t('claim')}
+          title={claimedBy === me ? t('unclaim') : t('claim')}
+          onClick={() => {
+            onLocalChange(item.id)
+            void store.updateItem(item.id, { claimedBy: claimedBy === me ? null : me })
+          }}
+        >
+          <Hand size={18} />
+        </button>
+      )}
+      {item.checked && (
+        // Löschen nur bei Abgehakten (D-055): ein offener Artikel verschwindet nicht versehentlich
+        <button className="ghost small" aria-label={t('delete')} onClick={() => {
+          onLocalChange(item.id)
+          void slideOut(rowRef.current ? [rowRef.current] : []).then(() => {
+            void store.updateItem(item.id, { deleted: true })
+            onDeleted([item.id], own)
+          })
+        }}>
+          <X size={18} />
+        </button>
+      )}
+      {/* Landesbegriff, Mitglied, Hinweise: ganze Breite unter Name und Knöpfen */}
+      <div className="item-sub">
         <div className="orig">
           {local ? (
             // Antippen → Zeigen-Karte fürs Personal (D-032)
@@ -145,46 +188,6 @@ export function ItemRow({
         )}
         {showHint && hint && !item.checked && <div className="hint">{hint}</div>}
       </div>
-      {hint && !item.checked && (
-        <button className={`ghost small ${showHint ? 'active' : ''}`} aria-label={t('tip')} onClick={() => setShowHint(!showHint)}>
-          <Lightbulb size={18} />
-        </button>
-      )}
-      {local && !item.checked && shopTag && hasPhotos(item.conceptId, override_) && (
-        <button
-          className={`ghost small ${showPhotos ? 'active' : ''}`}
-          aria-label={t('photos')}
-          onClick={() => setShowPhotos(!showPhotos)}
-        >
-          <Camera size={18} />
-        </button>
-      )}
-      {!item.checked && (
-        // „Ich hole das“ (D-031): antippen übernimmt den Artikel, nochmals antippen gibt ihn frei
-        <button
-          className={`ghost small ${claimedBy === me ? 'active' : ''}`}
-          aria-label={claimedBy === me ? t('unclaim') : t('claim')}
-          title={claimedBy === me ? t('unclaim') : t('claim')}
-          onClick={() => {
-            onLocalChange(item.id)
-            void store.updateItem(item.id, { claimedBy: claimedBy === me ? null : me })
-          }}
-        >
-          <Hand size={18} />
-        </button>
-      )}
-      {item.checked && (
-        // Löschen nur bei Abgehakten (D-055): ein offener Artikel verschwindet nicht versehentlich
-        <button className="ghost small" aria-label={t('delete')} onClick={() => {
-          onLocalChange(item.id)
-          void slideOut(rowRef.current ? [rowRef.current] : []).then(() => {
-            void store.updateItem(item.id, { deleted: true })
-            onDeleted([item.id], own)
-          })
-        }}>
-          <X size={18} />
-        </button>
-      )}
       {/* Fotos über die ganze Breite der Karte, unter Text und Knöpfen */}
       {showPhotos && local && (
         <div className="item-wide">
