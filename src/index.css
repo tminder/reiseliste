@@ -570,6 +570,10 @@ button svg,
   min-width: 0;
 }
 .brand-name {
+  font-family: Pacifico, cursive;
+  font-weight: 400;
+  line-height: 1.5;
+  padding-right: 0.15em; /* Schwung des letzten Buchstabens nicht abschneiden */
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;

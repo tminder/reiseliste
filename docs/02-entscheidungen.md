@@ -364,3 +364,9 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Keine Muttersprachler verfügbar; das stärkste Signal sind fehlende Wörter. Mehrheit und Produktdaten ersetzen die menschliche Prüfung so weit wie möglich. Ohne API keine laufenden Kosten und kein Schlüssel.
 - **Folgen:** Neuer Datenfluss, in der Datenschutzerklärung beschrieben. `supabase/schema.sql` muss erneut ausgeführt werden, sonst gehen die Meldungen ins Leere. Das bestehende Community-Modul (D-024, D-027) bleibt aus. Live-Übersetzung mit KI bleibt offen (F-004).
 
+
+## D-060 · Schriftzug des App-Namens in Pacifico
+
+- **Entscheidung:** Der App-Name neben dem Icon (Listenübersicht und Profil) steht in der Schreibschrift Pacifico, Grösse wie bisher. Alle übrigen Texte bleiben in der Systemschrift. Die Schrift kommt als npm-Paket `@fontsource/pacifico` (nur lateinische Zeichen, rund 32 KB) mit der App und wird für offline vorgeladen, keine Verbindung zu Google Fonts.
+- **Begründung:** Entscheidung des Inhabers aus acht Varianten. Gibt dem Namen Charakter und passt zum Road-Trip-Bild.
+- **Folgen:** Wird der Platz knapp, kürzt der Name mit „…“. Bis die Schrift geladen ist (nur beim allerersten Öffnen), steht der Name kurz in einer Ersatzschrift.

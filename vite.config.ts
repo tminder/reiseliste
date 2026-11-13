@@ -46,6 +46,8 @@ export default defineConfig({
       injectRegister: false, // Registrierung in src/main.tsx (mit Update-Prüfung)
       includeAssets: ['favicon.svg', 'favicon-32.png', 'apple-touch-icon.png'],
       workbox: {
+        // Schrift des App-Namens auch offline (D-060)
+        globPatterns: ['**/*.{js,css,html,woff2}'],
         // Einmal angesehene Produktfotos bleiben offline verfügbar
         runtimeCaching: [
           {
