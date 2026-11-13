@@ -14,7 +14,7 @@
     "review:export": "node scripts/review-export.mjs"
   },
   "dependencies": {
-    "@fontsource/kaushan-script": "^5.3.0",
+    "@fontsource/grand-hotel": "^5.3.0",
     "@supabase/supabase-js": "^2.119.0",
     "jsqr": "^1.4.0",
     "lucide-react": "^1.70.0",
