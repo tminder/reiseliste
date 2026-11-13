@@ -12,7 +12,7 @@ import { findConcept, isLoaded, loadLanguages, nameIn, onLanguagesLoaded, splitQ
 import { autoShopModeBlocked, blockAutoShopMode, getChosenShopAt, getPosition, getChosenShop, meters, setChosenShop, shopTag, type Shop } from '../../lib/nearby'
 import { detectCountry } from '../../lib/country'
 import { MAX } from '../../lib/limits'
-import { ListStore, scheduleDelete, isSoleMember, leaveList, setLastList, lastSyncError, supabase, type Item, type Profile, type SyncState } from '../../lib/store'
+import { ListStore, scheduleDelete, isSoleMember, knownSole, leaveList, setLastList, lastSyncError, supabase, type Item, type Profile, type SyncState } from '../../lib/store'
 import { formatQty, go } from '../format'
 import { ItemRow } from './ItemRow'
 import { ShopBar } from './ShopBar'
@@ -193,7 +193,8 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   const [showMembers, setShowMembers] = useState(false)
   const [confirmLeave, setConfirmLeave] = useState(false)
   // Einziges Mitglied? Dann „Liste löschen“ statt „Aus meinen Listen entfernen“ (D-036). Geprüft beim Öffnen des Menüs.
-  const [sole, setSole] = useState<boolean | null>(null)
+  // Startwert: zuletzt bekanntes Ergebnis, damit Menü und Warnung nicht kurz den falschen Text zeigen. undefined = unbekannt
+  const [sole, setSole] = useState<boolean | null | undefined>(() => knownSole(id))
   useEffect(() => {
     if (showMenu) void isSoleMember(id).then(setSole)
   }, [showMenu, id])
@@ -436,7 +437,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
                     setConfirmLeave(true)
                   }}
                 >
-                  <Trash2 size={18} /> {sole ? t('deleteList') : t('removeFromDevice')}
+                  <Trash2 size={18} /> {sole === undefined ? t('removeList') : sole ? t('deleteList') : t('removeFromDevice')}
                 </button>
                 <div className="menu-sep" role="separator" />
                 <div className="menu-label">{t('appName')}</div>
@@ -676,10 +677,11 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
         // Warnung vor dem Entfernen (D-036)
         <div className="sheet-backdrop" onClick={() => setConfirmLeave(false)}>
           <div className="sheet" role="alertdialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-            <h2>{sole ? t('deleteListTitle', { name: list.name }) : t('removeListTitle', { name: list.name })}</h2>
-            <p>{sole ? t('deleteListConfirm') : t('removeListConfirm')}</p>
+            <h2>{sole === undefined ? t('removeList') : sole ? t('deleteListTitle', { name: list.name }) : t('removeListTitle', { name: list.name })}</h2>
+            <p>{sole === undefined ? '…' : sole ? t('deleteListConfirm') : t('removeListConfirm')}</p>
             <button
               className="danger-btn"
+              disabled={sole === undefined}
               onClick={() => {
                 if (sole) scheduleDelete(id, list.name)
                 else void leaveList(id)

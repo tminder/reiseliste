@@ -1,12 +1,12 @@
 // Startseite: alle Listen, neue Liste anlegen, Liste beitreten (QR-Code oder Link)
 import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
-import { UserPlus, ClipboardPaste, ScanLine, LocateFixed, MapPin, Plus, ShoppingCart, Trash2, X } from 'lucide-react'
+import { UserPlus, ClipboardPaste, ScanLine, LocateFixed, MapPin, Plus, ShoppingCart, Trash2, Users, X } from 'lucide-react'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from '../data/countries'
 import { countryName, t } from '../i18n'
 import { listIdFrom } from '../lib/links'
 import { detectCountry } from '../lib/country'
 import { MAX } from '../lib/limits'
-import { ListStore, DELETE_GRACE_MS, flushDeletes, recentDelete, scheduleDelete, undoDelete, isSoleMember, knownLists, leaveList, localLastChange, remoteLastChanges, supabase, type Profile } from '../lib/store'
+import { ListStore, DELETE_GRACE_MS, flushDeletes, recentDelete, scheduleDelete, undoDelete, isSoleMember, knownSole, knownLists, leaveList, localLastChange, localPeople, remoteOverview, supabase, type Profile } from '../lib/store'
 import { AppVersion } from './AppVersion'
 import { formatWhen, go } from './format'
 
@@ -24,8 +24,9 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
   const showNew = panel === 'new'
   const setShowNew = (v: boolean) => setPanel(v ? 'new' : null)
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
-  // Einziges Mitglied? Dann „Löschen“ statt „Entfernen“ (D-036). null = noch unbekannt
-  const [sole, setSole] = useState<boolean | null>(null)
+  // Einziges Mitglied? Dann „Löschen“ statt „Entfernen“ (D-036).
+  // undefined = wird noch geprüft (keine Warnung zeigen, sonst wechselt der Text), null = nicht feststellbar (offline)
+  const [sole, setSole] = useState<boolean | null | undefined>(undefined)
   // „Gelöscht · Rückgängig“ während der Gnadenfrist (D-036)
   const [deleted, setDeleted] = useState(() => recentDelete())
   useEffect(() => {
@@ -38,27 +39,33 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
   }, [deleted])
   const askRemove = (listId: string | null) => {
     setConfirmRemove(listId)
-    setSole(null)
+    setSole(listId ? knownSole(listId) : undefined)
     if (listId) void isSoleMember(listId).then((v) => setSole(v))
   }
   // Letzte Änderung pro Liste (D-036): sofort aus dem Gerät, dann aktuell aus Supabase
   const [changed, setChanged] = useState<Record<string, string>>(() =>
     Object.fromEntries(lists.map((l) => [l.id, localLastChange(l.id)]).filter((e): e is [string, string] => !!e[1])),
   )
+  // Teilnehmer pro Liste, jüngste Aktivität zuerst: sofort aus dem Gerät, dann aktuell aus Supabase
+  const [people, setPeople] = useState<Record<string, string[]>>(() => Object.fromEntries(lists.map((l) => [l.id, localPeople(l.id, profile)])))
   useEffect(() => {
     let alive = true
-    void remoteLastChanges(lists.map((l) => l.id)).then((remote) => {
+    void remoteOverview(
+      lists.map((l) => l.id),
+      profile,
+    ).then((remote) => {
       if (!alive) return
       setChanged((c) => {
         const next = { ...c }
-        for (const [id, at] of Object.entries(remote)) if (!next[id] || at > next[id]) next[id] = at
+        for (const [id, at] of Object.entries(remote.changed)) if (!next[id] || at > next[id]) next[id] = at
         return next
       })
+      setPeople((p) => ({ ...p, ...remote.people }))
     })
     return () => {
       alive = false
     }
-  }, [lists])
+  }, [lists, profile])
   const sorted = [...lists].sort((a, b) => (changed[b.id] ?? '').localeCompare(changed[a.id] ?? ''))
 
   // Bist du schon im Ausland, wird das aktuelle Land vorgeschlagen (änderbar)
@@ -166,6 +173,11 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
                   <a href={`#/l/${l.id}`} className="list-link">
                     <span className="flag">{c?.flag}</span> {l.name}
                     {changed[l.id] && <span className="list-changed">{t('lastChange', { when: formatWhen(changed[l.id]) })}</span>}
+                    {!!people[l.id]?.length && (
+                      <span className="list-people" title={people[l.id].join(', ')}>
+                        <Users size={13} aria-hidden /> {people[l.id].join(', ')}
+                      </span>
+                    )}
                   </a>
                   <button className="ghost small" aria-label={t('removeList')} onClick={() => askRemove(confirmRemove === l.id ? null : l.id)}>
                     <Trash2 size={16} />
@@ -173,10 +185,11 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
                 </div>
                 {confirmRemove === l.id && (
                   <div className="confirm">
-                    <p className="small-text warn-text">{sole ? t('deleteListConfirm') : t('removeListConfirm')}</p>
+                    <p className="small-text warn-text">{sole === undefined ? '…' : sole ? t('deleteListConfirm') : t('removeListConfirm')}</p>
                     <div className="row-gap">
                       <button
                         className="danger-btn small"
+                        disabled={sole === undefined}
                         onClick={() => {
                           if (sole) {
                             scheduleDelete(l.id, l.name)

@@ -180,6 +180,7 @@ button.link {
   text-decoration: none;
   font-weight: 600;
   flex: 1;
+  min-width: 0; /* damit die Teilnehmerzeile mit „…“ abschneidet */
 }
 
 .sync {
@@ -803,6 +804,20 @@ button.term-btn {
   font-weight: 400;
   color: var(--muted);
   margin-top: 2px;
+}
+/* Teilnehmer in der Übersicht: höchstens eine Zeile, Rest mit „…“ */
+.list-people {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list-people svg {
+  vertical-align: -2px;
 }
 .confirm {
   border-top: 1px solid var(--line);

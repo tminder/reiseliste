@@ -58,6 +58,14 @@ test('Profil anlegen, Liste erstellen, Artikel übersetzt', async ({ page, probl
   await expect(page.locator('.item').first()).toContainText('leche')
 })
 
+test('Übersicht zeigt die anderen Teilnehmer, jüngste Aktivität zuerst', async ({ page, problems }) => {
+  void problems
+  const by = (n: number, author: string, at: string) => ({ ...item(n, 'Milch', 'milch'), author, createdAt: at, updatedAt: at })
+  await seed(page, [by(1, 'Anna', '2026-11-01T08:00:00Z'), by(2, 'Tobias', '2026-11-03T08:00:00Z'), by(3, 'Bea', '2026-11-02T08:00:00Z')])
+  await page.goto('/')
+  await expect(page.locator('.list-people')).toHaveText('Bea, Anna')
+})
+
 test('Länder-Abweichung: in Mexiko „crema“ statt „nata“, Wörterbuch wird nachgeladen (D-053)', async ({ page, problems }) => {
   void problems
   await seed(page, [item(1, 'Sahne', 'sahne')], 'MX')

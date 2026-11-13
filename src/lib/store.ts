@@ -1,6 +1,7 @@
 import { MAX, clip, clipOrNull } from './limits'
 import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js'
 import type { Lang } from '../data/dictionary'
+import { rankPeople, type ActivityRow, type MemberRow } from './people'
 import { FEATURES } from '../features'
 
 // ---------- Typen ----------
@@ -138,20 +139,50 @@ export function localLastChange(id: string): string | null {
   return times.length ? times.reduce((a, b) => (a > b ? a : b)) : null
 }
 
-export async function remoteLastChanges(ids: string[]): Promise<Record<string, string>> {
-  const out: Record<string, string> = {}
-  if (!supabase || !ids.length || !navigator.onLine) return out
-  if (!(await ensureAuth())) return out
-  const [lists, items] = await Promise.all([
+/** Teilnehmer pro Liste, zuletzt bekannter Stand auf dem Gerät: aus Supabase gemerkt, sonst Autoren der Artikel */
+export function localPeople(id: string, me: Profile): string[] {
+  const cached = LS.get<string[] | null>(`rl:people:${id}`, null)
+  if (cached) return cached
+  const c = LS.get<{ items?: Item[] }>(`rl:list:${id}`, {})
+  return rankPeople(null, (c.items ?? []).map((i) => ({ author: i.author, created_at: i.createdAt, claimed_by: i.claimedBy, updated_at: i.updatedAt })), me)
+}
+
+/** Für die Übersicht (D-036): letzte Änderung und Teilnehmer pro Liste aus Supabase */
+export async function remoteOverview(ids: string[], me: Profile): Promise<{ changed: Record<string, string>; people: Record<string, string[]> }> {
+  const changed: Record<string, string> = {}
+  const people: Record<string, string[]> = {}
+  if (!supabase || !ids.length || !navigator.onLine) return { changed, people }
+  if (!(await ensureAuth())) return { changed, people }
+  const [lists, items, members, auth] = await Promise.all([
     supabase.from('lists').select('id, updated_at').in('id', ids),
-    supabase.from('items').select('list_id, updated_at').in('list_id', ids).order('updated_at', { ascending: false }).limit(1000),
+    supabase
+      .from('items')
+      .select('list_id, author, claimed_by, created_at, updated_at')
+      .in('list_id', ids)
+      .order('updated_at', { ascending: false })
+      .limit(1000),
+    supabase.from('list_members').select('list_id, user_id, name, lang, joined_at').in('list_id', ids),
+    supabase.auth.getUser(),
   ])
   const put = (id: string, at: string) => {
-    if (!out[id] || at > out[id]) out[id] = at
+    if (!changed[id] || at > changed[id]) changed[id] = at
   }
   for (const l of (lists.data ?? []) as { id: string; updated_at: string }[]) put(l.id, l.updated_at)
-  for (const i of (items.data ?? []) as { list_id: string; updated_at: string }[]) put(i.list_id, i.updated_at)
-  return out
+  type ItemRow = ActivityRow & { list_id: string; updated_at: string }
+  const itemRows = (items.data ?? []) as ItemRow[]
+  for (const i of itemRows) put(i.list_id, i.updated_at)
+  if (!members.error) {
+    const memberRows = (members.data ?? []) as (MemberRow & { list_id: string })[]
+    for (const id of ids) {
+      people[id] = rankPeople(
+        memberRows.filter((m) => m.list_id === id),
+        itemRows.filter((i) => i.list_id === id),
+        { ...me, userId: auth.data.user?.id },
+      )
+      LS.set(`rl:people:${id}`, people[id])
+    }
+  }
+  return { changed, people }
 }
 
 /** Liste aus „Deine Listen“ entfernen und austreten (D-036). Für die anderen Mitglieder bleibt sie bestehen. */
@@ -171,7 +202,20 @@ export async function leaveList(id: string) {
  * Ist man (auch mit mehreren Geräten, gleicher Name und Sprache) das einzige Mitglied der Liste? (D-036)
  * Ohne Supabase gibt es die Liste nur auf diesem Gerät: true. Offline oder bei Fehlern: null (unbekannt).
  */
+/** Zuletzt bekanntes Ergebnis von isSoleMember, damit die Warnung sofort stimmt (D-036). undefined = unbekannt */
+export function knownSole(id: string): boolean | undefined {
+  if (!supabase) return true
+  const v = LS.get<boolean | null>(`rl:sole:${id}`, null)
+  return v ?? undefined
+}
+
 export async function isSoleMember(id: string): Promise<boolean | null> {
+  const v = await checkSoleMember(id)
+  if (v !== null) LS.set(`rl:sole:${id}`, v)
+  return v
+}
+
+async function checkSoleMember(id: string): Promise<boolean | null> {
   if (!supabase) return true
   if (!navigator.onLine) return null
   try {
@@ -249,6 +293,8 @@ export function forgetList(id: string) {
   if (LS.get<string | null>('rl:last', null) === id) localStorage.removeItem('rl:last')
   LS.set('rl:lists', LS.get<string[]>('rl:lists', []).filter((x) => x !== id))
   localStorage.removeItem(`rl:list:${id}`)
+  localStorage.removeItem(`rl:people:${id}`)
+  localStorage.removeItem(`rl:sole:${id}`)
 }
 
 // ---------- Warteschlange für Änderungen (offline-fähig) ----------
