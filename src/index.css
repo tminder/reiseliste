@@ -538,11 +538,6 @@ button.icon {
 .menu .danger {
   color: #dc2626;
 }
-.hint-ok {
-  font-size: 0.8rem;
-  color: var(--accent);
-}
-
 button.icon-btn {
   padding: 3px 6px;
   border-radius: 6px;
@@ -555,7 +550,6 @@ button.icon-btn.active {
 .shopline svg,
 .menu svg,
 button svg,
-.hint-ok svg,
 .brand svg {
   vertical-align: -0.15em;
 }

@@ -1,6 +1,6 @@
 // Startseite: alle Listen, neue Liste anlegen, Liste beitreten (QR-Code oder Link)
 import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
-import { UserPlus, ClipboardPaste, ScanLine, LocateFixed, MapPin, Plus, Trash2, Users, X } from 'lucide-react'
+import { UserPlus, ClipboardPaste, ScanLine, MapPin, Plus, Trash2, Users, X } from 'lucide-react'
 import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL, profileLangLabel, profileLangShort } from '../data/countries'
 import { AppLogo } from './AppLogo'
 import { countryName, t } from '../i18n'
@@ -16,7 +16,6 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
   const [name, setName] = useState('')
   // Vorauswahl: kein Land mit der eigenen Sprache, dort braucht es keine Übersetzung (D-041)
   const [country, setCountry] = useState(() => ['ES', 'IT', 'FR'].find((c) => COUNTRY_BY_CODE.get(c)?.lang !== profile.lang) ?? 'ES')
-  const [detected, setDetected] = useState<string | null>(null)
   const touched = useRef(false)
   // Reiseland: standardmässig automatisch nach Standort (D-057), sonst fest gewähltes Land
   const [auto, setAuto] = useState(true)
@@ -76,7 +75,6 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
     let alive = true
     void detectCountry().then((code) => {
       if (!alive || !code || COUNTRY_BY_CODE.get(code)?.lang === profile.lang) return // eigene Sprache: kein Vorschlag
-      setDetected(code)
       if (!touched.current) setCountry(code)
     })
     return () => {
@@ -162,10 +160,6 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
                 </option>
               ))}
             </select>
-            {detected && detected === country && <span className="hint-ok">
-                <LocateFixed size={14} /> {t('currentLocation')}
-              </span>}
-            {auto && <span className="muted small-text block">{t('autoCountryHint')}</span>}
           </label>
           <button className="primary" disabled={!name.trim()}>
             {t('createList')}
