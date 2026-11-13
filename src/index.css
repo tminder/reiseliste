@@ -260,7 +260,7 @@ button.link {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: 4px 12px;
+  gap: 2px 12px;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -401,6 +401,13 @@ button.active {
 }
 .item-sub:empty {
   display: none;
+}
+/* Knöpfe am Artikel etwas höher, damit die Zeile darunter nahe am Namen bleibt */
+.item > .ghost.small {
+  margin: -5px 0 -5px;
+}
+.item > .check {
+  margin-bottom: -4px;
 }
 .photo-row {
   display: flex;
