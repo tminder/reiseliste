@@ -86,9 +86,10 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
 
   function create(e: FormEvent) {
     e.preventDefault()
+    if (!name.trim()) return
     const id = crypto.randomUUID()
     const store = new ListStore(id)
-    void store.create(name.trim() || t('defaultListName', { country: countryName(country) }), country, auto)
+    void store.create(name.trim(), country, auto)
     go(`/l/${id}`)
   }
 
@@ -138,6 +139,11 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
               </button>
             )}
           </div>
+          {/* Name zuerst und Pflicht (D-058) */}
+          <label>
+            {t('name')}
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder')} maxLength={MAX.listName} required />
+          </label>
           <label>
             {t('travelCountry')}
             <select
@@ -161,11 +167,9 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
               </span>}
             {auto && <span className="muted small-text block">{t('autoCountryHint')}</span>}
           </label>
-          <label>
-            {t('nameOptional')}
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder')} maxLength={MAX.listName} />
-          </label>
-          <button className="primary">{t('createList')}</button>
+          <button className="primary" disabled={!name.trim()}>
+            {t('createList')}
+          </button>
         </form>
       )}
 

@@ -119,7 +119,7 @@ export function ShareSheet({ id, name, onClose }: { id: string; name: string; on
   const [copied, setCopied] = useState(false)
   useEffect(() => {
     // QR-Code-Bibliothek erst beim Teilen laden (kleineres Start-Bundle, S-021)
-    void import('qrcode').then((m) => m.default.toDataURL(url, { margin: 1, width: 240 })).then(setQr, () => setQr(''))
+    void import('qrcode').then((m) => m.default.toDataURL(url, { margin: 1, width: 560 })).then(setQr, () => setQr(''))
   }, [url])
 
   return (

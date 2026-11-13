@@ -372,8 +372,8 @@ button.link {
   align-items: stretch;
 }
 .qr {
-  width: 200px;
-  height: 200px;
+  width: min(280px, 100%);
+  aspect-ratio: 1;
   align-self: center;
   border-radius: 8px;
   background: #fff;

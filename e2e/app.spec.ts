@@ -51,6 +51,8 @@ test('Profil anlegen, Liste erstellen, Artikel übersetzt', async ({ page, probl
   await page.getByRole('button', { name: /Los geht/ }).click()
   // Ohne Listen ist das Formular „Neue Liste“ schon offen
   if (!(await page.locator('form select').first().isVisible())) await page.getByRole('button', { name: /Neue Liste/ }).click()
+  await expect(page.getByRole('button', { name: /Liste erstellen/ })).toBeDisabled() // Name ist Pflicht (D-058)
+  await page.getByLabel('Name').fill('Barcelona')
   await page.locator('form select').first().selectOption('ES')
   await page.getByRole('button', { name: /Liste erstellen/ }).click()
   await expect(page.locator('.add input')).toBeVisible()
