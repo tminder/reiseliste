@@ -56,3 +56,11 @@ export function declineCountryChange(listId: string, code: string) {
     /* egal */
   }
 }
+
+/** Beispiele unter dem Eingabefeld, solange es nichts „Schon mal gekauft“ gibt: Menge und Artikel */
+export const EXAMPLES: [string | null, string][] = [
+  ['2', 'milch'],
+  [null, 'brot'],
+  ['500 g', 'hack'],
+  ['1 kg', 'tomaten'],
+]

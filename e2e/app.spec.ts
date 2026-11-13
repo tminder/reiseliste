@@ -89,6 +89,16 @@ test('Profil Deutsch (Schweiz): Artikel anderer erscheinen mit Schweizer Begriff
   await expect(page.locator('header')).toContainText('Tobias · 🇨🇭 DE')
 })
 
+test('Ohne „Schon mal gekauft“: Beispiele unter dem Eingabefeld (D-030)', async ({ page, problems }) => {
+  void problems
+  await seed(page)
+  await page.goto(`/#/l/${LIST}`)
+  await expect(page.locator('.add input')).toHaveAttribute('placeholder', 'Was brauchst du?')
+  await page.locator('.add input').click()
+  await page.locator('.again .chip', { hasText: '2 Milch' }).click()
+  await expect(page.locator('.item').first()).toContainText('leche')
+})
+
 test('Mengen: gleiche Einheit wird addiert, andere Einheit eigene Zeile', async ({ page, problems }) => {
   void problems
   await seed(page)

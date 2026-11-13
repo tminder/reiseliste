@@ -64,8 +64,7 @@
   "thisList": "This list",
   "myProfile": "My profile",
   "removeFromDevice": "Remove from my lists",
-  "addPlaceholder": "Item in {lang}, e.g. “{example}”",
-  "addExample": "2 milk",
+  "addPlaceholder": "What do you need?",
   "addItem": "Add item",
   "add": "Add",
   "counts": "{open} open · {done} done",
@@ -166,5 +165,6 @@
   "cat_hygiene": "Toiletries",
   "cat_baby": "Baby",
   "autoCountry": "Automatic ({country})",
-  "autoCountryHint": "Follows your location, e.g. on a round trip. In a country of your own language it keeps the previous country."
+  "autoCountryHint": "Follows your location, e.g. on a round trip. In a country of your own language it keeps the previous country.",
+  "examples": "For example – tap to add:"
 }

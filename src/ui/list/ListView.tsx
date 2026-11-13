@@ -16,7 +16,7 @@ import { ListStore, scheduleDelete, isSoleMember, knownSole, leaveList, setLastL
 import { formatQty, go } from '../format'
 import { ItemRow } from './ItemRow'
 import { ShopBar } from './ShopBar'
-import { DAY_MS, VISIT_ACCURACY_M, VISIT_RADIUS_M, countryChangeDeclined, declineCountryChange, dupKey, readVisit, saveVisit } from './helpers'
+import { DAY_MS, EXAMPLES, VISIT_ACCURACY_M, VISIT_RADIUS_M, countryChangeDeclined, declineCountryChange, dupKey, readVisit, saveVisit } from './helpers'
 import { EditSheet, MembersSheet, ShareSheet } from './sheets'
 
 /** In Safari auf dem iPhone geöffneter Listen-Link: Hinweis, wie man die Liste in die Home-Bildschirm-App holt (D-037) */
@@ -483,7 +483,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
             onBlur={() => {
               blurTimer.current = window.setTimeout(() => setInputFocused(false), 250)
             }}
-            placeholder={t('addPlaceholder', { lang: LANG_LABEL[profile.lang], example: t('addExample') })}
+            placeholder={t('addPlaceholder')}
             aria-label={t('addItem')}
           />
           <button className={`primary ${justAdded ? 'just-added' : ''}`} aria-label={t('add')} disabled={!input.trim() && !justAdded}>
@@ -520,6 +520,23 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
             </ul>
           )}
         </form>
+
+      {/* Noch nichts gekauft: Beispiele zeigen, wie man mit Menge eingibt (D-030) */}
+      {inputFocused && !input && again.length === 0 && (
+        <div className="again">
+          <span className="muted small-text">{t('examples')}</span>
+          <div className="chips">
+            {EXAMPLES.map(([qty, id]) => {
+              const text = `${qty ? qty + ' ' : ''}${nameIn(id, profile.lang, profile.region) ?? ''}`
+              return (
+                <button key={id} className="chip" onMouseDown={(e) => e.preventDefault()} onClick={() => add(text, id)}>
+                  <Plus size={14} /> {text}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {inputFocused && !input && again.length > 0 && (
         <div className="again">

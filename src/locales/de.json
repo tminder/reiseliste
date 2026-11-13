@@ -64,8 +64,7 @@
   "thisList": "Diese Liste",
   "myProfile": "Mein Profil",
   "removeFromDevice": "Aus meinen Listen entfernen",
-  "addPlaceholder": "Artikel auf {lang}, z. B. „{example}“",
-  "addExample": "2 Milch",
+  "addPlaceholder": "Was brauchst du?",
   "addItem": "Artikel hinzufügen",
   "add": "Hinzufügen",
   "counts": "{open} offen · {done} erledigt",
@@ -166,5 +165,6 @@
   "cat_hygiene": "Drogerie",
   "cat_baby": "Baby",
   "autoCountry": "Automatisch ({country})",
-  "autoCountryHint": "Wechselt mit deinem Standort, z. B. auf einer Rundreise. Im Land deiner eigenen Sprache bleibt es beim bisherigen Land."
+  "autoCountryHint": "Wechselt mit deinem Standort, z. B. auf einer Rundreise. Im Land deiner eigenen Sprache bleibt es beim bisherigen Land.",
+  "examples": "Zum Beispiel – antippen zum Hinzufügen:"
 }
