@@ -570,7 +570,8 @@ button svg,
   min-width: 0;
 }
 .brand-name {
-  font-family: Pacifico, cursive;
+  font-family: 'Kaushan Script', cursive;
+  font-size: 1.15em;
   font-weight: 400;
   line-height: 1.5;
   padding-right: 0.15em; /* Schwung des letzten Buchstabens nicht abschneiden */

@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import '@fontsource/pacifico/latin-400.css' // Schriftzug des App-Namens (D-060)
+import '@fontsource/kaushan-script/latin-400.css' // Schriftzug des App-Namens (D-060)
 import './index.css'
 import App from './App.tsx'
 import { registerSW } from 'virtual:pwa-register'
