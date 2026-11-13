@@ -65,6 +65,11 @@ export function profileLangLabel(p: { lang: Lang; region?: string }): string {
   return PROFILE_LANGS.find((o) => o.value === (p.region ?? p.lang))?.label ?? LANG_LABEL[p.lang]
 }
 
+/** Kurzform für knappe Stellen, z. B. „DE-CH“, „DE“, „ES“ */
+export function profileLangShort(p: { lang: Lang; region?: string }): string {
+  return (p.region ?? p.lang).toUpperCase()
+}
+
 export const LANG_LABEL: Record<Lang, string> = {
   de: 'Deutsch',
   en: 'English',

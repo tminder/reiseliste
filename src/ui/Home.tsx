@@ -1,7 +1,7 @@
 // Startseite: alle Listen, neue Liste anlegen, Liste beitreten (QR-Code oder Link)
 import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
 import { UserPlus, ClipboardPaste, ScanLine, LocateFixed, MapPin, Plus, Trash2, Users, X } from 'lucide-react'
-import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL, profileLangLabel } from '../data/countries'
+import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL, profileLangLabel, profileLangShort } from '../data/countries'
 import { AppLogo } from './AppLogo'
 import { countryName, t } from '../i18n'
 import { listIdFrom } from '../lib/links'
@@ -96,8 +96,8 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
         <h1 className="brand">
           <AppLogo /> {t('appName')}
         </h1>
-        <button className="ghost small" onClick={onEditProfile}>
-          {profile.name} · {profileLangLabel(profile)}
+        <button className="ghost small" onClick={onEditProfile} title={profileLangLabel(profile)}>
+          {profile.name} · {profileLangShort(profile)}
         </button>
       </header>
 
