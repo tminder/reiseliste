@@ -285,7 +285,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   const items = store.items.filter((i) => !i.deleted)
   // Wörterbuch nur für die benötigten Sprachen laden (D-053): eigene, Landessprache, Sprachen der Einträge
   const langsReady = useLanguages([profile.lang, target, ...items.map((i) => i.lang)], [profile.lang, target])
-  const suggestions = suggest(input, profile.lang)
+  const suggestions = suggest(input, profile.lang, 5, profile.region)
 
   // Bestehende Zeile zeigen: aufleuchten, Menge hüpft kurz (D-044). Nicht hinscrollen, die Leiste unten bestätigt.
   function highlight(itemId: string) {
@@ -321,7 +321,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
     markLocal(existing.id)
     highlight(existing.id)
     void store.updateItem(existing.id, { qty: sum })
-    const name = nameIn(existing.conceptId, profile.lang) ?? existing.text
+    const name = nameIn(existing.conceptId, profile.lang, profile.region) ?? existing.text
     showBar(t('qtyMerged', { name, qty: formatQty(sum) }), [{ label: t('undo'), run: () => void store.updateItem(existing.id, { qty: before }) }])
   }
 
@@ -532,7 +532,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() =>
                   void store.addItem({
-                    text: nameIn(i.conceptId, profile.lang) ?? i.text,
+                    text: nameIn(i.conceptId, profile.lang, profile.region) ?? i.text,
                     qty: null,
                     lang: i.conceptId ? profile.lang : i.lang,
                     conceptId: i.conceptId,
@@ -540,7 +540,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
                   })
                 }
               >
-                <Plus size={14} /> {nameIn(i.conceptId, profile.lang) ?? i.text}
+                <Plus size={14} /> {nameIn(i.conceptId, profile.lang, profile.region) ?? i.text}
               </button>
             ))}
           </div>
@@ -561,7 +561,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           <section key={cat} className="group">
             <h3 data-flip={cat}>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
             {groups.get(cat)!.map((item) => (
-              <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
+              <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
             ))}
           </section>
         ))}
@@ -582,7 +582,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
             </button>
           </h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
+            <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
           ))}
         </section>
       )}

@@ -311,6 +311,16 @@ button.link {
   color: #fff;
   font-weight: 700;
 }
+/* Grösserer Tippbereich (rund 48 px), der Kreis bleibt gleich gross */
+.check {
+  position: relative;
+}
+.check::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+}
 .checked .check {
   background: var(--accent);
 }
@@ -548,6 +558,10 @@ button svg,
 .hint-ok svg,
 .brand svg {
   vertical-align: -0.15em;
+}
+.app-logo {
+  flex: none;
+  border-radius: 7px;
 }
 .brand {
   display: flex;

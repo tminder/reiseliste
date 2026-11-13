@@ -150,7 +150,7 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Das Icon zeigt einen weiss gefüllten Einkaufswagen, der leicht schräg auf einer dunklen, S-förmig geschwungenen Strasse (#1e293b) fährt. Petrolfarbener Grund (#14b8a6), keine weiteren Details. Quelle ist `public/favicon.svg`. Daraus entstehen mit `rsvg-convert` favicon-32, icon-192/512, apple-touch-icon (180 px, ohne Rundung, weil iOS selbst rundet) und icon-maskable-512 (Motiv auf 80 % verkleinert, Strasse läuft bis zum Rand).
 - **Begründung:** Entscheidung des Inhabers (Variante „i-b“). Der gefüllte Wagen bleibt auch in Home-Bildschirm-Grösse gut lesbar. Die Strasse verbindet Einkaufen und Unterwegs-Sein. iOS zeigt auf dem Home-Bildschirm nur PNG-Symbole, deshalb die PNG-Dateien.
-- **Folgen:** Bereits installierte PWAs zeigen das neue Icon erst nach dem Entfernen und erneuten Hinzufügen zum Home-Bildschirm.
+- **Folgen:** Bereits installierte PWAs zeigen das neue Icon erst nach dem Entfernen und erneuten Hinzufügen zum Home-Bildschirm. Dasselbe Icon steht in der App neben dem Namen „Proviant“ (Listenübersicht und Profil).
 
 ## D-027 · Community-Funktionen nicht im MVP, später als Modul
 
@@ -335,5 +335,11 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Die Liste hat nur noch eine Ansicht, Wunsch des Inhabers. Das Eingabefeld steht immer oben. Jeder offene Artikel zeigt Tipp (💡), Fotos (📷, mit Laden) und „Ich hole das“ (✋); der Begriff in der Landessprache öffnet die Zeigen-Karte (D-032). Die Schrift hat die Grösse der früheren Bearbeiten-Ansicht. Löschen (✕) gibt es nur bei abgehakten Artikeln, damit offene nicht versehentlich verschwinden. Wer einen offenen Artikel loswerden will, hakt ihn ab und löscht ihn dann. Der Knopf „Ladenansicht/Bearbeiten“ und die Hinweise „Ladenansicht eingeschaltet · zurück“ entfallen.
 - **Einkauf beginnt** (unsichtbar): beim ersten Abhaken oder beim Öffnen direkt im Supermarkt (D-020). Ab dann wird ein Ladenbesuch erfasst (D-043), und der Laden wird einmal genauer geprüft (D-046).
 - **Begründung:** Zwei Ansichten mit automatischem Wechsel waren schwer zu verstehen; im Laden will man auch schnell etwas ergänzen.
-- **Folgen:** Mehr Knöpfe pro Zeile. Die grosse Ladenschrift fällt weg.
+- **Folgen:** Mehr Knöpfe pro Zeile. Die grosse Ladenschrift fällt weg. Der Kreis zum Abhaken bleibt 30 px gross, reagiert aber auf einen Bereich von rund 50 px (Wunsch des Inhabers).
+
+## D-056 · Profilsprache mit Länder-Abweichung: Deutsch (Schweiz)
+
+- **Entscheidung:** Im Profil stehen „Deutsch (Deutschland, Österreich)“ und „Deutsch (Schweiz)“ getrennt zur Wahl. Mit „Deutsch (Schweiz)“ erscheinen Artikel in der eigenen Sprache mit den Schweizer Begriffen aus `de-CH.json` (Rahm, Poulet, Peperoni, Glace …), auch Artikel, die andere eingetragen haben, und die Vorschläge beim Tippen zeigen sie ebenfalls. Ein selbst getippter Text wird nur ersetzt, wenn er genau ein Name des Artikels ist („Sahne“ → „Rahm“), Zusätze bleiben („Schwarze Schokolade“). Gespeichert wird das als `region` im Profil auf dem Gerät; bei den Mitgliedern der Liste steht weiter nur die Sprache. Ein Schweizer Browser (`de-CH`, `de-LI`) wählt die Schweizer Variante vor. Die Auswahl steht in `PROFILE_LANGS` (`src/data/countries.ts`); weitere Abweichungen (z. B. Spanisch Mexiko) lassen sich dort ergänzen.
+- **Begründung:** Wunsch des Inhabers: Schweizer sollen ihre eigenen Wörter sehen, Deutsche und Österreicher die standarddeutschen.
+- **Folgen:** Österreichische Begriffe (Obers, Topfen, Paradeiser) gibt es nicht als eigene Variante. Wer auf einem neuen Gerät ein bestehendes Mitglied wählt (D-029), bekommt die Sprache ohne Abweichung und muss sie im Profil nachstellen.
 

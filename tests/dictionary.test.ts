@@ -1,7 +1,7 @@
 // Prüft das Wörterbuch auf Formfehler und fehlende Übersetzungen (S-002, D-053). Läuft bei jedem Push vor dem Build.
 import { beforeAll, describe, expect, it } from 'vitest'
 import { CATEGORY_LABEL, CATEGORY_ORDER, CONCEPT_BY_ID, CONCEPTS, LANGS, VARIANTS, loadLangFiles, type Lang, type Names } from '../src/data/dictionary'
-import { COUNTRIES } from '../src/data/countries'
+import { COUNTRIES, PROFILE_LANGS } from '../src/data/countries'
 import { THANKS, WHERE_IS } from '../src/data/phrases'
 import { OFF_CATEGORY } from '../src/lib/photos'
 import { normalize } from '../src/lib/translate'
@@ -41,6 +41,11 @@ describe('Wörterbuch', () => {
   it('verweist von jedem Land nur auf vorhandene Abweichungen der eigenen Sprache', () => {
     const bad = COUNTRIES.filter((c) => c.variant && !VARIANTS[c.lang]?.includes(c.variant)).map((c) => c.code)
     expect(bad).toEqual([])
+  })
+
+  it('bietet im Profil jede Sprache an, Abweichungen nur mit vorhandener Datei (D-056)', () => {
+    expect(LANGS.filter((l) => !PROFILE_LANGS.some((o) => o.value === l))).toEqual([])
+    expect(PROFILE_LANGS.filter((o) => o.region && !VARIANTS[o.lang]?.includes(o.region)).map((o) => o.value)).toEqual([])
   })
 
   it('nutzt nur bekannte Abteilungen', () => {

@@ -1,13 +1,12 @@
 // Profil anlegen oder ändern: Name und Sprache (D-041), auf neuem Gerät bestehendes Mitglied wählen (D-029)
 import { useEffect, useState } from 'react'
-import { ShoppingCart } from 'lucide-react'
-import { LANGS, type Lang } from '../data/dictionary'
-import { LANG_LABEL } from '../data/countries'
+import { LANG_LABEL, PROFILE_LANGS } from '../data/countries'
 import { setUiLang, t } from '../i18n'
 import { MAX } from '../lib/limits'
 import { memberProfiles, profileStore, type Profile } from '../lib/store'
 import { AppVersion } from './AppVersion'
-import { guessLang } from './format'
+import { guessProfileLang } from './format'
+import { AppLogo } from './AppLogo'
 
 
 export function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile) => void; onCancel?: () => void; listId?: string }) {
@@ -24,17 +23,19 @@ export function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile
     }
   }, [listId, hasProfile])
   const [name, setName] = useState(existing?.name ?? '')
-  const [lang, setLangState] = useState<Lang>(existing?.lang ?? guessLang())
+  // Sprache samt Länder-Abweichung, z. B. „de-CH“ (D-056)
+  const [choice, setChoiceState] = useState<string>(existing ? (existing.region ?? existing.lang) : guessProfileLang())
+  const option = PROFILE_LANGS.find((o) => o.value === choice) ?? PROFILE_LANGS[0]
   const [, rerender] = useState(0)
-  const setLang = (l: Lang) => {
-    setUiLang(l) // Oberfläche wechselt sofort mit
-    setLangState(l)
+  const setChoice = (v: string) => {
+    setUiLang(PROFILE_LANGS.find((o) => o.value === v)?.lang ?? 'de') // Oberfläche wechselt sofort mit
+    setChoiceState(v)
     rerender((n) => n + 1)
   }
   return (
     <main className="page narrow">
       <h1 className="brand">
-        <ShoppingCart size={26} strokeWidth={2.2} /> {t('appName')}
+        <AppLogo /> {t('appName')}
       </h1>
       <p className="lead">{t('tagline')}</p>
       {known.length > 0 && (
@@ -54,7 +55,7 @@ export function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile
         className="card stack"
         onSubmit={(e) => {
           e.preventDefault()
-          if (name.trim()) onDone({ name: name.trim(), lang })
+          if (name.trim()) onDone({ name: name.trim(), lang: option.lang, ...(option.region ? { region: option.region } : {}) })
         }}
       >
         <label>
@@ -63,10 +64,10 @@ export function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile
         </label>
         <label>
           {t('whichLanguage')}
-          <select value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
-            {LANGS.map((l) => (
-              <option key={l} value={l}>
-                {LANG_LABEL[l]}
+          <select value={choice} onChange={(e) => setChoice(e.target.value)}>
+            {PROFILE_LANGS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
               </option>
             ))}
           </select>

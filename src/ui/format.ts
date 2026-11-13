@@ -11,6 +11,11 @@ export function guessLang(): Lang {
   return LANGS.includes(l) ? l : 'de'
 }
 
+/** Profilsprache aus dem Browser, z. B. „de-CH“ für Schweizer Browser, sonst die Sprache (D-056) */
+export function guessProfileLang(): string {
+  return /^de-(CH|LI)$/i.test(navigator.language) ? 'de-CH' : guessLang()
+}
+
 /** „heute 10:58“, „gestern 18:20“ oder „3.11. 09:15“ (D-036) */
 export function formatWhen(iso: string): string {
   const d = new Date(iso)

@@ -202,13 +202,15 @@ export function nameIn(conceptId: string | null | undefined, lang: Lang, region?
 }
 
 /** Vorschläge beim Tippen: Artikel, deren Name (in der eigenen Sprache) mit der Eingabe beginnt oder sie enthält. */
-export function suggest(input: string, lang: Lang, limit = 5): { id: string; name: string }[] {
+/** Vorschläge beim Tippen. region: eigene Länder-Abweichung (z. B. de-CH) – deren Namen werden angezeigt und erkannt */
+export function suggest(input: string, lang: Lang, limit = 5, region?: string): { id: string; name: string }[] {
   const n = normalize(splitQuantity(input).text)
   if (n.length < 2) return []
   const starts: { id: string; name: string }[] = []
   const contains: { id: string; name: string }[] = []
   for (const c of CONCEPTS) {
-    const raw = namesIn(c.id, lang)
+    const own = (region && REGION.get(region)?.[c.id]) || []
+    const raw = [...own, ...namesIn(c.id, lang)]
     if (!raw.length) continue
     const names = raw.map(normalize)
     if (names.some((x) => x.startsWith(n))) starts.push({ id: c.id, name: raw[0] })

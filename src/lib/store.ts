@@ -35,6 +35,8 @@ export interface Item {
 export interface Profile {
   name: string
   lang: Lang
+  /** Länder-Abweichung der eigenen Sprache im Wörterbuch, z. B. „de-CH“ (D-056) */
+  region?: string
 }
 
 export type SyncState = 'local-only' | 'offline' | 'syncing' | 'synced' | 'error'
@@ -96,7 +98,7 @@ const LS = {
 
 export const profileStore = {
   get: () => LS.get<Profile | null>('rl:profile', null),
-  set: (p: Profile) => LS.set('rl:profile', { name: p.name, lang: p.lang }), // früheres Wohnland fällt weg (D-041)
+  set: (p: Profile) => LS.set('rl:profile', { name: p.name, lang: p.lang, ...(p.region ? { region: p.region } : {}) }), // früheres Wohnland fällt weg (D-041)
 }
 
 export function knownLists(): ShoppingList[] {

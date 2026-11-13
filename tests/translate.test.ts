@@ -97,6 +97,12 @@ describe('Länder-Abweichungen (D-053)', () => {
     // „presunto“ heisst in Portugal Rohschinken und bleibt es auch, wenn pt-BR geladen ist
     expect(findConcept('presunto', 'pt')).toBe('rohschinken')
   })
+
+  it('schlägt in der eigenen Abweichung den eigenen Begriff vor (D-056)', () => {
+    expect(suggest('Sahn', 'de', 5, 'de-CH').find((s) => s.id === 'sahne')?.name).toBe('Rahm')
+    expect(suggest('Rah', 'de', 5, 'de-CH').find((s) => s.id === 'sahne')?.name).toBe('Rahm')
+    expect(suggest('Sahn', 'de').find((s) => s.id === 'sahne')?.name).toBe('Sahne')
+  })
 })
 
 describe('listIdFrom', () => {

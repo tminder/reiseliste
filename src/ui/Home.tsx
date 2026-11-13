@@ -1,7 +1,8 @@
 // Startseite: alle Listen, neue Liste anlegen, Liste beitreten (QR-Code oder Link)
 import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
-import { UserPlus, ClipboardPaste, ScanLine, LocateFixed, MapPin, Plus, ShoppingCart, Trash2, Users, X } from 'lucide-react'
-import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from '../data/countries'
+import { UserPlus, ClipboardPaste, ScanLine, LocateFixed, MapPin, Plus, Trash2, Users, X } from 'lucide-react'
+import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL, profileLangLabel } from '../data/countries'
+import { AppLogo } from './AppLogo'
 import { countryName, t } from '../i18n'
 import { listIdFrom } from '../lib/links'
 import { detectCountry } from '../lib/country'
@@ -93,10 +94,10 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
     <main className="page narrow">
       <header className="topbar">
         <h1 className="brand">
-          <ShoppingCart size={26} strokeWidth={2.2} /> {t('appName')}
+          <AppLogo /> {t('appName')}
         </h1>
         <button className="ghost small" onClick={onEditProfile}>
-          {profile.name} · {LANG_LABEL[profile.lang]}
+          {profile.name} · {profileLangLabel(profile)}
         </button>
       </header>
 

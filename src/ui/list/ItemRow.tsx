@@ -7,7 +7,7 @@ import { t } from '../../i18n'
 import { THANKS, WHERE_IS } from '../../data/phrases'
 import { FEATURES } from '../../features'
 import { reducedMotion, slideOut } from '../../lib/motion'
-import { nameIn } from '../../lib/translate'
+import { exactConcept, nameIn } from '../../lib/translate'
 import { hasPhotos } from '../../lib/photos'
 import { ListStore, type Item } from '../../lib/store'
 import { formatQty } from '../format'
@@ -23,6 +23,7 @@ export function ItemRow({
   shopTag,
   shopName,
   viewer,
+  viewerRegion,
   me,
   onDeleted,
   onLocalChange,
@@ -37,6 +38,8 @@ export function ItemRow({
   shopTag?: string
   shopName?: string
   viewer: Lang
+  /** Länder-Abweichung der eigenen Sprache, z. B. de-CH (D-056) */
+  viewerRegion?: string
   /** Name aus dem Profil (für „Ich hole das“, D-031) */
   me: string
   /** Für „Gelöscht · Rückgängig“ (D-042) */
@@ -63,7 +66,10 @@ export function ItemRow({
   const override_ = FEATURES.community ? item.localOverride : null
   const local = override_ || nameIn(item.conceptId, target, region)
   // Gross: der Artikel in der Sprache des Betrachters (sonst wie eingegeben). Klein: Landessprache.
-  const own = (item.lang !== viewer && nameIn(item.conceptId, viewer)) || item.text
+  // Gleiche Sprache, andere Länder-Abweichung (Sahne → Rahm, D-056): nur ersetzen, wenn der Text genau ein Name des Artikels ist,
+  // sonst gingen Zusätze verloren („Schwarze Schokolade“)
+  const sameLangSwap = item.lang === viewer && !!viewerRegion && exactConcept(item.text, item.lang) === item.conceptId
+  const own = ((item.lang !== viewer || sameLangSwap) && nameIn(item.conceptId, viewer, viewerRegion)) || item.text
   const hints = item.conceptId ? CONCEPT_BY_ID.get(item.conceptId)?.hint : undefined
   const hint = hints?.[viewer] ?? hints?.en
 

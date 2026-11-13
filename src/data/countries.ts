@@ -42,6 +42,28 @@ export const COUNTRIES: Country[] = [
 
 export const COUNTRY_BY_CODE = new Map(COUNTRIES.map((c) => [c.code, c]))
 
+/**
+ * Sprachauswahl im Profil (D-056): Sprachen mit eigener Länder-Abweichung im Wörterbuch erscheinen getrennt,
+ * z. B. Deutsch (Schweiz) mit „Rahm“, „Poulet“, „Peperoni“. value = Sprache bzw. Abweichung wie „de-CH“.
+ */
+export const PROFILE_LANGS: { value: string; lang: Lang; region?: string; label: string }[] = [
+  { value: 'de', lang: 'de', label: 'Deutsch (Deutschland, Österreich)' },
+  { value: 'de-CH', lang: 'de', region: 'de-CH', label: 'Deutsch (Schweiz)' },
+  { value: 'en', lang: 'en', label: 'English' },
+  { value: 'es', lang: 'es', label: 'Español' },
+  { value: 'pt', lang: 'pt', label: 'Português' },
+  { value: 'fr', lang: 'fr', label: 'Français' },
+  { value: 'it', lang: 'it', label: 'Italiano' },
+  { value: 'nl', lang: 'nl', label: 'Nederlands' },
+  { value: 'hr', lang: 'hr', label: 'Hrvatski' },
+  { value: 'el', lang: 'el', label: 'Ελληνικά' },
+]
+
+/** Bezeichnung der Profilsprache, z. B. „Deutsch (Schweiz)“ */
+export function profileLangLabel(p: { lang: Lang; region?: string }): string {
+  return PROFILE_LANGS.find((o) => o.value === (p.region ?? p.lang))?.label ?? LANG_LABEL[p.lang]
+}
+
 export const LANG_LABEL: Record<Lang, string> = {
   de: 'Deutsch',
   en: 'English',

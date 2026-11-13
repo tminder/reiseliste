@@ -78,6 +78,17 @@ test('Länder-Abweichung: in Mexiko „crema“ statt „nata“, Wörterbuch wi
   await expect(rows(page)).toHaveCount(1)
 })
 
+test('Profil Deutsch (Schweiz): Artikel anderer erscheinen mit Schweizer Begriff (D-056)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [{ ...item(1, 'Sahne', 'sahne'), author: 'Anna' }, item(2, 'Schwarze Schokolade', 'schokolade')])
+  await page.addInitScript(() => localStorage.setItem('rl:profile', JSON.stringify({ name: 'Tobias', lang: 'de', region: 'de-CH' })))
+  await page.goto(`/#/l/${LIST}`)
+  await expect(page.locator('.item .main').first()).toContainText('Rahm')
+  await expect(page.locator('.item .main', { hasText: 'Schwarze Schokolade' })).toHaveCount(1)
+  await page.locator('a.back').click()
+  await expect(page.locator('header')).toContainText('Deutsch (Schweiz)')
+})
+
 test('Mengen: gleiche Einheit wird addiert, andere Einheit eigene Zeile', async ({ page, problems }) => {
   void problems
   await seed(page)
