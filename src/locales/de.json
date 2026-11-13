@@ -32,8 +32,6 @@
   "listDeleted": "„{name}“ gelöscht",
   "countryChanged": "Reiseland auf {country} geändert",
   "undo": "Rückgängig",
-  "added": "hinzugefügt",
-  "qtyIncreased": "Menge erhöht",
   "version": "Version",
   "motionOff": "Animationen aus (Bewegung reduzieren)",
   "qtyMerged": "{name} war schon auf der Liste: jetzt {qty}",

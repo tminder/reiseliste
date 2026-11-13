@@ -510,13 +510,8 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
                   >
                     {confirmSid === s.id ? <Check size={16} strokeWidth={3} className="confirm-check" /> : null}
                     {s.name} <span className="muted">→ {nameIn(s.id, target, region)}</span>
-                    {confirmSid === s.id ? (
-                      <span className="on-list">
-                        {openQtys.get(s.id)?.some((q) => canAddQty(q, splitQuantity(input).qty)) ? t('qtyIncreased') : t('added')}
-                      </span>
-                    ) : (
-                      onListLabel(s.id) && <span className="on-list">✓ {onListLabel(s.id)}</span>
-                    )}
+                    {/* Bestätigung nur über ✓ und Farbe, ohne Text (zu kurz zum Lesen, D-044) */}
+                    {confirmSid !== s.id && onListLabel(s.id) && <span className="on-list">✓ {onListLabel(s.id)}</span>}
                   </button>
                 </li>
               ))}
