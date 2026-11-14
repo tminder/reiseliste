@@ -373,8 +373,9 @@ test('Onboarding: Beispiel-Liste vorne, Hinweise im Ablauf (D-068)', async ({ pa
   await page.getByLabel('Dein Name').fill('Tobias')
   await page.getByRole('button', { name: /Los geht/ }).click()
   await expect(page.locator('form')).toHaveCount(0) // Formular erst nach Antippen
+  await expect(page.locator('.empty-home')).toContainText('Erstelle deine erste Einkaufsliste')
   await page.getByRole('button', { name: /Neue Liste/ }).click()
-  await expect(page.locator('form')).toContainText('Eine Liste pro Reise')
+  await expect(page.locator('form select').first().locator('option[value="auto"]')).toHaveText('Automatisch (nach Standort)')
   await page.getByLabel('Name').fill('Barcelona')
   await page.locator('form select').first().selectOption('ES')
   await page.getByRole('button', { name: /Liste erstellen/ }).click()

@@ -1218,3 +1218,6 @@ main.page:has(.group) {
   font-size: 1.35rem;
   margin: 4px 0 0;
 }
+.empty-home {
+  margin: 4px 0;
+}

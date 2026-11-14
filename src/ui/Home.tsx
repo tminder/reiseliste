@@ -123,6 +123,8 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
           <UserPlus size={18} /> {t('joinList')}
         </button>
       </div>
+      {/* Noch keine Liste: kurz sagen, wie es losgeht (D-068) */}
+      {lists.length === 0 && !panel && <p className="muted empty-home">{t('noListsYet')}</p>}
       {scan && (
         <Suspense fallback={null}>
           <QrScanner
@@ -146,8 +148,6 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
               <X size={16} />
             </button>
           </div>
-          {/* Erste Liste: kurz erklären, wozu Liste und Reiseland da sind (D-068) */}
-          {lists.length === 0 && <p className="muted small-text">{t('newListHint')}</p>}
           {/* Name zuerst und Pflicht (D-058) */}
           <label>
             {t('name')}
@@ -164,7 +164,10 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
                 setCountry(e.target.value)
               }}
             >
-              <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(country)?.flag ?? ''} ${countryName(country)}` })}</option>
+              {/* Ohne Standort kein Land in Klammern: es wäre nur geraten (D-067) */}
+              <option value="auto">
+                {loc.available ? t('autoCountry', { country: `${COUNTRY_BY_CODE.get(country)?.flag ?? ''} ${countryName(country)}` }) : t('autoCountryPlain')}
+              </option>
               <CountryOptions lang={profile.lang} />
             </select>
           </label>
