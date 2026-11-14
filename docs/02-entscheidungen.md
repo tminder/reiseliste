@@ -428,3 +428,9 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Eine Testperson schrieb „Muesches mir denn mal erkläre. Chume no nid ganz drus“. Der Zweck muss auf dem ersten Bildschirm klar sein, die Schritte danach erklären sich, wenn sie anstehen.
 - **Folgen:** Wirkung mit neuen Testpersonen prüfen (5-Sekunden-Test: „Was macht diese App?“). Ohne Beispiel hängt der erste Eindruck allein am Text.
 
+
+## D-069 · Erstes Abhaken frischt Standort und Laden auf
+
+- **Entscheidung:** Beim ersten Abhaken nach dem Öffnen einer Liste prüft die App still im Hintergrund nochmals Laden und Reiseland: die Ladensuche genau (Position höchstens 10 Sekunden alt, neue Suche ab 75 m Abstand, D-046), bei „Automatisch“ das Land mit einem höchstens 5 Minuten alten Ergebnis (sonst 30 Minuten, D-040). Das gilt auch, wenn der Einkauf schon beim Öffnen im Laden begonnen hat; höchstens eine genaue Ladenprüfung pro Minute.
+- **Begründung:** Wunsch des Inhabers. Wer die Liste unterwegs öffnet und erst im Laden abhakt, soll den richtigen Laden und das richtige Land sehen, ohne etwas zu tippen.
+- **Folgen:** Ohne Zustimmung zum Standort (D-066) passiert nichts. Ein Abhaken kann einen kurzen Standortzugriff auslösen.

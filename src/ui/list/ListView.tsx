@@ -166,7 +166,12 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
     setShopping(true)
     setAutoShop(s)
   }
-  const onChecked = () => setShopping(true)
+  // Erstes Abhaken nach dem Öffnen: Standort und Laden im Hintergrund auffrischen (D-069)
+  const [firstChecked, setFirstChecked] = useState(false)
+  const onChecked = () => {
+    setShopping(true)
+    setFirstChecked(true)
+  }
   const chooseShop = (s: Shop | null) => {
     setChosenShop(id, s)
     setShop(s)
@@ -226,7 +231,8 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
     // Nur bei „Automatisch“ (D-057); bei fest gewähltem Land bleibt es dabei
     if (!listCountry || !autoCountry) return
     let alive = true
-    void detectCountry(30 * 60 * 1000).then((code) => {
+    // Beim ersten Abhaken nach dem Öffnen erneut prüfen, dann mit höchstens 5 Minuten altem Ergebnis (D-069)
+    void detectCountry((firstChecked ? 5 : 30) * 60 * 1000).then((code) => {
       if (!alive || !code || code === listCountry || !COUNTRY_BY_CODE.has(code)) return
       if (COUNTRY_BY_CODE.get(code)?.lang === profile.lang) return
       if (countryChangeDeclined(id, code)) return
@@ -236,9 +242,9 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
     return () => {
       alive = false
     }
-    // Nur beim Öffnen der Liste bzw. wenn sie geladen ist oder auf „Automatisch“ gestellt wird
+    // Nur beim Öffnen der Liste bzw. wenn sie geladen ist, auf „Automatisch“ gestellt wird oder beim ersten Abhaken
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, !!listCountry, autoCountry])
+  }, [id, !!listCountry, autoCountry, firstChecked])
 
   const country = list ? COUNTRY_BY_CODE.get(list.country) : undefined
   const target: Lang = country?.lang ?? 'en'
@@ -342,7 +348,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           <span className="sub">
             {country?.flag} {countryName(list.country)} · {LANG_LABEL[target]}
           </span>
-          <ShopBar shop={shop} chosenAt={shopChosenAt} shopping={shopping} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
+          <ShopBar shop={shop} chosenAt={shopChosenAt} shopping={shopping} firstChecked={firstChecked} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
         </div>
         <SyncBadge state={store.sync} error={lastSyncError} />
         {/* Teilen direkt in der Kopfzeile, das Menü ist für den Rest (D-017) */}

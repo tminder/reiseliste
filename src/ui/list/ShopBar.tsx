@@ -9,6 +9,7 @@ export function ShopBar({
   shop,
   chosenAt,
   shopping,
+  firstChecked,
   onChoose,
   onSuggest,
   onArrived,
@@ -18,6 +19,8 @@ export function ShopBar({
   chosenAt: number | null
   /** Einkauf hat begonnen: löst eine genauere Prüfung im Hintergrund aus (D-046, D-055) */
   shopping: boolean
+  /** Erstes Abhaken nach dem Öffnen: Laden nochmals genau prüfen, auch wenn der Einkauf schon lief (D-069) */
+  firstChecked?: boolean
   onChoose: (s: Shop | null) => void
   onSuggest: (s: Shop | null) => void
   onArrived: (s: Shop) => void
@@ -105,7 +108,7 @@ export function ShopBar({
       })
     else void detect(false, true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shopping])
+  }, [shopping, firstChecked])
 
   // Beim Öffnen der Liste still prüfen: ohne gewählten Laden den Vorschlag, mit Laden ob man noch dort ist
   useEffect(() => {
