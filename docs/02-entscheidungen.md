@@ -464,3 +464,9 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Die Knöpfe einer Artikelkarte (💡, 📷, ✋, …, ✕) haben keinen Rahmen mehr, nur ruhige graue Symbole mit gleich grosser Tippfläche (38 px); ein aktiver Knopf ist petrolfarben hinterlegt. Kreis und Knöpfe stehen senkrecht mittig neben Name und Übersetzung. Aufbau der Karte: Kreis | Name, darunter Übersetzung und Person | Knöpfe; Fotos und Hinweise darunter über die ganze Breite.
 - **Begründung:** Wahl des Inhabers (Variante C aus fünf). Seit die ganze Karte abhakt (D-073), müssen die Knöpfe nicht mehr auffallen; Rahmen wirkten schwer und unruhig.
 - **Folgen:** Die Zeile mit Übersetzung und Person nutzt nicht mehr die ganze Breite, sondern endet links der Knöpfe; lange Begriffe brechen früher um.
+
+## D-075 · Ladensuche nur im Reiseland
+
+- **Entscheidung:** Die App sucht Läden nur, wenn man sich im Reiseland der Liste befindet. Vor jeder automatischen Suche prüft sie das aktuelle Land (Nominatim, Ergebnis höchstens 30 Minuten alt, D-040); verglichen wird das Land ohne Region (Schweiz = Schweiz, egal ob Deutschschweiz oder Romandie). Ist man woanders oder in einem nicht unterstützten Land, gibt es keine Suche und keine Ladenzeile, und Produktfotos nutzen keinen Laden. Ein von Hand gewählter Laden bleibt sichtbar, bis man sich davon entfernt (D-033). Lässt sich das Land nicht bestimmen (kein Standort, Dienst nicht erreichbar), verhält sich die App wie bisher.
+- **Begründung:** Wunsch des Inhabers. Wer zu Hause eine Liste für die Ferien vorbereitet, braucht keinen Laden um die Ecke.
+- **Folgen:** Eine zusätzliche Abfrage bei Nominatim, höchstens alle 30 Minuten. Laden und Vorschlag sind wie bisher pro Gerät, nicht für alle Mitglieder gleich (D-033).

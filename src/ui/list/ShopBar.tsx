@@ -4,12 +4,14 @@ import { Check, LocateFixed, MapPin, Pencil, Store as StoreIcon } from 'lucide-r
 import { t } from '../../i18n'
 import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
 import { RETRY_S } from './helpers'
+import { cachedCountry, detectCountry } from '../../lib/country'
 
 export function ShopBar({
   shop,
   chosenAt,
   shopping,
   firstChecked,
+  country,
   onChoose,
   onSuggest,
   onArrived,
@@ -21,6 +23,8 @@ export function ShopBar({
   shopping: boolean
   /** Erstes Abhaken nach dem Öffnen: Laden nochmals genau prüfen, auch wenn der Einkauf schon lief (D-069) */
   firstChecked?: boolean
+  /** Reiseland der Liste (App-Code, z. B. „CH-DE“): gesucht wird nur, wenn man dort ist (D-075) */
+  country: string
   onChoose: (s: Shop | null) => void
   onSuggest: (s: Shop | null) => void
   onArrived: (s: Shop) => void
@@ -38,12 +42,27 @@ export function ShopBar({
     dismissed?: boolean
   }>(() => recentSuggestion() ?? {})
   const [attempt, setAttempt] = useState(0)
+  // Nicht im Reiseland (D-075): keine Ladensuche, keine Anzeige. undefined = unbekannt, dann wie bisher
+  const iso = (code: string) => code.split('-')[0]
+  const [away, setAway] = useState<boolean | undefined>(() => {
+    const here = cachedCountry()
+    return here ? iso(here) !== iso(country) : undefined
+  })
 
   const lastCheck = useRef(0)
 
   /** manual: „Neu suchen“ – immer neue Anfrage. Sonst still im Hintergrund, neue Anfrage nur nach Ortswechsel. */
   async function detect(manual = false, precise = false) {
     lastCheck.current = Date.now()
+    if (!manual) {
+      // Erst prüfen, ob man im Reiseland ist; null = Land nicht unterstützt, also sicher nicht das Reiseland
+      const here = await detectCountry(30 * 60 * 1000)
+      if (here !== undefined) {
+        const isAway = here === null || iso(here) !== iso(country)
+        setAway(isAway)
+        if (isAway) return
+      }
+    }
     if (manual) setAttempt(0)
     // Ohne bisheriges Ergebnis „Suche …“ zeigen, sonst bleibt der bisherige Laden ruhig stehen
     setState((s) => ({ ...s, loading: manual || !s.shops, more: manual ? s.more : false }))
@@ -69,7 +88,7 @@ export function ShopBar({
   }
 
   // Den angezeigten Vorschlag nach oben melden (für die Fotos)
-  const suggestion = !shop && !state.dismissed ? (state.shops?.[0] ?? null) : null
+  const suggestion = !shop && !state.dismissed && !away ? (state.shops?.[0] ?? null) : null
   useEffect(() => {
     onSuggest(suggestion)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -143,6 +162,9 @@ export function ShopBar({
 
   const current = shop ?? (state.dismissed ? null : (state.shops?.[0] ?? null))
   const others = (state.shops ?? []).filter((x) => x.id !== current?.id).slice(0, 5)
+
+  // Nicht im Reiseland: nichts anzeigen (ein gewählter Laden bleibt sichtbar, bis man sich entfernt, D-033)
+  if (away && !shop) return null
 
   if (state.loading && !current)
     return (

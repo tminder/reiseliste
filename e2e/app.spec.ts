@@ -228,6 +228,27 @@ test.describe('Laden', () => {
   })
 })
 
+test.describe('Nicht im Reiseland (D-075)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 47.37, longitude: 8.54, accuracy: 20 } })
+  test('keine Ladensuche, keine Ladenzeile', async ({ page, problems }) => {
+    void problems
+    const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
+    let overpass = 0
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'ch', state: 'Zürich' } })))
+    await page.route(/interpreter/, (r) => {
+      overpass++
+      return r.fulfill(json({ elements: [{ type: 'node', id: 1, lat: 47.3701, lon: 8.54, tags: { shop: 'supermarket', name: 'Coop' } }] }))
+    })
+    await seed(page, [item(1, 'Milch', 'milch')])
+    await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+    await page.goto(`/#/l/${LIST}`)
+    await expect(page.locator('.add input')).toBeVisible()
+    await page.waitForTimeout(1500)
+    await expect(page.locator('.shopline')).toHaveCount(0)
+    expect(overpass).toBe(0)
+  })
+})
+
 test.describe('Reiseland nach Sprache (D-041)', () => {
   test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
   const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
