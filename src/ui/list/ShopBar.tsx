@@ -12,7 +12,6 @@ export function ShopBar({
   onChoose,
   onSuggest,
   onArrived,
-  onHere,
 }: {
   shop: Shop | null
   /** Zeitpunkt der Wahl von Hand: in den ersten 30 Minuten wird der Laden nie automatisch verworfen */
@@ -22,8 +21,6 @@ export function ShopBar({
   onChoose: (s: Shop | null) => void
   onSuggest: (s: Shop | null) => void
   onArrived: (s: Shop) => void
-  /** Nach jeder Suche: Supermarkt, in dem man gerade steht, sonst null (D-065) */
-  onHere?: (s: Shop | null) => void
 }) {
   // Letztes Ergebnis (bis 12 h) sofort zeigen, geprüft wird im Hintergrund (D-033)
   const [state, setState] = useState<{
@@ -52,7 +49,6 @@ export function ShopBar({
       setAttempt(0)
       setState((s) => ({ shops: result.shops, inside: result.inside, more: manual ? s.more : false, dismissed: result.fresh ? false : s.dismissed }))
       const here = isInsideSupermarket(result)
-      onHere?.(here)
       if (here) onArrived(here)
     } catch (e) {
       const err = e instanceof NearbyError ? e : new NearbyError(t('errShopUnknown'), true)

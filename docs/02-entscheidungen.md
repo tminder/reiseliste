@@ -179,7 +179,7 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-031 · Wer holt was: „Ich hole das“
 
-- **Entscheidung:** Offene Artikel haben einen Hand-Knopf (✋), sobald mindestens zwei Mitglieder im selben Laden sind (D-065). Ein Tipp trägt den eigenen Namen ein (Spalte `items.claimed_by`), alle sehen „🙋 Anna holt das“ bzw. „Du holst das“. Nochmals tippen gibt ihn frei. Tippt jemand anderes, übernimmt er den Artikel. Beim Abhaken wird der Eintrag zurückgesetzt (Wunsch des Inhabers). Der Hinweis bricht nicht um.
+- **Entscheidung:** Offene Artikel haben einen Hand-Knopf (✋), sobald die Liste mindestens zwei Mitglieder hat (D-065). Ein Tipp trägt den eigenen Namen ein (Spalte `items.claimed_by`), alle sehen „🙋 Anna holt das“ bzw. „Du holst das“. Nochmals tippen gibt ihn frei. Tippt jemand anderes, übernimmt er den Artikel. Beim Abhaken wird der Eintrag zurückgesetzt (Wunsch des Inhabers). Der Hinweis bricht nicht um.
 - **Begründung:** Verhindert Doppelkäufe, wenn sich die Gruppe im Laden aufteilt. Hauptnutzen einer geteilten Liste.
 - **Folgen:** `supabase/schema.sql` muss erneut ausgeführt werden (neue Spalte). Bis dahin schlägt nur das Speichern eines „Ich hole das“ fehl, alle anderen Änderungen werden weiter synchronisiert, weil `claimed_by` nur mitgeschickt wird, wenn es gesetzt ist. Der Name wird in der Datenschutzerklärung erwähnt.
 
@@ -332,7 +332,7 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-055 · Eine Ansicht statt Laden- und Bearbeiten-Ansicht
 
-- **Entscheidung:** Die Liste hat nur noch eine Ansicht, Wunsch des Inhabers. Das Eingabefeld steht immer oben. Jeder offene Artikel zeigt Tipp (💡), Fotos (📷, mit Laden) und, wenn ihr zu zweit im selben Laden seid, „Ich hole das“ (✋, D-065); der Begriff in der Landessprache öffnet die Zeigen-Karte (D-032). Die Schrift hat die Grösse der früheren Bearbeiten-Ansicht. Löschen (✕) gibt es nur bei abgehakten Artikeln, damit offene nicht versehentlich verschwinden. Wer einen offenen Artikel loswerden will, hakt ihn ab und löscht ihn dann. Der Knopf „Ladenansicht/Bearbeiten“ und die Hinweise „Ladenansicht eingeschaltet · zurück“ entfallen.
+- **Entscheidung:** Die Liste hat nur noch eine Ansicht, Wunsch des Inhabers. Das Eingabefeld steht immer oben. Jeder offene Artikel zeigt Tipp (💡), Fotos (📷, mit Laden) und in Listen mit mindestens zwei Personen „Ich hole das“ (✋, D-065); der Begriff in der Landessprache öffnet die Zeigen-Karte (D-032). Die Schrift hat die Grösse der früheren Bearbeiten-Ansicht. Löschen (✕) gibt es nur bei abgehakten Artikeln, damit offene nicht versehentlich verschwinden. Wer einen offenen Artikel loswerden will, hakt ihn ab und löscht ihn dann. Der Knopf „Ladenansicht/Bearbeiten“ und die Hinweise „Ladenansicht eingeschaltet · zurück“ entfallen.
 - **Einkauf beginnt** (unsichtbar): beim ersten Abhaken oder beim Öffnen direkt im Supermarkt (D-020). Ab dann wird ein Ladenbesuch erfasst (D-043), und der Laden wird einmal genauer geprüft (D-046).
 - **Begründung:** Zwei Ansichten mit automatischem Wechsel waren schwer zu verstehen; im Laden will man auch schnell etwas ergänzen.
 - **Folgen:** Mehr Knöpfe pro Zeile. Die grosse Ladenschrift fällt weg. Der Kreis zum Abhaken bleibt 30 px gross, reagiert aber auf einen Bereich von rund 50 px (Wunsch des Inhabers).
@@ -395,8 +395,8 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Wunsch des Inhabers. Traditionell und taiwanisch als Grundlage, weil Taiwan das erste chinesischsprachige Reiseland ist.
 - **Folgen:** Kommt später China dazu, braucht es eine Länder-Abweichung in vereinfachten Schriftzeichen (`zh-CN.json`, D-053), die alle Begriffe abdeckt. Open Food Facts hat für Taiwan wenige Produkte, Fotos fehlen oft. Die Übersetzungen sind ein ungeprüfter Entwurf (S-001).
 
-## D-065 · „Ich hole das“ nur, wenn ihr im selben Laden seid
+## D-065 · „Ich hole das“ nur in Listen mit mindestens zwei Personen
 
-- **Entscheidung:** Der Hand-Knopf (D-031) erscheint nur, wenn mindestens zwei Mitglieder (verschiedene Namen) die Liste gerade offen haben und im selben Laden stehen. „Im Laden“ heisst: Die Ladensuche erkennt, dass man in einem Supermarkt steht (D-020), oder man hat den Laden von Hand gewählt und der Einkauf läuft (D-055). Jedes Gerät meldet dafür über Supabase Realtime Presence im Kanal der Liste nur Prüfsummen (SHA-256, mit der Listen-ID vermischt) von Name und OpenStreetMap-Kennung des Ladens: Andere Geräte können vergleichen, aber weder Laden noch Namen ablesen. Nichts wird gespeichert, die Meldung verschwindet beim Schliessen der Liste oder Verlassen des Ladens. Wer einen Artikel übernommen hat, sieht den Knopf weiterhin, um ihn wieder freizugeben. Der Hinweis „Anna holt das“ bleibt für alle sichtbar.
-- **Begründung:** Wunsch des Inhabers. Aufteilen lohnt sich nur, wenn man gemeinsam einkauft; sonst ist der Knopf überflüssig.
-- **Folgen:** Hat die andere Person die App nicht offen oder ist ihr Laden nicht erkannt, fehlt der Knopf. Ohne Supabase (Demo) gibt es ihn nie. Neuer Datenfluss, in der Datenschutzerklärung beschrieben. Noch nicht mit zwei echten Handys getestet (S-047).
+- **Entscheidung:** Der Hand-Knopf (D-031) erscheint nur, wenn die Liste mindestens zwei Mitglieder hat (verschiedene Personen; dieselbe Person auf mehreren Geräten zählt einmal, D-036). Geprüft wird beim Öffnen der Liste, das letzte Ergebnis merkt sich das Gerät (`rl:sole:`). Unabhängig davon, wo man ist. Wer einen Artikel übernommen hat, sieht den Knopf weiterhin, um ihn wieder freizugeben. Der Hinweis „Anna holt das“ bleibt für alle sichtbar.
+- **Begründung:** Wunsch des Inhabers: einfach halten. Allein braucht man niemandem zu sagen, wer etwas holt. Eine Variante, die nur bei gemeinsamem Einkauf im selben Laden den Knopf zeigt, wurde verworfen (zu unzuverlässig und gibt den Aufenthaltsort an andere Mitglieder weiter).
+- **Folgen:** Kommt jemand neu dazu, erscheint der Knopf erst beim nächsten Öffnen der Liste. Ohne Supabase (Demo) gibt es ihn nie.
