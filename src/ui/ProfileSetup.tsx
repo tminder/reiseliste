@@ -13,11 +13,13 @@ export function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile
   const existing = profileStore.get()
   const hasProfile = !!existing
   // Neues Gerät, Link auf eine Liste: bestehende Mitglieder zur Auswahl anbieten (D-029)
-  const [known, setKnown] = useState<Profile[]>([])
+  const [loaded, setKnown] = useState<{ list: string; members: Profile[] } | null>(null)
+  // Nur die Mitglieder der Liste, die gerade in der Adresse steht: Ändert man nur den Teil nach „#“, lädt die Seite nicht neu
+  const known = listId && loaded?.list === listId ? loaded.members : []
   useEffect(() => {
     if (!listId || hasProfile) return
     let alive = true
-    void memberProfiles(listId).then((m) => alive && setKnown(m))
+    void memberProfiles(listId).then((m) => alive && setKnown({ list: listId, members: m }))
     return () => {
       alive = false
     }
