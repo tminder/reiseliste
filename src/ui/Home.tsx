@@ -9,7 +9,7 @@ import { useLocation, type LocationState } from './useLocation'
 import { countryName, t } from '../i18n'
 import { listIdFrom } from '../lib/links'
 import { detectCountry } from '../lib/country'
-import { locationAlreadyAllowed, locationConsent, setLocationConsent } from '../lib/nearby'
+import { locationAlreadyAllowed, setLocationConsent } from '../lib/nearby'
 import { MAX } from '../lib/limits'
 import { ListStore, DELETE_GRACE_MS, flushDeletes, recentDelete, scheduleDelete, undoDelete, isSoleMember, knownSole, knownLists, leaveList, localLastChange, localPeople, remoteOverview, supabase, type Profile } from '../lib/store'
 import { AppVersion } from './AppVersion'
@@ -109,6 +109,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
           {profile.name} · {profileLangShort(profile)}
         </button>
       </header>
+      <LocationAsk loc={loc} onAllowed={() => setLocTick((n) => n + 1)} />
 
       {/* Neu / Öffnen als waagrechte, scrollbare Knopfleiste; das Formular erscheint darunter */}
       <div className="action-row">
@@ -167,7 +168,9 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
               <CountryOptions lang={profile.lang} />
             </select>
           </label>
+          {/* Solange oben die Standort-Frage steht, hier kein zweiter Hinweis */}
           <LocationNeeded
+            hidden={loc.unasked}
             loc={loc}
             onAllowed={() => {
               setAuto(true)
@@ -247,10 +250,6 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
           </button>
         </div>
       )}
-      <LocationAsk
-        loc={loc}
-        onAllowed={() => setLocTick((n) => n + 1)}
-      />
       <footer className="footer">
         <a href="#/datenschutz">{t('privacy')}</a>
         <AppVersion />
@@ -330,15 +329,13 @@ function JoinList({ onClose, onScan, focusLink }: { onClose: () => void; onScan:
  * und nicht, wenn der Browser den Standort schon erlaubt.
  */
 function LocationAsk({ loc, onAllowed }: { loc: LocationState; onAllowed: () => void }) {
-  const [open, setOpen] = useState(() => locationConsent() === null)
-  const { refresh } = loc
+  const { unasked: open, refresh } = loc
   useEffect(() => {
     if (!open) return
     void locationAlreadyAllowed().then((ok) => {
       if (!ok) return
       setLocationConsent('yes')
       refresh()
-      setOpen(false)
     })
   }, [open, refresh])
   if (!open) return null
@@ -350,10 +347,7 @@ function LocationAsk({ loc, onAllowed }: { loc: LocationState; onAllowed: () => 
       <div className="row-gap">
         <button
           className="primary small"
-          onClick={() => {
-            setOpen(false)
-            void loc.allow().then((ok) => ok && onAllowed())
-          }}
+          onClick={() => void loc.allow().then((ok) => ok && onAllowed())}
         >
           {t('allowLocation')}
         </button>
@@ -361,8 +355,7 @@ function LocationAsk({ loc, onAllowed }: { loc: LocationState; onAllowed: () => 
           className="ghost small"
           onClick={() => {
             setLocationConsent('no')
-            setOpen(false)
-            loc.refresh()
+            refresh()
           }}
         >
           {t('notNow')}

@@ -4,8 +4,8 @@ import { t } from '../i18n'
 import type { LocationState } from './useLocation'
 
 /** Hinweis unter der Reiseland-Auswahl, solange „Automatisch“ mangels Standort nicht wählbar ist */
-export function LocationNeeded({ loc, onAllowed }: { loc: LocationState; onAllowed?: () => void }) {
-  if (loc.available) return null
+export function LocationNeeded({ loc, onAllowed, hidden }: { loc: LocationState; onAllowed?: () => void; hidden?: boolean }) {
+  if (loc.available || hidden) return null
   return (
     <p className="muted small-text">
       {loc.denied ? (

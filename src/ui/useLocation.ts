@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getPosition, locationConsent, NearbyError, setLocationConsent } from '../lib/nearby'
 
-export type LocationState = { available: boolean; denied: boolean; allow: () => Promise<boolean>; refresh: () => void }
+export type LocationState = { available: boolean; denied: boolean; /** noch nicht gefragt (weder zugestimmt noch „Nicht jetzt“) */ unasked: boolean; allow: () => Promise<boolean>; refresh: () => void }
 
 export function useLocation(): LocationState {
   const [consent, setConsent] = useState(locationConsent)
@@ -34,6 +34,6 @@ export function useLocation(): LocationState {
     }
   }, [])
   const refresh = useCallback(() => setConsent(locationConsent()), [])
-  return { available: consent === 'yes' && !denied, denied, allow, refresh }
+  return { available: consent === 'yes' && !denied, denied, unasked: consent === null, allow, refresh }
 }
 
