@@ -24,7 +24,7 @@
   "orNewProfile": "Oder neu:",
   "newList": "Neue Liste",
   "travelCountry": "Reiseland",
-  "listNamePlaceholder": "z. B. Ferienwohnung Lissabon",
+  "listNamePlaceholder": "z. B. Einkaufsliste {country}",
   "createList": "Liste erstellen",
   "yourLists": "Deine Listen",
   "removeList": "Liste entfernen",

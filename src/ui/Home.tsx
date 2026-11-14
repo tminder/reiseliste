@@ -152,7 +152,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
           {/* Name zuerst und Pflicht (D-058) */}
           <label>
             {t('name')}
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder')} maxLength={MAX.listName} required />
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder', { country: countryName(country) })} maxLength={MAX.listName} required />
           </label>
           <label>
             {t('travelCountry')}

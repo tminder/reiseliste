@@ -351,7 +351,7 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-058 · Neue Liste: Name zuerst und Pflicht
 
-- **Entscheidung:** Im Formular „Neue Liste“ steht der Name zuoberst, vor dem Reiseland, und muss ausgefüllt sein; „Liste erstellen“ ist bis dahin ausgegraut. Den automatischen Namen „Einkauf Spanien“ gibt es nicht mehr. Beim Teilen ist der QR-Code grösser (bis 280 px breit, schärfer erzeugt), damit er sich leichter scannen lässt.
+- **Entscheidung:** Im Formular „Neue Liste“ steht der Name zuoberst, vor dem Reiseland, und muss ausgefüllt sein; „Liste erstellen“ ist bis dahin ausgegraut. Den automatischen Namen „Einkauf Spanien“ gibt es nicht mehr. Als Beispiel im leeren Feld steht „z. B. Einkaufsliste Spanien“ mit dem gewählten bzw. vorausgewählten Reiseland (Wunsch des Inhabers). Beim Teilen ist der QR-Code grösser (bis 280 px breit, schärfer erzeugt), damit er sich leichter scannen lässt.
 - **Begründung:** Wunsch des Inhabers. Mit automatischem Reiseland (D-057) sagt das Land wenig über die Liste aus, ein eigener Name unterscheidet die Listen in der Übersicht.
 - **Folgen:** Ein Schritt mehr beim Anlegen.
 

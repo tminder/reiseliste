@@ -24,7 +24,7 @@
   "orNewProfile": "Or new:",
   "newList": "New list",
   "travelCountry": "Travel country",
-  "listNamePlaceholder": "e.g. Lisbon apartment",
+  "listNamePlaceholder": "e.g. Shopping list {country}",
   "createList": "Create list",
   "yourLists": "Your lists",
   "removeList": "Remove list",
