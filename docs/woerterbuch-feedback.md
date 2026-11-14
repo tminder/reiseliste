@@ -1,12 +1,12 @@
 # Wörterbuch aus Nutzer-Rückmeldungen verbessern (D-059)
 
-Stand: 2026-11-13 · Ohne Muttersprachler, KI vorerst nur von Hand (ohne API).
+Stand: 2026-11-14 · Ohne Muttersprachler, KI vorerst nur von Hand (ohne API).
 
 ## Ablauf
 
 1. **Sammeln (läuft automatisch in der App):**
    - Eingaben ohne Übersetzung („keine Übersetzung“) meldet die App anonym, ausser die eigene Sprache ist die Landessprache.
-   - Auf der Zeigen-Karte gibt es „Begriff stimmt nicht?“, wahlweise mit besserem Begriff.
+   - Im Menü „…“ eines Artikels gibt es „Begriff stimmt nicht?“, wahlweise mit besserem Begriff.
    - Jede Meldung pro Gerät nur einmal. Gespeichert in Supabase (`dictionary_feedback`), 180 Tage.
 2. **Exportieren (von Hand):** GitHub → Actions → „Wörterbuch-Feedback exportieren“ → Run workflow.
    Standard: nur Einträge von mindestens 2 verschiedenen Personen. Ergebnis: `docs/woerterbuch-feedback.csv`.

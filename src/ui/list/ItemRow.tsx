@@ -77,6 +77,7 @@ export function ItemRow({
   const hints = item.conceptId ? CONCEPT_BY_ID.get(item.conceptId)?.hint : undefined
   const hint = hints?.[viewer] ?? hints?.en
   const [showMenu, setShowMenu] = useState(false)
+  const [showReport, setShowReport] = useState(false)
   const photosOk = !!local && !!shopTag && hasPhotos(item.conceptId, override_)
 
   // Abhaken bzw. wieder öffnen (D-044): erst Häkchen und Durchstreichen zeigen, dann rutscht die Zeile an ihren neuen Platz
@@ -124,6 +125,12 @@ export function ItemRow({
           <Lightbulb size={18} />
         </button>
       )}
+      {photosOk && !item.checked && (
+        // Fotos direkt sichtbar (D-073): oft gebraucht, und das Symbol zeigt, dass es Bilder gibt
+        <button className={`ghost small ${showPhotos ? 'active' : ''}`} aria-label={t('photos')} onClick={() => setShowPhotos(!showPhotos)}>
+          <Camera size={18} />
+        </button>
+      )}
       {!item.checked && (canClaim || claimedBy === me) && (
         // „Ich hole das“ (D-031): antippen übernimmt den Artikel, nochmals antippen gibt ihn frei.
         // Nur in Listen mit mindestens zwei Personen (D-065), oder um die eigene Übernahme zu lösen
@@ -140,9 +147,9 @@ export function ItemRow({
         </button>
       )}
       {local && !item.checked && (
-        // Kleines Menü (D-073): Zeigen-Karte fürs Personal und Produktfotos
+        // Kleines Menü (D-073): Zeigen-Karte fürs Personal, Rückmeldung zur Übersetzung (D-059)
         <div className="menu-wrap">
-          <button className={`ghost small ${showMenu || showPhotos ? 'active' : ''}`} aria-label={t('itemMore')} aria-expanded={showMenu} onClick={() => setShowMenu(!showMenu)}>
+          <button className={`ghost small ${showMenu ? 'active' : ''}`} aria-label={t('itemMore')} aria-expanded={showMenu} onClick={() => setShowMenu(!showMenu)}>
             <MoreHorizontal size={18} />
           </button>
           {showMenu && (
@@ -158,15 +165,15 @@ export function ItemRow({
                 >
                   <Presentation size={18} /> {t('showStaff')}
                 </button>
-                {photosOk && (
+                {supabase && (
                   <button
                     role="menuitem"
                     onClick={() => {
                       setShowMenu(false)
-                      setShowPhotos(!showPhotos)
+                      setShowReport(true)
                     }}
                   >
-                    <Camera size={18} /> {showPhotos ? t('hidePhotos') : t('photos')}
+                    <ThumbsDown size={18} /> {t('wrongTerm')}
                   </button>
                 )}
               </div>
@@ -236,13 +243,13 @@ export function ItemRow({
           <PhotoStrip country={country} conceptId={item.conceptId} term={local} store={shopTag} storeName={shopName} />
         </div>
       )}
-      {showCard && local && (
-        <ShowCard
-          term={local}
-          qty={item.qty}
+      {showCard && local && <ShowCard term={local} qty={item.qty} own={own} target={target} onClose={() => setShowCard(false)} />}
+      {showReport && local && (
+        <ReportSheet
           own={own}
-          target={target}
-          onClose={() => setShowCard(false)}
+          term={local}
+          flag={COUNTRY_BY_CODE.get(country)?.flag ?? ''}
+          onClose={() => setShowReport(false)}
           // „Begriff stimmt nicht“ (D-059): Artikel in der Sprache des Betrachters, damit die Meldungen vergleichbar sind
           feedback={{ kind: 'wrong', itemText: own, itemLang: viewer, conceptId: item.conceptId, country, targetLang: target, term: local }}
         />
@@ -258,18 +265,13 @@ function ShowCard({
   own,
   target,
   onClose,
-  feedback,
 }: {
   term: string
   qty: string | null
   own: string
   target: Lang
   onClose: () => void
-  feedback: Feedback
 }) {
-  // „Begriff stimmt nicht?“ (D-059): null = zu, 'open' = Eingabe, 'sent' = gedankt
-  const [report, setReport] = useState<null | 'open' | 'sent' | 'failed'>(null)
-  const [suggestion, setSuggestion] = useState('')
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', onKey)
@@ -284,32 +286,57 @@ function ShowCard({
       </p>
       <p className="showcard-thanks" lang={target}>{THANKS[target]}</p>
       <p className="showcard-own">{own}</p>
-      {supabase && (
-        <div className="showcard-report" onClick={(e) => e.stopPropagation()}>
-          {report === null && (
-            <button className="link" onClick={() => setReport('open')}>
-              <ThumbsDown size={14} /> {t('wrongTerm')}
-            </button>
-          )}
-          {report === 'open' && (
-            <form
-              className="stack"
-              onSubmit={(e) => {
-                e.preventDefault()
-                void sendFeedback({ ...feedback, suggestion }).then((ok) => setReport(ok ? 'sent' : 'failed'))
-              }}
-            >
-              <input value={suggestion} onChange={(e) => setSuggestion(e.target.value)} placeholder={t('betterTermOptional')} maxLength={80} />
-              <button className="primary small">{t('send')}</button>
-            </form>
-          )}
-          {report === 'sent' && <span className="muted small-text">{t('feedbackThanks')}</span>}
-          {report === 'failed' && <span className="muted small-text">{t('feedbackFailed')}</span>}
-        </div>
-      )}
       <button className="ghost showcard-close" onClick={onClose} aria-label={t('close')}>
         <X size={28} />
       </button>
+    </div>
+  )
+}
+
+/** Rückmeldung „Begriff stimmt nicht?“ (D-059) aus dem Menü „…“ (D-073): nicht auf der Zeigen-Karte, die sieht das Personal */
+function ReportSheet({ own, term, flag, onClose, feedback }: { own: string; term: string; flag: string; onClose: () => void; feedback: Feedback }) {
+  const [state, setState] = useState<'open' | 'sending' | 'sent' | 'failed'>('open')
+  const [suggestion, setSuggestion] = useState('')
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+        <h2>{t('wrongTerm')}</h2>
+        <p>
+          {own} → {flag} <strong>{term}</strong>
+        </p>
+        {state === 'sent' || state === 'failed' ? (
+          <>
+            <p className="muted">{state === 'sent' ? t('feedbackThanks') : t('feedbackFailed')}</p>
+            <div className="row">
+              <button className="primary" onClick={onClose}>
+                {t('close')}
+              </button>
+            </div>
+          </>
+        ) : (
+          <form
+            className="stack"
+            onSubmit={(e) => {
+              e.preventDefault()
+              setState('sending')
+              void sendFeedback({ ...feedback, suggestion }).then((ok) => setState(ok ? 'sent' : 'failed'))
+            }}
+          >
+            <label>
+              {t('betterTermOptional')}
+              <input value={suggestion} onChange={(e) => setSuggestion(e.target.value)} maxLength={80} autoFocus />
+            </label>
+            <div className="row">
+              <button className="primary" disabled={state === 'sending'}>
+                {t('send')}
+              </button>
+              <button type="button" className="ghost" onClick={onClose}>
+                {t('cancel')}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   )
 }
