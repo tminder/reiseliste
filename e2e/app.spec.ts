@@ -359,7 +359,7 @@ test.describe('Standort schon erlaubt', () => {
 test('Onboarding: Beispiel-Liste vorne, Hinweise im Ablauf (D-068)', async ({ page, problems }) => {
   void problems
   await page.goto('/')
-  await expect(page.locator('h2')).toContainText('gemeinsame Einkaufsliste')
+  await expect(page.locator('h2')).toContainText('Einkaufsliste für die Reise')
   await expect(page.locator('.demo-list')).toHaveCount(0) // kein Beispielbild (Wunsch des Inhabers)
   await page.getByLabel('Dein Name').fill('Tobias')
   await page.getByRole('button', { name: /Los geht/ }).click()

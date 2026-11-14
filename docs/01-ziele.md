@@ -2,7 +2,7 @@
 
 Stand: 2026-11-14
 
-**Kurz:** Eine geteilte Einkaufsliste für Reisegruppen. Jeder schreibt in seiner Sprache, und im Laden steht jeder Artikel in der Landessprache, so wie er im Regal heisst. Primär ist die App eine Einkaufsliste, die Übersetzung ins Reiseland kommt an zweiter Stelle; so stellt sie sich auch vor (D-068).
+**Kurz:** Eine geteilte Einkaufsliste für Reisegruppen. Jeder schreibt in seiner Sprache, und im Laden steht jeder Artikel in der Landessprache, so wie er im Regal heisst. Die App ist eine Einkaufsliste; ihr Alleinstellungsmerkmal ist die Sprache des Reiselands. Teilen ist selbstverständlich und wird nur nebenbei erwähnt (D-068).
 
 ## Kernziele
 

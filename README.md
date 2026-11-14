@@ -1,6 +1,6 @@
 # 🛒 Cart on the Road
 
-Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im Laden steht jeder Artikel zusätzlich in der **Landessprache des Reiselands**.
+Einkaufsliste für Reisende: Du schreibst in deiner Sprache, und im Laden steht jeder Artikel zusätzlich in der **Landessprache des Reiselands**. Teilen mit der Reisegruppe inklusive.
 
 > MVP. Das Konzept liegt im Claude-Projekt „Einkaufsliste Travel App“. Ziele, Entscheidungen, offene Fragen und technische Schulden stehen in [`docs/`](docs/README.md).
 
