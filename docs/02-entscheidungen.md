@@ -347,7 +347,7 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Beim Anlegen einer Liste steht das Reiseland auf „Automatisch (🇪🇸 Spanien)“ (Wunsch des Inhabers). In Klammern steht das Land, das gerade gilt: der Standort, wenn man in einem Land mit anderer Sprache ist, sonst die Vorauswahl (D-041). Ohne erklärenden Text, damit das Formular kurz bleibt. Erst in „Liste bearbeiten“ steht darunter: „Wechselt mit deinem Standort, ausser im Land deiner Sprache.“ Wer ein Land fest wählt, schaltet den automatischen Wechsel für diese Liste ab. Dieselbe Auswahl steht in „Liste bearbeiten“. Gespeichert in der Spalte `lists.auto_country` (Standard: an, gilt für alle Mitglieder). Bestehende Listen sind automatisch, wie bisher (D-040).
 - **Begründung:** Auf Reisen soll die Liste ohne Handgriff die Sprache des Landes zeigen, in dem man gerade ist. Wer für ein bestimmtes Land plant (z. B. zu Hause für die Ferien), wählt es fest.
-- **Folgen:** `supabase/schema.sql` muss erneut ausgeführt werden (neue Spalte). Bis dahin klappt nur das Speichern eines fest gewählten Landes nicht.
+- **Folgen:** `supabase/schema.sql` muss erneut ausgeführt werden (neue Spalte). Bis dahin scheitert das Speichern neuer Listen und geänderter Listen-Einstellungen in Supabase („Could not find the 'auto_country' column“); die Liste bleibt auf dem Gerät und wird nach dem Ausführen nachgeliefert.
 
 ## D-058 · Neue Liste: Name zuerst und Pflicht
 
