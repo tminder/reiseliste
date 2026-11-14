@@ -15,6 +15,7 @@ import { MAX } from '../../lib/limits'
 import { ListStore, scheduleDelete, isSoleMember, knownSole, leaveList, setLastList, lastSyncError, supabase, type Item, type Profile, type SyncState } from '../../lib/store'
 import { formatQty, go } from '../format'
 import { AppHint } from './AppHint'
+import { ListHints } from './ListHints'
 import { ItemRow } from './ItemRow'
 import { ShopBar } from './ShopBar'
 import { DAY_MS, EXAMPLES, VISIT_ACCURACY_M, VISIT_RADIUS_M, countryChangeDeclined, declineCountryChange, dupKey, readVisit, saveVisit } from './helpers'
@@ -405,6 +406,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
         </div>
       </header>
       <AppHint id={id} />
+      <ListHints items={store.items} translated={target !== profile.lang} alone={sole !== false} onShare={() => setShowShare(true)} />
 
       {countryMoved && list.country === countryMoved.to && (
         <div className="toast">

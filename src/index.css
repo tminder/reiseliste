@@ -1213,3 +1213,63 @@ main.page:has(.group) {
   margin: 4px 8px;
   background: var(--line);
 }
+
+/* Beispiel-Liste auf dem ersten Bildschirm (D-068) */
+.demo-list {
+  display: grid;
+  gap: 8px;
+  pointer-events: none;
+  user-select: none;
+}
+.demo-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.demo-item {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  column-gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  animation: demo-in 0.35s ease both;
+}
+.demo-item .check {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-width: 2px;
+  border-style: solid;
+}
+.demo-txt {
+  font-weight: 650;
+}
+.demo-sub {
+  grid-column: 2;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.demo-item.checked .demo-txt,
+.demo-item.checked .demo-sub {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+@keyframes demo-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .demo-item {
+    animation: none;
+  }
+}
+.onboard-title {
+  font-size: 1.35rem;
+  margin: 4px 0 0;
+}

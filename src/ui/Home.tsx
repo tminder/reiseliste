@@ -148,6 +148,8 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
               </button>
             )}
           </div>
+          {/* Erste Liste: kurz erklären, wozu Liste und Reiseland da sind (D-068) */}
+          {lists.length === 0 && <p className="muted small-text">{t('newListHint')}</p>}
           {/* Name zuerst und Pflicht (D-058) */}
           <label>
             {t('name')}

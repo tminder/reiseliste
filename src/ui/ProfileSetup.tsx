@@ -7,6 +7,7 @@ import { memberProfiles, profileStore, type Profile } from '../lib/store'
 import { AppVersion } from './AppVersion'
 import { guessProfileLang } from './format'
 import { AppLogo } from './AppLogo'
+import { DemoList } from './DemoList'
 
 
 export function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile) => void; onCancel?: () => void; listId?: string }) {
@@ -37,7 +38,18 @@ export function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile
       <h1 className="brand">
         <AppLogo /> <span className="brand-name">{t('appName')}</span>
       </h1>
-      <p className="lead">{t('tagline')}</p>
+      {hasProfile ? (
+        <p className="lead">{t('tagline')}</p>
+      ) : (
+        // Erster Start (D-068): zuerst die gemeinsame Einkaufsliste, dann die Übersetzung – mit Beispiel statt Erklärung
+        <>
+          <h2 className="onboard-title">
+            {listId ? (known[0] ? t('invitedBy', { name: known[0].name }) : t('invitedTitle')) : t('onboardTitle')}
+          </h2>
+          <p className="lead">{t('onboardText')}</p>
+          <DemoList lang={option.lang} />
+        </>
+      )}
       {known.length > 0 && (
         <div className="card stack">
           <p>{t('knownMember')}</p>
