@@ -115,7 +115,8 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
 
       {/* Neu / Öffnen als waagrechte, scrollbare Knopfleiste; das Formular erscheint darunter */}
       <div className="action-row">
-        <button className={`ghost ${panel === 'new' ? 'active' : ''}`} onClick={() => setPanel(panel === 'new' ? null : 'new')}>
+        {/* Ohne Listen ist „Neue Liste“ der hervorgehobene nächste Schritt (D-068) */}
+        <button className={`${lists.length === 0 ? 'primary' : 'ghost'} ${panel === 'new' ? 'active' : ''}`} onClick={() => setPanel(panel === 'new' ? null : 'new')}>
           <Plus size={18} /> {t('newList')}
         </button>
         {/* Beitreten: QR-Code scannen oder Link einfügen (D-037, D-038) */}
