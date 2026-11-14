@@ -434,3 +434,9 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Beim ersten Abhaken nach dem Öffnen einer Liste prüft die App still im Hintergrund nochmals Laden und Reiseland: die Ladensuche genau (Position höchstens 10 Sekunden alt, neue Suche ab 75 m Abstand, D-046), bei „Automatisch“ das Land mit einem höchstens 5 Minuten alten Ergebnis (sonst 30 Minuten, D-040). Das gilt auch, wenn der Einkauf schon beim Öffnen im Laden begonnen hat; höchstens eine genaue Ladenprüfung pro Minute.
 - **Begründung:** Wunsch des Inhabers. Wer die Liste unterwegs öffnet und erst im Laden abhakt, soll den richtigen Laden und das richtige Land sehen, ohne etwas zu tippen.
 - **Folgen:** Ohne Zustimmung zum Standort (D-066) passiert nichts. Ein Abhaken kann einen kurzen Standortzugriff auslösen.
+
+## D-070 · Fusszeile am unteren Rand
+
+- **Entscheidung:** „Datenschutz & Kontakt“ und die Version stehen auf der Startseite und beim ersten Start am unteren Bildschirmrand, auch wenn die Seite fast leer ist. Bei langen Seiten folgen sie wie bisher nach dem Inhalt.
+- **Begründung:** Rückmeldung des Inhabers: Direkt unter „Noch keine Liste.“ wirkte die Fusszeile wie Inhalt und zog den Blick weg vom nächsten Schritt.
+- **Folgen:** Keine.

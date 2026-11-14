@@ -667,8 +667,14 @@ button.sync-badge.warn {
   margin-left: auto;
 }
 
+/* Fusszeile am unteren Rand, auch wenn die Seite fast leer ist (D-070) */
+.page:has(> .footer) {
+  min-height: 100dvh;
+  box-sizing: border-box;
+}
 .footer {
-  margin-top: 12px;
+  margin-top: auto;
+  padding-top: 12px;
   text-align: center;
   font-size: 0.8rem;
 }
