@@ -88,7 +88,7 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-015 · Eigene Sprache gross, Landessprache klein mit Flagge
 
-- **Entscheidung:** Jeder Artikel zeigt gross den Namen in der Sprache des Betrachters, wie eingegeben oder aus dem Wörterbuch übersetzt. Darunter steht klein der Begriff in der Landessprache, mit der Flagge des Reiselands davor („🇪🇸 leche“), und wer den Artikel eingetragen hat. Diese Zeile nutzt die ganze Breite der Karte unter Name und Knöpfen (Wunsch des Inhabers). Reine Zahlen werden als Anzahl angezeigt („2x“), Mengen mit Einheit bleiben unverändert („500 g“). Im Kopf der Liste stehen nur Land und Sprache, z. B. „Spanien · Español“. Tipps zu Artikeln (z. B. „Kochsahne und Schlagsahne sind oft getrennt beschriftet“) erscheinen bei offenen Artikeln auf Antippen des Glühbirnen-Symbols.
+- **Entscheidung:** Jeder Artikel zeigt gross den Namen in der Sprache des Betrachters, wie eingegeben oder aus dem Wörterbuch übersetzt. Darunter steht klein der Begriff in der Landessprache, mit der Flagge des Reiselands davor („🇪🇸 leche“), und wer den Artikel eingetragen hat. Diese Zeile steht unter dem Namen, links von den Knöpfen (D-074). Reine Zahlen werden als Anzahl angezeigt („2x“), Mengen mit Einheit bleiben unverändert („500 g“). Im Kopf der Liste stehen nur Land und Sprache, z. B. „Spanien · Español“. Tipps zu Artikeln (z. B. „Kochsahne und Schlagsahne sind oft getrennt beschriftet“) erscheinen bei offenen Artikeln auf Antippen des Glühbirnen-Symbols.
 - **Begründung:** Wunsch des Inhabers: Die eigene Sprache ist schneller lesbar, die Ansicht wird kompakter, und die Tipps stören beim Schreiben der Liste nicht.
 
 ## D-016 · Automatisch aktuell: neue App-Versionen und Listendaten
@@ -458,3 +458,9 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Ein Tipp irgendwo auf eine Artikelkarte hakt den Artikel ab bzw. öffnet ihn wieder, auch auf Name und Übersetzung. Ausgenommen sind die Knöpfe auf der Karte (💡, ✋, …, ✕), die Fotos und Eingabefelder. Der Kreis bleibt als Anzeige und eigener Knopf. Die Übersetzung ist kein eigener Knopf mehr. Hinter dem Knopf „…“ (offene Artikel mit Übersetzung) liegt ein kleines Menü mit „Dem Personal zeigen“ (Zeigen-Karte, D-032) und „Begriff stimmt nicht?“ (D-059, nur mit Supabase). Der Kamera-Knopf für Produktfotos (D-010) bleibt direkt auf der Karte, weil man ihn oft braucht und das Symbol zeigt, dass es Bilder gibt.
 - **Begründung:** Wunsch des Inhabers. Eine grosse Tippfläche hilft im Laden mit einer Hand; Zeigen-Karte und Fotos braucht man seltener.
 - **Folgen:** Abhaken aus Versehen ist leichter möglich, aber harmlos: Der Artikel rutscht nach „Im Wagen“ und ein Tipp holt ihn zurück. Text auf der Karte lässt sich nicht mehr markieren.
+
+## D-074 · Knöpfe am Artikel ohne Rahmen, mittig
+
+- **Entscheidung:** Die Knöpfe einer Artikelkarte (💡, 📷, ✋, …, ✕) haben keinen Rahmen mehr, nur ruhige graue Symbole mit gleich grosser Tippfläche (38 px); ein aktiver Knopf ist petrolfarben hinterlegt. Kreis und Knöpfe stehen senkrecht mittig neben Name und Übersetzung. Aufbau der Karte: Kreis | Name, darunter Übersetzung und Person | Knöpfe; Fotos und Hinweise darunter über die ganze Breite.
+- **Begründung:** Wahl des Inhabers (Variante C aus fünf). Seit die ganze Karte abhakt (D-073), müssen die Knöpfe nicht mehr auffallen; Rahmen wirkten schwer und unruhig.
+- **Folgen:** Die Zeile mit Übersetzung und Person nutzt nicht mehr die ganze Breite, sondern endet links der Knöpfe; lange Begriffe brechen früher um.

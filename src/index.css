@@ -1275,3 +1275,57 @@ main.page:has(.group) {
 .item-menu button {
   white-space: nowrap;
 }
+
+/* Artikelkarte (D-074): Kreis | Name und Übersetzung | Knöpfe ohne Rahmen, Kreis und Knöpfe mittig; Fotos darunter über die ganze Breite */
+.item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: 12px;
+  row-gap: 3px;
+  align-items: start;
+}
+.item > .check {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  margin: 0;
+}
+.item > .body {
+  grid-column: 2;
+  grid-row: 1;
+}
+.item > .item-sub {
+  grid-column: 2;
+  grid-row: 2;
+  margin-left: 0;
+}
+.item > .item-actions {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: -6px;
+}
+.item > .item-actions:empty {
+  display: none;
+}
+.item > .item-wide {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+.item-actions > .menu-wrap {
+  display: flex;
+}
+.item-actions button.ghost.small {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  min-width: 38px;
+  min-height: 38px;
+}
+.item-actions button.ghost.small.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}

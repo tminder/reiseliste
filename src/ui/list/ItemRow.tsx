@@ -120,80 +120,83 @@ export function ItemRow({
           <span className="txt">{own}</span>
         </div>
       </div>
-      {hint && !item.checked && (
-        <button className={`ghost small ${showHint ? 'active' : ''}`} aria-label={t('tip')} onClick={() => setShowHint(!showHint)}>
-          <Lightbulb size={18} />
-        </button>
-      )}
-      {photosOk && !item.checked && (
-        // Fotos direkt sichtbar (D-073): oft gebraucht, und das Symbol zeigt, dass es Bilder gibt
-        <button className={`ghost small ${showPhotos ? 'active' : ''}`} aria-label={t('photos')} onClick={() => setShowPhotos(!showPhotos)}>
-          <Camera size={18} />
-        </button>
-      )}
-      {!item.checked && (canClaim || claimedBy === me) && (
-        // „Ich hole das“ (D-031): antippen übernimmt den Artikel, nochmals antippen gibt ihn frei.
-        // Nur in Listen mit mindestens zwei Personen (D-065), oder um die eigene Übernahme zu lösen
-        <button
-          className={`ghost small ${claimedBy === me ? 'active' : ''}`}
-          aria-label={claimedBy === me ? t('unclaim') : t('claim')}
-          title={claimedBy === me ? t('unclaim') : t('claim')}
-          onClick={() => {
-            onLocalChange(item.id)
-            void store.updateItem(item.id, { claimedBy: claimedBy === me ? null : me })
-          }}
-        >
-          <Hand size={18} />
-        </button>
-      )}
-      {local && !item.checked && (
-        // Kleines Menü (D-073): Zeigen-Karte fürs Personal, Rückmeldung zur Übersetzung (D-059)
-        <div className="menu-wrap">
-          <button className={`ghost small ${showMenu ? 'active' : ''}`} aria-label={t('itemMore')} aria-expanded={showMenu} onClick={() => setShowMenu(!showMenu)}>
-            <MoreHorizontal size={18} />
+      {/* Knöpfe ohne Rahmen, mittig neben Name und Übersetzung (D-074) */}
+      <div className="item-actions">
+        {hint && !item.checked && (
+          <button className={`ghost small ${showHint ? 'active' : ''}`} aria-label={t('tip')} onClick={() => setShowHint(!showHint)}>
+            <Lightbulb size={18} />
           </button>
-          {showMenu && (
-            <>
-              <div className="menu-backdrop" onClick={() => setShowMenu(false)} />
-              <div className="menu item-menu" role="menu">
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setShowMenu(false)
-                    setShowCard(true)
-                  }}
-                >
-                  <Presentation size={18} /> {t('showStaff')}
-                </button>
-                {supabase && (
+        )}
+        {photosOk && !item.checked && (
+          // Fotos direkt sichtbar (D-073): oft gebraucht, und das Symbol zeigt, dass es Bilder gibt
+          <button className={`ghost small ${showPhotos ? 'active' : ''}`} aria-label={t('photos')} onClick={() => setShowPhotos(!showPhotos)}>
+            <Camera size={18} />
+          </button>
+        )}
+        {!item.checked && (canClaim || claimedBy === me) && (
+          // „Ich hole das“ (D-031): antippen übernimmt den Artikel, nochmals antippen gibt ihn frei.
+          // Nur in Listen mit mindestens zwei Personen (D-065), oder um die eigene Übernahme zu lösen
+          <button
+            className={`ghost small ${claimedBy === me ? 'active' : ''}`}
+            aria-label={claimedBy === me ? t('unclaim') : t('claim')}
+            title={claimedBy === me ? t('unclaim') : t('claim')}
+            onClick={() => {
+              onLocalChange(item.id)
+              void store.updateItem(item.id, { claimedBy: claimedBy === me ? null : me })
+            }}
+          >
+            <Hand size={18} />
+          </button>
+        )}
+        {local && !item.checked && (
+          // Kleines Menü (D-073): Zeigen-Karte fürs Personal, Rückmeldung zur Übersetzung (D-059)
+          <div className="menu-wrap">
+            <button className={`ghost small ${showMenu ? 'active' : ''}`} aria-label={t('itemMore')} aria-expanded={showMenu} onClick={() => setShowMenu(!showMenu)}>
+              <MoreHorizontal size={18} />
+            </button>
+            {showMenu && (
+              <>
+                <div className="menu-backdrop" onClick={() => setShowMenu(false)} />
+                <div className="menu item-menu" role="menu">
                   <button
                     role="menuitem"
                     onClick={() => {
                       setShowMenu(false)
-                      setShowReport(true)
+                      setShowCard(true)
                     }}
                   >
-                    <ThumbsDown size={18} /> {t('wrongTerm')}
+                    <Presentation size={18} /> {t('showStaff')}
                   </button>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-      {item.checked && (
-        // Löschen nur bei Abgehakten (D-055): ein offener Artikel verschwindet nicht versehentlich
-        <button className="ghost small" aria-label={t('delete')} onClick={() => {
-          onLocalChange(item.id)
-          void slideOut(rowRef.current ? [rowRef.current] : []).then(() => {
-            void store.updateItem(item.id, { deleted: true })
-            onDeleted([item.id], own)
-          })
-        }}>
-          <X size={18} />
-        </button>
-      )}
-      {/* Landesbegriff, Mitglied, Hinweise: ganze Breite unter Name und Knöpfen */}
+                  {supabase && (
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        setShowMenu(false)
+                        setShowReport(true)
+                      }}
+                    >
+                      <ThumbsDown size={18} /> {t('wrongTerm')}
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+        {item.checked && (
+          // Löschen nur bei Abgehakten (D-055): ein offener Artikel verschwindet nicht versehentlich
+          <button className="ghost small" aria-label={t('delete')} onClick={() => {
+            onLocalChange(item.id)
+            void slideOut(rowRef.current ? [rowRef.current] : []).then(() => {
+              void store.updateItem(item.id, { deleted: true })
+              onDeleted([item.id], own)
+            })
+          }}>
+            <X size={18} />
+          </button>
+        )}
+      </div>
+      {/* Landesbegriff, Mitglied, Hinweise unter dem Namen */}
       <div className="item-sub">
         <div className="orig">
           {local ? (
