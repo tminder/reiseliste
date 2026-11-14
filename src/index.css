@@ -413,8 +413,13 @@ button.active {
   display: none;
 }
 /* Knöpfe am Artikel etwas höher, damit die Zeile darunter nahe am Namen bleibt */
-.item > .ghost.small {
+.item > .ghost.small,
+.item > .menu-wrap > .ghost.small {
   margin: -5px 0 -5px;
+}
+/* Menü „…“ steht in einer Hülle: gleiche Höhe wie die übrigen Knöpfe (D-073) */
+.item > .menu-wrap {
+  display: flex;
 }
 .item > .check {
   margin-bottom: -4px;
