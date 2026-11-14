@@ -1,6 +1,6 @@
 // Laden in der Nähe finden und wählen (D-033), Ladenbesuch erkennen
 import { useEffect, useRef, useState } from 'react'
-import { LocateFixed, MapPin, Pencil, Store as StoreIcon } from 'lucide-react'
+import { Check, LocateFixed, MapPin, Pencil, Store as StoreIcon } from 'lucide-react'
 import { t } from '../../i18n'
 import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
 import { RETRY_S } from './helpers'
@@ -202,48 +202,61 @@ export function ShopBar({
       </div>
     )
 
-  // Ein Laden (gewählt oder vorgeschlagen) – nur ein Ändern-Symbol, Alternativen erst nach Antippen
+  // Ein Laden (gewählt oder vorgeschlagen): die ganze Zeile öffnet die Auswahl als Blatt (D-072)
+  const close = () => setState((st) => ({ ...st, more: false }))
   return (
     <div className="shopline">
-      <span>
-        <StoreIcon size={15} /> {current.name}
-        {!shop && <span className="muted"> {formatDistance(current.distance)}</span>}
-      </span>
       <button
-        className={`icon-btn ${state.more ? 'active' : ''}`}
+        className="shop-current"
         aria-label={t('changeShop')}
         aria-expanded={!!state.more}
         onClick={() => {
-          if (!state.more && !state.shops) void detect(true)
-          setState((st) => ({ ...st, more: !st.more }))
+          if (!state.shops) void detect(true)
+          setState((st) => ({ ...st, more: true }))
         }}
       >
-        <Pencil size={14} />
+        <StoreIcon size={15} />
+        <span className="shop-name">{current.name}</span>
+        {!shop && <span className="muted">{formatDistance(current.distance)}</span>}
+        <Pencil size={13} className="shop-edit" />
       </button>
       {state.more && (
-        <div className="shop-alts">
-          {state.loading && <span className="muted small-text">{t('searching')}</span>}
-          {others.map((x) => (
-            <button
-              key={x.id}
-              className="chip"
-              onClick={() => {
-                onChoose(x)
-                setState((st) => ({ ...st, more: false }))
-              }}
-            >
-              {x.name} <span className="muted">{formatDistance(x.distance)}</span>
-            </button>
-          ))}
-          <button
-            className="chip"
-            onClick={() => {
-              onChoose(null)
-              void detect(true).then(() => setState((st) => ({ ...st, more: true })))
-            }}
-          >
-            <LocateFixed size={13} /> {t('searchAgain')}
-          </button>
+        <div className="sheet-backdrop" onClick={close}>
+          <div className="sheet" role="dialog" aria-modal="true" aria-label={t('changeShop')} onClick={(e) => e.stopPropagation()}>
+            <h2>{t('chooseShop')}</h2>
+            <ul className="shop-options">
+              {[current, ...others].map((x) => (
+                <li key={x.id}>
+                  <button
+                    className={x.id === current.id ? 'active' : ''}
+                    onClick={() => {
+                      onChoose(x)
+                      close()
+                    }}
+                  >
+                    <span className="shop-name">{x.name}</span>
+                    <span className="muted">{x.id === current.id ? <Check size={16} /> : formatDistance(x.distance)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {state.loading && <p className="muted small-text">{t('searching')}</p>}
+            <div className="row">
+              <button
+                className="ghost"
+                disabled={state.loading}
+                onClick={() => {
+                  onChoose(null)
+                  void detect(true).then(() => setState((st) => ({ ...st, more: true })))
+                }}
+              >
+                <LocateFixed size={15} /> {t('searchAgain')}
+              </button>
+              <button className="ghost" onClick={close}>
+                {t('close')}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

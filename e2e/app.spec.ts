@@ -200,7 +200,9 @@ test.describe('Laden', () => {
     await page.goto(`/#/l/${LIST}`)
     await expect(page.locator('.shopline')).toContainText('Mercadona')
     await page.getByRole('button', { name: 'Laden ändern' }).click()
-    await page.locator('.shop-alts .chip', { hasText: 'Lidl' }).click()
+    await expect(page.locator('.sheet .shop-options li')).toHaveCount(3)
+    await page.locator('.shop-options button', { hasText: 'Lidl' }).click()
+    await expect(page.locator('.sheet')).toHaveCount(0)
     await page.waitForTimeout(1500)
     await expect(page.locator('.shopline')).toContainText('Lidl') // 1,2 km entfernt, trotzdem gewählt
     await page.locator('.item').first().locator('.check').click() // Einkauf läuft: Laden wird genauer geprüft (D-046)
