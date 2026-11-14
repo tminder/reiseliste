@@ -1,8 +1,9 @@
 // Untere Blätter der Liste: Mitglieder, Liste bearbeiten, Teilen
 import { useEffect, useState } from 'react'
 import { type Lang } from '../../data/dictionary'
-import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
+import { COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
 import { countryName, t } from '../../i18n'
+import { CountryOptions } from '../CountryOptions'
 import { listUrl } from '../../lib/links'
 import { MAX } from '../../lib/limits'
 import { ListStore, supabase, type Profile } from '../../lib/store'
@@ -46,10 +47,13 @@ export function EditSheet({
   country,
   autoClear,
   autoCountry,
+  lang,
   onSave,
   onClose,
 }: {
   name: string
+  /** Sprache des Profils (für die vorgeschlagenen Länder) */
+  lang: Lang
   country: string
   autoClear: boolean
   /** Reiseland automatisch nach Standort (D-057) */
@@ -87,11 +91,7 @@ export function EditSheet({
             }}
           >
             <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(c)?.flag ?? ''} ${countryName(c)}` })}</option>
-            {COUNTRIES.map((x) => (
-              <option key={x.code} value={x.code}>
-                {x.flag} {countryName(x.code)} – {LANG_LABEL[x.lang]}
-              </option>
-            ))}
+            <CountryOptions lang={lang} />
           </select>
         </label>
         <p className="muted small-text">{auto ? t('autoCountryHint') : t('countryChangeHint')}</p>

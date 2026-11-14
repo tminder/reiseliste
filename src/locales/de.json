@@ -172,6 +172,8 @@
   "cat_hygiene": "Drogerie",
   "cat_baby": "Baby",
   "autoCountry": "Automatisch ({country})",
+  "countriesSuggested": "Vorschläge",
+  "countriesAll": "Alle Länder",
   "autoCountryHint": "Wechselt mit deinem Standort, ausser im Land deiner Sprache.",
   "examples": "Zum Beispiel – antippen zum Hinzufügen:",
   "wrongTerm": "Begriff stimmt nicht?",

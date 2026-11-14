@@ -613,6 +613,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           country={list.country}
           autoClear={list.autoClear !== false}
           autoCountry={list.autoCountry !== false}
+          lang={profile.lang}
           onSave={(name, country, autoClear, autoCountry) => {
             void store.updateList({
               name,

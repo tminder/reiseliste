@@ -172,6 +172,8 @@
   "cat_hygiene": "Toiletries",
   "cat_baby": "Baby",
   "autoCountry": "Automatic ({country})",
+  "countriesSuggested": "Suggested",
+  "countriesAll": "All countries",
   "autoCountryHint": "Follows your location, except in a country of your own language.",
   "examples": "For example – tap to add:",
   "wrongTerm": "Wrong term?",

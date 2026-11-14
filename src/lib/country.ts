@@ -42,6 +42,9 @@ function toAppCode(iso: string, state: string): string | null {
   return COUNTRY_BY_CODE.has(code) ? code : null
 }
 
+/** Zuletzt erkanntes Land aus dem Speicher (ohne neue Abfrage), z. B. für die Reihenfolge der Länderauswahl */
+export const cachedCountry = (): string | null => read()?.code ?? null
+
 /**
  * Liefert den App-Ländercode des aktuellen Standorts, null wenn das Land nicht unterstützt wird
  * (z. B. zu Hause in Deutschland), oder undefined, wenn es nicht bestimmt werden konnte.

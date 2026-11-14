@@ -305,3 +305,17 @@ test('Liste für Vietnam: Artikel auf Vietnamesisch (D-062)', async ({ page, pro
   await expect(page.locator('.item').filter({ hasText: 'Milch' })).toContainText('sữa tươi')
   await expect(page.locator('.item').filter({ hasText: 'Butter' })).toContainText('bơ')
 })
+
+test('Reiseland-Auswahl: Vorschläge oben, dann alphabetisch (D-063)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [], 'IT')
+  await page.goto(`/#/l/${LIST}`)
+  await page.locator('a.back').click()
+  if (!(await page.locator('form select').first().isVisible())) await page.getByRole('button', { name: /Neue Liste/ }).click()
+  const select = page.locator('form select').first()
+  await expect(select.locator('optgroup[label="Vorschläge"] option')).toHaveText([/Italien/])
+  const all = await select.locator('optgroup[label="Alle Länder"] option').allTextContents()
+  const names = all.map((s) => s.replace(/^\S+\s/, '').split(' – ')[0])
+  expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b, 'de')))
+  expect(names[0]).toBe('Argentinien')
+})

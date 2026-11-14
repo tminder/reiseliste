@@ -1,8 +1,9 @@
 // Startseite: alle Listen, neue Liste anlegen, Liste beitreten (QR-Code oder Link)
 import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
 import { UserPlus, ClipboardPaste, ScanLine, MapPin, Plus, Trash2, Users, X } from 'lucide-react'
-import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL, profileLangLabel, profileLangShort } from '../data/countries'
+import { COUNTRY_BY_CODE, profileLangLabel, profileLangShort } from '../data/countries'
 import { AppLogo } from './AppLogo'
+import { CountryOptions } from './CountryOptions'
 import { countryName, t } from '../i18n'
 import { listIdFrom } from '../lib/links'
 import { detectCountry } from '../lib/country'
@@ -154,11 +155,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
               }}
             >
               <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(country)?.flag ?? ''} ${countryName(country)}` })}</option>
-              {COUNTRIES.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.flag} {countryName(c.code)} – {LANG_LABEL[c.lang]}
-                </option>
-              ))}
+              <CountryOptions lang={profile.lang} />
             </select>
           </label>
           <button className="primary" disabled={!name.trim()}>
