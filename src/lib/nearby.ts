@@ -25,8 +25,34 @@ export class NearbyError extends Error {
   }
 }
 
+/**
+ * Zustimmung zum Standort in der App (D-066): 'yes' nach „Standort freigeben“, 'no' nach „Nicht jetzt“, null = noch nicht gefragt.
+ * Ohne 'yes' fragt die App den Standort nicht ab, ausser der Browser hat ihn schon erlaubt.
+ */
+export function locationConsent(): 'yes' | 'no' | null {
+  try {
+    const v = localStorage.getItem('rl:locConsent')
+    if (v === 'yes' || v === 'no') return v
+    return localStorage.getItem('rl:locnotice') === '1' ? 'yes' : null // früherer Hinweis mit „OK“ bestätigt
+  } catch {
+    return null
+  }
+}
+export function setLocationConsent(v: 'yes' | 'no') {
+  try {
+    localStorage.setItem('rl:locConsent', v)
+  } catch {
+    /* egal */
+  }
+}
+
 /** maxAgeMs: wie alt eine zwischengespeicherte Position höchstens sein darf (Standard 1 Minute) */
-export function getPosition(maxAgeMs = 60_000): Promise<GeolocationPosition> {
+export async function getPosition(maxAgeMs = 60_000): Promise<GeolocationPosition> {
+  // Erst nach Zustimmung in der App fragen, damit die Rückfrage des Browsers nicht ohne Erklärung kommt (D-066)
+  if (locationConsent() !== 'yes') {
+    if (!(await locationAlreadyAllowed())) throw new NearbyError(t('errGeoDenied'), false, true)
+    setLocationConsent('yes')
+  }
   return new Promise((resolve, reject) => {
     if (!('geolocation' in navigator)) return reject(new NearbyError(t('errNoGeo')))
     navigator.geolocation.getCurrentPosition(resolve, (err) => {

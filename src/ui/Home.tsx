@@ -7,6 +7,7 @@ import { CountryOptions } from './CountryOptions'
 import { countryName, t } from '../i18n'
 import { listIdFrom } from '../lib/links'
 import { detectCountry } from '../lib/country'
+import { locationAlreadyAllowed, locationConsent, setLocationConsent } from '../lib/nearby'
 import { MAX } from '../lib/limits'
 import { ListStore, DELETE_GRACE_MS, flushDeletes, recentDelete, scheduleDelete, undoDelete, isSoleMember, knownSole, knownLists, leaveList, localLastChange, localPeople, remoteOverview, supabase, type Profile } from '../lib/store'
 import { AppVersion } from './AppVersion'
@@ -71,7 +72,8 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
   }, [lists, profile])
   const sorted = [...lists].sort((a, b) => (changed[b.id] ?? '').localeCompare(changed[a.id] ?? ''))
 
-  // Bist du schon im Ausland, wird das aktuelle Land vorgeschlagen (änderbar)
+  // Bist du schon im Ausland, wird das aktuelle Land vorgeschlagen (änderbar). Nach „Standort freigeben“ erneut (D-066)
+  const [locTick, setLocTick] = useState(0)
   useEffect(() => {
     let alive = true
     void detectCountry().then((code) => {
@@ -81,7 +83,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
     return () => {
       alive = false
     }
-  }, [profile.lang])
+  }, [profile.lang, locTick])
 
   function create(e: FormEvent) {
     e.preventDefault()
@@ -231,7 +233,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
           </button>
         </div>
       )}
-      <LocationNotice />
+      <LocationAsk onAllowed={() => setLocTick((n) => n + 1)} />
       <footer className="footer">
         <a href="#/datenschutz">{t('privacy')}</a>
         <AppVersion />
@@ -306,32 +308,47 @@ function JoinList({ onClose, onScan, focusLink }: { onClose: () => void; onScan:
   )
 }
 
-/** Einmaliger Hinweis zum Standort (bis „OK“ getippt) */
-function LocationNotice() {
-  const [seen, setSeen] = useState(() => {
-    try {
-      return localStorage.getItem('rl:locnotice') === '1'
-    } catch {
-      return true
-    }
-  })
-  if (seen) return null
+/**
+ * Frage nach dem Standort vor der Rückfrage des Browsers (D-066). Erscheint, bis man „Standort freigeben“ oder „Nicht jetzt“ tippt,
+ * und nicht, wenn der Browser den Standort schon erlaubt.
+ */
+function LocationAsk({ onAllowed }: { onAllowed: () => void }) {
+  const [open, setOpen] = useState(() => locationConsent() === null)
+  useEffect(() => {
+    if (!open) return
+    void locationAlreadyAllowed().then((ok) => {
+      if (!ok) return
+      setLocationConsent('yes')
+      setOpen(false)
+    })
+  }, [open])
+  if (!open) return null
   return (
-    <div className="note info">
-      <MapPin size={15} /> {t('locationNotice')} <a href="#/datenschutz">{t('privacy')}</a>
-      <button
-        className="link"
-        onClick={() => {
-          try {
-            localStorage.setItem('rl:locnotice', '1')
-          } catch {
-            /* egal */
-          }
-          setSeen(true)
-        }}
-      >
-        {t('ok')}
-      </button>
+    <div className="note info ios-hint">
+      <p>
+        <MapPin size={15} /> {t('locationAsk')} <a href="#/datenschutz">{t('privacy')}</a>
+      </p>
+      <div className="row-gap">
+        <button
+          className="primary small"
+          onClick={() => {
+            setLocationConsent('yes')
+            setOpen(false)
+            onAllowed()
+          }}
+        >
+          {t('allowLocation')}
+        </button>
+        <button
+          className="ghost small"
+          onClick={() => {
+            setLocationConsent('no')
+            setOpen(false)
+          }}
+        >
+          {t('notNow')}
+        </button>
+      </div>
     </div>
   )
 }

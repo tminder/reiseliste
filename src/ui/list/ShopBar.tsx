@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { LocateFixed, MapPin, Pencil, Store as StoreIcon } from 'lucide-react'
 import { t } from '../../i18n'
-import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
+import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
 import { RETRY_S } from './helpers'
 
 export function ShopBar({
@@ -152,7 +152,13 @@ export function ShopBar({
     return (
       <div className="shopline muted">
         <MapPin size={15} />
-        <button className="link" onClick={() => void detect(true)}>
+        <button
+          className="link"
+          onClick={() => {
+            setLocationConsent('yes')
+            void detect(true)
+          }}
+        >
           {t('allowLocation')}
         </button>
         <button className="link" onClick={() => setState((st) => ({ ...st, help: !st.help }))}>

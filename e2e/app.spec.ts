@@ -330,3 +330,32 @@ test('Liste für Taiwan: Artikel auf traditionellem Chinesisch (D-064)', async (
   await expect(page.locator('.item').filter({ hasText: 'Milch' })).toContainText('鮮奶')
   await expect(page.locator('.item').filter({ hasText: 'Eier' })).toContainText('雞蛋')
 })
+
+test('Standort: eigene Frage vor der Browser-Rückfrage (D-066)', async ({ page, problems }) => {
+  void problems
+  await seed(page)
+  await page.goto(`/#/l/${LIST}`)
+  await page.locator('a.back').click()
+  const ask = page.locator('.note', { hasText: 'braucht die App deinen Standort' })
+  await expect(ask).toBeVisible()
+  await ask.getByRole('button', { name: 'Nicht jetzt' }).click()
+  await expect(ask).toHaveCount(0)
+  await page.reload() // öffnet wieder die letzte Liste
+  await page.locator('a.back').click()
+  await expect(page.locator('.list-card')).toHaveCount(1)
+  await expect(ask).toHaveCount(0)
+})
+
+test.describe('Standort schon erlaubt', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
+  test('keine eigene Frage (D-066)', async ({ page, problems }) => {
+    void problems
+    await seed(page)
+    await page.route(/nominatim/, (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ address: { country_code: 'es' } }) }))
+    await page.goto(`/#/l/${LIST}`)
+    await page.locator('a.back').click()
+    await expect(page.locator('.list-card')).toHaveCount(1)
+    await page.waitForTimeout(300)
+    await expect(page.locator('.note', { hasText: 'braucht die App deinen Standort' })).toHaveCount(0)
+  })
+})
