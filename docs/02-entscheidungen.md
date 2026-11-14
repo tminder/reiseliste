@@ -455,6 +455,6 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-073 · Ganze Karte hakt ab, Menü „…“ für Zeigen-Karte und Fotos
 
-- **Entscheidung:** Ein Tipp irgendwo auf eine Artikelkarte hakt den Artikel ab bzw. öffnet ihn wieder, auch auf Name und Übersetzung. Ausgenommen sind die Knöpfe auf der Karte (💡, ✋, …, ✕), die Fotos und Eingabefelder. Der Kreis bleibt als Anzeige und eigener Knopf. Die Übersetzung ist kein eigener Knopf mehr. „Dem Personal zeigen“ (Zeigen-Karte, D-032) und „Produktfotos“ (nur mit Laden und vorhandenen Fotos, D-034) liegen in einem kleinen Menü hinter dem Knopf „…“ bei offenen Artikeln mit Übersetzung; der Kamera-Knopf entfällt.
+- **Entscheidung:** Ein Tipp irgendwo auf eine Artikelkarte hakt den Artikel ab bzw. öffnet ihn wieder, auch auf Name und Übersetzung. Ausgenommen sind die Knöpfe auf der Karte (💡, ✋, …, ✕), die Fotos und Eingabefelder. Der Kreis bleibt als Anzeige und eigener Knopf. Die Übersetzung ist kein eigener Knopf mehr. „Dem Personal zeigen“ (Zeigen-Karte, D-032) und „Produktfotos“ (nur mit Laden und vorhandenen Fotos, D-010) liegen in einem kleinen Menü hinter dem Knopf „…“ bei offenen Artikeln mit Übersetzung; der Kamera-Knopf entfällt.
 - **Begründung:** Wunsch des Inhabers. Eine grosse Tippfläche hilft im Laden mit einer Hand; Zeigen-Karte und Fotos braucht man seltener.
 - **Folgen:** Abhaken aus Versehen ist leichter möglich, aber harmlos: Der Artikel rutscht nach „Im Wagen“ und ein Tipp holt ihn zurück. Text auf der Karte lässt sich nicht mehr markieren.
