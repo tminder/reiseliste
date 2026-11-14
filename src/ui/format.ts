@@ -12,15 +12,14 @@ export function guessLang(): Lang {
 }
 
 /**
- * Profilsprache aus der Gerätesprache (D-056, D-071): Deutsch aus Deutschland bzw. Österreich wird erkannt,
- * jedes andere Deutsch (Schweiz, Liechtenstein, ohne Land oder z. B. „de-ES“ für Deutschsprachige in Spanien) gilt als Deutsch (Schweiz).
+ * Profilsprache aus der Gerätesprache (D-056, D-071): Deutsch aus der Schweiz und Liechtenstein → Deutsch (Schweiz),
+ * aus Österreich → Deutsch (Österreich), jedes andere Deutsch → Deutsch (Deutschland).
  * Andere unterstützte Sprachen wie erkannt, sonst Englisch.
  */
 export function guessProfileLang(): string {
   const n = navigator.language
-  if (/^de-DE$/i.test(n)) return 'de'
+  if (/^de-(CH|LI)$/i.test(n)) return 'de-CH'
   if (/^de-AT$/i.test(n)) return 'de-AT'
-  if (/^de(-|$)/i.test(n)) return 'de-CH'
   return guessLang()
 }
 

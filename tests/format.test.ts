@@ -9,8 +9,8 @@ describe('guessProfileLang', () => {
   it.each([
     ['de-CH', 'de-CH'],
     ['de-LI', 'de-CH'],
-    ['de', 'de-CH'],
-    ['de-ES', 'de-CH'],
+    ['de', 'de'],
+    ['de-ES', 'de'],
     ['de-DE', 'de'],
     ['de-AT', 'de-AT'],
     ['es-ES', 'es'],

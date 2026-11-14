@@ -441,8 +441,9 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Rückmeldung des Inhabers: Direkt unter „Noch keine Liste.“ wirkte die Fusszeile wie Inhalt und zog den Blick weg vom nächsten Schritt.
 - **Folgen:** Keine.
 
-## D-071 · Sprache beim ersten Start: Gerätesprache, Deutsch heisst Schweiz, sonst Englisch
+## D-071 · Sprache beim ersten Start: Gerätesprache, sonst Englisch
 
-- **Entscheidung:** Beim ersten Start schlägt die App die Sprache aus der Gerätesprache vor (`navigator.language`): „de-DE“ → Deutsch (Deutschland), „de-AT“ → Deutsch (Österreich), jedes andere Deutsch (de-CH, de-LI, „de“ ohne Land, aber auch z. B. „de-ES“ für Deutschsprachige mit Region Spanien) → Deutsch (Schweiz). Andere unterstützte Sprachen wie erkannt, alle übrigen → Englisch. Auch die Oberfläche vor dem Profil fällt auf Englisch zurück statt auf Deutsch. Die Auswahl lässt sich auf dem ersten Bildschirm ändern.
-- **Begründung:** Wunsch des Inhabers: Standard Deutsch (Schweiz), international Englisch. Der Inhaber (Region Spanien) bekam bisher Deutsch (Deutschland).
-- **Folgen:** Wer Deutsch ohne Länderangabe nutzt und aus Deutschland kommt, muss einmal auf Deutsch (Deutschland) umstellen. Die native App (D-009) kann die Gerätesprache ebenso auslesen und dieselbe Regel nutzen.
+- **Entscheidung:** Beim ersten Start schlägt die App die Sprache aus der Gerätesprache vor (`navigator.language`): „de-CH“ und „de-LI“ → Deutsch (Schweiz), „de-AT“ → Deutsch (Österreich), jedes andere Deutsch (auch „de“ ohne Land oder „de-ES“) → Deutsch (Deutschland). Andere unterstützte Sprachen wie erkannt, alle übrigen → Englisch. Auch die Oberfläche vor dem Profil fällt auf Englisch zurück statt auf Deutsch. Die Auswahl lässt sich auf dem ersten Bildschirm ändern.
+- **Begründung:** Wunsch des Inhabers: Standard-Deutsch ist Deutschland, international Englisch.
+- **Folgen:** Deutschschweizer mit anderer Region (z. B. iPhone auf Deutsch, Region Spanien) bekommen Deutsch (Deutschland) und stellen einmal um. Die native App (D-009) kann die Gerätesprache ebenso auslesen und dieselbe Regel nutzen.
+
