@@ -260,3 +260,37 @@ test.describe('Reiseland nach Sprache (D-041)', () => {
     await expect(page.locator('.topbar .sub')).toContainText(/Ital/)
   })
 })
+
+test.describe('iPhone in Safari (D-061)', () => {
+  test.use({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' })
+
+  test('Eigene Liste: Tipp „Home-Bildschirm“ mit Anleitung', async ({ page, problems }) => {
+    void problems
+    await seed(page)
+    await page.goto(`/#/l/${LIST}`)
+    await expect(page.locator('.ios-hint')).toContainText('Home-Bildschirm')
+    await expect(page.locator('.ios-hint')).not.toContainText('Du bist im Browser')
+    await page.getByRole('button', { name: 'Anleitung' }).click()
+    await expect(page.locator('.sheet .install-steps li')).toHaveCount(3)
+    await expect(page.locator('.sheet')).toContainText('Zum Home-Bildschirm')
+    await page.locator('.sheet').getByRole('button', { name: 'Schliessen' }).click()
+    await page.locator('.ios-hint').getByRole('button', { name: 'Nicht mehr zeigen' }).click()
+    await expect(page.locator('.ios-hint')).toHaveCount(0)
+    await page.reload()
+    await expect(page.locator('.add input')).toBeVisible()
+    await expect(page.locator('.ios-hint')).toHaveCount(0)
+  })
+
+  test('Fremder Link: Hinweis „Link in die App holen“', async ({ page, problems }) => {
+    void problems
+    // Ohne Supabase lädt nur eine zwischengespeicherte Liste; sie steht aber nicht in „Deine Listen“ (wie neu über den Link)
+    await seed(page)
+    await page.addInitScript(() => {
+      if (!localStorage.getItem('rl:once')) localStorage.setItem('rl:lists', '[]')
+      localStorage.setItem('rl:once', '1')
+    })
+    await page.goto(`/#/l/${LIST}`)
+    await expect(page.locator('.ios-hint')).toContainText('Du bist im Browser')
+    await expect(page.locator('.ios-hint').getByRole('button', { name: 'Link kopieren' })).toBeVisible()
+  })
+})

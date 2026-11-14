@@ -1,6 +1,6 @@
 # Entscheidungen
 
-Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
+Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
 
 ---
 
@@ -211,7 +211,7 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-037 · Listen in der iPhone-App vom Home-Bildschirm öffnen
 
-- **Entscheidung:** Auf der Startseite öffnet „Liste beitreten“ ein Feld mit zwei Wegen: oben gross „QR-Code scannen“ (D-038), darunter „oder Link einfügen“. Für den Link gilt: Link (oder Text mit Link) einfügen, auf Wunsch mit „Einfügen“ aus der Zwischenablage, und die Liste öffnet sich. Wird ein Listen-Link auf dem iPhone in Safari geöffnet (nicht in der Home-Bildschirm-App), erklärt ein Hinweis über der Liste den Weg und bietet „Link kopieren“ an. Er lässt sich mit „Nicht mehr zeigen“ ausblenden. Auch das Teilen-Fenster nennt den Weg.
+- **Entscheidung:** Auf der Startseite öffnet „Liste beitreten“ ein Feld mit zwei Wegen: oben gross „QR-Code scannen“ (D-038), darunter „oder Link einfügen“. Für den Link gilt: Link (oder Text mit Link) einfügen, auf Wunsch mit „Einfügen“ aus der Zwischenablage, und die Liste öffnet sich. Wird ein Listen-Link auf dem iPhone in Safari geöffnet und war die Liste auf dem Gerät noch unbekannt (also nicht selbst angelegt), erklärt ein Hinweis über der Liste den Weg („Du bist im Browser. …“) und bietet „Link kopieren“ an. In allen anderen Fällen steht dort der Tipp aus D-061. Er lässt sich mit „Nicht mehr zeigen“ ausblenden. Auch das Teilen-Fenster nennt den Weg.
 - **Begründung:** Rückmeldung des Inhabers: Haben beide die Web-App auf dem Home-Bildschirm, klappt das Teilen nicht. iOS öffnet Links immer in Safari, und Safari und die Home-Bildschirm-App haben getrennten Speicher.
 - **Folgen:** Ein Schritt mehr für iPhone-Nutzer (Link kopieren, in der App einfügen). Eine echte Lösung wären native Apps mit Universal Links (D-009, F-006).
 
@@ -370,3 +370,9 @@ Stand: 2026-11-13 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Der App-Name neben dem Icon (Listenübersicht und Profil) steht in der schmalen Retro-Schreibschrift Grand Hotel, etwas grösser als die übrige Kopfzeile. Alle übrigen Texte bleiben in der Systemschrift. Die Schrift kommt als npm-Paket `@fontsource/grand-hotel` (nur lateinische Zeichen) mit der App und wird für offline vorgeladen, keine Verbindung zu Google Fonts.
 - **Begründung:** Entscheidung des Inhabers aus zwei Runden mit Varianten. Verspielt im Retro-Stil, aber dünner und ruhiger als Pacifico (die gewählten Schriften gibt es nur in einer Strichstärke, dünner geht nur über eine andere Schrift); passt zum Road-Trip-Bild.
 - **Folgen:** Wird der Platz knapp, kürzt der Name mit „…“. Bis die Schrift geladen ist (nur beim allerersten Öffnen), steht der Name kurz in einer Ersatzschrift.
+
+## D-061 · Tipp „Auf den Home-Bildschirm“ mit Anleitung
+
+- **Entscheidung:** Im Handy-Browser (iPhone oder Android, nicht als Home-Bildschirm-App) steht über der Liste ein kurzer Tipp: „Leg Cart on the Road auf den Home-Bildschirm, dann startet sie wie eine App.“ Knöpfe: „Anleitung“ und „Nicht mehr zeigen“ (`rl:installHint`). Die Anleitung zeigt drei Schritte passend zum Gerät (Safari: Teilen-Symbol bzw. „•••“ → „Zum Home-Bildschirm“ → „Hinzufügen“; Chrome: „⋮“ → „Zum Startbildschirm hinzufügen“/„App installieren“ → „Installieren“). Auf dem iPhone erklärt sie zusätzlich, dass die App einen eigenen Speicher hat, und bietet „Link kopieren“ für die aktuelle Liste an. Ausnahme: Kam man über einen fremden Listen-Link, erscheint stattdessen der Link-Hinweis (D-037). Ob das so war, merkt sich die App beim Start (Listen-Adresse und ob die Liste schon auf dem Gerät war).
+- **Begründung:** Wunsch des Inhabers. Der Link-Hinweis war für Nutzer, die selbst eine Liste anlegen, verwirrend. Wer die App noch nicht installiert hat, soll erfahren, dass es geht und wie.
+- **Folgen:** Kein automatischer Installations-Dialog (Chrome würde ihn anbieten, ist aber nicht eingebaut). Die Menübezeichnungen in Safari und Chrome ändern sich je nach Version; die Anleitung nennt deshalb Alternativen.

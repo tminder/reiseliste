@@ -884,6 +884,12 @@ button.danger-btn {
 .ios-hint p {
   margin: 0 0 8px;
 }
+.install-steps {
+  margin: 0 0 12px;
+  padding-left: 1.3em;
+  display: grid;
+  gap: 8px;
+}
 
 /* QR-Scanner (D-038) */
 .scanner {

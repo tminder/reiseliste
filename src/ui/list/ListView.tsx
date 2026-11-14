@@ -6,7 +6,6 @@ import { COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
 import { categoryLabel, countryName, t } from '../../i18n'
 import { flash, reducedMotion, slideOut, useFlip } from '../../lib/motion'
 import { addQty, canAddQty } from '../../lib/qty'
-import { isIos, isStandalone, listUrl } from '../../lib/links'
 import { reportError } from '../../lib/errors'
 import { sendFeedback } from '../../lib/feedback'
 import { findConcept, isLoaded, loadLanguages, nameIn, onLanguagesLoaded, splitQuantity, suggest } from '../../lib/translate'
@@ -15,57 +14,11 @@ import { detectCountry } from '../../lib/country'
 import { MAX } from '../../lib/limits'
 import { ListStore, scheduleDelete, isSoleMember, knownSole, leaveList, setLastList, lastSyncError, supabase, type Item, type Profile, type SyncState } from '../../lib/store'
 import { formatQty, go } from '../format'
+import { AppHint } from './AppHint'
 import { ItemRow } from './ItemRow'
 import { ShopBar } from './ShopBar'
 import { DAY_MS, EXAMPLES, VISIT_ACCURACY_M, VISIT_RADIUS_M, countryChangeDeclined, declineCountryChange, dupKey, readVisit, saveVisit } from './helpers'
 import { EditSheet, MembersSheet, ShareSheet } from './sheets'
-
-/** In Safari auf dem iPhone geöffneter Listen-Link: Hinweis, wie man die Liste in die Home-Bildschirm-App holt (D-037) */
-function IosAppHint({ id }: { id: string }) {
-  const [hidden, setHidden] = useState(() => {
-    try {
-      return !isIos() || isStandalone() || localStorage.getItem('rl:iosHint') === '1'
-    } catch {
-      return true
-    }
-  })
-  const [copied, setCopied] = useState(false)
-  if (hidden) return null
-  return (
-    <div className="note info ios-hint">
-      <p>{t('iosHint')}</p>
-      <div className="row-gap">
-        <button
-          className="primary small"
-          onClick={async () => {
-            try {
-              await navigator.clipboard.writeText(listUrl(id))
-              setCopied(true)
-            } catch {
-              /* egal */
-            }
-          }}
-        >
-          {copied ? t('copied') : t('copyLink')}
-        </button>
-        <button
-          className="ghost small"
-          onClick={() => {
-            try {
-              localStorage.setItem('rl:iosHint', '1')
-            } catch {
-              /* egal */
-            }
-            setHidden(true)
-          }}
-        >
-          {t('iosHintDismiss')}
-        </button>
-      </div>
-    </div>
-  )
-}
-
 
 function useStore(id: string, profile: Profile) {
   const store = useMemo(() => new ListStore(id), [id])
@@ -447,7 +400,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           )}
         </div>
       </header>
-      <IosAppHint id={id} />
+      <AppHint id={id} />
 
       {countryMoved && list.country === countryMoved.to && (
         <div className="toast">
