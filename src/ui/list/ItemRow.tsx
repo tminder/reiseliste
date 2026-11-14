@@ -26,6 +26,7 @@ export function ItemRow({
   viewer,
   viewerRegion,
   me,
+  canClaim,
   onDeleted,
   onLocalChange,
   onChecked,
@@ -43,6 +44,8 @@ export function ItemRow({
   viewerRegion?: string
   /** Name aus dem Profil (für „Ich hole das“, D-031) */
   me: string
+  /** Mindestens zwei Mitglieder im selben Laden: „Ich hole das“ zeigen (D-065) */
+  canClaim: boolean
   /** Für „Gelöscht · Rückgängig“ (D-042) */
   onDeleted: (ids: string[], name: string) => void
   /** Eigene Änderung melden, damit sie nicht als „von anderen“ aufleuchtet (D-044) */
@@ -125,8 +128,9 @@ export function ItemRow({
           <Camera size={18} />
         </button>
       )}
-      {!item.checked && (
-        // „Ich hole das“ (D-031): antippen übernimmt den Artikel, nochmals antippen gibt ihn frei
+      {!item.checked && (canClaim || claimedBy === me) && (
+        // „Ich hole das“ (D-031): antippen übernimmt den Artikel, nochmals antippen gibt ihn frei.
+        // Nur sichtbar, wenn mindestens zwei Mitglieder im selben Laden sind (D-065), oder um die eigene Übernahme zu lösen
         <button
           className={`ghost small ${claimedBy === me ? 'active' : ''}`}
           aria-label={claimedBy === me ? t('unclaim') : t('claim')}

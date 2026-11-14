@@ -28,7 +28,7 @@ function useStore(id: string, profile: Profile) {
   }, [store, profile])
   const version = useSyncExternalStore(
     (cb) => store.subscribe(cb),
-    () => `${store.items.length}|${store.items.map((i) => i.updatedAt).join()}|${store.list?.updatedAt}|${store.sync}|${store.notFound}`,
+    () => `${store.items.length}|${store.items.map((i) => i.updatedAt).join()}|${store.list?.updatedAt}|${store.sync}|${store.notFound}|${[...store.othersInShop].map(([s, n]) => `${s}:${[...n].join('+')}`).join()}`,
   )
   return { store, version }
 }
@@ -162,6 +162,14 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
     setAutoShop(s)
   }
   const onChecked = () => setShopping(true)
+  // „Ich hole das“ nur, wenn mindestens zwei Mitglieder gerade im selben Laden sind (D-065).
+  // Mein Laden: automatisch erkannt (ich stehe drin) oder von Hand gewählt, sobald der Einkauf läuft.
+  const [hereShop, setHereShop] = useState<Shop | null>(null)
+  const myShopId = hereShop?.id ?? (shopping ? shop?.id : undefined) ?? null
+  useEffect(() => {
+    void store.setShopPresence(profile.name, myShopId)
+  }, [store, profile.name, myShopId])
+  const together = !!myShopId && store.othersHere() > 0
   const chooseShop = (s: Shop | null) => {
     setChosenShop(id, s)
     setShop(s)
@@ -337,7 +345,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           <span className="sub">
             {country?.flag} {countryName(list.country)} · {LANG_LABEL[target]}
           </span>
-          <ShopBar shop={shop} chosenAt={shopChosenAt} shopping={shopping} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
+          <ShopBar shop={shop} chosenAt={shopChosenAt} shopping={shopping} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} onHere={setHereShop} />
         </div>
         <SyncBadge state={store.sync} error={lastSyncError} />
         {/* Teilen direkt in der Kopfzeile, das Menü ist für den Rest (D-017) */}
@@ -537,7 +545,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           <section key={cat} className="group">
             <h3 data-flip={cat}>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
             {groups.get(cat)!.map((item) => (
-              <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
+              <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} canClaim={together} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
             ))}
           </section>
         ))}
@@ -558,7 +566,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
             </button>
           </h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
+            <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} canClaim={together} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
           ))}
         </section>
       )}

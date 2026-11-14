@@ -80,6 +80,12 @@ export function ensureAuth(): Promise<boolean> {
 
 // ---------- Lokaler Speicher ----------
 
+/** Kurze Prüfsumme (SHA-256, hex, 16 Zeichen) */
+async function digest(text: string): Promise<string> {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
+  return [...new Uint8Array(buf)].slice(0, 8).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
 const LS = {
   get<T>(key: string, fallback: T): T {
     try {
@@ -415,6 +421,10 @@ export class ListStore {
     if (document.visibilityState === 'visible') void this.pushAndPull(true)
   }
   private poll: number | undefined
+  /** Wer gerade in welchem Laden ist (D-065): Supabase Realtime Presence, nur solange die Liste offen ist, nichts gespeichert */
+  private myPresence: { name: string; shop: string } | null = null
+  /** Laden (Prüfsumme) → Personen (Prüfsumme), die dort gerade die Liste offen haben (ohne mich) */
+  othersInShop = new Map<string, Set<string>>()
   /** Echtzeit-Kanal verbunden (D-016) */
   private live = false
   private everLive = false
@@ -487,9 +497,11 @@ export class ListStore {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'lists', filter: `id=eq.${this.id}` }, (p) => {
         if (p.new && 'id' in p.new) this.applyList(fromRemoteList(p.new))
       })
+      .on('presence', { event: 'sync' }, () => this.readPresence())
       .subscribe((status) => {
         const wasLive = this.live
         this.live = status === 'SUBSCRIBED'
+        if (this.live && this.myPresence) void this.channel?.track(this.myPresence)
         // Nach einer Unterbrechung verpasste Änderungen nachholen
         if (this.live && !wasLive && this.everLive) void this.pushAndPull(true)
         if (this.live) this.everLive = true
@@ -497,6 +509,42 @@ export class ListStore {
     await this.pushAndPull()
     // Neu erstellte Liste: erst nach dem Hochladen existiert sie online – dann Namen eintragen
     if (!this.joined && this.list) await this.join()
+  }
+
+  /**
+   * Eigenen Laden melden (D-065): shop = OSM-Kennung des Ladens, in dem man gerade steht, sonst null.
+   * Gesendet werden nur Prüfsummen (mit der Listen-ID vermischt): Andere können vergleichen, ob sie im selben Laden sind,
+   * erfahren aber weder den Laden noch den Namen.
+   */
+  async setShopPresence(name: string, shop: string | null) {
+    const next = shop ? { name: await digest(`${this.id}|name|${name}`), shop: await digest(`${this.id}|shop|${shop}`) } : null
+    if (JSON.stringify(next) === JSON.stringify(this.myPresence)) return
+    this.myPresence = next
+    this.readPresence() // „gemeinsam“ neu berechnen
+    if (!this.channel || !this.live) return
+    void (next ? this.channel.track(next) : this.channel.untrack())
+  }
+
+  /** Andere Mitglieder, die gerade im selben Laden wie ich die Liste offen haben (D-065) */
+  othersHere(): number {
+    return this.myPresence ? (this.othersInShop.get(this.myPresence.shop)?.size ?? 0) : 0
+  }
+
+  private readPresence() {
+    const state = (this.channel?.presenceState() ?? {}) as Record<string, { name?: string; shop?: string; presence_ref: string }[]>
+    const mine = this.myPresence
+    const map = new Map<string, Set<string>>()
+    for (const metas of Object.values(state))
+      for (const m of metas) {
+        if (!m.shop || !m.name) continue
+        // Eigene Meldung (auch von einem zweiten Gerät mit gleichem Namen) zählt nicht als andere Person
+        if (mine && m.name === mine.name) continue
+        const set = map.get(m.shop) ?? new Set<string>()
+        set.add(m.name)
+        map.set(m.shop, set)
+      }
+    this.othersInShop = map
+    this.listeners.forEach((fn) => fn())
   }
 
   /** Mitglieder der Liste (Name, Sprache). Ohne Supabase: leer. */
@@ -518,6 +566,7 @@ export class ListStore {
   }
 
   stop() {
+    if (this.myPresence) void this.channel?.untrack()
     window.removeEventListener('online', this.onOnline)
     document.removeEventListener('visibilitychange', this.onVisible)
     window.clearInterval(this.poll)
