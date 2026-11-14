@@ -129,9 +129,26 @@ test('Eine Ansicht (D-055): Eingabe immer da, Löschen nur bei Abgehakten, Zeige
   const checked = page.locator('.item.checked').first()
   await checked.getByRole('button', { name: 'Löschen' }).click()
   await expect(page.locator('.undo-bar')).toContainText('gelöscht')
-  // Begriff in der Landessprache antippen → Zeigen-Karte
-  await page.locator('.item').first().locator('.term-btn').click()
+  // Zeigen-Karte über das Menü „…“ (D-073)
+  await page.locator('.item').first().getByRole('button', { name: 'Mehr' }).click()
+  await page.getByRole('menuitem', { name: 'Dem Personal zeigen' }).click()
   await expect(page.locator('.showcard')).toBeVisible()
+})
+
+test('Ganze Karte hakt ab, Knöpfe nicht (D-073)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [item(1, 'Milch', 'milch')])
+  await page.goto(`/#/l/${LIST}`)
+  const card = page.locator('.item').first()
+  await card.locator('.local').click() // auch die Übersetzung hakt ab
+  await expect(page.locator('.item.checked')).toHaveCount(1)
+  await page.waitForTimeout(600) // Animation abwarten (D-044)
+  await page.locator('.item.checked .txt').click() // nochmals: wieder offen
+  await expect(page.locator('.item.checked')).toHaveCount(0)
+  await page.locator('.item').first().getByRole('button', { name: 'Mehr' }).click()
+  await expect(page.getByRole('menu')).toBeVisible()
+  await page.waitForTimeout(500)
+  await expect(page.locator('.item.checked')).toHaveCount(0)
 })
 
 test('Menü, Profil ändern und abbrechen, Teilen mit QR-Code', async ({ page, problems }) => {

@@ -1,6 +1,6 @@
 // Ein Artikel der Liste: Name, Landesbegriff, Menge, Abhaken, Fotos, Tipp und Zeigen-Karte (D-032)
 import { useEffect, useRef, useState } from 'react'
-import { Camera, Check, Hand, Lightbulb, ThumbsDown, X } from 'lucide-react'
+import { Camera, Check, Hand, Lightbulb, MoreHorizontal, Presentation, ThumbsDown, X } from 'lucide-react'
 import { CONCEPT_BY_ID, type Lang } from '../../data/dictionary'
 import { COUNTRY_BY_CODE } from '../../data/countries'
 import { t } from '../../i18n'
@@ -76,6 +76,26 @@ export function ItemRow({
   const own = ((item.lang !== viewer || sameLangSwap) && nameIn(item.conceptId, viewer, viewerRegion)) || item.text
   const hints = item.conceptId ? CONCEPT_BY_ID.get(item.conceptId)?.hint : undefined
   const hint = hints?.[viewer] ?? hints?.en
+  const [showMenu, setShowMenu] = useState(false)
+  const photosOk = !!local && !!shopTag && hasPhotos(item.conceptId, override_)
+
+  // Abhaken bzw. wieder öffnen (D-044): erst Häkchen und Durchstreichen zeigen, dann rutscht die Zeile an ihren neuen Platz
+  function toggle() {
+    if (pending !== null) return
+    const next = !item.checked
+    onLocalChange(item.id)
+    setPending(next)
+    if (next) navigator.vibrate?.(12)
+    window.setTimeout(
+      () => {
+        // Beim Abhaken wird „Ich hole das“ zurückgesetzt (D-031)
+        void store.updateItem(item.id, { checked: next, ...(item.claimedBy ? { claimedBy: null } : {}) })
+        setPending(null)
+        if (next) onChecked?.()
+      },
+      reducedMotion() ? 0 : 380,
+    )
+  }
 
   return (
     <div
@@ -83,29 +103,14 @@ export function ItemRow({
       data-item-id={item.id}
       data-item-key={dupKey(item)}
       data-stamp={stamp}
-      className={`item ${shownChecked ? 'checked' : ''} ${pending !== null ? 'just-toggled' : ''}`}
+      className={`item tappable ${shownChecked ? 'checked' : ''} ${pending !== null ? 'just-toggled' : ''}`}
+      // Die ganze Karte hakt ab (D-073); Knöpfe, Fotos, Eingaben und Menü behalten ihre eigene Funktion
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest('button, a, input, textarea, select, form, .item-wide, .hint, .menu, .menu-backdrop, .showcard')) return
+        toggle()
+      }}
     >
-      <button
-        className="check"
-        aria-label={item.checked ? t('markOpen') : t('check')}
-        onClick={() => {
-          if (pending !== null) return
-          const next = !item.checked
-          onLocalChange(item.id)
-          // Erst Häkchen und Durchstreichen zeigen, dann rutscht die Zeile an ihren neuen Platz (D-044)
-          setPending(next)
-          if (next) navigator.vibrate?.(12)
-          window.setTimeout(
-            () => {
-              // Beim Abhaken wird „Ich hole das“ zurückgesetzt (D-031)
-              void store.updateItem(item.id, { checked: next, ...(item.claimedBy ? { claimedBy: null } : {}) })
-              setPending(null)
-              if (next) onChecked?.()
-            },
-            reducedMotion() ? 0 : 380,
-          )
-        }}
-      >
+      <button className="check" aria-label={item.checked ? t('markOpen') : t('check')} onClick={toggle}>
         {shownChecked && <Check size={18} strokeWidth={3} />}
       </button>
       <div className="body">
@@ -117,15 +122,6 @@ export function ItemRow({
       {hint && !item.checked && (
         <button className={`ghost small ${showHint ? 'active' : ''}`} aria-label={t('tip')} onClick={() => setShowHint(!showHint)}>
           <Lightbulb size={18} />
-        </button>
-      )}
-      {local && !item.checked && shopTag && hasPhotos(item.conceptId, override_) && (
-        <button
-          className={`ghost small ${showPhotos ? 'active' : ''}`}
-          aria-label={t('photos')}
-          onClick={() => setShowPhotos(!showPhotos)}
-        >
-          <Camera size={18} />
         </button>
       )}
       {!item.checked && (canClaim || claimedBy === me) && (
@@ -143,6 +139,41 @@ export function ItemRow({
           <Hand size={18} />
         </button>
       )}
+      {local && !item.checked && (
+        // Kleines Menü (D-073): Zeigen-Karte fürs Personal und Produktfotos
+        <div className="menu-wrap">
+          <button className={`ghost small ${showMenu || showPhotos ? 'active' : ''}`} aria-label={t('itemMore')} aria-expanded={showMenu} onClick={() => setShowMenu(!showMenu)}>
+            <MoreHorizontal size={18} />
+          </button>
+          {showMenu && (
+            <>
+              <div className="menu-backdrop" onClick={() => setShowMenu(false)} />
+              <div className="menu item-menu" role="menu">
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setShowMenu(false)
+                    setShowCard(true)
+                  }}
+                >
+                  <Presentation size={18} /> {t('showStaff')}
+                </button>
+                {photosOk && (
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setShowMenu(false)
+                      setShowPhotos(!showPhotos)
+                    }}
+                  >
+                    <Camera size={18} /> {showPhotos ? t('hidePhotos') : t('photos')}
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      )}
       {item.checked && (
         // Löschen nur bei Abgehakten (D-055): ein offener Artikel verschwindet nicht versehentlich
         <button className="ghost small" aria-label={t('delete')} onClick={() => {
@@ -159,10 +190,10 @@ export function ItemRow({
       <div className="item-sub">
         <div className="orig">
           {local ? (
-            // Antippen → Zeigen-Karte fürs Personal (D-032)
-            <button className="local term-btn" title={t('showStaff')} onClick={() => setShowCard(true)}>
+            // Zeigen-Karte fürs Personal jetzt über das Menü „…“ (D-073); hier nur Text, ein Tipp hakt ab
+            <span className="local">
               <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
-            </button>
+            </span>
           ) : (
             <span className="missing">{t('noTranslation')}</span>
           )}

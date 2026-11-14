@@ -1273,3 +1273,17 @@ main.page:has(.group) {
 .empty-home {
   margin: 4px 0;
 }
+
+/* Ganze Karte hakt ab (D-073) */
+.item.tappable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.item-menu {
+  min-width: 230px;
+}
+.item-menu button {
+  white-space: nowrap;
+}

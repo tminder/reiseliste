@@ -185,7 +185,7 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-032 · Zeigen-Karte fürs Personal
 
-- **Entscheidung:** Ein Tipp auf den Begriff in der Landessprache (z. B. „🇪🇸 nata“) öffnet eine bildschirmfüllende Karte. Inhalt der Karte: oben „Entschuldigung, wo finde ich das?“, gross der Begriff (mit Menge), darunter „Danke!“, alles in der Landessprache, klein der Artikel in der eigenen Sprache. Antippen oder ✕ schliesst sie. Die Sätze stehen in `src/data/phrases.ts` und enthalten den Begriff bewusst nicht, damit Fall und Artikel in keiner Sprache falsch werden. Mit eingeschaltetem Community-Modul gibt es „Begriff korrigieren“ nur noch für Artikel ohne Landesbegriff (S-045).
+- **Entscheidung:** „Dem Personal zeigen“ im Menü „…“ eines Artikels (D-073) öffnet eine bildschirmfüllende Karte. Inhalt der Karte: oben „Entschuldigung, wo finde ich das?“, gross der Begriff (mit Menge), darunter „Danke!“, alles in der Landessprache, klein der Artikel in der eigenen Sprache. Antippen oder ✕ schliesst sie. Die Sätze stehen in `src/data/phrases.ts` und enthalten den Begriff bewusst nicht, damit Fall und Artikel in keiner Sprache falsch werden. Mit eingeschaltetem Community-Modul gibt es „Begriff korrigieren“ nur noch für Artikel ohne Landesbegriff (S-045).
 - **Begründung:** Hilft genau dann, wenn man im Laden nicht weiterkommt, ohne die Sprache sprechen zu müssen.
 - **Folgen:** Die Sätze sind nicht von Muttersprachlern geprüft (S-001).
 
@@ -332,7 +332,7 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-055 · Eine Ansicht statt Laden- und Bearbeiten-Ansicht
 
-- **Entscheidung:** Die Liste hat nur noch eine Ansicht, Wunsch des Inhabers. Das Eingabefeld steht immer oben. Jeder offene Artikel zeigt Tipp (💡), Fotos (📷, mit Laden) und in Listen mit mindestens zwei Personen „Ich hole das“ (✋, D-065); der Begriff in der Landessprache öffnet die Zeigen-Karte (D-032). Die Schrift hat die Grösse der früheren Bearbeiten-Ansicht. Löschen (✕) gibt es nur bei abgehakten Artikeln, damit offene nicht versehentlich verschwinden. Wer einen offenen Artikel loswerden will, hakt ihn ab und löscht ihn dann. Der Knopf „Ladenansicht/Bearbeiten“ und die Hinweise „Ladenansicht eingeschaltet · zurück“ entfallen.
+- **Entscheidung:** Die Liste hat nur noch eine Ansicht, Wunsch des Inhabers. Das Eingabefeld steht immer oben. Jeder offene Artikel zeigt Tipp (💡), in Listen mit mindestens zwei Personen „Ich hole das“ (✋, D-065) und das Menü „…“ mit Zeigen-Karte und Fotos (D-073). Die Schrift hat die Grösse der früheren Bearbeiten-Ansicht. Löschen (✕) gibt es nur bei abgehakten Artikeln, damit offene nicht versehentlich verschwinden. Wer einen offenen Artikel loswerden will, hakt ihn ab und löscht ihn dann. Der Knopf „Ladenansicht/Bearbeiten“ und die Hinweise „Ladenansicht eingeschaltet · zurück“ entfallen.
 - **Einkauf beginnt** (unsichtbar): beim ersten Abhaken oder beim Öffnen direkt im Supermarkt (D-020). Ab dann wird ein Ladenbesuch erfasst (D-043), und der Laden wird einmal genauer geprüft (D-046).
 - **Begründung:** Zwei Ansichten mit automatischem Wechsel waren schwer zu verstehen; im Laden will man auch schnell etwas ergänzen.
 - **Folgen:** Mehr Knöpfe pro Zeile. Die grosse Ladenschrift fällt weg. Der Kreis zum Abhaken bleibt 30 px gross, reagiert aber auf einen Bereich von rund 50 px (Wunsch des Inhabers).
@@ -452,3 +452,9 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Im Kopf der Liste steht der Laden in einer Zeile: Symbol, Name (wird bei Platzmangel mit „…“ gekürzt), Distanz beim Vorschlag, Stift. Ein Tipp auf die ganze Zeile öffnet von unten das Blatt „Laden wählen“: der aktuelle Laden mit Häkchen, darunter bis zu 5 andere Läden als Zeilen mit Distanz, unten „Neu suchen“ und „Schliessen“. Ein Tipp auf einen Laden wählt ihn und schliesst das Blatt.
 - **Begründung:** Rückmeldung des Inhabers mit Bildschirmfoto: Die Läden klappten als Knöpfe im Kopf auf, brachen um („276 / m“), der Stift stand allein auf einer Zeile, und die Liste rutschte weit nach unten.
 - **Folgen:** Ein Tipp mehr zum Schliessen, dafür bleibt der Kopf der Liste immer gleich hoch. Gleiches Muster wie „Liste bearbeiten“ und „Teilen“.
+
+## D-073 · Ganze Karte hakt ab, Menü „…“ für Zeigen-Karte und Fotos
+
+- **Entscheidung:** Ein Tipp irgendwo auf eine Artikelkarte hakt den Artikel ab bzw. öffnet ihn wieder, auch auf Name und Übersetzung. Ausgenommen sind die Knöpfe auf der Karte (💡, ✋, …, ✕), die Fotos und Eingabefelder. Der Kreis bleibt als Anzeige und eigener Knopf. Die Übersetzung ist kein eigener Knopf mehr. „Dem Personal zeigen“ (Zeigen-Karte, D-032) und „Produktfotos“ (nur mit Laden und vorhandenen Fotos, D-034) liegen in einem kleinen Menü hinter dem Knopf „…“ bei offenen Artikeln mit Übersetzung; der Kamera-Knopf entfällt.
+- **Begründung:** Wunsch des Inhabers. Eine grosse Tippfläche hilft im Laden mit einer Hand; Zeigen-Karte und Fotos braucht man seltener.
+- **Folgen:** Abhaken aus Versehen ist leichter möglich, aber harmlos: Der Artikel rutscht nach „Im Wagen“ und ein Tipp holt ihn zurück. Text auf der Karte lässt sich nicht mehr markieren.
