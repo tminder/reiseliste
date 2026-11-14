@@ -6,8 +6,8 @@ Geteilte Einkaufsliste für Reisende: Jeder schreibt in seiner Sprache, und im L
 
 ## Funktionen (MVP)
 
-- Liste pro Reise mit Reiseland (28 Länder, Landessprachen: DE, ES, PT, FR, IT, NL, HR, EL, VI, EN). Sprache im Profil, international nutzbar, auch für Expats
-- Eingabe in 10 Sprachen (DE, EN, ES, PT, FR, IT, NL, HR, EL, VI), inklusive Mengen („2 Milch“, „500 g Hackfleisch“)
+- Liste pro Reise mit Reiseland (29 Länder, Landessprachen: DE, ES, PT, FR, IT, NL, HR, EL, VI, ZH, EN). Sprache im Profil, international nutzbar, auch für Expats
+- Eingabe in 11 Sprachen (DE, EN, ES, PT, FR, IT, NL, HR, EL, VI, ZH), inklusive Mengen („2 Milch“, „500 g Hackfleisch“)
 - Übersetzung über ein eingebautes Wörterbuch mit 361 Grundbegriffen (inkl. Küchenutensilien und Schweizer Ausdrücken wie Rahm, Poulet, Rüebli, Chriesi, Schoggi) und eigenen Begriffen für Mexiko, Argentinien, Brasilien, die USA, Österreich und die Deutschschweiz, ohne KI und ohne laufende Kosten
 - Vorschläge aus dem Wörterbuch beim Tippen
 - Wörterbuch lernt aus Rückmeldungen: fehlende Wörter und „Begriff stimmt nicht?“ werden anonym gesammelt und von Hand ausgewertet (`docs/woerterbuch-feedback.md`)
@@ -80,7 +80,7 @@ Automatisch: Der Job „Korrekturvorschläge exportieren“ (`.github/workflows/
 
 ## Bekannte Grenzen / nächste Schritte
 
-- **Wörterbuch prüfen lassen:** Die Übersetzungen sind ein Entwurf und noch nicht von Muttersprachlern geprüft, besonders Kroatisch, Griechisch und Vietnamesisch.
+- **Wörterbuch prüfen lassen:** Die Übersetzungen sind ein Entwurf und noch nicht von Muttersprachlern geprüft, besonders Kroatisch, Griechisch, Vietnamesisch und Chinesisch.
 - Bei gleichzeitigen Änderungen gewinnt die letzte („last write wins“).
 - Die Abteilungsreihenfolge ist noch für alle Länder gleich.
 - Laut Konzept folgen später: KI-Übersetzung für unbekannte Artikel, Produktfotos (Open Food Facts), Supermarkterkennung.

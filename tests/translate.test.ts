@@ -91,6 +91,19 @@ describe('nameIn und suggest', () => {
     expect(suggest('bo', 'vi', 20).map((s) => s.id)).toEqual(expect.arrayContaining(['butter', 'rind']))
     expect(suggest('sữa', 'vi', 20).map((s) => s.id)).not.toContain('butter')
     expect(splitQuantity('2 hộp sữa chua')).toEqual({ qty: '2 hộp', text: 'sữa chua' })
+  })
+
+  it('Chinesisch (Taiwan): ohne Leerzeichen, Zählwörter, einzelne Zeichen', () => {
+    expect(findConcept('鮮奶', 'zh')).toBe('milch')
+    expect(findConcept('冰鮮奶', 'zh')).toBe('milch')
+    expect(findConcept('鮮奶油', 'zh')).toBe('sahne')
+    expect(findConcept('奶油', 'zh')).toBe('butter')
+    expect(nameIn('milch', 'zh')).toBe('鮮奶')
+    expect(splitQuantity('2瓶鮮奶')).toEqual({ qty: '2瓶', text: '鮮奶' })
+    expect(splitQuantity('雞蛋10顆')).toEqual({ qty: '10顆', text: '雞蛋' })
+    expect(splitQuantity('500公克絞肉')).toEqual({ qty: '500公克', text: '絞肉' })
+    expect(splitQuantity('3蘋果')).toEqual({ qty: '3', text: '蘋果' })
+    expect(suggest('蛋', 'zh').map((x) => x.id)).toContain('eier')
     expect(nameIn(null, 'es')).toBeNull()
   })
 

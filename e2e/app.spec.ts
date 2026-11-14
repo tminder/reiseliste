@@ -319,3 +319,14 @@ test('Reiseland-Auswahl: Vorschläge oben, dann alphabetisch (D-063)', async ({ 
   expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b, 'de')))
   expect(names[0]).toBe('Argentinien')
 })
+
+test('Liste für Taiwan: Artikel auf traditionellem Chinesisch (D-064)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [], 'TW')
+  await page.goto(`/#/l/${LIST}`)
+  await expect(page.locator('header')).toContainText('繁體中文')
+  await add(page, '2 Milch')
+  await add(page, 'Eier')
+  await expect(page.locator('.item').filter({ hasText: 'Milch' })).toContainText('鮮奶')
+  await expect(page.locator('.item').filter({ hasText: 'Eier' })).toContainText('雞蛋')
+})

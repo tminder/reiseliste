@@ -13,6 +13,7 @@ export const WHERE_IS: Record<Lang, string> = {
   hr: 'Oprostite, gdje mogu ovo naći?',
   el: 'Συγγνώμη, πού μπορώ να το βρω αυτό;',
   vi: 'Xin lỗi, tôi có thể tìm cái này ở đâu?',
+  zh: '不好意思，請問這個在哪裡？',
 }
 
 export const THANKS: Record<Lang, string> = {
@@ -26,4 +27,5 @@ export const THANKS: Record<Lang, string> = {
   hr: 'Hvala!',
   el: 'Ευχαριστώ!',
   vi: 'Cảm ơn!',
+  zh: '謝謝！',
 }

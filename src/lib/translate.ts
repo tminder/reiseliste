@@ -24,7 +24,7 @@ export function normalize(s: string, lang?: Lang): string {
 /** Grobe Plural-/Endungsvarianten, damit "Tomate" und "Tomaten" beide treffen. */
 function stems(word: string, lang?: Lang): string[] {
   const out = new Set([word])
-  if (lang === 'vi') return [...out] // keine Endungen
+  if (lang === 'vi' || lang === 'zh') return [...out] // keine Endungen
   for (const suf of ['en', 'n', 'e', 's', 'es']) {
     if (word.length > suf.length + 2 && word.endsWith(suf)) out.add(word.slice(0, -suf.length))
   }
@@ -137,6 +137,11 @@ const COMPOUND_LEAD = new RegExp(`^(\\d+)(?:\\s*(${PACK}))?${SEP}${SIZE}\\s+(?:(
 const COMPOUND_TRAIL = new RegExp(`^(.+?)\\s+(\\d+)(?:\\s*(${PACK}))?\\s*[x×à]\\s*${SIZE}$`, 'iu')
 const PACK_LEAD = new RegExp(`^(\\d+(?:[.,]\\d+)?)\\s*(${PACK})\\.?\\s+(?:(?:of|de|di|du|des|d')\\s*)?(.+)$`, 'iu')
 
+// Chinesisch: Zahl + Zählwort ohne Leerzeichen, vorne oder hinten („2瓶牛奶“, „牛奶2瓶“, „500克絞肉“)
+const CJK_COUNTER = '(盒裝|瓶|罐|包|盒|袋|個|顆|條|片|串|把|打|公斤|公克|克|公升|毫升|斤|份|杯|塊|根)'
+const CJK_LEAD = new RegExp(`^(\\d+(?:[.,]\\d+)?)\\s*${CJK_COUNTER}?\\s*(\\p{Script=Han}.*)$`, 'u')
+const CJK_TRAIL = new RegExp(`^(\\p{Script=Han}.*?)\\s*(\\d+(?:[.,]\\d+)?)\\s*${CJK_COUNTER}?$`, 'u')
+
 function sizeText(n: string, unit: string): string {
   const u = unit.toLowerCase()
   return `${n.replace('.', ',')} ${u === 'gr' ? 'g' : u}`
@@ -152,6 +157,10 @@ function compoundQty(count: string, pack: string | undefined, n: string, unit: s
  */
 export function splitQuantity(input: string): { qty: string | null; text: string } {
   const s = input.trim().replace(/\s+/g, ' ')
+  let c = s.match(CJK_LEAD)
+  if (c) return { qty: `${c[1]}${c[2] ?? ''}`, text: c[3].trim() }
+  c = s.match(CJK_TRAIL)
+  if (c) return { qty: `${c[2]}${c[3] ?? ''}`, text: c[1].trim() }
   let m = s.match(COMPOUND_LEAD)
   if (m) return { qty: compoundQty(m[1], m[2], m[3], m[4]), text: m[5].trim() }
   m = s.match(COMPOUND_TRAIL)
@@ -180,6 +189,11 @@ export function findConcept(text: string, lang: Lang): string | null {
 
   // Enthaltenes Wort, nur in der eigenen Sprache und ab 3 Zeichen ("Milch fettarm", "frische Tomaten")
   const padded = ` ${n} `
+  // Chinesisch: ohne Leerzeichen zwischen Wörtern, Begriffe meist 2 Zeichen („冰牛奶“ enthält „牛奶“)
+  if (lang === 'zh') {
+    for (const { alias, id } of aliasesByLang.get(lang) ?? []) if (alias.length >= 2 && n.includes(alias)) return id
+    return null
+  }
   for (const { alias, id } of aliasesByLang.get(lang) ?? []) {
     if (alias.length < 3) continue
     for (const variant of [alias, ...stems(alias, lang)]) {
@@ -216,7 +230,7 @@ export function nameIn(conceptId: string | null | undefined, lang: Lang, region?
 export function suggest(input: string, lang: Lang, limit = 5, region?: string): { id: string; name: string }[] {
   const text = splitQuantity(input).text
   const n = normalize(text, lang)
-  if (n.length < 2) return []
+  if (n.length < (lang === 'zh' ? 1 : 2)) return [] // ein chinesisches Zeichen ist schon ein Wort (蛋)
   // Vietnamesisch ohne Zeichen getippt („sua“): mit den Namen ohne Zeichen vergleichen, die Vorschläge zeigen sie mit
   const plain = lang === 'vi' && n === normalize(text)
   const norm = (x: string) => (plain ? normalize(x) : normalize(x, lang))
