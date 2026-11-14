@@ -263,21 +263,12 @@ test.describe('Reiseland nach Sprache (D-041)', () => {
 test.describe('iPhone in Safari (D-061)', () => {
   test.use({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' })
 
-  test('Eigene Liste: Tipp „Home-Bildschirm“ mit Anleitung', async ({ page, problems }) => {
+  test('Eigene Liste: kein Tipp „Home-Bildschirm“, vorübergehend aus (D-061)', async ({ page, problems }) => {
     void problems
     await seed(page)
     await page.goto(`/#/l/${LIST}`)
-    await expect(page.locator('.ios-hint')).toContainText('Home-Bildschirm')
-    await expect(page.locator('.ios-hint')).not.toContainText('Du bist im Browser')
-    await page.getByRole('button', { name: 'Anleitung' }).click()
-    await expect(page.locator('.sheet .install-steps li')).toHaveCount(3)
-    await expect(page.locator('.sheet')).toContainText('Zum Home-Bildschirm')
-    await page.locator('.sheet').getByRole('button', { name: 'Schliessen' }).click()
-    await page.locator('.ios-hint').getByRole('button', { name: 'Nicht mehr zeigen' }).click()
-    await expect(page.locator('.ios-hint')).toHaveCount(0)
-    await page.reload()
     await expect(page.locator('.add input')).toBeVisible()
-    await expect(page.locator('.ios-hint')).toHaveCount(0)
+    await expect(page.locator('.ios-hint', { hasText: 'Home-Bildschirm' })).toHaveCount(0)
   })
 
   test('Fremder Link: Hinweis „Link in die App holen“', async ({ page, problems }) => {

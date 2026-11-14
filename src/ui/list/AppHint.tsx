@@ -64,11 +64,14 @@ function InstallSheet({ id, onClose }: { id: string; onClose: () => void }) {
   )
 }
 
+/** Tipp „Auf den Home-Bildschirm“ vorübergehend ausgeschaltet (Wunsch des Inhabers, D-061). Der Link-Hinweis bleibt. */
+const SHOW_INSTALL_HINT = false
+
 export function AppHint({ id }: { id: string }) {
   const mobile = isIos() || isAndroid()
   const viaLink = isIos() && openedByLink(id)
   const key = viaLink ? 'rl:iosHint' : 'rl:installHint'
-  const [hidden, setHidden] = useState(() => !mobile || isStandalone() || flag(key))
+  const [hidden, setHidden] = useState(() => !mobile || isStandalone() || flag(key) || (!viaLink && !SHOW_INSTALL_HINT))
   const [guide, setGuide] = useState(false)
   if (hidden) return null
   const dismiss = (

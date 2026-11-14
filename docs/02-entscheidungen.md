@@ -375,7 +375,7 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Im Handy-Browser (iPhone oder Android, nicht als Home-Bildschirm-App) steht über der Liste ein kurzer Tipp: „Leg Cart on the Road auf den Home-Bildschirm, dann startet sie wie eine App.“ Knöpfe: „Anleitung“ und „Nicht mehr zeigen“ (`rl:installHint`). Die Anleitung zeigt drei Schritte passend zum Gerät (Safari: Teilen-Symbol bzw. „•••“ → „Zum Home-Bildschirm“ → „Hinzufügen“; Chrome: „⋮“ → „Zum Startbildschirm hinzufügen“/„App installieren“ → „Installieren“). Auf dem iPhone erklärt sie zusätzlich, dass die App einen eigenen Speicher hat, und bietet „Link kopieren“ für die aktuelle Liste an. Ausnahme: Kam man über einen fremden Listen-Link, erscheint stattdessen der Link-Hinweis (D-037). Ob das so war, merkt sich die App beim Start (Listen-Adresse und ob die Liste schon auf dem Gerät war).
 - **Begründung:** Wunsch des Inhabers. Der Link-Hinweis war für Nutzer, die selbst eine Liste anlegen, verwirrend. Wer die App noch nicht installiert hat, soll erfahren, dass es geht und wie.
-- **Folgen:** Kein automatischer Installations-Dialog (Chrome würde ihn anbieten, ist aber nicht eingebaut). Die Menübezeichnungen in Safari und Chrome ändern sich je nach Version; die Anleitung nennt deshalb Alternativen.
+- **Folgen:** Vorübergehend ausgeschaltet (Wunsch des Inhabers, Schalter `SHOW_INSTALL_HINT` in `src/ui/list/AppHint.tsx`); der Link-Hinweis aus D-037 bleibt. Kein automatischer Installations-Dialog (Chrome würde ihn anbieten, ist aber nicht eingebaut). Die Menübezeichnungen in Safari und Chrome ändern sich je nach Version; die Anleitung nennt deshalb Alternativen.
 
 ## D-062 · Vietnamesisch im Wörterbuch
 
