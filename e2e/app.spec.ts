@@ -49,7 +49,6 @@ test('Profil anlegen, Liste erstellen, Artikel übersetzt', async ({ page, probl
   await page.goto('/')
   await page.getByLabel('Dein Name').fill('Tobias')
   await page.getByRole('button', { name: /Los geht/ }).click()
-  // Ohne Listen ist das Formular „Neue Liste“ schon offen
   if (!(await page.locator('form select').first().isVisible())) await page.getByRole('button', { name: /Neue Liste/ }).click()
   await expect(page.getByRole('button', { name: /Liste erstellen/ })).toBeDisabled() // Name ist Pflicht (D-058)
   await page.getByLabel('Name').fill('Barcelona')
@@ -370,10 +369,11 @@ test('Onboarding: Beispiel-Liste vorne, Hinweise im Ablauf (D-068)', async ({ pa
   void problems
   await page.goto('/')
   await expect(page.locator('h2')).toContainText('gemeinsame Einkaufsliste')
-  await expect(page.locator('.demo-item')).toHaveCount(3)
-  await expect(page.locator('.demo-list')).toContainText('leche')
+  await expect(page.locator('.demo-list')).toHaveCount(0) // kein Beispielbild (Wunsch des Inhabers)
   await page.getByLabel('Dein Name').fill('Tobias')
   await page.getByRole('button', { name: /Los geht/ }).click()
+  await expect(page.locator('form')).toHaveCount(0) // Formular erst nach Antippen
+  await page.getByRole('button', { name: /Neue Liste/ }).click()
   await expect(page.locator('form')).toContainText('Eine Liste pro Reise')
   await page.getByLabel('Name').fill('Barcelona')
   await page.locator('form select').first().selectOption('ES')

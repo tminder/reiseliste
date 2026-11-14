@@ -417,12 +417,14 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Wunsch des Inhabers. Ohne Standort würde „Automatisch“ nie wechseln und nur so tun als ob.
 - **Folgen:** Ob der Browser den Standort sperrt, erfährt die App über die Permissions-API; wo sie fehlt, erst nach einer gescheiterten Abfrage.
 
-## D-068 · Onboarding: Beispiel vorne, Hinweise im Ablauf
+## D-068 · Onboarding: Einkaufsliste zuerst, Hinweise im Ablauf
 
-- **Entscheidung:** Option B plus D aus dem [Konzept: Onboarding](https://claude.ai/artifact/9qozxTcNmEQUd4EGFsUwJE). Die App stellt sich zuerst als gemeinsame Einkaufsliste vor, die Übersetzung kommt an zweiter Stelle (Wunsch des Inhabers).
-  - **Erster Bildschirm:** Überschrift „Die gemeinsame Einkaufsliste für die Reise“, darunter „Schreibt zusammen auf, was ihr braucht, und hakt im Laden ab. Im Ausland zeigt die App jeden Artikel zusätzlich so, wie er dort im Laden heisst.“ Dann eine Beispiel-Liste „Ferien in Spanien“ (Anna, Ben) mit Milch, Brot (abgehakt) und Tomaten, je mit spanischem Begriff und Person; die Zeilen erscheinen nacheinander. Die Begriffe folgen der gewählten Sprache; für Spanischsprachige ist das Beispiel Italien. Danach Name und Sprache wie bisher. Nur Anzeige, nichts wird gespeichert.
-  - **Über einen Link eingeladen:** Überschrift „Anna hat dich zu einer gemeinsamen Einkaufsliste eingeladen“ (erstes bekanntes Mitglied), sonst „Du wurdest zu einer gemeinsamen Einkaufsliste eingeladen“, dazu dasselbe Beispiel.
+- **Entscheidung:** Aus dem [Konzept: Onboarding](https://claude.ai/artifact/9qozxTcNmEQUd4EGFsUwJE) umgesetzt: klare Vorstellung auf dem ersten Bildschirm und Hinweise im Ablauf (Option D). Die App stellt sich zuerst als gemeinsame Einkaufsliste vor, die Übersetzung kommt an zweiter Stelle (Wunsch des Inhabers).
+  - **Erster Bildschirm:** Überschrift „Die gemeinsame Einkaufsliste für die Reise“, darunter „Schreibt zusammen auf, was ihr braucht, und hakt im Laden ab. Im Ausland zeigt die App jeden Artikel zusätzlich so, wie er dort im Laden heisst.“, dann Name und Sprache. Kein Beispielbild: Eine Beispiel-Liste über dem Formular war nicht von den Eingabefeldern zu unterscheiden und wurde wieder entfernt (Wunsch des Inhabers).
+  - **Über einen Link eingeladen:** Überschrift „Anna hat dich zu einer gemeinsamen Einkaufsliste eingeladen“ (erstes bekanntes Mitglied), sonst „Du wurdest zu einer gemeinsamen Einkaufsliste eingeladen“.
+  - **Startseite:** „Neue Liste“ und „Liste beitreten“ sind eingeklappt, bis man sie antippt, auch ohne Listen (Wunsch des Inhabers). Das Formular hat immer ein ✕ zum Schliessen.
   - **Hinweise im Ablauf,** je einmal pro Gerät und immer nur einer: im Formular der ersten Liste „Eine Liste pro Reise oder Einkauf …“ (solange es keine Listen gibt); nach dem ersten übersetzten Artikel „Unter jedem Artikel steht, wie er im Laden des Reiselands heisst. Tippe darauf, um ihn dem Personal zu zeigen.“ mit „Verstanden“ (`rl:hintTranslation`); ab drei Artikeln in einer Liste, die man allein hat, „Kaufst du mit anderen ein? Teile die Liste …“ mit „Teilen“ und „Nicht jetzt“ (`rl:hintShare`).
-  - Im Profil-Bearbeiten bleibt der kurze Satz (`tagline`) ohne Beispiel.
-- **Begründung:** Eine Testperson schrieb „Muesches mir denn mal erkläre. Chume no nid ganz drus“. Der Nutzen zeigte sich erst nach drei Bildschirmen; ein Beispiel zeigt ihn in Sekunden, ohne zusätzlichen Schritt.
-- **Folgen:** Wirkung mit neuen Testpersonen prüfen (5-Sekunden-Test: „Was macht diese App?“).
+  - Im Profil-Bearbeiten bleibt der kurze Satz (`tagline`).
+- **Begründung:** Eine Testperson schrieb „Muesches mir denn mal erkläre. Chume no nid ganz drus“. Der Zweck muss auf dem ersten Bildschirm klar sein, die Schritte danach erklären sich, wenn sie anstehen.
+- **Folgen:** Wirkung mit neuen Testpersonen prüfen (5-Sekunden-Test: „Was macht diese App?“). Ohne Beispiel hängt der erste Eindruck allein am Text.
+

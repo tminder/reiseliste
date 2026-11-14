@@ -26,8 +26,8 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
   const [auto, setAuto] = useState(true)
   const [askLocation, setAskLocation] = useState(false)
   const [lists, setLists] = useState(knownLists)
-  // „Neue Liste“ ist eingeklappt, sobald es Listen gibt; ohne Listen direkt offen
-  const [panel, setPanel] = useState<'new' | 'join' | 'link' | null>(lists.length === 0 ? 'new' : null)
+  // „Neue Liste“ und „Liste beitreten“ sind eingeklappt, bis man sie antippt (D-068)
+  const [panel, setPanel] = useState<'new' | 'join' | 'link' | null>(null)
   const [scan, setScan] = useState(false)
   const showNew = panel === 'new'
   const setShowNew = (v: boolean) => setPanel(v ? 'new' : null)
@@ -142,11 +142,9 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
         <form className="card stack" onSubmit={create}>
           <div className="row-between">
             <h2>{t('newList')}</h2>
-            {lists.length > 0 && (
-              <button type="button" className="ghost small" aria-label={t('close')} onClick={() => setShowNew(false)}>
-                <X size={16} />
-              </button>
-            )}
+            <button type="button" className="ghost small" aria-label={t('close')} onClick={() => setShowNew(false)}>
+              <X size={16} />
+            </button>
           </div>
           {/* Erste Liste: kurz erklären, wozu Liste und Reiseland da sind (D-068) */}
           {lists.length === 0 && <p className="muted small-text">{t('newListHint')}</p>}
