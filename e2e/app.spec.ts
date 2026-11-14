@@ -294,3 +294,14 @@ test.describe('iPhone in Safari (D-061)', () => {
     await expect(page.locator('.ios-hint').getByRole('button', { name: 'Link kopieren' })).toBeVisible()
   })
 })
+
+test('Liste für Vietnam: Artikel auf Vietnamesisch (D-062)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [], 'VN')
+  await page.goto(`/#/l/${LIST}`)
+  await expect(page.locator('.list-sub, header')).toContainText('Tiếng Việt')
+  await add(page, 'Milch')
+  await add(page, 'Butter')
+  await expect(page.locator('.item').filter({ hasText: 'Milch' })).toContainText('sữa tươi')
+  await expect(page.locator('.item').filter({ hasText: 'Butter' })).toContainText('bơ')
+})

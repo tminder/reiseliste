@@ -59,7 +59,7 @@ describe('Wörterbuch', () => {
     for (const l of LANGS) {
       const seen = new Map<string, string>()
       for (const c of CONCEPTS)
-        for (const n of new Set((base[l][c.id] ?? []).map(normalize))) {
+        for (const n of new Set((base[l][c.id] ?? []).map((x) => normalize(x, l)))) {
           const other = seen.get(n)
           if (other && other !== c.id) clashes.push(`${l}:${n} → ${other} / ${c.id}`)
           else seen.set(n, c.id)

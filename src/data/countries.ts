@@ -38,6 +38,7 @@ export const COUNTRIES: Country[] = [
   { code: 'NZ', name: 'Neuseeland', flag: '🇳🇿', lang: 'en' },
   { code: 'CH-FR', name: 'Schweiz (Romandie)', flag: '🇨🇭', lang: 'fr' },
   { code: 'CH-IT', name: 'Schweiz (Tessin)', flag: '🇨🇭', lang: 'it' },
+  { code: 'VN', name: 'Vietnam', flag: '🇻🇳', lang: 'vi' },
 ]
 
 export const COUNTRY_BY_CODE = new Map(COUNTRIES.map((c) => [c.code, c]))
@@ -58,6 +59,7 @@ export const PROFILE_LANGS: { value: string; lang: Lang; region?: string; label:
   { value: 'nl', lang: 'nl', label: 'Nederlands' },
   { value: 'hr', lang: 'hr', label: 'Hrvatski' },
   { value: 'el', lang: 'el', label: 'Ελληνικά' },
+  { value: 'vi', lang: 'vi', label: 'Tiếng Việt' },
 ]
 
 /** Bezeichnung der Profilsprache, z. B. „Deutsch (Schweiz)“ */
@@ -66,7 +68,7 @@ export function profileLangLabel(p: { lang: Lang; region?: string }): string {
 }
 
 /** Land, für das eine Sprache ohne Abweichung steht (für die Flagge im Profil-Knopf) */
-const LANG_HOME: Record<Lang, string> = { de: 'DE', en: 'GB', es: 'ES', pt: 'PT', fr: 'FR', it: 'IT', nl: 'NL', hr: 'HR', el: 'GR' }
+const LANG_HOME: Record<Lang, string> = { de: 'DE', en: 'GB', es: 'ES', pt: 'PT', fr: 'FR', it: 'IT', nl: 'NL', hr: 'HR', el: 'GR', vi: 'VN' }
 const flagOf = (cc: string) => String.fromCodePoint(...[...cc.toUpperCase()].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65))
 
 /** Kurzform für knappe Stellen: Flagge und Sprachkürzel, z. B. „🇨🇭 DE“, „🇩🇪 DE“, „🇪🇸 ES“ */
@@ -85,4 +87,5 @@ export const LANG_LABEL: Record<Lang, string> = {
   nl: 'Nederlands',
   hr: 'Hrvatski',
   el: 'Ελληνικά',
+  vi: 'Tiếng Việt',
 }

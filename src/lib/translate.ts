@@ -1,10 +1,19 @@
 import { CONCEPTS, LANGS, loadLangFiles, type Lang, type Names } from '../data/dictionary'
 
-export function normalize(s: string): string {
-  return s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '') // Akzente entfernen (auch griechische Tonos)
+/**
+ * Vergleichsform eines Begriffs: klein, ohne Satzzeichen, ohne Akzente.
+ * Vietnamesisch behält seine Zeichen (lang = 'vi'): Dort unterscheiden sie Wörter (bơ = Butter, bò = Rind).
+ */
+export function normalize(s: string, lang?: Lang): string {
+  const lower = s.toLowerCase()
+  const plain =
+    lang === 'vi'
+      ? lower.normalize('NFC')
+      : lower
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Akzente entfernen (auch griechische Tonos)
+          .replace(/đ/g, 'd') // Vietnamesisch ohne Zeichen: đ zerfällt nicht in Grundbuchstabe + Zeichen
+  return plain
     .replace(/ß/g, 'ss')
     .replace(/[’']/g, "'")
     .replace(/[^\p{L}\p{N}' -]/gu, ' ')
@@ -13,8 +22,9 @@ export function normalize(s: string): string {
 }
 
 /** Grobe Plural-/Endungsvarianten, damit "Tomate" und "Tomaten" beide treffen. */
-function stems(word: string): string[] {
+function stems(word: string, lang?: Lang): string[] {
   const out = new Set([word])
+  if (lang === 'vi') return [...out] // keine Endungen
   for (const suf of ['en', 'n', 'e', 's', 'es']) {
     if (word.length > suf.length + 2 && word.endsWith(suf)) out.add(word.slice(0, -suf.length))
   }
@@ -51,20 +61,20 @@ function addLanguage(lang: Lang, base: Names, variants: Record<string, Names>) {
   const arr = aliasesByLang.get(lang) ?? []
   const owner = new Map<string, string>() // normalisierter Name → Artikel (allgemeine Namen)
   const add = (id: string, name: string) => {
-    const n = normalize(name)
+    const n = normalize(name, lang)
     push(exactIndex, n, { id, lang })
-    for (const st of stems(n)) push(stemIndex, st, { id, lang })
+    for (const st of stems(n, lang)) push(stemIndex, st, { id, lang })
     arr.push({ alias: n, id })
   }
   for (const c of CONCEPTS)
     for (const name of base[c.id] ?? []) {
-      owner.set(normalize(name), c.id)
+      owner.set(normalize(name, lang), c.id)
       add(c.id, name)
     }
   for (const names of Object.values(variants))
     for (const [id, list] of Object.entries(names))
       for (const name of list) {
-        const n = normalize(name)
+        const n = normalize(name, lang)
         if (owner.has(n)) continue // gleicher Name: schon erfasst oder gehört einem anderen Artikel
         owner.set(n, id)
         add(id, name)
@@ -120,7 +130,7 @@ const NUM = '\\d+(?:[.,]\\d+)?'
 const SIZE = `(${NUM})\\s*(kg|gr|g|ml|cl|l)\\.?`
 /** Packungswörter, die zur Menge gehören („2 Tafeln Schokolade“). Werden nicht übersetzt. */
 const PACK =
-  '(?:tafeln?|packungen?|packs?|päckchen|pkg|flaschen?|dosen?|beutel|tüten?|becher|gläser|glas|bund|netze?|schalen?|kisten?|rollen?|stück|stk|bars?|bottles?|cans?|bags?|boxe?s?|jars?|paquetes?|botellas?|latas?|bolsas?|paquets?|bouteilles?|boîtes?|sachets?|confezion[ei]|bottiglie|bottiglia|lattin[ae]|pacchi|pacco)'
+  '(?:tafeln?|packungen?|packs?|päckchen|pkg|flaschen?|dosen?|beutel|tüten?|becher|gläser|glas|bund|netze?|schalen?|kisten?|rollen?|stück|stk|bars?|bottles?|cans?|bags?|boxe?s?|jars?|paquetes?|botellas?|latas?|bolsas?|paquets?|bouteilles?|boîtes?|sachets?|confezion[ei]|bottiglie|bottiglia|lattin[ae]|pacchi|pacco|hộp|chai|gói|lon|túi|bịch|vỉ|thùng|lốc)'
 // Zwischen Anzahl und Grösse steht „x“/„×“ oder ein Leerzeichen (sonst wäre „100g“ = 1 × 00 g)
 const SEP = `(?:\\s*[x×]\\s*|\\s+(?:(?:à|a|je|zu|of|de)\\s+)?)`
 const COMPOUND_LEAD = new RegExp(`^(\\d+)(?:\\s*(${PACK}))?${SEP}${SIZE}\\s+(?:(?:of|de|di|d')\\s*)?(.+)$`, 'iu')
@@ -157,13 +167,13 @@ export function splitQuantity(input: string): { qty: string | null; text: string
 
 /** Findet den Wörterbuch-Eintrag zu einer Eingabe. Die Sprache des Eingebenden wird bevorzugt. */
 export function findConcept(text: string, lang: Lang): string | null {
-  const n = normalize(text)
+  const n = normalize(text, lang)
   if (!n) return null
 
   const exact = pick(exactIndex.get(n), lang)
   if (exact) return exact
 
-  for (const s of stems(n)) {
+  for (const s of stems(n, lang)) {
     const hit = pick(stemIndex.get(s), lang)
     if (hit) return hit
   }
@@ -172,7 +182,7 @@ export function findConcept(text: string, lang: Lang): string | null {
   const padded = ` ${n} `
   for (const { alias, id } of aliasesByLang.get(lang) ?? []) {
     if (alias.length < 3) continue
-    for (const variant of [alias, ...stems(alias)]) {
+    for (const variant of [alias, ...stems(alias, lang)]) {
       if (variant.length >= 3 && padded.includes(` ${variant} `)) return id
     }
   }
@@ -181,11 +191,11 @@ export function findConcept(text: string, lang: Lang): string | null {
 
 /** Nur genaue Treffer (Name oder Endungsvariante), ohne „enthaltenes Wort“. Für den Vergleich doppelter Artikel (D-045). */
 export function exactConcept(text: string, lang: Lang): string | null {
-  const n = normalize(text)
+  const n = normalize(text, lang)
   if (!n) return null
   const exact = pick(exactIndex.get(n), lang)
   if (exact) return exact
-  for (const s of stems(n)) {
+  for (const s of stems(n, lang)) {
     const hit = pick(stemIndex.get(s), lang)
     if (hit) return hit
   }
@@ -204,15 +214,19 @@ export function nameIn(conceptId: string | null | undefined, lang: Lang, region?
 /** Vorschläge beim Tippen: Artikel, deren Name (in der eigenen Sprache) mit der Eingabe beginnt oder sie enthält. */
 /** Vorschläge beim Tippen. region: eigene Länder-Abweichung (z. B. de-CH) – deren Namen werden angezeigt und erkannt */
 export function suggest(input: string, lang: Lang, limit = 5, region?: string): { id: string; name: string }[] {
-  const n = normalize(splitQuantity(input).text)
+  const text = splitQuantity(input).text
+  const n = normalize(text, lang)
   if (n.length < 2) return []
+  // Vietnamesisch ohne Zeichen getippt („sua“): mit den Namen ohne Zeichen vergleichen, die Vorschläge zeigen sie mit
+  const plain = lang === 'vi' && n === normalize(text)
+  const norm = (x: string) => (plain ? normalize(x) : normalize(x, lang))
   const starts: { id: string; name: string }[] = []
   const contains: { id: string; name: string }[] = []
   for (const c of CONCEPTS) {
     const own = (region && REGION.get(region)?.[c.id]) || []
     const raw = [...own, ...namesIn(c.id, lang)]
     if (!raw.length) continue
-    const names = raw.map(normalize)
+    const names = raw.map(norm)
     if (names.some((x) => x.startsWith(n))) starts.push({ id: c.id, name: raw[0] })
     else if (names.some((x) => x.includes(n))) contains.push({ id: c.id, name: raw[0] })
   }

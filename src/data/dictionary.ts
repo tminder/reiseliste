@@ -7,7 +7,7 @@
 
 import CONCEPTS_JSON from './dictionary/concepts.json'
 
-export const LANGS = ['de', 'en', 'es', 'pt', 'fr', 'it', 'nl', 'hr', 'el'] as const
+export const LANGS = ['de', 'en', 'es', 'pt', 'fr', 'it', 'nl', 'hr', 'el', 'vi'] as const
 export type Lang = (typeof LANGS)[number]
 
 export type Category =

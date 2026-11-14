@@ -38,6 +38,7 @@ const OFF_COUNTRY: Record<string, string> = {
   GR: 'en:greece',
   CY: 'en:cyprus',
   HR: 'en:croatia',
+  VN: 'en:vietnam',
   NL: 'en:netherlands',
   'BE-NL': 'en:belgium',
   'BE-FR': 'en:belgium',

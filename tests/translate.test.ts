@@ -61,6 +61,11 @@ describe('findConcept', () => {
     ['leche', 'es', 'milch'],
     ['crème liquide', 'fr', 'schlagsahne'],
     ['γάλα', 'el', 'milch'],
+    ['sữa tươi', 'vi', 'milch'],
+    ['đường', 'vi', 'zucker'],
+    ['quả bơ', 'vi', 'avocado'],
+    ['bơ', 'vi', 'butter'],
+    ['2 hộp sữa chua', 'vi', 'joghurt'],
   ])('%s (%s) → %s', (text, lang, id) => {
     expect(findConcept(text, lang as never)).toBe(id)
   })
@@ -75,6 +80,17 @@ describe('nameIn und suggest', () => {
   it('zeigt die erste Variante in der Zielsprache', () => {
     expect(nameIn('milch', 'es')).toBe('leche')
     expect(nameIn('sahne', 'de')).toBe('Sahne')
+    expect(nameIn('milch', 'vi')).toBe('sữa tươi')
+  })
+
+  it('Vietnamesisch: Zeichen unterscheiden Wörter, ohne Zeichen getippt helfen die Vorschläge', () => {
+    expect(findConcept('bò', 'vi')).toBe('rind')
+    expect(findConcept('thịt bò', 'vi')).toBe('rind')
+    expect(findConcept('bơ', 'vi')).toBe('butter')
+    expect(suggest('sua tuoi', 'vi').map((s) => s.id)).toContain('milch')
+    expect(suggest('bo', 'vi', 20).map((s) => s.id)).toEqual(expect.arrayContaining(['butter', 'rind']))
+    expect(suggest('sữa', 'vi', 20).map((s) => s.id)).not.toContain('butter')
+    expect(splitQuantity('2 hộp sữa chua')).toEqual({ qty: '2 hộp', text: 'sữa chua' })
     expect(nameIn(null, 'es')).toBeNull()
   })
 
