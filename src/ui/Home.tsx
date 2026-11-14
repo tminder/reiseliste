@@ -4,6 +4,7 @@ import { UserPlus, ClipboardPaste, ScanLine, MapPin, Plus, Trash2, Users, X } fr
 import { COUNTRY_BY_CODE, profileLangLabel, profileLangShort } from '../data/countries'
 import { AppLogo } from './AppLogo'
 import { CountryOptions } from './CountryOptions'
+import { LocationOff } from './LocationOff'
 import { countryName, t } from '../i18n'
 import { listIdFrom } from '../lib/links'
 import { detectCountry } from '../lib/country'
@@ -160,6 +161,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
               <CountryOptions lang={profile.lang} />
             </select>
           </label>
+          {auto && <LocationOff key={locTick} onAllowed={() => setLocTick((n) => n + 1)} />}
           <button className="primary" disabled={!name.trim()}>
             {t('createList')}
           </button>
@@ -233,7 +235,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
           </button>
         </div>
       )}
-      <LocationAsk onAllowed={() => setLocTick((n) => n + 1)} />
+      <LocationAsk onAllowed={() => setLocTick((n) => n + 1)} onDeclined={() => setLocTick((n) => n + 1)} />
       <footer className="footer">
         <a href="#/datenschutz">{t('privacy')}</a>
         <AppVersion />
@@ -312,7 +314,7 @@ function JoinList({ onClose, onScan, focusLink }: { onClose: () => void; onScan:
  * Frage nach dem Standort vor der Rückfrage des Browsers (D-066). Erscheint, bis man „Standort freigeben“ oder „Nicht jetzt“ tippt,
  * und nicht, wenn der Browser den Standort schon erlaubt.
  */
-function LocationAsk({ onAllowed }: { onAllowed: () => void }) {
+function LocationAsk({ onAllowed, onDeclined }: { onAllowed: () => void; onDeclined: () => void }) {
   const [open, setOpen] = useState(() => locationConsent() === null)
   useEffect(() => {
     if (!open) return
@@ -344,6 +346,7 @@ function LocationAsk({ onAllowed }: { onAllowed: () => void }) {
           onClick={() => {
             setLocationConsent('no')
             setOpen(false)
+            onDeclined()
           }}
         >
           {t('notNow')}

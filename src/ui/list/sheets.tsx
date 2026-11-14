@@ -4,6 +4,7 @@ import { type Lang } from '../../data/dictionary'
 import { COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
 import { countryName, t } from '../../i18n'
 import { CountryOptions } from '../CountryOptions'
+import { LocationOff } from '../LocationOff'
 import { listUrl } from '../../lib/links'
 import { MAX } from '../../lib/limits'
 import { ListStore, supabase, type Profile } from '../../lib/store'
@@ -95,6 +96,7 @@ export function EditSheet({
           </select>
         </label>
         <p className="muted small-text">{auto ? t('autoCountryHint') : t('countryChangeHint')}</p>
+        {auto && <LocationOff />}
         <label className="check-row">
           <input type="checkbox" checked={ac} onChange={(e) => setAc(e.target.checked)} />
           <span>

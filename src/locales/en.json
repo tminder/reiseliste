@@ -160,6 +160,7 @@
   "privacy": "Privacy & contact",
   "locationAsk": "To suggest the travel country and find shops, the app needs your location. Coordinates are sent to OpenStreetMap and not stored on any server.",
   "notNow": "Not now",
+  "autoNoLocation": "Without your location, the country stays as preselected.",
   "cat_obst": "Fruit & vegetables",
   "cat_milch": "Dairy & eggs",
   "cat_brot": "Bread & breakfast",

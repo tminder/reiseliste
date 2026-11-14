@@ -340,6 +340,10 @@ test('Standort: eigene Frage vor der Browser-Rückfrage (D-066)', async ({ page,
   await expect(ask).toBeVisible()
   await ask.getByRole('button', { name: 'Nicht jetzt' }).click()
   await expect(ask).toHaveCount(0)
+  // Später freigeben: Hinweis unter „Reiseland: Automatisch“
+  if (!(await page.locator('form select').first().isVisible())) await page.getByRole('button', { name: /Neue Liste/ }).click()
+  await expect(page.locator('form')).toContainText('Ohne Standort bleibt das Land')
+  await expect(page.locator('form').getByRole('button', { name: 'Standort freigeben' })).toBeVisible()
   await page.reload() // öffnet wieder die letzte Liste
   await page.locator('a.back').click()
   await expect(page.locator('.list-card')).toHaveCount(1)

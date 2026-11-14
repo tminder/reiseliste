@@ -160,6 +160,7 @@
   "privacy": "Datenschutz & Kontakt",
   "locationAsk": "Für Reiseland und Ladensuche braucht die App deinen Standort. Die Koordinaten gehen an OpenStreetMap und werden nicht auf einem Server gespeichert.",
   "notNow": "Nicht jetzt",
+  "autoNoLocation": "Ohne Standort bleibt das Land bei der Vorauswahl.",
   "cat_obst": "Obst & Gemüse",
   "cat_milch": "Milchprodukte & Eier",
   "cat_brot": "Brot & Frühstück",
