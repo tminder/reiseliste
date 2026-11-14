@@ -1,15 +1,14 @@
 // Startseite: alle Listen, neue Liste anlegen, Liste beitreten (QR-Code oder Link)
 import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
-import { UserPlus, ClipboardPaste, ScanLine, MapPin, Plus, Trash2, Users, X } from 'lucide-react'
+import { UserPlus, ClipboardPaste, ScanLine, Plus, Trash2, Users, X } from 'lucide-react'
 import { COUNTRY_BY_CODE, profileLangLabel, profileLangShort } from '../data/countries'
 import { AppLogo } from './AppLogo'
 import { CountryOptions } from './CountryOptions'
-import { LocationNeeded } from './LocationNeeded'
-import { useLocation, type LocationState } from './useLocation'
+import { LocationSheet } from './LocationSheet'
+import { useLocation } from './useLocation'
 import { countryName, t } from '../i18n'
 import { listIdFrom } from '../lib/links'
 import { detectCountry } from '../lib/country'
-import { locationAlreadyAllowed, setLocationConsent } from '../lib/nearby'
 import { MAX } from '../lib/limits'
 import { ListStore, DELETE_GRACE_MS, flushDeletes, recentDelete, scheduleDelete, undoDelete, isSoleMember, knownSole, knownLists, leaveList, localLastChange, localPeople, remoteOverview, supabase, type Profile } from '../lib/store'
 import { AppVersion } from './AppVersion'
@@ -22,10 +21,10 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
   const [country, setCountry] = useState(() => ['ES', 'IT', 'FR'].find((c) => COUNTRY_BY_CODE.get(c)?.lang !== profile.lang) ?? 'ES')
   const touched = useRef(false)
   // Reiseland: standardmässig automatisch nach Standort (D-057), sonst fest gewähltes Land
-  // „Automatisch“ nur mit Standort (D-067)
+  // „Automatisch“ ist immer die Vorauswahl; fehlt der Standort, fragt „Liste erstellen“ zuerst danach (D-066, D-067)
   const loc = useLocation()
-  const [autoWanted, setAuto] = useState(true)
-  const auto = autoWanted && loc.available
+  const [auto, setAuto] = useState(true)
+  const [askLocation, setAskLocation] = useState(false)
   const [lists, setLists] = useState(knownLists)
   // „Neue Liste“ ist eingeklappt, sobald es Listen gibt; ohne Listen direkt offen
   const [panel, setPanel] = useState<'new' | 'join' | 'link' | null>(lists.length === 0 ? 'new' : null)
@@ -77,8 +76,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
   }, [lists, profile])
   const sorted = [...lists].sort((a, b) => (changed[b.id] ?? '').localeCompare(changed[a.id] ?? ''))
 
-  // Bist du schon im Ausland, wird das aktuelle Land vorgeschlagen (änderbar). Nach „Standort freigeben“ erneut (D-066)
-  const [locTick, setLocTick] = useState(0)
+  // Bist du schon im Ausland, wird das aktuelle Land vorgeschlagen (änderbar)
   useEffect(() => {
     let alive = true
     void detectCountry().then((code) => {
@@ -88,15 +86,20 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
     return () => {
       alive = false
     }
-  }, [profile.lang, locTick])
+  }, [profile.lang])
+
+  function make(c: string, a: boolean) {
+    const id = crypto.randomUUID()
+    const store = new ListStore(id)
+    void store.create(name.trim(), c, a)
+    go(`/l/${id}`)
+  }
 
   function create(e: FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
-    const id = crypto.randomUUID()
-    const store = new ListStore(id)
-    void store.create(name.trim(), country, auto)
-    go(`/l/${id}`)
+    if (auto && !loc.available) return setAskLocation(true)
+    make(country, auto)
   }
 
   return (
@@ -109,7 +112,6 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
           {profile.name} · {profileLangShort(profile)}
         </button>
       </header>
-      <LocationAsk loc={loc} onAllowed={() => setLocTick((n) => n + 1)} />
 
       {/* Neu / Öffnen als waagrechte, scrollbare Knopfleiste; das Formular erscheint darunter */}
       <div className="action-row">
@@ -162,25 +164,17 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
                 setCountry(e.target.value)
               }}
             >
-              <option value="auto" disabled={!loc.available}>
-                {loc.available ? t('autoCountry', { country: `${COUNTRY_BY_CODE.get(country)?.flag ?? ''} ${countryName(country)}` }) : t('autoCountryOff')}
-              </option>
+              <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(country)?.flag ?? ''} ${countryName(country)}` })}</option>
               <CountryOptions lang={profile.lang} />
             </select>
           </label>
-          {/* Solange oben die Standort-Frage steht, hier kein zweiter Hinweis */}
-          <LocationNeeded
-            hidden={loc.unasked}
-            loc={loc}
-            onAllowed={() => {
-              setAuto(true)
-              setLocTick((n) => n + 1)
-            }}
-          />
           <button className="primary" disabled={!name.trim()}>
             {t('createList')}
           </button>
         </form>
+      )}
+      {askLocation && (
+        <LocationSheet loc={loc} lang={profile.lang} country={country} submitLabel={t('createList')} onDone={make} onClose={() => setAskLocation(false)} />
       )}
 
       {lists.length > 0 && (
@@ -324,43 +318,3 @@ function JoinList({ onClose, onScan, focusLink }: { onClose: () => void; onScan:
   )
 }
 
-/**
- * Frage nach dem Standort vor der Rückfrage des Browsers (D-066). Erscheint, bis man „Standort freigeben“ oder „Nicht jetzt“ tippt,
- * und nicht, wenn der Browser den Standort schon erlaubt.
- */
-function LocationAsk({ loc, onAllowed }: { loc: LocationState; onAllowed: () => void }) {
-  const { unasked: open, refresh } = loc
-  useEffect(() => {
-    if (!open) return
-    void locationAlreadyAllowed().then((ok) => {
-      if (!ok) return
-      setLocationConsent('yes')
-      refresh()
-    })
-  }, [open, refresh])
-  if (!open) return null
-  return (
-    <div className="note info ios-hint">
-      <p>
-        <MapPin size={15} /> {t('locationAsk')} <a href="#/datenschutz">{t('privacy')}</a>
-      </p>
-      <div className="row-gap">
-        <button
-          className="primary small"
-          onClick={() => void loc.allow().then((ok) => ok && onAllowed())}
-        >
-          {t('allowLocation')}
-        </button>
-        <button
-          className="ghost small"
-          onClick={() => {
-            setLocationConsent('no')
-            refresh()
-          }}
-        >
-          {t('notNow')}
-        </button>
-      </div>
-    </div>
-  )
-}

@@ -4,7 +4,7 @@ import { type Lang } from '../../data/dictionary'
 import { COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
 import { countryName, t } from '../../i18n'
 import { CountryOptions } from '../CountryOptions'
-import { LocationNeeded } from '../LocationNeeded'
+import { LocationSheet } from '../LocationSheet'
 import { useLocation } from '../useLocation'
 import { listUrl } from '../../lib/links'
 import { MAX } from '../../lib/limits'
@@ -66,8 +66,9 @@ export function EditSheet({
   const [n, setN] = useState(name)
   const [c, setC] = useState(country)
   const [auto, setAuto] = useState(autoCountry)
-  // „Automatisch“ nur mit Standort wählbar, ausser die Liste steht schon darauf (D-067)
+  // Wechsel auf „Automatisch“ ohne Standort: erst fragen (D-066, D-067)
   const loc = useLocation()
+  const [askLocation, setAskLocation] = useState(false)
   const [ac, setAc] = useState(autoClear)
   return (
     <div className="sheet-backdrop" onClick={onClose}>
@@ -76,6 +77,7 @@ export function EditSheet({
         onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
           e.preventDefault()
+          if (auto && !autoCountry && !loc.available) return setAskLocation(true)
           onSave(n.trim() || name, c, ac, auto)
         }}
       >
@@ -94,14 +96,11 @@ export function EditSheet({
               setC(e.target.value)
             }}
           >
-            <option value="auto" disabled={!loc.available && !autoCountry}>
-              {loc.available || autoCountry ? t('autoCountry', { country: `${COUNTRY_BY_CODE.get(c)?.flag ?? ''} ${countryName(c)}` }) : t('autoCountryOff')}
-            </option>
+            <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(c)?.flag ?? ''} ${countryName(c)}` })}</option>
             <CountryOptions lang={lang} />
           </select>
         </label>
         <p className="muted small-text">{auto ? t('autoCountryHint') : t('countryChangeHint')}</p>
-        <LocationNeeded loc={loc} onAllowed={() => setAuto(true)} />
         <label className="check-row">
           <input type="checkbox" checked={ac} onChange={(e) => setAc(e.target.checked)} />
           <span>
@@ -116,6 +115,16 @@ export function EditSheet({
           </button>
         </div>
       </form>
+      {askLocation && (
+        <LocationSheet
+          loc={loc}
+          lang={lang}
+          country={c}
+          submitLabel={t('save')}
+          onDone={(country, a) => onSave(n.trim() || name, country, ac, a)}
+          onClose={() => setAskLocation(false)}
+        />
+      )}
     </div>
   )
 }

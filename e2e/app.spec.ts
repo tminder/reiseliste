@@ -331,42 +331,37 @@ test('Liste für Taiwan: Artikel auf traditionellem Chinesisch (D-064)', async (
   await expect(page.locator('.item').filter({ hasText: 'Eier' })).toContainText('雞蛋')
 })
 
-test('Standort: eigene Frage vor der Browser-Rückfrage (D-066)', async ({ page, problems }) => {
+test('Neue Liste auf „Automatisch“ ohne Standort: Blatt mit „Land selbst wählen“ (D-066, D-067)', async ({ page, problems }) => {
   void problems
   await seed(page)
   await page.goto(`/#/l/${LIST}`)
   await page.locator('a.back').click()
-  const ask = page.locator('.note', { hasText: 'braucht die App deinen Standort' })
-  await expect(ask).toBeVisible()
-  await ask.getByRole('button', { name: 'Nicht jetzt' }).click()
-  await expect(ask).toHaveCount(0)
-  // Später freigeben: Hinweis unter „Reiseland: Automatisch“
   if (!(await page.locator('form select').first().isVisible())) await page.getByRole('button', { name: /Neue Liste/ }).click()
-  // „Automatisch“ nur mit Standort (D-067): gesperrt, fest gewähltes Land, Hinweis mit „Standort freigeben“
-  const select = page.locator('form select').first()
-  await expect(select.locator('option[value="auto"]')).toBeDisabled()
-  await expect(select.locator('option[value="auto"]')).toHaveText('Automatisch (Standort nötig)')
-  expect(await select.inputValue()).not.toBe('auto')
-  await expect(page.locator('form')).toContainText('braucht ihn deshalb')
-  await expect(page.locator('form').getByRole('button', { name: 'Standort freigeben' })).toBeVisible()
-  await page.reload() // öffnet wieder die letzte Liste
-  await page.locator('a.back').click()
-  await expect(page.locator('.list-card')).toHaveCount(1)
-  await expect(ask).toHaveCount(0)
+  expect(await page.locator('form select').first().inputValue()).toBe('auto') // immer die Vorauswahl
+  await page.getByLabel('Name').fill('Rundreise')
+  await page.getByRole('button', { name: /Liste erstellen/ }).click()
+  const sheet = page.locator('.sheet')
+  await expect(sheet).toContainText('wechselt das Reiseland mit deinem Standort')
+  await sheet.getByRole('button', { name: 'Land selbst wählen' }).click()
+  await sheet.locator('select').selectOption('IT')
+  await sheet.getByRole('button', { name: 'Liste erstellen' }).click()
+  await expect(page.locator('.add input')).toBeVisible()
+  await expect(page.locator('header')).toContainText('Italien')
 })
 
 test.describe('Standort schon erlaubt', () => {
   test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
-  test('keine eigene Frage (D-066)', async ({ page, problems }) => {
+  test('„Automatisch“ ohne Zwischenschritt (D-067)', async ({ page, problems }) => {
     void problems
     await seed(page)
     await page.route(/nominatim/, (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ address: { country_code: 'es' } }) }))
     await page.goto(`/#/l/${LIST}`)
     await page.locator('a.back').click()
-    await expect(page.locator('.list-card')).toHaveCount(1)
-    await page.waitForTimeout(300)
-    await expect(page.locator('.note', { hasText: 'braucht die App deinen Standort' })).toHaveCount(0)
     if (!(await page.locator('form select').first().isVisible())) await page.getByRole('button', { name: /Neue Liste/ }).click()
     expect(await page.locator('form select').first().inputValue()).toBe('auto')
+    await page.getByLabel('Name').fill('Barcelona')
+    await page.getByRole('button', { name: /Liste erstellen/ }).click()
+    await expect(page.locator('.add input')).toBeVisible()
+    await expect(page.locator('.sheet')).toHaveCount(0)
   })
 })
