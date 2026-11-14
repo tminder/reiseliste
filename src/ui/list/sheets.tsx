@@ -4,7 +4,8 @@ import { type Lang } from '../../data/dictionary'
 import { COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
 import { countryName, t } from '../../i18n'
 import { CountryOptions } from '../CountryOptions'
-import { LocationOff } from '../LocationOff'
+import { LocationNeeded } from '../LocationNeeded'
+import { useLocation } from '../useLocation'
 import { listUrl } from '../../lib/links'
 import { MAX } from '../../lib/limits'
 import { ListStore, supabase, type Profile } from '../../lib/store'
@@ -65,6 +66,8 @@ export function EditSheet({
   const [n, setN] = useState(name)
   const [c, setC] = useState(country)
   const [auto, setAuto] = useState(autoCountry)
+  // „Automatisch“ nur mit Standort wählbar, ausser die Liste steht schon darauf (D-067)
+  const loc = useLocation()
   const [ac, setAc] = useState(autoClear)
   return (
     <div className="sheet-backdrop" onClick={onClose}>
@@ -91,12 +94,14 @@ export function EditSheet({
               setC(e.target.value)
             }}
           >
-            <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(c)?.flag ?? ''} ${countryName(c)}` })}</option>
+            <option value="auto" disabled={!loc.available && !autoCountry}>
+              {loc.available || autoCountry ? t('autoCountry', { country: `${COUNTRY_BY_CODE.get(c)?.flag ?? ''} ${countryName(c)}` }) : t('autoCountryOff')}
+            </option>
             <CountryOptions lang={lang} />
           </select>
         </label>
         <p className="muted small-text">{auto ? t('autoCountryHint') : t('countryChangeHint')}</p>
-        {auto && <LocationOff />}
+        <LocationNeeded loc={loc} onAllowed={() => setAuto(true)} />
         <label className="check-row">
           <input type="checkbox" checked={ac} onChange={(e) => setAc(e.target.checked)} />
           <span>

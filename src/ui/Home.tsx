@@ -4,7 +4,8 @@ import { UserPlus, ClipboardPaste, ScanLine, MapPin, Plus, Trash2, Users, X } fr
 import { COUNTRY_BY_CODE, profileLangLabel, profileLangShort } from '../data/countries'
 import { AppLogo } from './AppLogo'
 import { CountryOptions } from './CountryOptions'
-import { LocationOff } from './LocationOff'
+import { LocationNeeded } from './LocationNeeded'
+import { useLocation, type LocationState } from './useLocation'
 import { countryName, t } from '../i18n'
 import { listIdFrom } from '../lib/links'
 import { detectCountry } from '../lib/country'
@@ -21,7 +22,10 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
   const [country, setCountry] = useState(() => ['ES', 'IT', 'FR'].find((c) => COUNTRY_BY_CODE.get(c)?.lang !== profile.lang) ?? 'ES')
   const touched = useRef(false)
   // Reiseland: standardmässig automatisch nach Standort (D-057), sonst fest gewähltes Land
-  const [auto, setAuto] = useState(true)
+  // „Automatisch“ nur mit Standort (D-067)
+  const loc = useLocation()
+  const [autoWanted, setAuto] = useState(true)
+  const auto = autoWanted && loc.available
   const [lists, setLists] = useState(knownLists)
   // „Neue Liste“ ist eingeklappt, sobald es Listen gibt; ohne Listen direkt offen
   const [panel, setPanel] = useState<'new' | 'join' | 'link' | null>(lists.length === 0 ? 'new' : null)
@@ -157,11 +161,19 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
                 setCountry(e.target.value)
               }}
             >
-              <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(country)?.flag ?? ''} ${countryName(country)}` })}</option>
+              <option value="auto" disabled={!loc.available}>
+                {loc.available ? t('autoCountry', { country: `${COUNTRY_BY_CODE.get(country)?.flag ?? ''} ${countryName(country)}` }) : t('autoCountryOff')}
+              </option>
               <CountryOptions lang={profile.lang} />
             </select>
           </label>
-          {auto && <LocationOff key={locTick} onAllowed={() => setLocTick((n) => n + 1)} />}
+          <LocationNeeded
+            loc={loc}
+            onAllowed={() => {
+              setAuto(true)
+              setLocTick((n) => n + 1)
+            }}
+          />
           <button className="primary" disabled={!name.trim()}>
             {t('createList')}
           </button>
@@ -235,7 +247,10 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
           </button>
         </div>
       )}
-      <LocationAsk onAllowed={() => setLocTick((n) => n + 1)} onDeclined={() => setLocTick((n) => n + 1)} />
+      <LocationAsk
+        loc={loc}
+        onAllowed={() => setLocTick((n) => n + 1)}
+      />
       <footer className="footer">
         <a href="#/datenschutz">{t('privacy')}</a>
         <AppVersion />
@@ -314,16 +329,18 @@ function JoinList({ onClose, onScan, focusLink }: { onClose: () => void; onScan:
  * Frage nach dem Standort vor der Rückfrage des Browsers (D-066). Erscheint, bis man „Standort freigeben“ oder „Nicht jetzt“ tippt,
  * und nicht, wenn der Browser den Standort schon erlaubt.
  */
-function LocationAsk({ onAllowed, onDeclined }: { onAllowed: () => void; onDeclined: () => void }) {
+function LocationAsk({ loc, onAllowed }: { loc: LocationState; onAllowed: () => void }) {
   const [open, setOpen] = useState(() => locationConsent() === null)
+  const { refresh } = loc
   useEffect(() => {
     if (!open) return
     void locationAlreadyAllowed().then((ok) => {
       if (!ok) return
       setLocationConsent('yes')
+      refresh()
       setOpen(false)
     })
-  }, [open])
+  }, [open, refresh])
   if (!open) return null
   return (
     <div className="note info ios-hint">
@@ -334,9 +351,8 @@ function LocationAsk({ onAllowed, onDeclined }: { onAllowed: () => void; onDecli
         <button
           className="primary small"
           onClick={() => {
-            setLocationConsent('yes')
             setOpen(false)
-            onAllowed()
+            void loc.allow().then((ok) => ok && onAllowed())
           }}
         >
           {t('allowLocation')}
@@ -346,7 +362,7 @@ function LocationAsk({ onAllowed, onDeclined }: { onAllowed: () => void; onDecli
           onClick={() => {
             setLocationConsent('no')
             setOpen(false)
-            onDeclined()
+            loc.refresh()
           }}
         >
           {t('notNow')}

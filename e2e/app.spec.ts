@@ -342,7 +342,12 @@ test('Standort: eigene Frage vor der Browser-Rückfrage (D-066)', async ({ page,
   await expect(ask).toHaveCount(0)
   // Später freigeben: Hinweis unter „Reiseland: Automatisch“
   if (!(await page.locator('form select').first().isVisible())) await page.getByRole('button', { name: /Neue Liste/ }).click()
-  await expect(page.locator('form')).toContainText('Ohne Standort bleibt das Land')
+  // „Automatisch“ nur mit Standort (D-067): gesperrt, fest gewähltes Land, Hinweis mit „Standort freigeben“
+  const select = page.locator('form select').first()
+  await expect(select.locator('option[value="auto"]')).toBeDisabled()
+  await expect(select.locator('option[value="auto"]')).toHaveText('Automatisch (Standort nötig)')
+  expect(await select.inputValue()).not.toBe('auto')
+  await expect(page.locator('form')).toContainText('braucht ihn deshalb')
   await expect(page.locator('form').getByRole('button', { name: 'Standort freigeben' })).toBeVisible()
   await page.reload() // öffnet wieder die letzte Liste
   await page.locator('a.back').click()
@@ -361,5 +366,7 @@ test.describe('Standort schon erlaubt', () => {
     await expect(page.locator('.list-card')).toHaveCount(1)
     await page.waitForTimeout(300)
     await expect(page.locator('.note', { hasText: 'braucht die App deinen Standort' })).toHaveCount(0)
+    if (!(await page.locator('form select').first().isVisible())) await page.getByRole('button', { name: /Neue Liste/ }).click()
+    expect(await page.locator('form select').first().inputValue()).toBe('auto')
   })
 })
