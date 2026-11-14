@@ -194,8 +194,10 @@
   "autoCountryHint": "Follows your location, except in a country of your own language.",
   "examples": "For example – tap to add:",
   "wrongTerm": "Wrong term?",
+  "reportTitle": "Report wrong translation",
+  "reportIntro": "Is this term wrong, or is it called something else in the shop? Report the error and we will check the dictionary. A better term helps but is optional.",
+  "reportSend": "Report error",
   "betterTermOptional": "Better term (optional)",
-  "send": "Send",
   "feedbackThanks": "Thanks! We will check it.",
   "feedbackFailed": "Not possible right now (offline?). Please try again later."
 }

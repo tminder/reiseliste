@@ -194,8 +194,10 @@
   "autoCountryHint": "Wechselt mit deinem Standort, ausser im Land deiner Sprache.",
   "examples": "Zum Beispiel – antippen zum Hinzufügen:",
   "wrongTerm": "Begriff stimmt nicht?",
+  "reportTitle": "Übersetzung falsch melden",
+  "reportIntro": "Stimmt dieser Begriff nicht oder heisst er im Laden anders? Melde den Fehler, dann prüfen wir das Wörterbuch. Ein besserer Begriff hilft, ist aber freiwillig.",
+  "reportSend": "Fehler melden",
   "betterTermOptional": "Besserer Begriff (freiwillig)",
-  "send": "Senden",
   "feedbackThanks": "Danke! Wir prüfen das.",
   "feedbackFailed": "Gerade nicht möglich (offline?). Bitte später nochmals."
 }

@@ -303,10 +303,11 @@ function ReportSheet({ own, term, flag, onClose, feedback }: { own: string; term
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-        <h2>{t('wrongTerm')}</h2>
+        <h2>{t('reportTitle')}</h2>
         <p>
           {own} → {flag} <strong>{term}</strong>
         </p>
+        {state !== 'sent' && state !== 'failed' && <p className="muted small-text">{t('reportIntro')}</p>}
         {state === 'sent' || state === 'failed' ? (
           <>
             <p className="muted">{state === 'sent' ? t('feedbackThanks') : t('feedbackFailed')}</p>
@@ -331,7 +332,7 @@ function ReportSheet({ own, term, flag, onClose, feedback }: { own: string; term
             </label>
             <div className="row">
               <button className="primary" disabled={state === 'sending'}>
-                {t('send')}
+                {t('reportSend')}
               </button>
               <button type="button" className="ghost" onClick={onClose}>
                 {t('cancel')}
