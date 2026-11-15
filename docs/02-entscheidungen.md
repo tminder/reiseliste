@@ -482,3 +482,9 @@ Stand: 2026-11-15 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Provisorisch zum Testen zeigen das Logo neben dem App-Namen (Startseite, erster Start, Profil) und das Symbol im Browser-Tab eine Version, bei der die Strasse durchsichtig ist (`public/logo-transparent.svg`): Sie nimmt die Farbe der Seite an. Die Symbole für den Home-Bildschirm (apple-touch-icon, icon-192/512, maskable, Manifest) bleiben unverändert aus `public/favicon.svg` mit dunkler Strasse (D-026).
 - **Begründung:** Wunsch des Inhabers, eine leichtere Wirkung zu testen. Auf dem Home-Bildschirm brächte es nichts: iOS füllt durchsichtige Stellen schwarz, Android meist weiss oder farbig.
 - **Folgen:** Auf hellem Hintergrund wird die Strasse weiss und das Logo wirkt zweigeteilt; bei 30 px ist die Lücke klein. Nach dem Test entscheiden: behalten oder `logo-transparent.svg` wieder durch `favicon.svg` ersetzen (`index.html`, `src/ui/AppLogo.tsx`).
+
+## D-078 · Im Laden „hier“ statt Meterangabe
+
+- **Entscheidung:** Ist der angezeigte Laden höchstens 20 m entfernt (`HERE_M`), steht statt der Meterangabe eine kleine Marke „hier“, und das Laden-Symbol erscheint in der Akzentfarbe. Das gilt auch für einen von Hand gewählten Laden (letzte Messung) und für Läden in der Auswahl.
+- **Begründung:** Im Laden ist „3 m“ eine überflüssige, wegen der GPS-Ungenauigkeit oft schwankende Zahl. „hier“ bestätigt auf einen Blick, dass die App den richtigen Laden erkannt hat.
+- **Folgen:** Ohne neue Messung bleibt die Anzeige beim letzten Stand. Die Grenze von 20 m ist ein Startwert und lässt sich nach Tests anpassen.

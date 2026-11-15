@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Check, LocateFixed, MapPin, Pencil, Store as StoreIcon } from 'lucide-react'
 import { t } from '../../i18n'
-import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
+import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, HERE_M, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
 import { RETRY_S } from './helpers'
 import { cachedCountry, detectCountry } from '../../lib/country'
 
@@ -226,10 +226,15 @@ export function ShopBar({
 
   // Ein Laden (gewählt oder vorgeschlagen): die ganze Zeile öffnet die Auswahl als Blatt (D-072)
   const close = () => setState((st) => ({ ...st, more: false }))
+  // Im Laden (höchstens HERE_M entfernt): „hier“ statt Meter (D-078). Beim gewählten Laden zählt die letzte Messung.
+  const isHere = (s: Shop) => s.distance <= HERE_M
+  const dist = shop ? state.shops?.find((x) => x.id === shop.id)?.distance : current.distance
+  const here = dist != null && dist <= HERE_M
+  const hereTag = <span className="shop-here">{t('shopHere')}</span>
   return (
     <div className="shopline">
       <button
-        className="shop-current"
+        className={here ? 'shop-current here' : 'shop-current'}
         aria-label={t('changeShop')}
         aria-expanded={!!state.more}
         onClick={() => {
@@ -239,7 +244,7 @@ export function ShopBar({
       >
         <StoreIcon size={15} />
         <span className="shop-name">{current.name}</span>
-        {!shop && <span className="muted">{formatDistance(current.distance)}</span>}
+        {here ? hereTag : !shop && <span className="muted">{formatDistance(current.distance)}</span>}
         <Pencil size={13} className="shop-edit" />
       </button>
       {state.more && (
@@ -257,7 +262,7 @@ export function ShopBar({
                     }}
                   >
                     <span className="shop-name">{x.name}</span>
-                    <span className="muted">{x.id === current.id ? <Check size={16} /> : formatDistance(x.distance)}</span>
+                    <span className="muted">{x.id === current.id ? <Check size={16} /> : isHere(x) ? hereTag : formatDistance(x.distance)}</span>
                   </button>
                 </li>
               ))}

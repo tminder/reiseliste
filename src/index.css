@@ -504,6 +504,20 @@ button.link.strong {
 .shop-current .muted {
   flex: none;
 }
+/* Im Laden (D-078): Symbol in Akzentfarbe, „hier“ als kleine Marke statt Meter */
+.shop-current.here > svg:first-child {
+  color: var(--accent);
+}
+.shop-here {
+  flex: none;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
 .shop-options {
   list-style: none;
   margin: 0;

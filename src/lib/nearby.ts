@@ -235,6 +235,8 @@ const VALID_MS = 3 * 60 * 60 * 1000
 const VALID_WITH_POS_MS = 24 * 60 * 60 * 1000
 /** Weiter weg als das: gewählter Laden wird verworfen */
 export const LEFT_SHOP_M = 1_000
+/** Bis zu dieser Entfernung gilt man als „im Laden“: Anzeige „hier“ statt Meter (D-078) */
+export const HERE_M = 20
 
 export function getChosenShop(listId: string): Shop | null {
   try {
