@@ -44,7 +44,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false, // Registrierung in src/main.tsx (mit Update-Prüfung)
-      includeAssets: ['favicon.svg', 'favicon-32.png', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'logo-transparent.svg', 'favicon-32.png', 'apple-touch-icon.png'],
       workbox: {
         // Schrift des App-Namens auch offline (D-060)
         globPatterns: ['**/*.{js,css,html,woff2}'],

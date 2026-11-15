@@ -476,3 +476,9 @@ Stand: 2026-11-15 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** In einer Liste heisst die Seite „<Listenname> · Cart on the Road“ (Tab, Lesezeichen, Verlauf), auf der Startseite „Cart on the Road“. Beim Teilen über das Teilen-Menü des Handys geht zusätzlich der Text „Einkaufsliste „<Listenname>““ mit, zum Link.
 - **Begründung:** Wunsch des Inhabers: Beim Teilen soll der Listenname sichtbar sein.
 - **Folgen:** Die Link-Vorschau in Nachrichten-Apps (Bild und Titel unter dem Link) zeigt weiterhin „Cart on the Road“: Die Vorschau liest die Seite ohne den Teil nach „#“, und GitHub Pages liefert für alle Listen dieselbe Datei. Eine eigene Vorschau pro Liste bräuchte einen Server, der den Listennamen öffentlich ausliefert.
+
+## D-077 · Testversion: Logo mit durchsichtiger Strasse in App und Tab
+
+- **Entscheidung:** Provisorisch zum Testen zeigen das Logo neben dem App-Namen (Startseite, erster Start, Profil) und das Symbol im Browser-Tab eine Version, bei der die Strasse durchsichtig ist (`public/logo-transparent.svg`): Sie nimmt die Farbe der Seite an. Die Symbole für den Home-Bildschirm (apple-touch-icon, icon-192/512, maskable, Manifest) bleiben unverändert aus `public/favicon.svg` mit dunkler Strasse (D-026).
+- **Begründung:** Wunsch des Inhabers, eine leichtere Wirkung zu testen. Auf dem Home-Bildschirm brächte es nichts: iOS füllt durchsichtige Stellen schwarz, Android meist weiss oder farbig.
+- **Folgen:** Auf hellem Hintergrund wird die Strasse weiss und das Logo wirkt zweigeteilt; bei 30 px ist die Lücke klein. Nach dem Test entscheiden: behalten oder `logo-transparent.svg` wieder durch `favicon.svg` ersetzen (`index.html`, `src/ui/AppLogo.tsx`).
