@@ -483,8 +483,8 @@ Stand: 2026-11-15 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Wunsch des Inhabers, eine leichtere Wirkung zu testen. Auf dem Home-Bildschirm brächte es nichts: iOS füllt durchsichtige Stellen schwarz, Android meist weiss oder farbig.
 - **Folgen:** Auf hellem Hintergrund wird die Strasse weiss und das Logo wirkt zweigeteilt; bei 30 px ist die Lücke klein. Nach dem Test entscheiden: behalten oder `logo-transparent.svg` wieder durch `favicon.svg` ersetzen (`index.html`, `src/ui/AppLogo.tsx`).
 
-## D-078 · Im Laden „hier“ statt Meterangabe
+## D-078 · Im Laden „Im Mercadona“ statt Meterangabe
 
-- **Entscheidung:** Ist der angezeigte Laden höchstens 50 m entfernt und das GPS auf mindestens 60 m genau (`isHere`), steht statt der Meterangabe eine kleine Marke „hier“, und das Laden-Symbol erscheint in der Akzentfarbe. Das gilt auch für einen von Hand gewählten Laden (letzte Messung) und für Läden in der Auswahl.
-- **Begründung:** Im Laden ist eine Meterangabe überflüssig und schwankt wegen der GPS-Ungenauigkeit. „hier“ bestätigt auf einen Blick, dass die App den richtigen Laden erkannt hat. Ein Laden ist in OpenStreetMap oft nur ein Punkt, und grosse Supermärkte sind 50–80 m lang, darum wären 20 m zu knapp. Es ist dieselbe Grenze wie bei der Ankunftserkennung, Anzeige und Ankunft sagen also dasselbe.
-- **Folgen:** Bei ungenauem GPS bleibt die Meterangabe. Liegen zwei Läden nah beieinander, können in der Auswahl beide „hier“ zeigen. Ohne neue Messung bleibt die Anzeige beim letzten Stand.
+- **Entscheidung:** Ist der angezeigte Laden höchstens 50 m entfernt und das GPS auf mindestens 60 m genau (`isHere`), steht in der Ladenzeile „Im <Laden>“ (englisch „At <shop>“, „Im“ in Grau) statt der Meterangabe, und das Laden-Symbol erscheint in der Akzentfarbe. Das gilt auch für einen von Hand gewählten Laden (letzte Messung). In der Ladenauswahl bleiben die Meter. Eine farbige Marke „hier“ wurde verworfen, sie passte optisch nicht.
+- **Begründung:** Im Laden ist eine Meterangabe überflüssig und schwankt wegen der GPS-Ungenauigkeit. „Im …“ bestätigt auf einen Blick, dass die App den richtigen Laden erkannt hat. Ein Laden ist in OpenStreetMap oft nur ein Punkt, und grosse Supermärkte sind 50–80 m lang, darum wären 20 m zu knapp. Es ist dieselbe Grenze wie bei der Ankunftserkennung, Anzeige und Ankunft sagen also dasselbe.
+- **Folgen:** Bei ungenauem GPS bleibt die Meterangabe. Ohne neue Messung bleibt die Anzeige beim letzten Stand.

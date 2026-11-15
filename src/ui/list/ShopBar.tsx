@@ -227,9 +227,8 @@ export function ShopBar({
 
   // Ein Laden (gewählt oder vorgeschlagen): die ganze Zeile öffnet die Auswahl als Blatt (D-072)
   const close = () => setState((st) => ({ ...st, more: false }))
-  // Im Laden (höchstens 50 m, GPS auf 60 m genau): „hier“ statt Meter (D-078). Beim gewählten Laden zählt die letzte Messung.
+  // Im Laden (höchstens 50 m, GPS auf 60 m genau): „Im <Laden>“ statt Meter (D-078). Beim gewählten Laden zählt die letzte Messung.
   const here = isHere(shop ? state.shops?.find((x) => x.id === shop.id)?.distance : current.distance, state.accuracy)
-  const hereTag = <span className="shop-here">{t('shopHere')}</span>
   return (
     <div className="shopline">
       <button
@@ -242,8 +241,11 @@ export function ShopBar({
         }}
       >
         <StoreIcon size={15} />
-        <span className="shop-name">{current.name}</span>
-        {here ? hereTag : !shop && <span className="muted">{formatDistance(current.distance)}</span>}
+        <span className="shop-name">
+          {here && <span className="muted">{t('shopIn')} </span>}
+          {current.name}
+        </span>
+        {!here && !shop && <span className="muted">{formatDistance(current.distance)}</span>}
         <Pencil size={13} className="shop-edit" />
       </button>
       {state.more && (
@@ -261,7 +263,7 @@ export function ShopBar({
                     }}
                   >
                     <span className="shop-name">{x.name}</span>
-                    <span className="muted">{x.id === current.id ? <Check size={16} /> : isHere(x.distance, state.accuracy) ? hereTag : formatDistance(x.distance)}</span>
+                    <span className="muted">{x.id === current.id ? <Check size={16} /> : formatDistance(x.distance)}</span>
                   </button>
                 </li>
               ))}
