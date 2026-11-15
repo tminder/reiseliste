@@ -143,7 +143,7 @@ function writeLast(v: LastResult) {
 /** Letztes Ergebnis (bis 12 h, ohne neue Standortabfrage) – wird sofort gezeigt, die Prüfung läuft im Hintergrund */
 export function recentSuggestion(): NearbyResult | null {
   const last = readLast()
-  return last && Date.now() - last.at < CACHE_MS ? last.result : null
+  return last && Date.now() - last.at < CACHE_MS ? { ...last.result, accuracy: last.accuracy } : null
 }
 
 /** Distanzen eines gespeicherten Ergebnisses auf den aktuellen Standort umrechnen */
@@ -235,8 +235,13 @@ const VALID_MS = 3 * 60 * 60 * 1000
 const VALID_WITH_POS_MS = 24 * 60 * 60 * 1000
 /** Weiter weg als das: gewählter Laden wird verworfen */
 export const LEFT_SHOP_M = 1_000
-/** Bis zu dieser Entfernung gilt man als „im Laden“: Anzeige „hier“ statt Meter (D-078) */
-export const HERE_M = 20
+/** Im Laden: höchstens so weit vom Ladenpunkt entfernt, bei mindestens dieser GPS-Genauigkeit (D-078) */
+export const HERE_M = 50
+export const HERE_ACCURACY_M = 60
+/** Gilt man als „im Laden“? Gleiche Grenze für die Ankunft und die Anzeige „hier“ */
+export function isHere(distance: number | undefined, accuracy: number | undefined): boolean {
+  return distance != null && distance <= HERE_M && (accuracy ?? 999) <= HERE_ACCURACY_M
+}
 
 export function getChosenShop(listId: string): Shop | null {
   try {
@@ -287,6 +292,6 @@ export function shopTag(shop: Shop): string {
 export function isInsideSupermarket(r: NearbyResult): Shop | null {
   const first = r.shops[0]
   if (!r.inside || !first?.supermarket) return null
-  if (first.distance > 50 || (r.accuracy ?? 999) > 60) return null
+  if (!isHere(first.distance, r.accuracy)) return null
   return first
 }

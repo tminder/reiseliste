@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Check, LocateFixed, MapPin, Pencil, Store as StoreIcon } from 'lucide-react'
 import { t } from '../../i18n'
-import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, HERE_M, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
+import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, isHere, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
 import { RETRY_S } from './helpers'
 import { cachedCountry, detectCountry } from '../../lib/country'
 
@@ -34,6 +34,7 @@ export function ShopBar({
     loading?: boolean
     shops?: Shop[]
     inside?: boolean
+    accuracy?: number
     error?: string
     permission?: boolean
     help?: boolean
@@ -69,7 +70,7 @@ export function ShopBar({
     try {
       const result = await findNearbyShops(manual, precise)
       setAttempt(0)
-      setState((s) => ({ shops: result.shops, inside: result.inside, more: manual ? s.more : false, dismissed: result.fresh ? false : s.dismissed }))
+      setState((s) => ({ shops: result.shops, inside: result.inside, accuracy: result.accuracy, more: manual ? s.more : false, dismissed: result.fresh ? false : s.dismissed }))
       const here = isInsideSupermarket(result)
       if (here) onArrived(here)
     } catch (e) {
@@ -226,10 +227,8 @@ export function ShopBar({
 
   // Ein Laden (gewählt oder vorgeschlagen): die ganze Zeile öffnet die Auswahl als Blatt (D-072)
   const close = () => setState((st) => ({ ...st, more: false }))
-  // Im Laden (höchstens HERE_M entfernt): „hier“ statt Meter (D-078). Beim gewählten Laden zählt die letzte Messung.
-  const isHere = (s: Shop) => s.distance <= HERE_M
-  const dist = shop ? state.shops?.find((x) => x.id === shop.id)?.distance : current.distance
-  const here = dist != null && dist <= HERE_M
+  // Im Laden (höchstens 50 m, GPS auf 60 m genau): „hier“ statt Meter (D-078). Beim gewählten Laden zählt die letzte Messung.
+  const here = isHere(shop ? state.shops?.find((x) => x.id === shop.id)?.distance : current.distance, state.accuracy)
   const hereTag = <span className="shop-here">{t('shopHere')}</span>
   return (
     <div className="shopline">
@@ -262,7 +261,7 @@ export function ShopBar({
                     }}
                   >
                     <span className="shop-name">{x.name}</span>
-                    <span className="muted">{x.id === current.id ? <Check size={16} /> : isHere(x) ? hereTag : formatDistance(x.distance)}</span>
+                    <span className="muted">{x.id === current.id ? <Check size={16} /> : isHere(x.distance, state.accuracy) ? hereTag : formatDistance(x.distance)}</span>
                   </button>
                 </li>
               ))}

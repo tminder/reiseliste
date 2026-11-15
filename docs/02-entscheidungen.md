@@ -485,6 +485,6 @@ Stand: 2026-11-15 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-078 · Im Laden „hier“ statt Meterangabe
 
-- **Entscheidung:** Ist der angezeigte Laden höchstens 20 m entfernt (`HERE_M`), steht statt der Meterangabe eine kleine Marke „hier“, und das Laden-Symbol erscheint in der Akzentfarbe. Das gilt auch für einen von Hand gewählten Laden (letzte Messung) und für Läden in der Auswahl.
-- **Begründung:** Im Laden ist „3 m“ eine überflüssige, wegen der GPS-Ungenauigkeit oft schwankende Zahl. „hier“ bestätigt auf einen Blick, dass die App den richtigen Laden erkannt hat.
-- **Folgen:** Ohne neue Messung bleibt die Anzeige beim letzten Stand. Die Grenze von 20 m ist ein Startwert und lässt sich nach Tests anpassen.
+- **Entscheidung:** Ist der angezeigte Laden höchstens 50 m entfernt und das GPS auf mindestens 60 m genau (`isHere`), steht statt der Meterangabe eine kleine Marke „hier“, und das Laden-Symbol erscheint in der Akzentfarbe. Das gilt auch für einen von Hand gewählten Laden (letzte Messung) und für Läden in der Auswahl.
+- **Begründung:** Im Laden ist eine Meterangabe überflüssig und schwankt wegen der GPS-Ungenauigkeit. „hier“ bestätigt auf einen Blick, dass die App den richtigen Laden erkannt hat. Ein Laden ist in OpenStreetMap oft nur ein Punkt, und grosse Supermärkte sind 50–80 m lang, darum wären 20 m zu knapp. Es ist dieselbe Grenze wie bei der Ankunftserkennung, Anzeige und Ankunft sagen also dasselbe.
+- **Folgen:** Bei ungenauem GPS bleibt die Meterangabe. Liegen zwei Läden nah beieinander, können in der Auswahl beide „hier“ zeigen. Ohne neue Messung bleibt die Anzeige beim letzten Stand.
