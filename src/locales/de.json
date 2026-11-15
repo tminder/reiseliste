@@ -149,6 +149,7 @@
   "installAndroid3": "Bestätige mit „Installieren“. Danach startest du Cart on the Road über das Symbol.",
   "shareIosHint": "iPhone mit Cart on the Road auf dem Home-Bildschirm: in der App „Liste beitreten“ → „QR-Code scannen“ antippen und diesen Code scannen.",
   "shareLink": "Link teilen",
+  "shareText": "Einkaufsliste „{name}“",
   "errNoGeo": "Dieses Gerät kann den Standort nicht bestimmen.",
   "errGeoDenied": "Standort nicht freigegeben.",
   "errGeoFailed": "Standort konnte nicht bestimmt werden.",

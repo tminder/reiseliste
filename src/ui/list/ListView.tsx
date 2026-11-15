@@ -220,6 +220,14 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   }, [autoClear, id, store, visitShop?.id, visitShop?.lat, visitShop?.lon])
 
   const list = store.list
+  // Seitentitel = Listenname (D-076): Tabs, Lesezeichen, Verlauf und Vorschauen, die die Seite ausführen
+  useEffect(() => {
+    if (!list?.name) return
+    document.title = `${list.name} · ${t('appName')}`
+    return () => {
+      document.title = t('appName')
+    }
+  }, [list?.name])
 
   // Reiseland automatisch anpassen, wenn man in einem anderen unterstützten Land ist (D-040).
   // Keine Änderung in einem Land mit der eigenen Sprache (dort braucht man keine Übersetzung, D-041)

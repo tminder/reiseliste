@@ -151,7 +151,8 @@ export function ShareSheet({ id, name, onClose }: { id: string; name: string; on
             className="primary"
             onClick={async () => {
               try {
-                if (navigator.share) await navigator.share({ title: name, url })
+                // Listenname im geteilten Text (D-076): Link-Vorschauen zeigen sonst nur den App-Namen
+                if (navigator.share) await navigator.share({ title: name, text: t('shareText', { name }), url })
                 else {
                   await navigator.clipboard.writeText(url)
                   setCopied(true)

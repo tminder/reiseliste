@@ -330,6 +330,7 @@ test('Liste für Vietnam: Artikel auf Vietnamesisch (D-062)', async ({ page, pro
   await seed(page, [], 'VN')
   await page.goto(`/#/l/${LIST}`)
   await expect(page.locator('.list-sub, header')).toContainText('Tiếng Việt')
+  await expect(page).toHaveTitle('Testing · Cart on the Road') // Seitentitel = Listenname (D-076)
   await add(page, 'Milch')
   await add(page, 'Butter')
   await expect(page.locator('.item').filter({ hasText: 'Milch' })).toContainText('sữa tươi')

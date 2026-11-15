@@ -149,6 +149,7 @@
   "installAndroid3": "Confirm with “Install”. From then on, start Cart on the Road from the icon.",
   "shareIosHint": "iPhone with Cart on the Road on the home screen: tap “Join a list” → “Scan QR code” in the app and scan this code.",
   "shareLink": "Share link",
+  "shareText": "Shopping list “{name}”",
   "errNoGeo": "This device cannot determine its location.",
   "errGeoDenied": "Location not allowed.",
   "errGeoFailed": "Location could not be determined.",

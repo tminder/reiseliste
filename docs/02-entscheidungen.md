@@ -1,6 +1,6 @@
 # Entscheidungen
 
-Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
+Stand: 2026-11-15 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
 
 ---
 
@@ -470,3 +470,9 @@ Stand: 2026-11-14 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Die App sucht Läden nur, wenn man sich im Reiseland der Liste befindet. Vor jeder automatischen Suche prüft sie das aktuelle Land (Nominatim, Ergebnis höchstens 30 Minuten alt, D-040); verglichen wird das Land ohne Region (Schweiz = Schweiz, egal ob Deutschschweiz oder Romandie). Ist man woanders oder in einem nicht unterstützten Land, gibt es keine Suche und keine Ladenzeile, und Produktfotos nutzen keinen Laden. Ein von Hand gewählter Laden bleibt sichtbar, bis man sich davon entfernt (D-033). Lässt sich das Land nicht bestimmen (kein Standort, Dienst nicht erreichbar), verhält sich die App wie bisher.
 - **Begründung:** Wunsch des Inhabers. Wer zu Hause eine Liste für die Ferien vorbereitet, braucht keinen Laden um die Ecke.
 - **Folgen:** Eine zusätzliche Abfrage bei Nominatim, höchstens alle 30 Minuten. Laden und Vorschlag sind wie bisher pro Gerät, nicht für alle Mitglieder gleich (D-033).
+
+## D-076 · Listenname im Seitentitel und beim Teilen
+
+- **Entscheidung:** In einer Liste heisst die Seite „<Listenname> · Cart on the Road“ (Tab, Lesezeichen, Verlauf), auf der Startseite „Cart on the Road“. Beim Teilen über das Teilen-Menü des Handys geht zusätzlich der Text „Einkaufsliste „<Listenname>““ mit, zum Link.
+- **Begründung:** Wunsch des Inhabers: Beim Teilen soll der Listenname sichtbar sein.
+- **Folgen:** Die Link-Vorschau in Nachrichten-Apps (Bild und Titel unter dem Link) zeigt weiterhin „Cart on the Road“: Die Vorschau liest die Seite ohne den Teil nach „#“, und GitHub Pages liefert für alle Listen dieselbe Datei. Eine eigene Vorschau pro Liste bräuchte einen Server, der den Listennamen öffentlich ausliefert.
