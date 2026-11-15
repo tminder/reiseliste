@@ -39,7 +39,8 @@ jobs:
           retention-days: 7
       - run: npm run build
         env:
-          BASE_PATH: /${{ github.event.repository.name }}/
+          # Eigene Domain cartontheroad.app (D-006): App liegt an der Wurzel, nicht mehr unter /reiseliste/
+          BASE_PATH: /
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

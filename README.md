@@ -43,8 +43,8 @@ Zugriff: Jedes Gerät meldet sich anonym an. Eine Liste sehen nur Personen, die 
 
 ## Auf GitHub Pages veröffentlichen
 
-1. Repo → **Settings → Pages** → Source: **GitHub Actions**.
-2. Push auf `main`. Die App ist danach unter `https://<user>.github.io/reiseliste/` erreichbar.
+1. Repo → **Settings → Pages** → Source: **GitHub Actions**, Custom domain: `cartontheroad.app`, „Enforce HTTPS“.
+2. Push auf `main`. Die App ist danach unter `https://cartontheroad.app` erreichbar (die alte Adresse `tminder.github.io/reiseliste` leitet weiter). Ohne eigene Domain in `.github/workflows/deploy.yml` `BASE_PATH` wieder auf `/<repo-name>/` setzen.
 
 ## Module
 

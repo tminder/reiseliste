@@ -35,9 +35,9 @@ Stand: 2026-11-15 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-006 · Hosting auf GitHub Pages, öffentliches Repo
 
-- **Entscheidung:** Die App wird per GitHub Actions auf `tminder.github.io/reiseliste` veröffentlicht. Das Repo ist öffentlich. Die Navigation läuft über den Hash in der Adresse (`#/l/<id>`).
+- **Entscheidung:** Die App wird per GitHub Actions auf GitHub Pages veröffentlicht, unter der eigenen Domain **cartontheroad.app** (seit 2026-11-15, registriert bei Hostfactory; DNS mit A/AAAA-Einträgen auf GitHub Pages, `www` als CNAME auf `tminder.github.io`). Die App liegt an der Wurzel der Domain (`BASE_PATH=/`), die alte Adresse `tminder.github.io/reiseliste` leitet GitHub automatisch weiter. Das Repo ist öffentlich. Die Navigation läuft über den Hash in der Adresse (`#/l/<id>`).
 - **Begründung:** Kostenlos, ohne Server, das Deployment läuft bei jedem Push. Pages ist im Gratis-Tarif nur für öffentliche Repos verfügbar. Die Navigation über den Hash braucht keine Weiterleitungen auf dem Server.
-- **Folgen:** Der Code ist öffentlich einsehbar. Geheimnisse dürfen nie ins Repo, der Supabase-anon-Key ist ohnehin öffentlich.
+- **Folgen:** Der Code ist öffentlich einsehbar. Geheimnisse dürfen nie ins Repo, der Supabase-anon-Key ist ohnehin öffentlich. Beim Umzug auf die eigene Domain begannen Profil, Listen und anonyme Anmeldung auf jedem Gerät neu (Gerätespeicher hängt an der Adresse); Listen öffnet man über ihren Link wieder.
 
 ## D-007 · Offline zuerst, letzte Änderung gewinnt
 
