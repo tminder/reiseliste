@@ -1,6 +1,6 @@
 # Entscheidungen
 
-Stand: 2026-11-15 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
+Stand: 2026-11-17 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
 
 ---
 
@@ -421,9 +421,9 @@ Stand: 2026-11-15 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Aus dem [Konzept: Onboarding](https://claude.ai/artifact/9qozxTcNmEQUd4EGFsUwJE) umgesetzt: klare Vorstellung auf dem ersten Bildschirm und Hinweise im Ablauf (Option D). Die App stellt sich als Einkaufsliste für die Reise vor; das Besondere ist die Sprache des Reiselands, das Teilen wird nur nebenbei erwähnt, weil es selbstverständlich ist (Wunsch des Inhabers).
   - **Erster Bildschirm:** Überschrift „Die Einkaufsliste für die Reise“, darunter „Du schreibst „Milch“, und im Laden in Spanien steht „leche“: Die App zeigt jeden Artikel so, wie er im Reiseland heisst. Teilen mit der Reisegruppe inklusive.“, dann Name und Sprache. Kein Beispielbild: Eine Beispiel-Liste über dem Formular war nicht von den Eingabefeldern zu unterscheiden und wurde wieder entfernt (Wunsch des Inhabers).
-  - **Über einen Link eingeladen:** Überschrift „Anna hat dich zu einer Einkaufsliste eingeladen“ (erstes bekanntes Mitglied), sonst „Du wurdest zu einer Einkaufsliste eingeladen“.
+  - **Über einen Link eingeladen:** Überschrift „Anna hat dich zu einer Einkaufsliste eingeladen“ (erstes bekanntes Mitglied), sonst „Du wurdest zu einer Einkaufsliste eingeladen“, darunter direkt Name und Sprache, ohne Erklärungstext: Die Liste zeigt gleich danach, was die App macht (Wunsch des Inhabers).
   - **Startseite:** „Neue Liste“ und „Liste beitreten“ sind eingeklappt, bis man sie antippt, auch ohne Listen (Wunsch des Inhabers). Das Formular hat immer ein ✕ zum Schliessen. Gibt es noch keine Liste, ist „Neue Liste“ gefüllt (hervorgehobener nächster Schritt), „Liste beitreten“ bleibt ein gleich grosser normaler Knopf (iPhone-Nutzer mit der App auf dem Home-Bildschirm treten nur darüber bei, D-037), und darunter steht „Noch keine Liste. Leg deine erste an, zum Beispiel für die nächste Reise.“ Die Knopfleiste bleibt an ihrem Platz, damit sie nach der ersten Liste nicht springt.
-  - **Hinweise im Ablauf,** je einmal pro Gerät und immer nur einer: nach dem ersten übersetzten Artikel „Unter jedem Artikel steht, wie er im Laden des Reiselands heisst. Tippe darauf, um ihn dem Personal zu zeigen.“ mit „Verstanden“ (`rl:hintTranslation`); ab drei Artikeln in einer Liste, die man allein hat, „Kaufst du mit anderen ein? Teile die Liste …“ mit „Teilen“ und „Nicht jetzt“ (`rl:hintShare`).
+  - **Ein Hinweis im Ablauf,** einmal pro Gerät: nach dem ersten übersetzten Artikel „Unter jedem Artikel steht, wie er im Laden des Reiselands heisst.“ mit „Verstanden“ (`rl:hintTranslation`). Den früheren Hinweis zum Teilen ab drei Artikeln gibt es nicht mehr: Teilen ist nebensächlich und hat einen eigenen Knopf in der Kopfzeile (Wunsch des Inhabers: Tipps reduzieren). Weiterhin gibt es den Link-Hinweis auf dem iPhone (D-061) und die Frage nach dem Standort (D-066), beide nur, wenn sie anstehen.
   - Im Profil-Bearbeiten bleibt der kurze Satz (`tagline`).
 - **Begründung:** Eine Testperson schrieb „Muesches mir denn mal erkläre. Chume no nid ganz drus“. Der Zweck muss auf dem ersten Bildschirm klar sein, die Schritte danach erklären sich, wenn sie anstehen.
 - **Folgen:** Wirkung mit neuen Testpersonen prüfen (5-Sekunden-Test: „Was macht diese App?“). Ohne Beispiel hängt der erste Eindruck allein am Text.
@@ -443,9 +443,9 @@ Stand: 2026-11-15 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-071 · Sprache beim ersten Start: Gerätesprache, sonst Englisch
 
-- **Entscheidung:** Beim ersten Start schlägt die App die Sprache aus der Gerätesprache vor (`navigator.language`): „de-CH“ und „de-LI“ → Deutsch (Schweiz), „de-AT“ → Deutsch (Österreich), jedes andere Deutsch (auch „de“ ohne Land oder „de-ES“) → Deutsch (Deutschland). Andere unterstützte Sprachen wie erkannt, alle übrigen → Englisch. Auch die Oberfläche vor dem Profil fällt auf Englisch zurück statt auf Deutsch. Die Auswahl lässt sich auf dem ersten Bildschirm ändern.
+- **Entscheidung:** Beim ersten Start schlägt die App die Sprache aus der Gerätesprache vor: Steht in einer der Gerätesprachen (`navigator.languages`) „de-CH“ oder „de-LI“ → Deutsch (Schweiz), „de-AT“ → Deutsch (Österreich). Sonst entscheidet bei Deutsch die Zeitzone des Geräts: Zürich oder Vaduz → Deutsch (Schweiz), Wien → Deutsch (Österreich), alles andere (auch „de-ES“) → Deutsch (Deutschland). Andere unterstützte Sprachen wie erkannt, alle übrigen → Englisch. Auch die Oberfläche vor dem Profil fällt auf Englisch zurück statt auf Deutsch. Die Auswahl lässt sich auf dem ersten Bildschirm ändern.
 - **Begründung:** Wunsch des Inhabers: Standard-Deutsch ist Deutschland, international Englisch.
-- **Folgen:** Deutschschweizer mit anderer Region (z. B. iPhone auf Deutsch, Region Spanien) bekommen Deutsch (Deutschland) und stellen einmal um. Die native App (D-009) kann die Gerätesprache ebenso auslesen und dieselbe Regel nutzen.
+- **Folgen:** iPhones mit der Sprache „Deutsch“ melden oft nur „de-DE“, auch mit Region Schweiz; die Zeitzone fängt das zu Hause ab. Wer im Ausland zum ersten Mal startet und nur „de-DE“ meldet, bekommt Deutsch (Deutschland) und stellt einmal um. Die native App (D-009) kann die Gerätesprache ebenso auslesen und dieselbe Regel nutzen.
 
 ## D-072 · Laden wählen als Blatt
 
@@ -485,12 +485,24 @@ Stand: 2026-11-15 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-078 · Im Laden „Im Mercadona“ statt Meterangabe
 
-- **Entscheidung:** Ist der angezeigte Laden höchstens 50 m entfernt und das GPS auf mindestens 60 m genau (`isHere`), steht in der Ladenzeile „Im <Laden>“ (englisch „At <shop>“, „Im“ in Grau) statt der Meterangabe, und das Laden-Symbol erscheint in der Akzentfarbe. Das gilt auch für einen von Hand gewählten Laden (letzte Messung). In der Ladenauswahl bleiben die Meter. Eine farbige Marke „hier“ wurde verworfen, sie passte optisch nicht.
-- **Begründung:** Im Laden ist eine Meterangabe überflüssig und schwankt wegen der GPS-Ungenauigkeit. „Im …“ bestätigt auf einen Blick, dass die App den richtigen Laden erkannt hat. Ein Laden ist in OpenStreetMap oft nur ein Punkt, und grosse Supermärkte sind 50–80 m lang, darum wären 20 m zu knapp. Es ist dieselbe Grenze wie bei der Ankunftserkennung, Anzeige und Ankunft sagen also dasselbe.
-- **Folgen:** Bei ungenauem GPS bleibt die Meterangabe. Ohne neue Messung bleibt die Anzeige beim letzten Stand.
+- **Entscheidung:** Liegt der angezeigte Laden innerhalb von 50 m oder innerhalb der GPS-Ungenauigkeit (höchstens 100 m) vom letzten Standort dieser Sitzung (`looksInside`), steht in der Ladenzeile „Im <Laden>“ (englisch „At <shop>“, „Im“ in Grau) statt der Meterangabe, und das Laden-Symbol erscheint in der Akzentfarbe. Das gilt auch für einen von Hand gewählten Laden. Gemessen wird ab dem eigenen Standort, nicht ab gespeicherten Distanzen. In der Ladenauswahl bleiben die Meter. Eine farbige Marke „hier“ wurde verworfen, sie passte optisch nicht.
+- **Begründung:** Im Laden ist eine Meterangabe überflüssig und schwankt wegen der GPS-Ungenauigkeit. „Im …“ bestätigt auf einen Blick, dass die App den richtigen Laden erkannt hat. Ein Laden ist in OpenStreetMap oft nur ein Punkt, und grosse Supermärkte sind 50–80 m lang, darum wären 20 m zu knapp. Im Gebäude ist GPS oft 50–100 m ungenau, eine feste Grenze mit Anforderung an die Genauigkeit greift dort kaum (so im Test des Inhabers). Die Erkennung „Einkauf beginnt“ (D-020) bleibt streng (50 m, GPS auf 60 m genau), weil sie sonst einen Einkauf im falschen Laden erfassen könnte.
+- **Folgen:** Bei sehr ungenauem GPS kann ein Laden bis 100 m entfernt als „Im …“ erscheinen, wenn man davor steht. Die Anzeige folgt der regelmässigen Prüfung (D-080).
 
 ## D-079 · Auffindbarkeit und Vorschau beim Teilen
 
 - **Entscheidung:** `index.html` hat eine Kurzbeschreibung für Suchmaschinen, eine kanonische Adresse und Open-Graph-Angaben mit einem Vorschaubild (`public/og-image.png`, 1200 × 630, Logo, Schriftzug, Satz zum Nutzen und Beispiel „Milch → leche · lait · latte“). Dazu `robots.txt` (alles erlaubt) und `sitemap.xml` mit der Startseite. Texte auf Deutsch, passend zur Zielgruppe in der Schweiz.
 - **Begründung:** Listen werden als Link per Messenger geteilt. Eine Vorschau mit Bild wirkt bei einer Einladung vertrauenswürdiger. Ohne Kurzbeschreibung wählt Google selbst einen Textschnipsel, oft aus dem Startformular.
 - **Folgen:** Alle Listen-Links zeigen dieselbe Vorschau. Der Listenname steht hinter dem # und ist für Messenger und Suchmaschinen unsichtbar, die Listen bleiben dadurch auch privat. Das Vorschaubild ist eine feste Datei: Ändern sich Logo oder Schriftzug, muss es neu erstellt werden. Kein Google-Code in der App; die Anmeldung bei der Google Search Console macht der Inhaber über einen TXT-Eintrag im DNS.
+
+## D-080 · Laden regelmässig still prüfen
+
+- **Entscheidung:** Solange eine Liste offen und sichtbar ist, prüft die App höchstens alle 2 Minuten still den Standort: mit gewähltem Laden, ob man noch dort ist, sonst den Vorschlag. Dazu wie bisher beim Öffnen, beim Zurückkehren in die App und beim Beginn des Einkaufs.
+- **Begründung:** Bisher wurde nur bei diesen Ereignissen geprüft. Wer die App offen lässt und in einen anderen Laden geht, sah den alten Laden, und die Anzeige „Im <Laden>“ (D-078) wurde nicht nachgeführt.
+- **Folgen:** Ohne Ortswechsel nutzt die Prüfung das letzte Ergebnis, es gibt also keine zusätzliche Anfrage an OpenStreetMap. Etwas mehr Akku für die Standortabfrage, nur solange die Liste offen ist.
+
+## D-081 · Im eigenen Sprachraum keine Übersetzung
+
+- **Entscheidung:** Lautet der Landesbegriff gleich wie der eigene Begriff (z. B. Schweizer Liste, Deutsch (Schweiz) als Sprache), zeigt der Artikel keine Zeile mit Flagge und Landesbegriff, nur den Namen der Person. „Keine Übersetzung“ erscheint nur, wenn die Sprache des Reiselands eine andere ist. Weicht der Begriff ab (z. B. „Sahne“ statt „Rahm“ in Deutschland), bleibt die Zeile. Der Untertitel der Liste zeigt bei Ländern mit Region die Kurzform ohne Sprache („🇨🇭 Deutschschweiz“ statt „🇨🇭 Schweiz (Deutschschweiz) · Deutsch“), bei anderen weiter Land und Sprache („🇪🇸 Spanien · Español“).
+- **Begründung:** Wunsch des Inhabers. Im eigenen Land wiederholte die Zeile nur den Namen, und der Untertitel nannte die Sprache doppelt.
+- **Folgen:** Die Region in Klammern steht nur noch in der Länderauswahl und im Platzhalter für den Listennamen.

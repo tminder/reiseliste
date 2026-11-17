@@ -15,12 +15,23 @@ export function guessLang(): Lang {
  * Profilsprache aus der Gerätesprache (D-056, D-071): Deutsch aus der Schweiz und Liechtenstein → Deutsch (Schweiz),
  * aus Österreich → Deutsch (Österreich), jedes andere Deutsch → Deutsch (Deutschland).
  * Andere unterstützte Sprachen wie erkannt, sonst Englisch.
+ * iPhones melden bei „Deutsch“ oft nur „de-DE“, auch mit Region Schweiz. Darum zählen alle Spracheinträge,
+ * und ohne Hinweis auf die Region entscheidet die Zeitzone des Geräts (Zürich, Vaduz, Wien).
  */
 export function guessProfileLang(): string {
-  const n = navigator.language
-  if (/^de-(CH|LI)$/i.test(n)) return 'de-CH'
-  if (/^de-AT$/i.test(n)) return 'de-AT'
-  return guessLang()
+  if (guessLang() !== 'de') return guessLang()
+  const all = [navigator.language, ...(navigator.languages ?? [])].filter((l) => /^de\b/i.test(l))
+  if (all.some((l) => /^de-(CH|LI)$/i.test(l))) return 'de-CH'
+  if (all.some((l) => /^de-AT$/i.test(l))) return 'de-AT'
+  let zone = ''
+  try {
+    zone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? ''
+  } catch {
+    /* ohne Zeitzone: Deutsch (Deutschland) */
+  }
+  if (zone === 'Europe/Zurich' || zone === 'Europe/Vaduz') return 'de-CH'
+  if (zone === 'Europe/Vienna') return 'de-AT'
+  return 'de'
 }
 
 /** „heute 10:58“, „gestern 18:20“ oder „3.11. 09:15“ (D-036) */

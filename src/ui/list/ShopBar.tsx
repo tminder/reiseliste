@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Check, LocateFixed, MapPin, Pencil, Store as StoreIcon } from 'lucide-react'
 import { t } from '../../i18n'
-import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, isHere, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
+import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, looksInside, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
 import { RETRY_S } from './helpers'
 import { cachedCountry, detectCountry } from '../../lib/country'
 
@@ -51,6 +51,8 @@ export function ShopBar({
   })
 
   const lastCheck = useRef(0)
+  // Letzter eigener Standort dieser Sitzung: für die Anzeige „Im <Laden>“ (D-078)
+  const [pos, setPos] = useState<{ lat: number; lon: number; accuracy: number } | null>(null)
 
   /** manual: „Neu suchen“ – immer neue Anfrage. Sonst still im Hintergrund, neue Anfrage nur nach Ortswechsel. */
   async function detect(manual = false, precise = false) {
@@ -69,6 +71,7 @@ export function ShopBar({
     setState((s) => ({ ...s, loading: manual || !s.shops, more: manual ? s.more : false }))
     try {
       const result = await findNearbyShops(manual, precise)
+      setPos({ lat: result.lat, lon: result.lon, accuracy: result.accuracy ?? 999 })
       setAttempt(0)
       setState((s) => ({ shops: result.shops, inside: result.inside, accuracy: result.accuracy, more: manual ? s.more : false, dismissed: result.fresh ? false : s.dismissed }))
       const here = isInsideSupermarket(result)
@@ -106,6 +109,7 @@ export function ShopBar({
     lastCheck.current = Date.now()
     try {
       const { latitude, longitude, accuracy } = (await getPosition(limitM < LEFT_SHOP_M ? 10_000 : undefined)).coords
+      setPos({ lat: latitude, lon: longitude, accuracy })
       if (meters(latitude, longitude, shop.lat, shop.lon) > Math.max(limitM, accuracy)) {
         onChoose(null)
         return true
@@ -137,15 +141,20 @@ export function ShopBar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shop])
 
-  // Zurück in der App (aus dem Hintergrund): erneut still prüfen, höchstens alle 2 Minuten
+  // Zurück in der App und regelmässig, solange die Liste offen ist: still prüfen, höchstens alle 2 Minuten (D-080).
+  // Ohne Ortswechsel nutzt detect() das letzte Ergebnis, es gibt also keine neue Anfrage an OpenStreetMap.
   useEffect(() => {
-    const onVisible = () => {
+    const check = () => {
       if (document.visibilityState !== 'visible' || Date.now() - lastCheck.current < 120_000) return
       if (shop) void checkLeft()
       else void detect()
     }
-    document.addEventListener('visibilitychange', onVisible)
-    return () => document.removeEventListener('visibilitychange', onVisible)
+    document.addEventListener('visibilitychange', check)
+    const timer = window.setInterval(check, 30_000)
+    return () => {
+      document.removeEventListener('visibilitychange', check)
+      window.clearInterval(timer)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shop])
 
@@ -227,8 +236,8 @@ export function ShopBar({
 
   // Ein Laden (gewählt oder vorgeschlagen): die ganze Zeile öffnet die Auswahl als Blatt (D-072)
   const close = () => setState((st) => ({ ...st, more: false }))
-  // Im Laden (höchstens 50 m, GPS auf 60 m genau): „Im <Laden>“ statt Meter (D-078). Beim gewählten Laden zählt die letzte Messung.
-  const here = isHere(shop ? state.shops?.find((x) => x.id === shop.id)?.distance : current.distance, state.accuracy)
+  // Im Laden: „Im <Laden>“ statt Meter (D-078). Gemessen ab dem letzten Standort dieser Sitzung, nicht ab gespeicherten Distanzen.
+  const here = !!pos && current.lat != null && current.lon != null && looksInside(meters(pos.lat, pos.lon, current.lat, current.lon), pos.accuracy)
   return (
     <div className="shopline">
       <button

@@ -78,6 +78,7 @@ export function ItemRow({
   const hint = hints?.[viewer] ?? hints?.en
   const [showMenu, setShowMenu] = useState(false)
   const [showReport, setShowReport] = useState(false)
+  const sameAsOwn = !!local && local.trim().toLowerCase() === own.trim().toLowerCase()
   const photosOk = !!local && !!shopTag && hasPhotos(item.conceptId, override_)
 
   // Abhaken bzw. wieder öffnen (D-044): erst Häkchen und Durchstreichen zeigen, dann rutscht die Zeile an ihren neuen Platz
@@ -199,15 +200,23 @@ export function ItemRow({
       {/* Landesbegriff, Mitglied, Hinweise unter dem Namen */}
       <div className="item-sub">
         <div className="orig">
-          {local ? (
+          {/* Im eigenen Sprachraum (D-081): kein Landesbegriff, wenn er gleich lautet wie der eigene Begriff */}
+          {local && !sameAsOwn ? (
             // Zeigen-Karte fürs Personal jetzt über das Menü „…“ (D-073); hier nur Text, ein Tipp hakt ab
             <span className="local">
               <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
+              <span className="muted"> · </span>
             </span>
           ) : (
-            <span className="missing">{t('noTranslation')}</span>
+            !local &&
+            target !== viewer && (
+              <>
+                <span className="missing">{t('noTranslation')}</span>
+                <span className="muted"> · </span>
+              </>
+            )
           )}
-          <span className="muted"> · {author}</span>
+          <span className="muted">{author}</span>
           {claimedBy && !item.checked && (
             <span className="claim"> · {claimedBy === me ? t('claimedByMe') : t('claimedBy', { name: claimedBy })}</span>
           )}

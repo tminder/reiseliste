@@ -354,7 +354,9 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
         <div className="title">
           <h1>{list.name}</h1>
           <span className="sub">
-            {country?.flag} {countryName(list.country)} · {LANG_LABEL[target]}
+            {/* „🇨🇭 Deutschschweiz“ sagt die Sprache schon: dann Kurzform und ohne Sprache (D-081) */}
+            {country?.flag} {countryName(list.country, true)}
+            {!list.country.includes('-') && ` · ${LANG_LABEL[target]}`}
           </span>
           <ShopBar shop={shop} chosenAt={shopChosenAt} shopping={shopping} firstChecked={firstChecked} country={list.country} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
         </div>
@@ -420,7 +422,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
         </div>
       </header>
       <AppHint id={id} />
-      <ListHints items={store.items} translated={target !== profile.lang} alone={sole !== false} onShare={() => setShowShare(true)} />
+      <ListHints items={store.items} translated={target !== profile.lang} />
 
       {countryMoved && list.country === countryMoved.to && (
         <div className="toast">

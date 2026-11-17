@@ -95,7 +95,7 @@ export function categoryLabel(c: Category): string {
 }
 
 /** Ländername in der Sprache der Oberfläche (über Intl), bei mehrsprachigen Ländern mit Region */
-export function countryName(code: string): string {
+export function countryName(code: string, short = false): string {
   const [iso, region] = code.split('-')
   let name = iso
   try {
@@ -110,5 +110,7 @@ export function countryName(code: string): string {
     'CH-IT': 'regionTicino',
     'CH-DE': 'regionGermanSwiss',
   }
-  return region && suffix[code] ? `${name} (${t(suffix[code])})` : name
+  if (!region || !suffix[code]) return name
+  // Kurzform für knappe Stellen, z. B. „Deutschschweiz“ statt „Schweiz (Deutschschweiz)“ (D-081)
+  return short ? t(suffix[code]) : `${name} (${t(suffix[code])})`
 }

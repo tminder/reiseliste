@@ -195,6 +195,23 @@ test('Datenschutzseite lädt nach', async ({ page, problems }) => {
   await expect(page.locator('body')).toContainText('Fehlermeldungen')
 })
 
+test.describe('Im Laden, GPS im Gebäude ungenau (D-078)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 80 } })
+
+  test('„Im <Laden>“ statt Meterangabe', async ({ page, problems }) => {
+    void problems
+    const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
+    await page.route(/interpreter/, (r) =>
+      r.fulfill(json({ elements: [{ type: 'node', id: 1, lat: 41.3906, lon: 2.17, tags: { shop: 'supermarket', name: 'Mercadona' } }] })),
+    )
+    await seed(page, [item(1, 'Milch', 'milch')])
+    await page.goto(`/#/l/${LIST}`)
+    await expect(page.locator('.shop-current.here')).toContainText('Im Mercadona') // 67 m entfernt, GPS auf 80 m genau
+    await expect(page.locator('.shop-current')).not.toContainText(/\d+ m\b/)
+  })
+})
+
 test.describe('Laden', () => {
   test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
 
@@ -397,7 +414,7 @@ test.describe('Standort schon erlaubt', () => {
   })
 })
 
-test('Onboarding: Beispiel-Liste vorne, Hinweise im Ablauf (D-068)', async ({ page, problems }) => {
+test('Onboarding: Hinweis im Ablauf (D-068)', async ({ page, problems }) => {
   void problems
   await page.goto('/')
   await expect(page.locator('h2')).toContainText('Einkaufsliste für die Reise')
@@ -417,7 +434,23 @@ test('Onboarding: Beispiel-Liste vorne, Hinweise im Ablauf (D-068)', async ({ pa
   await page.getByRole('button', { name: 'Verstanden' }).click()
   await add(page, 'Brot')
   await add(page, 'Eier')
-  await expect(page.locator('.note')).toContainText('Teile die Liste')
-  await page.locator('.note').getByRole('button', { name: 'Teilen' }).click()
-  await expect(page.locator('.sheet')).toBeVisible()
+  await expect(page.locator('.note')).toHaveCount(0) // kein Teilen-Hinweis mehr (D-068)
+})
+
+test('Im eigenen Sprachraum keine Übersetzung, Untertitel ohne doppelte Sprache (D-081)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [item(1, 'Milch', 'milch')], 'CH-DE')
+  await page.goto(`/#/l/${LIST}`)
+  await expect(page.locator('.item').first()).toContainText('Milch')
+  await expect(page.locator('.item .local')).toHaveCount(0)
+  await expect(page.locator('.item .missing')).toHaveCount(0)
+  await expect(page.locator('.topbar .sub')).toHaveText(/^🇨🇭 Deutschschweiz\s*$/)
+  await expect(page.locator('.topbar .sub')).not.toContainText('· Deutsch')
+})
+
+test('Einladung ohne Erklärungstext (D-068)', async ({ page, problems }) => {
+  void problems
+  await page.goto(`/#/l/${LIST}`)
+  await expect(page.locator('h2')).toContainText('eingeladen')
+  await expect(page.locator('.lead')).toHaveCount(0)
 })

@@ -163,7 +163,7 @@ function relocate(result: NearbyResult, lat: number, lon: number): NearbyResult 
  * precise: Beginn des Einkaufs (D-046). Frischer Standort (höchstens 10 s alt), neue Suche schon ab
  * 75 m Abstand oder wenn die letzte Suche älter als 30 Minuten ist – in Städten liegen Läden oft nah beieinander.
  */
-export async function findNearbyShops(force = false, precise = false): Promise<NearbyResult & { fresh: boolean }> {
+export async function findNearbyShops(force = false, precise = false): Promise<NearbyResult & { fresh: boolean; lat: number; lon: number }> {
   const pos = await getPosition(precise ? 10_000 : undefined)
   const { latitude: lat, longitude: lon, accuracy } = pos.coords
 
@@ -174,7 +174,7 @@ export async function findNearbyShops(force = false, precise = false): Promise<N
     const moved = meters(lat, lon, lastResult.lat, lastResult.lon)
     const base = precise ? 75 : lastResult.result.inside ? MOVED_INSIDE_M : MOVED_M
     const limit = Math.max(base, accuracy, precise ? 0 : (lastResult.accuracy ?? 0))
-    if (moved <= limit) return { ...relocate(lastResult.result, lat, lon), accuracy, fresh: false }
+    if (moved <= limit) return { ...relocate(lastResult.result, lat, lon), accuracy, lat, lon, fresh: false }
   }
 
   // GPS ist in Gebäuden ungenau: Radius an die Genauigkeit anpassen (mind. 75 m, höchstens 400 m)
@@ -218,7 +218,7 @@ ${FAR_STEPS_M.map((r) => `nwr(around:${r},${at})["shop"="supermarket"];out cente
         inside: false,
       }
   writeLast({ at: Date.now(), lat, lon, accuracy, result })
-  return { ...result, accuracy, fresh: true }
+  return { ...result, accuracy, lat, lon, fresh: true }
 }
 
 function formatDistance(m: number) {
@@ -235,12 +235,19 @@ const VALID_MS = 3 * 60 * 60 * 1000
 const VALID_WITH_POS_MS = 24 * 60 * 60 * 1000
 /** Weiter weg als das: gewählter Laden wird verworfen */
 export const LEFT_SHOP_M = 1_000
-/** Im Laden: höchstens so weit vom Ladenpunkt entfernt, bei mindestens dieser GPS-Genauigkeit (D-078) */
+/** Ankunft im Supermarkt: höchstens 50 m vom Ladenpunkt, GPS auf 60 m genau (D-020) */
 export const HERE_M = 50
 export const HERE_ACCURACY_M = 60
-/** Gilt man als „im Laden“? Gleiche Grenze für die Ankunft und die Anzeige „hier“ */
 export function isHere(distance: number | undefined, accuracy: number | undefined): boolean {
   return distance != null && distance <= HERE_M && (accuracy ?? 999) <= HERE_ACCURACY_M
+}
+/**
+ * Anzeige „Im <Laden>“ (D-078): grosszügiger als die Ankunft, weil der Laden schon feststeht.
+ * Im Gebäude ist GPS oft 50–100 m ungenau, und der Ladenpunkt liegt oft in der Gebäudemitte:
+ * „im Laden“, solange der Laden innerhalb von 50 m oder innerhalb der GPS-Ungenauigkeit (höchstens 100 m) liegt.
+ */
+export function looksInside(distance: number, accuracy: number): boolean {
+  return distance <= Math.max(HERE_M, Math.min(accuracy, 100))
 }
 
 export function getChosenShop(listId: string): Shop | null {

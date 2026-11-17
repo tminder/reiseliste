@@ -47,7 +47,8 @@ export function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile
           <h2 className="onboard-title">
             {listId ? (known[0] ? t('invitedBy', { name: known[0].name }) : t('invitedTitle')) : t('onboardTitle')}
           </h2>
-          <p className="lead">{t('onboardText')}</p>
+          {/* Eingeladen: keine Erklärung, die Liste selbst zeigt gleich, was die App macht */}
+          {!listId && <p className="lead">{t('onboardText')}</p>}
         </>
       )}
       {known.length > 0 && (

@@ -1,4 +1,4 @@
-// Einmalige Hinweise im Ablauf (D-068): erklären den nächsten Schritt erst, wenn er ansteht. Immer nur einer auf einmal.
+// Einmaliger Hinweis im Ablauf (D-068): wo die Übersetzung steht. Den Teilen-Hinweis gibt es nicht mehr (D-068).
 import { useState } from 'react'
 import { t } from '../../i18n'
 import type { Item } from '../../lib/store'
@@ -18,7 +18,7 @@ const markSeen = (key: string) => {
   }
 }
 
-export function ListHints({ items, translated, alone, onShare }: { items: Item[]; translated: boolean; alone: boolean; onShare: () => void }) {
+export function ListHints({ items, translated }: { items: Item[]; translated: boolean }) {
   const [, setTick] = useState(0)
   const done = (key: string) => {
     markSeen(key)
@@ -33,27 +33,6 @@ export function ListHints({ items, translated, alone, onShare }: { items: Item[]
         <div className="row-gap">
           <button className="primary small" onClick={() => done('rl:hintTranslation')}>
             {t('gotIt')}
-          </button>
-        </div>
-      </div>
-    )
-  // 2. Ab drei Artikeln in einer Liste, die man allein hat: Teilen anbieten
-  if (alone && open.length >= 3 && !seen('rl:hintShare'))
-    return (
-      <div className="note info ios-hint">
-        <p>{t('hintShare')}</p>
-        <div className="row-gap">
-          <button
-            className="primary small"
-            onClick={() => {
-              done('rl:hintShare')
-              onShare()
-            }}
-          >
-            {t('share')}
-          </button>
-          <button className="ghost small" onClick={() => done('rl:hintShare')}>
-            {t('notNow')}
           </button>
         </div>
       </div>
