@@ -51,8 +51,9 @@ export function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile
           {!listId && <p className="lead">{t('onboardText')}</p>}
         </>
       )}
+      {/* Bekannte Mitglieder kompakt über dem Formular, ohne eigene Karte (D-068) */}
       {known.length > 0 && (
-        <div className="card stack">
+        <section className="known">
           <p>{t('knownMember')}</p>
           <div className="chips">
             {known.map((m) => (
@@ -61,8 +62,10 @@ export function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile
               </button>
             ))}
           </div>
-          <p className="muted">{t('orNewProfile')}</p>
-        </div>
+          <p className="divider">
+            <span>{t('orNewProfile')}</span>
+          </p>
+        </section>
       )}
       <form
         className="card stack"
@@ -73,7 +76,7 @@ export function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile
       >
         <label>
           {t('yourName')}
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('namePlaceholder')} maxLength={MAX.personName} autoFocus />
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('namePlaceholder')} maxLength={MAX.personName} autoFocus={!listId} />
         </label>
         <label>
           {t('whichLanguage')}

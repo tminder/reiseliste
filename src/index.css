@@ -783,6 +783,24 @@ button.term-btn {
   font-size: 1rem;
   padding: 8px 14px;
 }
+/* Einladung: bekannte Mitglieder, dann Trennlinie „oder neu“ (D-068) */
+.known p {
+  margin: 0 0 10px;
+}
+.known .divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 4px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.known .divider::before,
+.known .divider::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--line);
+}
 
 /* Zeigen-Karte fürs Personal (D-032) */
 .showcard {
@@ -1302,6 +1320,11 @@ main.page:has(.group) {
   grid-column: 2;
   grid-row: 2;
   margin-left: 0;
+}
+/* Ohne Zeile darunter (eigener Sprachraum, allein in der Liste, D-081/D-082): Name mittig */
+.item:has(> .item-sub:empty) > .body {
+  grid-row: 1 / span 2;
+  align-self: center;
 }
 .item > .item-actions {
   grid-column: 3;

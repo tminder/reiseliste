@@ -26,9 +26,18 @@
     <meta property="og:image:alt" content="Logo von Cart on the Road: Milch wird zu leche, lait, latte" />
     <meta property="og:locale" content="de_CH" />
     <meta name="twitter:card" content="summary_large_image" />
+    <!-- Startbildschirm bis die App geladen ist (D-083): erscheint erst nach 0,3 s, damit er bei schnellem Laden nicht aufblitzt -->
+    <style>
+      html { background: #f8fafc; }
+      @media (prefers-color-scheme: dark) { html { background: #0b1120; } }
+      .splash { display: flex; align-items: center; justify-content: center; height: 100vh; height: 100dvh; opacity: 0; animation: splash-in 0.4s ease 0.3s forwards; }
+      .splash img { width: 88px; height: 88px; }
+      @keyframes splash-in { to { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) { .splash { animation-duration: 0s; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="splash" aria-label="Cart on the Road wird geladen" role="status"><img src="/favicon.svg" alt="" /></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

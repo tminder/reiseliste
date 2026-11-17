@@ -454,3 +454,21 @@ test('Einladung ohne Erklärungstext (D-068)', async ({ page, problems }) => {
   await expect(page.locator('h2')).toContainText('eingeladen')
   await expect(page.locator('.lead')).toHaveCount(0)
 })
+
+test('Namen bei Artikeln nur, wenn mehrere Personen schreiben (D-082)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [item(1, 'Milch', 'milch')])
+  await page.goto(`/#/l/${LIST}`)
+  await expect(page.locator('.item').first()).toContainText('leche')
+  await expect(page.locator('.item').first()).not.toContainText('Tobias')
+  await add(page, 'Brot')
+  await expect(page.locator('.item')).not.toContainText(['Tobias'])
+})
+
+test('Namen bei Artikeln mit zwei Schreibenden (D-082)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [item(1, 'Milch', 'milch'), { ...item(2, 'Brot', 'brot'), author: 'Anna' }])
+  await page.goto(`/#/l/${LIST}`)
+  await expect(page.locator('.item', { hasText: 'Milch' })).toContainText('leche · Tobias')
+  await expect(page.locator('.item', { hasText: 'Brot' })).toContainText('Anna')
+})

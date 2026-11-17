@@ -27,6 +27,7 @@ export function ItemRow({
   viewerRegion,
   me,
   canClaim,
+  showAuthor,
   onDeleted,
   onLocalChange,
   onChecked,
@@ -46,6 +47,8 @@ export function ItemRow({
   me: string
   /** Liste mit mindestens zwei Personen: „Ich hole das“ zeigen (D-065) */
   canClaim: boolean
+  /** Name der Person anzeigen: nur, wenn mehrere in der Liste sind (D-082) */
+  showAuthor: boolean
   /** Für „Gelöscht · Rückgängig“ (D-042) */
   onDeleted: (ids: string[], name: string) => void
   /** Eigene Änderung melden, damit sie nicht als „von anderen“ aufleuchtet (D-044) */
@@ -98,6 +101,34 @@ export function ItemRow({
       reducedMotion() ? 0 : 380,
     )
   }
+
+  const subParts = [
+    // Landesbegriff; im eigenen Sprachraum weg, wenn er gleich lautet wie der eigene Begriff (D-081).
+    // Zeigen-Karte fürs Personal über das Menü „…“ (D-073); hier nur Text, ein Tipp hakt ab
+    local && !sameAsOwn && (
+      <span key="local" className="local">
+        <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
+      </span>
+    ),
+    !local && target !== viewer && (
+      <span key="missing" className="missing">
+        {t('noTranslation')}
+      </span>
+    ),
+    // Wer den Artikel geschrieben hat: nur bei mindestens zwei Personen in der Liste (D-082)
+    showAuthor && (
+      <span key="author" className="muted">
+        {author}
+      </span>
+    ),
+    claimedBy && !item.checked && (
+      <span key="claim" className="claim">
+        {claimedBy === me ? t('claimedByMe') : t('claimedBy', { name: claimedBy })}
+      </span>
+    ),
+  ]
+    .filter(Boolean)
+    .flatMap((part, i) => (i ? [<span key={`sep${i}`} className="muted"> · </span>, part] : [part]))
 
   return (
     <div
@@ -199,28 +230,7 @@ export function ItemRow({
       </div>
       {/* Landesbegriff, Mitglied, Hinweise unter dem Namen */}
       <div className="item-sub">
-        <div className="orig">
-          {/* Im eigenen Sprachraum (D-081): kein Landesbegriff, wenn er gleich lautet wie der eigene Begriff */}
-          {local && !sameAsOwn ? (
-            // Zeigen-Karte fürs Personal jetzt über das Menü „…“ (D-073); hier nur Text, ein Tipp hakt ab
-            <span className="local">
-              <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
-              <span className="muted"> · </span>
-            </span>
-          ) : (
-            !local &&
-            target !== viewer && (
-              <>
-                <span className="missing">{t('noTranslation')}</span>
-                <span className="muted"> · </span>
-              </>
-            )
-          )}
-          <span className="muted">{author}</span>
-          {claimedBy && !item.checked && (
-            <span className="claim"> · {claimedBy === me ? t('claimedByMe') : t('claimedBy', { name: claimedBy })}</span>
-          )}
-        </div>
+        {subParts.length > 0 && <div className="orig">{subParts}</div>}
         {FEATURES.community && !local && !editing && (
           <button className="link" onClick={() => setEditing(true)}>
             {t('enterLocalTerm')}

@@ -257,6 +257,8 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   const country = list ? COUNTRY_BY_CODE.get(list.country) : undefined
   const target: Lang = country?.lang ?? 'en'
   const region = country?.variant
+  // Namen bei Artikeln nur, wenn mehrere Personen beteiligt sind (D-082): Mitglieder laut Server oder verschiedene Schreibende
+  const showAuthors = sole === false || new Set(store.items.filter((i) => !i.deleted).map((i) => i.author)).size > 1
   const items = store.items.filter((i) => !i.deleted)
   // Wörterbuch nur für die benötigten Sprachen laden (D-053): eigene, Landessprache, Sprachen der Einträge
   const langsReady = useLanguages([profile.lang, target, ...items.map((i) => i.lang)], [profile.lang, target])
@@ -559,7 +561,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           <section key={cat} className="group">
             <h3 data-flip={cat}>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
             {groups.get(cat)!.map((item) => (
-              <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} canClaim={sole === false} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
+              <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} canClaim={sole === false} showAuthor={showAuthors} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
             ))}
           </section>
         ))}
@@ -580,7 +582,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
             </button>
           </h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} canClaim={sole === false} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
+            <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} canClaim={sole === false} showAuthor={showAuthors} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
           ))}
         </section>
       )}
