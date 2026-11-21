@@ -80,7 +80,9 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
   useEffect(() => {
     let alive = true
     void detectCountry().then((code) => {
-      if (!alive || !code || COUNTRY_BY_CODE.get(code)?.lang === profile.lang) return // eigene Sprache: kein Vorschlag
+      // Auch im eigenen Sprachraum (D-087): Dort zeigt die Liste keine Übersetzung (D-081), und auf der Reise
+      // wechselt „Automatisch“ ins fremde Land (D-040)
+      if (!alive || !code) return
       if (!touched.current) setCountry(code)
     })
     return () => {

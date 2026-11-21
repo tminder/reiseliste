@@ -502,3 +502,23 @@ test.describe('Ladensuche: Fehler nur im Auswahlblatt (D-086)', () => {
     await expect(page.locator('.sheet')).toContainText(/Neuer Versuch|\d+ s/)
   })
 })
+
+test.describe('Neue Liste zu Hause in der Schweiz (D-087)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 47.37, longitude: 8.54, accuracy: 20 } })
+
+  test('„Automatisch“ zeigt die Schweiz, nicht Spanien', async ({ page, problems }) => {
+    void problems
+    await page.route(/nominatim/, (r) =>
+      r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ address: { country_code: 'ch', state: 'Zürich' } }) }),
+    )
+    await page.addInitScript(() => {
+      localStorage.setItem('rl:profile', JSON.stringify({ name: 'Tobias', lang: 'de', region: 'de-CH' }))
+      localStorage.setItem('rl:locConsent', 'yes')
+      // Von der Reise: Spanien vor einer Stunde erkannt
+      localStorage.setItem('rl:here', JSON.stringify({ at: Date.now() - 3_600_000, code: 'ES', lat: 41.39, lon: 2.17 }))
+    })
+    await page.goto('/')
+    await page.getByRole('button', { name: /Neue Liste/ }).click()
+    await expect(page.locator('form select').first().locator('option:checked')).toHaveText(/Automatisch.*Deutschschweiz/)
+  })
+})

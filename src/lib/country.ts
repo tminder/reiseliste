@@ -1,13 +1,18 @@
 // Aktuelles Land erkennen (Vorschlag beim Anlegen einer Liste, Reiseland automatisch anpassen: D-040).
-// Standort → Nominatim (OpenStreetMap) → Ländercode der App. Ergebnis 6 Stunden lokal gespeichert,
-// damit nicht bei jedem Öffnen der Startseite erneut nach dem Standort gefragt wird.
+// Standort → Nominatim (OpenStreetMap) → Ländercode der App. Das Ergebnis wird mit der Stelle gespeichert (D-087):
+// Es gilt, solange man weniger als 10 km davon entfernt ist (höchstens 24 Stunden). Nach einer Reise wird also
+// sofort neu bestimmt, auch wenn das letzte Ergebnis erst eine Stunde alt ist.
 
 import { COUNTRY_BY_CODE } from '../data/countries'
-import { getPosition } from './nearby'
+import { getPosition, meters } from './nearby'
 
+/** Ohne Standort (z. B. nicht freigegeben) gilt das letzte Ergebnis so lange */
 const TTL = 6 * 60 * 60 * 1000
+/** Mit Standort: gleiche Gegend (10 km) und höchstens 24 Stunden alt */
+const SAME_PLACE_M = 10_000
+const SAME_PLACE_MS = 24 * 60 * 60 * 1000
 
-type Cached = { at: number; code: string | null }
+type Cached = { at: number; code: string | null; lat?: number; lon?: number }
 
 function read(ttl = TTL): Cached | null {
   try {
@@ -19,9 +24,9 @@ function read(ttl = TTL): Cached | null {
   }
 }
 
-function write(code: string | null) {
+function write(code: string | null, lat: number, lon: number) {
   try {
-    localStorage.setItem('rl:here', JSON.stringify({ at: Date.now(), code } satisfies Cached))
+    localStorage.setItem('rl:here', JSON.stringify({ at: Date.now(), code, lat, lon } satisfies Cached))
   } catch {
     /* egal */
   }
@@ -50,11 +55,19 @@ export const cachedCountry = (): string | null => read()?.code ?? null
  * (z. B. zu Hause in Deutschland), oder undefined, wenn es nicht bestimmt werden konnte.
  */
 export async function detectCountry(maxAgeMs = TTL): Promise<string | null | undefined> {
-  const cached = read(maxAgeMs)
-  if (cached) return cached.code
+  let pos: GeolocationPosition
   try {
-    const pos = await getPosition()
-    const { latitude, longitude } = pos.coords
+    pos = await getPosition()
+  } catch {
+    // Kein Standort: letztes Ergebnis, wenn nicht zu alt
+    const cached = read(maxAgeMs)
+    return cached ? cached.code : undefined
+  }
+  const { latitude, longitude } = pos.coords
+  // Gleiche Gegend: keine neue Anfrage an Nominatim
+  const cached = read(SAME_PLACE_MS)
+  if (cached && cached.lat != null && cached.lon != null && meters(latitude, longitude, cached.lat, cached.lon) < SAME_PLACE_M) return cached.code
+  try {
     const params = new URLSearchParams({ format: 'jsonv2', lat: String(latitude), lon: String(longitude), zoom: '5', addressdetails: '1', 'accept-language': 'en' })
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?${params}`)
     if (!res.ok) return undefined
@@ -62,7 +75,7 @@ export async function detectCountry(maxAgeMs = TTL): Promise<string | null | und
     const iso = data.address?.country_code
     if (!iso) return undefined
     const code = toAppCode(iso, data.address?.state ?? '')
-    write(code)
+    write(code, latitude, longitude)
     return code
   } catch {
     return undefined
