@@ -5,8 +5,6 @@
   "onboardText": "You write “milk”, and in a shop in Spain it says “leche”: the app shows every item the way it is called in the country you are visiting. Sharing with your travel group included.",
   "invitedTitle": "You have been invited to a shopping list",
   "invitedBy": "{name} invited you to a shopping list",
-  "hintTranslation": "Under each item you see what it is called in the shops of the travel country.",
-  "gotIt": "Got it",
   "notNow": "Not now",
   "yourName": "Your name",
   "namePlaceholder": "e.g. Anna",

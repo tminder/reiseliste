@@ -414,7 +414,7 @@ test.describe('Standort schon erlaubt', () => {
   })
 })
 
-test('Onboarding: Hinweis im Ablauf (D-068)', async ({ page, problems }) => {
+test('Onboarding ohne Hinweise in der Liste (D-068)', async ({ page, problems }) => {
   void problems
   await page.goto('/')
   await expect(page.locator('h2')).toContainText('Einkaufsliste für die Reise')
@@ -430,11 +430,9 @@ test('Onboarding: Hinweis im Ablauf (D-068)', async ({ page, problems }) => {
   await page.locator('form select').first().selectOption('ES')
   await page.getByRole('button', { name: /Liste erstellen/ }).click()
   await add(page, 'Milch')
-  await expect(page.locator('.note')).toContainText('wie er im Laden des Reiselands heisst')
-  await page.getByRole('button', { name: 'Verstanden' }).click()
   await add(page, 'Brot')
   await add(page, 'Eier')
-  await expect(page.locator('.note')).toHaveCount(0) // kein Teilen-Hinweis mehr (D-068)
+  await expect(page.locator('.note')).toHaveCount(0) // keine Hinweise in der Liste (D-068)
 })
 
 test('Im eigenen Sprachraum keine Übersetzung, Untertitel ohne doppelte Sprache (D-081)', async ({ page, problems }) => {
