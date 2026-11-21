@@ -1,6 +1,6 @@
 // Untere Blätter der Liste: Mitglieder, Liste bearbeiten, Teilen
 import { useEffect, useState } from 'react'
-import { UserMinus } from 'lucide-react'
+import { Copy, UserMinus } from 'lucide-react'
 import { type Lang } from '../../data/dictionary'
 import { COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
 import { countryLabel, t } from '../../i18n'
@@ -185,7 +185,25 @@ export function ShareSheet({ id, name, onClose }: { id: string; name: string; on
         <h2>{t('shareList')}</h2>
         {!supabase && <p className="note">{t('demoShare')}</p>}
         {qr && <img src={qr} alt={t('qrAlt')} className="qr" />}
-        <input readOnly value={url} onFocus={(e) => e.target.select()} />
+        {/* Link mit Knopf „Kopieren“ in einer Zeile (D-089), z. B. für E-Mail oder Desktop */}
+        <div className="copy-row">
+          <input readOnly value={url} onFocus={(e) => e.target.select()} />
+          <button
+            className="ghost"
+            aria-label={t('copyLink')}
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(url)
+                setCopied(true)
+                window.setTimeout(() => setCopied(false), 2000)
+              } catch {
+                /* Zwischenablage nicht erlaubt: Link steht im Feld zum Markieren */
+              }
+            }}
+          >
+            {!copied && <Copy size={16} />} {copied ? t('copied') : t('copy')}
+          </button>
+        </div>
         <p className="muted small-text">{t('shareIosHint')}</p>
         <div className="row">
           <button
@@ -197,13 +215,14 @@ export function ShareSheet({ id, name, onClose }: { id: string; name: string; on
                 else {
                   await navigator.clipboard.writeText(url)
                   setCopied(true)
+                  window.setTimeout(() => setCopied(false), 2000)
                 }
               } catch {
                 /* abgebrochen */
               }
             }}
           >
-            {copied ? t('copied') : t('shareLink')}
+            {t('shareLink')}
           </button>
           <button className="ghost" onClick={onClose}>
             {t('close')}

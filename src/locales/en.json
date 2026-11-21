@@ -138,6 +138,7 @@
   "qrWrong": "That is not a list QR code.",
   "cameraDenied": "No camera access. Allow it in your browser settings.",
   "cameraUnavailable": "This browser cannot use the camera.",
+  "copy": "Copy",
   "copyLink": "Copy link",
   "iosHint": "You are in the browser. Have Cart on the Road on your home screen? Then copy the link and paste it in the app under “Join a list”. Otherwise the list is missing there.",
   "iosHintDismiss": "Don't show again",

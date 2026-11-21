@@ -138,6 +138,7 @@
   "qrWrong": "Das ist kein QR-Code einer Liste.",
   "cameraDenied": "Kein Zugriff auf die Kamera. Erlaube ihn in den Einstellungen des Browsers.",
   "cameraUnavailable": "Dieser Browser kann die Kamera nicht nutzen.",
+  "copy": "Kopieren",
   "copyLink": "Link kopieren",
   "iosHint": "Du bist im Browser. Hast du Cart on the Road auf dem Home-Bildschirm? Dann kopiere den Link und füge ihn in der App unter „Liste beitreten“ ein. Sonst fehlt die Liste dort.",
   "iosHintDismiss": "Nicht mehr zeigen",

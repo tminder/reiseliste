@@ -548,3 +548,9 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Das Reiseland erscheint überall als Flagge, Land und Sprache, die Sprache in der Sprache der Oberfläche: „🇪🇸 Spanien – Spanisch“, „🇬🇷 Griechenland – Griechisch“, „🇹🇼 Taiwan – Chinesisch (traditionell)“. Bei Regionen sagt die Sprache, welche gemeint ist, der Regionsname fällt weg: „🇨🇭 Schweiz – Deutsch“, „🇨🇭 Schweiz – Französisch“, „🇧🇪 Belgien – Niederländisch“. So in der Länderauswahl (alphabetisch nach diesem Text), bei „Automatisch (🇨🇭 Schweiz – Deutsch)“, im Untertitel der Liste und in der Meldung zum Länderwechsel. Der Platzhalter für den Listennamen nennt nur das Land („z. B. Einkaufsliste Schweiz“).
 - **Begründung:** Rückmeldung des Inhabers mit Bildschirmfoto: „Schweiz (Deutschschweiz) – Deutsch“ war doppelt, und Sprachnamen in der Landessprache („Ελληνικά“, „繁體中文“) sind nicht für alle lesbar. Die Sprache ist das, worum es in der App geht; „Schweiz – Französisch“ ist klarer als „Romandie“.
 - **Folgen:** Bei den meisten Ländern wirkt die Sprache selbstverständlich und die Zeilen werden etwas länger. Ein eigenes Auswahlblatt mit Suche wäre schöner, lohnt sich aber erst mit deutlich mehr Ländern. Die Regionsnamen („Deutschschweiz“) bleiben nur noch intern für die Länderwahl im Code.
+
+## D-089 · Teilen: Knopf „Kopieren“ neben dem Link
+
+- **Entscheidung:** Im Blatt „Liste teilen“ steht neben dem Link ein Knopf „Kopieren“. Er kopiert den Link und zeigt 2 Sekunden lang „Kopiert ✓“. „Link teilen“ öffnet wie bisher das Teilen-Menü des Geräts.
+- **Begründung:** Wunsch des Inhabers. Bisher kopierte „Link teilen“ nur auf Geräten ohne Teilen-Menü; auf dem Handy gab es keinen direkten Weg, den Link zu kopieren, z. B. für eine E-Mail.
+- **Folgen:** Erlaubt der Browser die Zwischenablage nicht, passiert beim Tipp nichts; der Link steht weiterhin im Feld zum Markieren.

@@ -165,6 +165,11 @@ test('Menü, Profil ändern und abbrechen, Teilen mit QR-Code', async ({ page, p
   expect(JSON.parse((await page.evaluate(() => localStorage.getItem('rl:profile'))) ?? '{}').name).toBe('Tobi')
   await page.getByRole('button', { name: 'Teilen' }).click()
   await expect(page.locator('.sheet img')).toBeVisible()
+  // Link kopieren als eigener Knopf (D-089)
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.getByRole('button', { name: 'Link kopieren' }).click()
+  await expect(page.locator('.sheet')).toContainText('Kopiert')
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(`#/l/${LIST}`)
 })
 
 test('Einziges Mitglied: Liste löschen mit Rückgängig und Gnadenfrist', async ({ page, problems }) => {
