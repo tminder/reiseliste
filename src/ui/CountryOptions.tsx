@@ -26,9 +26,23 @@ function suggestedCountries(lang: Lang): string[] {
   return out
 }
 
+/** Länder, in denen die Sprache der Liste nicht selbstverständlich ist: Sprache in Klammern (D-088) */
+const SHOW_LANG = new Set(['LU', 'MT', 'CA'])
+
+function languageName(l: Lang): string {
+  try {
+    return new Intl.DisplayNames([uiLang()], { type: 'language' }).of(l) ?? LANG_LABEL[l]
+  } catch {
+    return LANG_LABEL[l]
+  }
+}
+
+/** „🇪🇸 Spanien“, „🇨🇭 Schweiz – Deutschschweiz“, „🇱🇺 Luxemburg (Französisch)“ (D-088) */
 const label = (code: string) => {
   const c = COUNTRY_BY_CODE.get(code)!
-  return `${c.flag} ${countryName(code)} – ${LANG_LABEL[c.lang]}`
+  const [iso, region] = code.split('-')
+  if (region) return `${c.flag} ${countryName(iso)} – ${countryName(code, true)}`
+  return SHOW_LANG.has(code) ? `${c.flag} ${countryName(code)} (${languageName(c.lang)})` : `${c.flag} ${countryName(code)}`
 }
 
 export function CountryOptions({ lang }: { lang: Lang }) {

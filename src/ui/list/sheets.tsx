@@ -137,7 +137,7 @@ export function EditSheet({
               setC(e.target.value)
             }}
           >
-            <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(c)?.flag ?? ''} ${countryName(c)}` })}</option>
+            <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(c)?.flag ?? ''} ${countryName(c, true)}` })}</option>
             <CountryOptions lang={lang} />
           </select>
         </label>

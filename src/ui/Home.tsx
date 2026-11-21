@@ -154,7 +154,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
           {/* Name zuerst und Pflicht (D-058) */}
           <label>
             {t('name')}
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder', { country: countryName(country) })} maxLength={MAX.listName} required />
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder', { country: countryName(country, true) })} maxLength={MAX.listName} required />
           </label>
           <label>
             {t('travelCountry')}
@@ -169,7 +169,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
             >
               {/* Ohne Standort kein Land in Klammern: es wäre nur geraten (D-067) */}
               <option value="auto">
-                {loc.available ? t('autoCountry', { country: `${COUNTRY_BY_CODE.get(country)?.flag ?? ''} ${countryName(country)}` }) : t('autoCountryPlain')}
+                {loc.available ? t('autoCountry', { country: `${COUNTRY_BY_CODE.get(country)?.flag ?? ''} ${countryName(country, true)}` }) : t('autoCountryPlain')}
               </option>
               <CountryOptions lang={profile.lang} />
             </select>

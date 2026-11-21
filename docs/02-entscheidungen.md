@@ -542,3 +542,9 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Das erkannte Land wird zusammen mit der Stelle gespeichert. Die App verwendet es wieder, solange man weniger als 10 km davon entfernt ist und es höchstens 24 Stunden alt ist; sonst fragt sie Nominatim neu. Ohne Standort gilt wie bisher das letzte Ergebnis (bis 6 Stunden). Beim Anlegen einer Liste zeigt „Automatisch“ das erkannte Land auch im eigenen Sprachraum, z. B. „Automatisch (🇨🇭 Schweiz (Deutschschweiz))“ zu Hause.
 - **Begründung:** Rückmeldung des Inhabers: Nach der Rückreise aus Spanien wurde immer Spanien gewählt. Das Land war bis 6 Stunden gespeichert, ohne Rücksicht auf den Ort, und im eigenen Sprachraum gab es keinen Vorschlag, sodass Spanien als Standard stehen blieb.
 - **Folgen:** Eine zu Hause angelegte Liste mit „Automatisch“ zeigt zuerst keine Übersetzung (D-081) und wechselt am Reiseziel ins fremde Land (D-040). Bestehende Listen wechseln zu Hause weiterhin nicht zurück. Nach einem Ortswechsel von mehr als 10 km eine Anfrage mehr an Nominatim.
+
+## D-088 · Länderauswahl ohne Sprache
+
+- **Entscheidung:** Die Reiseland-Auswahl zeigt Flagge und Land, ohne Sprache: „🇪🇸 Spanien“. Regionen stehen als „🇨🇭 Schweiz – Deutschschweiz“, damit sie beim Land bleiben. Nur wo die Sprache nicht selbstverständlich ist, steht sie in der Sprache der Oberfläche dabei: „🇱🇺 Luxemburg (Französisch)“, „🇲🇹 Malta (Englisch)“, „🇨🇦 Kanada (Englisch)“. „Automatisch“ und der Platzhalter für den Listennamen nutzen die Kurzform: „Automatisch (🇨🇭 Deutschschweiz)“, „z. B. Einkaufsliste Deutschschweiz“.
+- **Begründung:** Rückmeldung des Inhabers mit Bildschirmfoto: „Schweiz (Deutschschweiz) – Deutsch“ war doppelt und unruhig. Das Systemauswahlfeld kann die Sprache nicht dezent grau zeigen.
+- **Folgen:** Ein eigenes Auswahlblatt mit Suche und Sprache in Grau wäre schöner, lohnt sich aber erst mit deutlich mehr Ländern.
