@@ -1,14 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Feste Seiten (D-090, D-091). Die App unter „/“ ist für Suchmaschinen ausgeblendet (noindex). -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://cartontheroad.app/de/</loc>
+    <lastmod>2026-11-21</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://cartontheroad.app/de/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://cartontheroad.app/en/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://cartontheroad.app/en/" />
   </url>
   <url>
     <loc>https://cartontheroad.app/en/</loc>
+    <lastmod>2026-11-21</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://cartontheroad.app/de/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://cartontheroad.app/en/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://cartontheroad.app/en/" />
   </url>
-  <url><loc>https://cartontheroad.app/</loc></url>
+  <url>
+    <loc>https://cartontheroad.app/datenschutz/</loc>
+    <lastmod>2026-11-21</lastmod>
+    <xhtml:link rel="alternate" hreflang="de" href="https://cartontheroad.app/datenschutz/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://cartontheroad.app/privacy/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://cartontheroad.app/privacy/" />
+  </url>
+  <url>
+    <loc>https://cartontheroad.app/privacy/</loc>
+    <lastmod>2026-11-21</lastmod>
+    <xhtml:link rel="alternate" hreflang="de" href="https://cartontheroad.app/datenschutz/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://cartontheroad.app/privacy/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://cartontheroad.app/privacy/" />
+  </url>
+  <url>
+    <loc>https://cartontheroad.app/ueber/</loc>
+    <lastmod>2026-11-21</lastmod>
+    <xhtml:link rel="alternate" hreflang="de" href="https://cartontheroad.app/ueber/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://cartontheroad.app/about/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://cartontheroad.app/about/" />
+  </url>
+  <url>
+    <loc>https://cartontheroad.app/about/</loc>
+    <lastmod>2026-11-21</lastmod>
+    <xhtml:link rel="alternate" hreflang="de" href="https://cartontheroad.app/ueber/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://cartontheroad.app/about/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://cartontheroad.app/about/" />
+  </url>
 </urlset>

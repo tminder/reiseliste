@@ -532,9 +532,9 @@ test.describe('Neue Liste zu Hause in der Schweiz (D-087)', () => {
   })
 })
 
-test('Startseiten /de/ und /en/ mit Knopf zur App (D-090)', async ({ page, problems }) => {
+test('Feste Seiten mit Knopf zur App (D-090, D-091)', async ({ page, problems }) => {
   void problems
-  for (const [path, cta] of [['/de/', 'App öffnen'], ['/en/', 'Open the app']]) {
+  for (const [path, cta] of [['/de/', 'App öffnen'], ['/en/', 'Open the app'], ['/datenschutz/', 'App öffnen'], ['/privacy/', 'Open the app'], ['/ueber/', 'App öffnen'], ['/about/', 'Open the app']]) {
     await page.goto(path)
     await expect(page.locator('h1')).toBeVisible()
     await expect(page.getByRole('link', { name: cta }).first()).toHaveAttribute('href', '/')

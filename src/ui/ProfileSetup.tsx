@@ -1,7 +1,7 @@
 // Profil anlegen oder ändern: Name und Sprache (D-041), auf neuem Gerät bestehendes Mitglied wählen (D-029)
 import { useEffect, useState } from 'react'
 import { LANG_LABEL, PROFILE_LANGS } from '../data/countries'
-import { setUiLang, t } from '../i18n'
+import { setUiLang, t, uiLang } from '../i18n'
 import { MAX } from '../lib/limits'
 import { memberProfiles, profileStore, type Profile } from '../lib/store'
 import { AppVersion } from './AppVersion'
@@ -98,6 +98,8 @@ export function ProfileSetup({ onDone, onCancel, listId }: { onDone: (p: Profile
         )}
       </form>
       <footer className="footer">
+        <a href={uiLang() === 'de' ? '/ueber/' : '/about/'}>{t('aboutProject')}</a>
+        {' · '}
         <a href="#/datenschutz">{t('privacy')}</a>
         <AppVersion />
       </footer>

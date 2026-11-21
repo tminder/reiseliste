@@ -6,7 +6,7 @@ import { AppLogo } from './AppLogo'
 import { CountryOptions } from './CountryOptions'
 import { LocationSheet } from './LocationSheet'
 import { useLocation } from './useLocation'
-import { countryLabel, countryName, t } from '../i18n'
+import { countryLabel, countryName, t, uiLang } from '../i18n'
 import { listIdFrom } from '../lib/links'
 import { detectCountry } from '../lib/country'
 import { MAX } from '../lib/limits'
@@ -251,6 +251,8 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
         </div>
       )}
       <footer className="footer">
+        <a href={uiLang() === 'de' ? '/ueber/' : '/about/'}>{t('aboutProject')}</a>
+        {' · '}
         <a href="#/datenschutz">{t('privacy')}</a>
         <AppVersion />
       </footer>

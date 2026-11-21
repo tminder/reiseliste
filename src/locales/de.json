@@ -119,6 +119,7 @@
   "removeMemberFailed": "Entfernen hat nicht geklappt. Bist du online?",
   "removedNotice": "Du wurdest aus dieser Liste entfernt. Änderungen werden nicht mehr abgeglichen.",
   "removeFromMyLists": "Aus meinen Listen entfernen",
+  "aboutProject": "Über das Projekt",
   "cancel": "Abbrechen",
   "shareList": "Liste teilen",
   "demoShare": "Demo-Modus: Ohne Supabase sehen andere die Liste nicht.",

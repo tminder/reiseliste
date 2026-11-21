@@ -119,6 +119,7 @@
   "removeMemberFailed": "Couldn’t remove. Are you online?",
   "removedNotice": "You were removed from this list. Changes are no longer synced.",
   "removeFromMyLists": "Remove from my lists",
+  "aboutProject": "About",
   "cancel": "Cancel",
   "shareList": "Share list",
   "demoShare": "Demo mode: without Supabase others cannot see the list.",

@@ -1,6 +1,6 @@
 /**
  * Optionale Module. Ein ausgeschaltetes Modul ist in der Oberfläche unsichtbar und sendet keine Daten.
- * Zum Einschalten: Flag auf true setzen, Datenschutz (src/Privacy.tsx) und Planung (D-027) prüfen.
+ * Zum Einschalten: Flag auf true setzen, Datenschutz (src/privacyText.ts) und Planung (D-027) prüfen.
  */
 export const FEATURES = {
   /**

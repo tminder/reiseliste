@@ -1,6 +1,7 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { staticPages } from './src/staticPages.ts'
 
 // Kennung dieses Builds (D-035): steckt im Code und in version.json. Weichen beide ab, lädt die App neu.
 const BUILD_ID = process.env.GITHUB_SHA?.slice(0, 12) || new Date().toISOString()
@@ -13,7 +14,7 @@ const versionFile = (): Plugin => ({
 })
 
 // Content-Security-Policy (D-049): nur im Build, der Entwicklungsserver braucht Inline-Skripte und WebSockets.
-// Neue externe Dienste hier und in src/Privacy.tsx eintragen.
+// Neue externe Dienste hier und in src/privacyText.ts eintragen.
 const CSP = [
   "default-src 'self'",
   "script-src 'self'",
@@ -27,6 +28,15 @@ const CSP = [
   "base-uri 'self'",
   "form-action 'self'",
 ].join('; ')
+// Feste Seiten Datenschutz und „Über das Projekt“ (D-091) beim Build erzeugen
+const staticPagesPlugin = (): Plugin => ({
+  name: 'static-pages',
+  apply: 'build',
+  generateBundle() {
+    for (const [fileName, source] of Object.entries(staticPages())) this.emitFile({ type: 'asset', fileName, source })
+  },
+})
+
 const cspMeta = (): Plugin => ({
   name: 'csp-meta',
   apply: 'build',
@@ -41,6 +51,7 @@ export default defineConfig({
     react(),
     versionFile(),
     cspMeta(),
+    staticPagesPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false, // Registrierung in src/main.tsx (mit Update-Prüfung)
@@ -50,8 +61,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,woff2}'],
         // Startseiten /de/ und /en/ (D-090) nicht offline speichern und nicht durch die App ersetzen.
         // Ebenso Dateien mit Endung (sitemap.xml, robots.txt …): sonst öffnet der Service Worker dort die App.
-        globIgnores: ['de/**', 'en/**', 'landing/**'],
-        navigateFallbackDenylist: [/^\/(de|en)(\/|$)/, /\.[a-z0-9]+$/i],
+        globIgnores: ['de/**', 'en/**', 'landing/**', 'datenschutz/**', 'privacy/**', 'ueber/**', 'about/**'],
+        navigateFallbackDenylist: [/^\/(de|en|datenschutz|privacy|ueber|about)(\/|$)/, /\.[a-z0-9]+$/i],
         // Einmal angesehene Produktfotos bleiben offline verfügbar
         runtimeCaching: [
           {

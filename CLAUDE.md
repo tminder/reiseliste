@@ -35,4 +35,4 @@ Regeln (Details in `docs/README.md`):
 - Wörterbuch: `src/data/dictionary/` – `concepts.json` (ein Eintrag pro Artikel), eine Datei pro Sprache, Länder-Abweichungen als `<sprache>-<LAND>.json` (D-053). Oberflächentexte: `src/locales/<sprache>.json` im ICU-Format.
 - Wörterbuch-Feedback auswerten (Inhaber sagt z. B. „Wörterbuch-Feedback auswerten“): Regeln in `docs/woerterbuch-feedback.md` (D-059).
 - Datenbank-Änderungen immer in `supabase/schema.sql` nachziehen. Das Skript muss mehrfach ausführbar bleiben (`if not exists`, `drop policy if exists`).
-- Datenschutz: Kommt ein neuer externer Dienst dazu oder ändert sich, welche Daten wohin gehen oder wie lange sie gespeichert werden, `src/Privacy.tsx` (DE und EN) im selben Commit anpassen.
+- Datenschutz: Kommt ein neuer externer Dienst dazu oder ändert sich, welche Daten wohin gehen oder wie lange sie gespeichert werden, `src/privacyText.ts` (DE und EN) im selben Commit anpassen. Daraus entstehen die Seite in der App und die festen Seiten `/datenschutz/` und `/privacy/` (D-091).

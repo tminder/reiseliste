@@ -174,3 +174,29 @@ footer {
 footer a {
   color: inherit;
 }
+/* Textseiten: Datenschutz, Über das Projekt (D-091) */
+main.text {
+  max-width: 720px;
+  padding-top: 28px;
+}
+main.text h1 {
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+}
+main.text h2 {
+  font-size: 1.2rem;
+  margin: 30px 0 8px;
+}
+main.text p,
+main.text li {
+  margin: 0 0 10px;
+}
+main.text ul {
+  padding-left: 1.2em;
+  margin: 0 0 10px;
+}
+main.text a:not(.cta) {
+  color: var(--accent);
+}
+main.text .end {
+  padding: 28px 0 40px;
+}
