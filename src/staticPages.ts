@@ -63,7 +63,6 @@ export function footer(lang: Lang): string {
   return `    <footer>
       <a href="${PATHS.about[lang]}">${t('Über das Projekt', 'About')}</a>
       <a href="${PATHS.privacy[lang]}">${t('Datenschutz', 'Privacy')}</a>
-      <a href="mailto:${CONTACT}">${t('Kontakt', 'Contact')}</a>
     </footer>`
 }
 
@@ -98,7 +97,7 @@ const ABOUT: Record<Lang, { title: string; description: string; sections: Sectio
     sections: [
       {
         h: 'Wer steht dahinter?',
-        p: [`Cart on the Road ist ein privates Projekt von Tobias Minder aus der Schweiz. Kontakt: ${CONTACT}.`],
+        p: ['Cart on the Road ist ein privates Projekt von Tobias Minder aus der Schweiz.'],
       },
       {
         h: 'Wie die Idee entstand',
@@ -114,13 +113,13 @@ const ABOUT: Record<Lang, { title: string; description: string; sections: Sectio
             'Gratis, ohne Werbung und ohne Tracking.',
             'Ohne Konto: Es braucht weder E-Mail-Adresse noch Passwort.',
             'Die Begriffe kommen aus einem von Hand gepflegten Wörterbuch, nicht von einer KI.',
-            'Noch in der Testphase: Es gibt Lücken und Fehler, und Rückmeldungen helfen sehr.',
+            'Noch in der Testphase: Es gibt Lücken und Fehler.',
           ],
         ],
       },
       {
         h: 'Rückmeldungen',
-        p: [`Fehlt ein Begriff, stimmt eine Übersetzung nicht oder klemmt etwas? Schreib an ${CONTACT}. In der App gibt es dafür auch „Begriff stimmt nicht?“ im Menü „…“ jedes Artikels.`],
+        p: ['Stimmt eine Übersetzung nicht? In der App gibt es dafür „Begriff stimmt nicht?“ im Menü „…“ jedes Artikels. Einen persönlichen Support gibt es nicht.'],
       },
     ],
   },
@@ -130,7 +129,7 @@ const ABOUT: Record<Lang, { title: string; description: string; sections: Sectio
     sections: [
       {
         h: 'Who is behind it?',
-        p: [`Cart on the Road is a private project by Tobias Minder from Switzerland. Contact: ${CONTACT}.`],
+        p: ['Cart on the Road is a private project by Tobias Minder from Switzerland.'],
       },
       {
         h: 'How the idea came about',
@@ -146,13 +145,13 @@ const ABOUT: Record<Lang, { title: string; description: string; sections: Sectio
             'Free, no ads and no tracking.',
             'No account: no email address or password needed.',
             'The words come from a hand-maintained dictionary, not from AI.',
-            'Still in testing: there are gaps and mistakes, and feedback helps a lot.',
+            'Still in testing: there are gaps and mistakes.',
           ],
         ],
       },
       {
         h: 'Feedback',
-        p: [`A word is missing, a translation is wrong or something doesn’t work? Write to ${CONTACT}. In the app you can also use “Wrong term?” in the “…” menu of each item.`],
+        p: ['Is a translation wrong? In the app, use “Wrong term?” in the “…” menu of each item. There is no personal support.'],
       },
     ],
   },

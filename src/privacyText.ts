@@ -6,19 +6,20 @@
 import { FEATURES } from './features.ts'
 
 export const UPDATED = '2026-11-21'
+/** Nur für Anfragen zum Datenschutz (gesetzlich nötig), nicht für Support oder Rückmeldungen (D-091) */
 export const CONTACT = 'mail@tobiasminder.ch'
 
 export type Section = { h: string; p: (string | string[])[] }
 
 export const PRIVACY_DE: { title: string; back: string; updated: string; sections: Section[] } = {
-  title: 'Datenschutz & Kontakt',
+  title: 'Datenschutz',
   back: 'Zurück',
   updated: `Stand: ${UPDATED}`,
   sections: [
     {
       h: 'Wer ist verantwortlich?',
       p: [
-        `Tobias Minder, Schweiz, E-Mail: ${CONTACT}. Cart on the Road ist ein privates, nicht kommerzielles Projekt in der Testphase. Es gibt keine Werbung, kein Tracking und keine Analyse-Tools, nur eine eigene Fehlerüberwachung (siehe unten).`,
+        `Tobias Minder, Schweiz, E-Mail: ${CONTACT} (nur für Anfragen zum Datenschutz, kein Support). Cart on the Road ist ein privates, nicht kommerzielles Projekt in der Testphase. Es gibt keine Werbung, kein Tracking und keine Analyse-Tools, nur eine eigene Fehlerüberwachung (siehe unten).`,
       ],
     },
     {
@@ -81,14 +82,14 @@ export const PRIVACY_DE: { title: string; back: string; updated: string; section
 }
 
 export const PRIVACY_EN: typeof PRIVACY_DE = {
-  title: 'Privacy & contact',
+  title: 'Privacy',
   back: 'Back',
   updated: `Last updated: ${UPDATED}`,
   sections: [
     {
       h: 'Who is responsible?',
       p: [
-        `Tobias Minder, Switzerland, email: ${CONTACT}. Cart on the Road is a private, non-commercial project in a test phase. There are no ads, no tracking and no analytics tools, only our own error monitoring (see below).`,
+        `Tobias Minder, Switzerland, email: ${CONTACT} (for privacy requests only, no support). Cart on the Road is a private, non-commercial project in a test phase. There are no ads, no tracking and no analytics tools, only our own error monitoring (see below).`,
       ],
     },
     {
