@@ -51,7 +51,7 @@ test('Profil anlegen, Liste erstellen, Artikel übersetzt', async ({ page, probl
   await page.getByRole('button', { name: /Los geht/ }).click()
   if (!(await page.locator('form select').first().isVisible())) await page.getByRole('button', { name: /Neue Liste/ }).click()
   await expect(page.getByRole('button', { name: /Liste erstellen/ })).toBeDisabled() // Name ist Pflicht (D-058)
-  await page.getByLabel('Name').fill('Barcelona')
+  await page.getByLabel('Name', { exact: true }).fill('Barcelona')
   await page.locator('form select').first().selectOption('ES')
   await page.getByRole('button', { name: /Liste erstellen/ }).click()
   await expect(page.locator('.add input')).toBeVisible()
@@ -306,7 +306,7 @@ test.describe('Reiseland nach Sprache (D-041)', () => {
     await open(page, 'de')
     await page.locator('a.back').click()
     if (!(await page.locator('form select').first().isVisible())) await page.getByRole('button', { name: /Neue Liste/ }).click()
-    await expect(page.locator('form select').first().locator('option:checked')).toHaveText(/Automatisch \(🇪🇸 Spanien\)/, { timeout: 10_000 })
+    await expect(page.locator('form select').first().locator('option:checked')).toHaveText(/Automatisch \(🇪🇸 Spanien – Spanisch\)/, { timeout: 10_000 })
   })
 
   test('Spanischsprachig in Spanien: Liste bleibt beim bisherigen Land', async ({ page, problems }) => {
@@ -346,7 +346,7 @@ test('Liste für Vietnam: Artikel auf Vietnamesisch (D-062)', async ({ page, pro
   void problems
   await seed(page, [], 'VN')
   await page.goto(`/#/l/${LIST}`)
-  await expect(page.locator('.list-sub, header')).toContainText('Tiếng Việt')
+  await expect(page.locator('.list-sub, header')).toContainText('Vietnam – Vietnamesisch')
   await expect(page).toHaveTitle('Testing · Cart on the Road') // Seitentitel = Listenname (D-076)
   await add(page, 'Milch')
   await add(page, 'Butter')
@@ -372,7 +372,7 @@ test('Liste für Taiwan: Artikel auf traditionellem Chinesisch (D-064)', async (
   void problems
   await seed(page, [], 'TW')
   await page.goto(`/#/l/${LIST}`)
-  await expect(page.locator('header')).toContainText('繁體中文')
+  await expect(page.locator('header')).toContainText('Taiwan – Chinesisch (traditionell)')
   await add(page, '2 Milch')
   await add(page, 'Eier')
   await expect(page.locator('.item').filter({ hasText: 'Milch' })).toContainText('鮮奶')
@@ -386,7 +386,7 @@ test('Neue Liste auf „Automatisch“ ohne Standort: Blatt mit „Land selbst w
   await page.locator('a.back').click()
   if (!(await page.locator('form select').first().isVisible())) await page.getByRole('button', { name: /Neue Liste/ }).click()
   expect(await page.locator('form select').first().inputValue()).toBe('auto') // immer die Vorauswahl
-  await page.getByLabel('Name').fill('Rundreise')
+  await page.getByLabel('Name', { exact: true }).fill('Rundreise')
   await page.getByRole('button', { name: /Liste erstellen/ }).click()
   const sheet = page.locator('.sheet')
   await expect(sheet).toContainText('wechselt das Reiseland mit deinem Standort')
@@ -407,7 +407,7 @@ test.describe('Standort schon erlaubt', () => {
     await page.locator('a.back').click()
     if (!(await page.locator('form select').first().isVisible())) await page.getByRole('button', { name: /Neue Liste/ }).click()
     expect(await page.locator('form select').first().inputValue()).toBe('auto')
-    await page.getByLabel('Name').fill('Barcelona')
+    await page.getByLabel('Name', { exact: true }).fill('Barcelona')
     await page.getByRole('button', { name: /Liste erstellen/ }).click()
     await expect(page.locator('.add input')).toBeVisible()
     await expect(page.locator('.sheet')).toHaveCount(0)
@@ -426,7 +426,7 @@ test('Onboarding: Hinweis im Ablauf (D-068)', async ({ page, problems }) => {
   await expect(page.getByRole('button', { name: /Neue Liste/ })).toHaveClass(/primary/)
   await page.getByRole('button', { name: /Neue Liste/ }).click()
   await expect(page.locator('form select').first().locator('option[value="auto"]')).toHaveText('Automatisch (nach Standort)')
-  await page.getByLabel('Name').fill('Barcelona')
+  await page.getByLabel('Name', { exact: true }).fill('Barcelona')
   await page.locator('form select').first().selectOption('ES')
   await page.getByRole('button', { name: /Liste erstellen/ }).click()
   await add(page, 'Milch')
@@ -444,8 +444,8 @@ test('Im eigenen Sprachraum keine Übersetzung, Untertitel ohne doppelte Sprache
   await expect(page.locator('.item').first()).toContainText('Milch')
   await expect(page.locator('.item .local')).toHaveCount(0)
   await expect(page.locator('.item .missing')).toHaveCount(0)
-  await expect(page.locator('.topbar .sub')).toHaveText(/^🇨🇭 Deutschschweiz\s*$/)
-  await expect(page.locator('.topbar .sub')).not.toContainText('· Deutsch')
+  await expect(page.locator('.topbar .sub')).toHaveText(/^🇨🇭 Schweiz – Deutsch\s*$/)
+  await expect(page.locator('.topbar .sub')).not.toContainText('Deutschschweiz')
 })
 
 test('Einladung ohne Erklärungstext (D-068)', async ({ page, problems }) => {
@@ -519,6 +519,6 @@ test.describe('Neue Liste zu Hause in der Schweiz (D-087)', () => {
     })
     await page.goto('/')
     await page.getByRole('button', { name: /Neue Liste/ }).click()
-    await expect(page.locator('form select').first().locator('option:checked')).toHaveText(/Automatisch.*Deutschschweiz/)
+    await expect(page.locator('form select').first().locator('option:checked')).toHaveText(/Automatisch \(🇨🇭 Schweiz – Deutsch\)/)
   })
 })

@@ -114,3 +114,22 @@ export function countryName(code: string, short = false): string {
   // Kurzform für knappe Stellen, z. B. „Deutschschweiz“ statt „Schweiz (Deutschschweiz)“ (D-081)
   return short ? t(suffix[code]) : `${name} (${t(suffix[code])})`
 }
+
+/** Name einer Sprache in der Sprache der Oberfläche, z. B. „Spanisch“ (D-088) */
+export function languageName(l: Lang): string {
+  try {
+    return new Intl.DisplayNames([current], { type: 'language' }).of(l) ?? l
+  } catch {
+    return l
+  }
+}
+
+/**
+ * Reiseland mit Sprache (D-088): „Spanien – Spanisch“, „Schweiz – Französisch“.
+ * Bei Regionen sagt die Sprache, welche gemeint ist; der Regionsname fällt weg.
+ */
+export function countryLabel(code: string, lang: Lang): string {
+  // Taiwan: traditionelle Schriftzeichen (D-064)
+  const language = code === 'TW' && lang === 'zh' ? languageName('zh-Hant' as Lang) : languageName(lang)
+  return `${countryName(code.split('-')[0])} – ${language}`
+}

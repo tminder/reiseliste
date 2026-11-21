@@ -47,7 +47,7 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-008 · Landessprache über das Reiseland der Liste, Vorschlag per Standort
 
-- **Entscheidung:** Jede Liste hat ein Reiseland, daraus folgt die Landessprache. Beim Anlegen schlägt die App das Land des aktuellen Standorts vor, sofern es unterstützt wird und seine Sprache nicht die eigene ist (D-041). Dafür werden die Koordinaten über Nominatim (OpenStreetMap) einem Land zugeordnet. Das Ergebnis gilt 6 Stunden. In einem Land mit der eigenen Sprache, z. B. für Deutschsprachige in Deutschland oder der Deutschschweiz, bleibt die Auswahl von Hand. Bestehende Listen ändern ihr Land nicht automatisch. Name und Land lassen sich über das Menü ändern (D-017). Länder mit mehreren Sprachen sind als einzelne Einträge auswählbar, z. B. Belgien (Flandern/Wallonie) oder die Schweiz (Romandie/Tessin). Der Vorschlag ordnet sie über die Region zu.
+- **Entscheidung:** Jede Liste hat ein Reiseland, daraus folgt die Landessprache. Beim Anlegen schlägt die App das Land des aktuellen Standorts vor, sofern es unterstützt wird, auch im eigenen Sprachraum (D-087). Dafür werden die Koordinaten über Nominatim (OpenStreetMap) einem Land zugeordnet; ein gespeichertes Ergebnis gilt nur am gleichen Ort (D-087). Bestehende Listen ändern ihr Land nicht automatisch. Name und Land lassen sich über das Menü ändern (D-017). Länder mit mehreren Sprachen sind als einzelne Einträge auswählbar, z. B. „Belgien – Niederländisch“ und „Belgien – Französisch“ oder „Schweiz – Französisch“ und „Schweiz – Italienisch“ (D-088). Der Vorschlag ordnet sie über die Region zu.
 - **Begründung:** Man kann die Liste vor der Reise anlegen, das Land bleibt also wählbar. Ist man schon vor Ort, spart der Vorschlag einen Schritt (Wunsch des Inhabers).
 - **Folgen:** Auf der Startseite fragt der Browser nach dem Standort. Die Koordinaten gehen an Nominatim, das steht in der Datenschutzerklärung (D-023).
 
@@ -503,9 +503,9 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-081 · Im eigenen Sprachraum keine Übersetzung
 
-- **Entscheidung:** Lautet der Landesbegriff gleich wie der eigene Begriff (z. B. Schweizer Liste, Deutsch (Schweiz) als Sprache), zeigt der Artikel keine Zeile mit Flagge und Landesbegriff, nur den Namen der Person. „Keine Übersetzung“ erscheint nur, wenn die Sprache des Reiselands eine andere ist. Weicht der Begriff ab (z. B. „Sahne“ statt „Rahm“ in Deutschland), bleibt die Zeile. Der Untertitel der Liste zeigt bei Ländern mit Region die Kurzform ohne Sprache („🇨🇭 Deutschschweiz“ statt „🇨🇭 Schweiz (Deutschschweiz) · Deutsch“), bei anderen weiter Land und Sprache („🇪🇸 Spanien · Español“).
+- **Entscheidung:** Lautet der Landesbegriff gleich wie der eigene Begriff (z. B. Schweizer Liste, Deutsch (Schweiz) als Sprache), zeigt der Artikel keine Zeile mit Flagge und Landesbegriff, nur den Namen der Person. „Keine Übersetzung“ erscheint nur, wenn die Sprache des Reiselands eine andere ist. Weicht der Begriff ab (z. B. „Sahne“ statt „Rahm“ in Deutschland), bleibt die Zeile. Der Untertitel der Liste zeigt Land und Sprache ohne Doppelung („🇨🇭 Schweiz – Deutsch“, D-088).
 - **Begründung:** Wunsch des Inhabers. Im eigenen Land wiederholte die Zeile nur den Namen, und der Untertitel nannte die Sprache doppelt. Gleiches gilt für die Suchvorschläge beim Eintippen: „Milch → leche“, aber nicht „Milch → Milch“.
-- **Folgen:** Die Region in Klammern steht nur noch in der Länderauswahl und im Platzhalter für den Listennamen.
+- **Folgen:** Wer im eigenen Land eine Liste führt, sieht nur die eigenen Begriffe; die Zeigen-Karte im Menü „…“ bleibt verfügbar.
 
 ## D-082 · Namen bei Artikeln nur mit mehreren Personen
 
@@ -539,12 +539,12 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-087 · Reiseland: Ergebnis nur am gleichen Ort wiederverwenden, Vorschlag auch zu Hause
 
-- **Entscheidung:** Das erkannte Land wird zusammen mit der Stelle gespeichert. Die App verwendet es wieder, solange man weniger als 10 km davon entfernt ist und es höchstens 24 Stunden alt ist; sonst fragt sie Nominatim neu. Ohne Standort gilt wie bisher das letzte Ergebnis (bis 6 Stunden). Beim Anlegen einer Liste zeigt „Automatisch“ das erkannte Land auch im eigenen Sprachraum, z. B. „Automatisch (🇨🇭 Schweiz (Deutschschweiz))“ zu Hause.
+- **Entscheidung:** Das erkannte Land wird zusammen mit der Stelle gespeichert. Die App verwendet es wieder, solange man weniger als 10 km davon entfernt ist und es höchstens 24 Stunden alt ist; sonst fragt sie Nominatim neu. Ohne Standort gilt wie bisher das letzte Ergebnis (bis 6 Stunden). Beim Anlegen einer Liste zeigt „Automatisch“ das erkannte Land auch im eigenen Sprachraum, z. B. „Automatisch (🇨🇭 Schweiz – Deutsch)“ zu Hause.
 - **Begründung:** Rückmeldung des Inhabers: Nach der Rückreise aus Spanien wurde immer Spanien gewählt. Das Land war bis 6 Stunden gespeichert, ohne Rücksicht auf den Ort, und im eigenen Sprachraum gab es keinen Vorschlag, sodass Spanien als Standard stehen blieb.
 - **Folgen:** Eine zu Hause angelegte Liste mit „Automatisch“ zeigt zuerst keine Übersetzung (D-081) und wechselt am Reiseziel ins fremde Land (D-040). Bestehende Listen wechseln zu Hause weiterhin nicht zurück. Nach einem Ortswechsel von mehr als 10 km eine Anfrage mehr an Nominatim.
 
-## D-088 · Länderauswahl ohne Sprache
+## D-088 · Reiseland als „Land – Sprache“
 
-- **Entscheidung:** Die Reiseland-Auswahl zeigt Flagge und Land, ohne Sprache: „🇪🇸 Spanien“. Regionen stehen als „🇨🇭 Schweiz – Deutschschweiz“, damit sie beim Land bleiben. Nur wo die Sprache nicht selbstverständlich ist, steht sie in der Sprache der Oberfläche dabei: „🇱🇺 Luxemburg (Französisch)“, „🇲🇹 Malta (Englisch)“, „🇨🇦 Kanada (Englisch)“. „Automatisch“ und der Platzhalter für den Listennamen nutzen die Kurzform: „Automatisch (🇨🇭 Deutschschweiz)“, „z. B. Einkaufsliste Deutschschweiz“.
-- **Begründung:** Rückmeldung des Inhabers mit Bildschirmfoto: „Schweiz (Deutschschweiz) – Deutsch“ war doppelt und unruhig. Das Systemauswahlfeld kann die Sprache nicht dezent grau zeigen.
-- **Folgen:** Ein eigenes Auswahlblatt mit Suche und Sprache in Grau wäre schöner, lohnt sich aber erst mit deutlich mehr Ländern.
+- **Entscheidung:** Das Reiseland erscheint überall als Flagge, Land und Sprache, die Sprache in der Sprache der Oberfläche: „🇪🇸 Spanien – Spanisch“, „🇬🇷 Griechenland – Griechisch“, „🇹🇼 Taiwan – Chinesisch (traditionell)“. Bei Regionen sagt die Sprache, welche gemeint ist, der Regionsname fällt weg: „🇨🇭 Schweiz – Deutsch“, „🇨🇭 Schweiz – Französisch“, „🇧🇪 Belgien – Niederländisch“. So in der Länderauswahl (alphabetisch nach diesem Text), bei „Automatisch (🇨🇭 Schweiz – Deutsch)“, im Untertitel der Liste und in der Meldung zum Länderwechsel. Der Platzhalter für den Listennamen nennt nur das Land („z. B. Einkaufsliste Schweiz“).
+- **Begründung:** Rückmeldung des Inhabers mit Bildschirmfoto: „Schweiz (Deutschschweiz) – Deutsch“ war doppelt, und Sprachnamen in der Landessprache („Ελληνικά“, „繁體中文“) sind nicht für alle lesbar. Die Sprache ist das, worum es in der App geht; „Schweiz – Französisch“ ist klarer als „Romandie“.
+- **Folgen:** Bei den meisten Ländern wirkt die Sprache selbstverständlich und die Zeilen werden etwas länger. Ein eigenes Auswahlblatt mit Suche wäre schöner, lohnt sich aber erst mit deutlich mehr Ländern. Die Regionsnamen („Deutschschweiz“) bleiben nur noch intern für die Länderwahl im Code.

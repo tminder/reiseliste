@@ -2,8 +2,8 @@
 // darunter alle Länder alphabetisch in der Sprache der Oberfläche.
 import { useMemo } from 'react'
 import type { Lang } from '../data/dictionary'
-import { COUNTRIES, COUNTRY_BY_CODE, LANG_LABEL } from '../data/countries'
-import { countryName, t, uiLang } from '../i18n'
+import { COUNTRIES, COUNTRY_BY_CODE } from '../data/countries'
+import { countryLabel, t, uiLang } from '../i18n'
 import { cachedCountry } from '../lib/country'
 import { knownLists, localLastChange } from '../lib/store'
 
@@ -26,28 +26,15 @@ function suggestedCountries(lang: Lang): string[] {
   return out
 }
 
-/** Länder, in denen die Sprache der Liste nicht selbstverständlich ist: Sprache in Klammern (D-088) */
-const SHOW_LANG = new Set(['LU', 'MT', 'CA'])
-
-function languageName(l: Lang): string {
-  try {
-    return new Intl.DisplayNames([uiLang()], { type: 'language' }).of(l) ?? LANG_LABEL[l]
-  } catch {
-    return LANG_LABEL[l]
-  }
-}
-
-/** „🇪🇸 Spanien“, „🇨🇭 Schweiz – Deutschschweiz“, „🇱🇺 Luxemburg (Französisch)“ (D-088) */
+/** „🇪🇸 Spanien – Spanisch“, „🇨🇭 Schweiz – Französisch“ (D-088) */
 const label = (code: string) => {
   const c = COUNTRY_BY_CODE.get(code)!
-  const [iso, region] = code.split('-')
-  if (region) return `${c.flag} ${countryName(iso)} – ${countryName(code, true)}`
-  return SHOW_LANG.has(code) ? `${c.flag} ${countryName(code)} (${languageName(c.lang)})` : `${c.flag} ${countryName(code)}`
+  return `${c.flag} ${countryLabel(code, c.lang)}`
 }
 
 export function CountryOptions({ lang }: { lang: Lang }) {
   const ui = uiLang()
-  const sorted = useMemo(() => COUNTRIES.map((c) => c.code).sort((a, b) => countryName(a).localeCompare(countryName(b), ui)), [ui])
+  const sorted = useMemo(() => COUNTRIES.map((c) => c.code).sort((a, b) => label(a).slice(label(a).indexOf(' ') + 1).localeCompare(label(b).slice(label(b).indexOf(' ') + 1), ui)), [ui])
   const top = useMemo(() => suggestedCountries(lang), [lang])
   const all = sorted.map((code) => (
     <option key={code} value={code}>

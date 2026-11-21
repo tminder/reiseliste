@@ -2,8 +2,8 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { ArrowLeft, Shield, Users, CloudAlert, CloudOff, Check, RotateCcw, MapPin, Menu, Plus, Settings, Share2, Trash2, UserRound, X } from 'lucide-react'
 import { CATEGORY_ORDER, CONCEPT_BY_ID, type Category, type Lang } from '../../data/dictionary'
-import { COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
-import { categoryLabel, countryName, t } from '../../i18n'
+import { COUNTRY_BY_CODE } from '../../data/countries'
+import { categoryLabel, countryLabel, t } from '../../i18n'
 import { flash, reducedMotion, slideOut, useFlip } from '../../lib/motion'
 import { addQty, canAddQty } from '../../lib/qty'
 import { reportError } from '../../lib/errors'
@@ -356,9 +356,8 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
         <div className="title">
           <h1>{list.name}</h1>
           <span className="sub">
-            {/* „🇨🇭 Deutschschweiz“ sagt die Sprache schon: dann Kurzform und ohne Sprache (D-081) */}
-            {country?.flag} {countryName(list.country, true)}
-            {!list.country.includes('-') && ` · ${LANG_LABEL[target]}`}
+            {/* „🇨🇭 Schweiz – Deutsch“ (D-088) */}
+            {country?.flag} {countryLabel(list.country, target)}
           </span>
           <ShopBar shop={shop} chosenAt={shopChosenAt} shopping={shopping} firstChecked={firstChecked} country={list.country} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
         </div>
@@ -445,7 +444,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
 
       {countryMoved && list.country === countryMoved.to && (
         <div className="toast">
-          <MapPin size={16} /> {t('countryChanged', { country: `${COUNTRY_BY_CODE.get(countryMoved.to)?.flag ?? ''} ${countryName(countryMoved.to)}` })}
+          <MapPin size={16} /> {t('countryChanged', { country: `${COUNTRY_BY_CODE.get(countryMoved.to)?.flag ?? ''} ${countryLabel(countryMoved.to, COUNTRY_BY_CODE.get(countryMoved.to)?.lang ?? 'en')}` })}
           <button
             className="link"
             onClick={() => {

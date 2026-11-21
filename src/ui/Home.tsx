@@ -6,7 +6,7 @@ import { AppLogo } from './AppLogo'
 import { CountryOptions } from './CountryOptions'
 import { LocationSheet } from './LocationSheet'
 import { useLocation } from './useLocation'
-import { countryName, t } from '../i18n'
+import { countryLabel, countryName, t } from '../i18n'
 import { listIdFrom } from '../lib/links'
 import { detectCountry } from '../lib/country'
 import { MAX } from '../lib/limits'
@@ -154,7 +154,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
           {/* Name zuerst und Pflicht (D-058) */}
           <label>
             {t('name')}
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder', { country: countryName(country, true) })} maxLength={MAX.listName} required />
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('listNamePlaceholder', { country: countryName(country.split('-')[0]) })} maxLength={MAX.listName} required />
           </label>
           <label>
             {t('travelCountry')}
@@ -169,7 +169,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
             >
               {/* Ohne Standort kein Land in Klammern: es wäre nur geraten (D-067) */}
               <option value="auto">
-                {loc.available ? t('autoCountry', { country: `${COUNTRY_BY_CODE.get(country)?.flag ?? ''} ${countryName(country, true)}` }) : t('autoCountryPlain')}
+                {loc.available ? t('autoCountry', { country: `${COUNTRY_BY_CODE.get(country)?.flag ?? ''} ${countryLabel(country, COUNTRY_BY_CODE.get(country)?.lang ?? 'en')}` }) : t('autoCountryPlain')}
               </option>
               <CountryOptions lang={profile.lang} />
             </select>

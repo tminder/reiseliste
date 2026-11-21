@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { UserMinus } from 'lucide-react'
 import { type Lang } from '../../data/dictionary'
 import { COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
-import { countryName, t } from '../../i18n'
+import { countryLabel, t } from '../../i18n'
 import { CountryOptions } from '../CountryOptions'
 import { LocationSheet } from '../LocationSheet'
 import { useLocation } from '../useLocation'
@@ -137,7 +137,7 @@ export function EditSheet({
               setC(e.target.value)
             }}
           >
-            <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(c)?.flag ?? ''} ${countryName(c, true)}` })}</option>
+            <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(c)?.flag ?? ''} ${countryLabel(c, COUNTRY_BY_CODE.get(c)?.lang ?? 'en')}` })}</option>
             <CountryOptions lang={lang} />
           </select>
         </label>
