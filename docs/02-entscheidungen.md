@@ -230,15 +230,15 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-040 · Reiseland passt sich beim Grenzübertritt automatisch an
 
-- **Entscheidung:** Gilt nur für Listen mit Reiseland „Automatisch“ (D-057). Beim Öffnen einer Liste prüft die App still das aktuelle Land (Nominatim; ein gespeichertes Ergebnis gilt nur am gleichen Ort, D-087). Ist man in einem anderen unterstützten Reiseland als dem der Liste, wechselt sie das Reiseland der Liste automatisch (für alle Mitglieder) und zeigt „Reiseland auf 🇫🇷 Frankreich geändert · Rückgängig“. „Rückgängig“ stellt das alte Land wieder her, und für diese Liste wird nicht mehr automatisch auf dieses Land gewechselt (nur auf diesem Gerät). In Ländern mit der eigenen Sprache (D-041) und in nicht unterstützten Ländern passiert nichts.
-- **Begründung:** Wunsch des Inhabers. Auf Rundreisen (z. B. Spanien → Frankreich) soll die Liste ohne Handgriff die neue Landessprache zeigen.
+- **Entscheidung:** Gilt nur für Listen mit Reiseland „Automatisch“ (D-057). Beim Öffnen einer Liste prüft die App still das aktuelle Land (Nominatim; ein gespeichertes Ergebnis gilt nur am gleichen Ort, D-087). Ist man in einem anderen unterstützten Reiseland als dem der Liste, wechselt sie das Reiseland der Liste automatisch (für alle Mitglieder) und zeigt „Reiseland auf 🇫🇷 Frankreich geändert · Rückgängig“. „Rückgängig“ stellt das alte Land wieder her, und für diese Liste wird nicht mehr automatisch auf dieses Land gewechselt (nur auf diesem Gerät). Das gilt auch für Länder mit der eigenen Sprache, z. B. nach der Rückreise in die Schweiz: Dort zeigt die Liste keine Übersetzung (D-081). In nicht unterstützten Ländern passiert nichts.
+- **Begründung:** Wunsch des Inhabers. Auf Rundreisen (z. B. Spanien → Frankreich) soll die Liste ohne Handgriff die neue Landessprache zeigen, und zu Hause soll eine „automatische“ Liste auch wieder zu Hause sein.
 - **Folgen:** Ein Mitglied mit anderer Sprache kann das Reiseland umstellen, während man selbst zu Hause ist, z. B. ein Gast aus Deutschland in Spanien. Dafür gibt es „Rückgängig“. Fällt der Standort weg (keine Erlaubnis), bleibt alles wie es ist.
 
 ## D-041 · International: Sprache statt Wohnland
 
-- **Entscheidung:** Das Profil hat nur Name und Sprache, kein Wohnland mehr. Ob eine Übersetzung nötig ist, entscheidet die Sprache: In einem Land, dessen Landessprache die eigene Sprache ist, wechselt die App das Reiseland einer bestehenden Liste nicht automatisch (D-040). Beim Anlegen einer Liste gilt das erkannte Land, auch im eigenen Sprachraum (D-087); ohne erkanntes Land Spanien, Italien bzw. Frankreich (das erste mit fremder Sprache). Ein früher gespeichertes Wohnland wird ignoriert und beim nächsten Speichern des Profils entfernt.
+- **Entscheidung:** Das Profil hat nur Name und Sprache, kein Wohnland mehr. Ob eine Übersetzung nötig ist, entscheidet die Sprache: Auch in einem Land, dessen Landessprache die eigene Sprache ist, folgt eine Liste mit „Automatisch“ dem Standort (D-040), und beim Anlegen gilt das erkannte Land (D-087); ohne erkanntes Land Spanien, Italien bzw. Frankreich (das erste mit fremder Sprache). Ein früher gespeichertes Wohnland wird ignoriert und beim nächsten Speichern des Profils entfernt.
 - **Begründung:** Entscheidung des Inhabers: Für Expats funktionierte das Wohnland nicht. Eine Deutsche in Barcelona hatte „Spanien“ als Wohnland und bekam zu Hause nie Spanisch, obwohl sie genau dort die Übersetzung braucht. Die Übersetzung hängt ohnehin nur an den Sprachen. Ein Schritt weniger beim Einrichten und eine Angabe weniger.
-- **Folgen:** Eine Deutschschweizerin in Deutschland (oder in Österreich) bekommt das Reiseland nicht automatisch umgestellt, z. B. auf „Sahne“ statt „Rahm“. Sie kann es von Hand ändern. Die Oberfläche bleibt Deutsch oder Englisch (D-022).
+- **Folgen:** Eine Deutschschweizerin in Deutschland bekommt mit „Automatisch“ das Reiseland Deutschland und sieht dort abweichende Begriffe, z. B. „Sahne“ statt „Rahm“ (D-081). Die Oberfläche bleibt Deutsch oder Englisch (D-022).
 
 ## D-042 · „Rückgängig“ nach dem Löschen statt Swipen
 
@@ -541,7 +541,7 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Das erkannte Land wird zusammen mit der Stelle gespeichert. Die App verwendet es wieder, solange man weniger als 10 km davon entfernt ist und es höchstens 24 Stunden alt ist; sonst fragt sie Nominatim neu. Ohne Standort gilt wie bisher das letzte Ergebnis (bis 6 Stunden). Beim Anlegen einer Liste zeigt „Automatisch“ das erkannte Land auch im eigenen Sprachraum, z. B. „Automatisch (🇨🇭 Schweiz – Deutsch)“ zu Hause.
 - **Begründung:** Rückmeldung des Inhabers: Nach der Rückreise aus Spanien wurde immer Spanien gewählt. Das Land war bis 6 Stunden gespeichert, ohne Rücksicht auf den Ort, und im eigenen Sprachraum gab es keinen Vorschlag, sodass Spanien als Standard stehen blieb.
-- **Folgen:** Eine zu Hause angelegte Liste mit „Automatisch“ zeigt zuerst keine Übersetzung (D-081) und wechselt am Reiseziel ins fremde Land (D-040). Bestehende Listen wechseln zu Hause weiterhin nicht zurück. Nach einem Ortswechsel von mehr als 10 km eine Anfrage mehr an Nominatim.
+- **Folgen:** Eine zu Hause angelegte Liste mit „Automatisch“ zeigt zuerst keine Übersetzung (D-081) und wechselt am Reiseziel ins fremde Land (D-040). Nach einem Ortswechsel von mehr als 10 km eine Anfrage mehr an Nominatim.
 
 ## D-088 · Reiseland als „Land – Sprache“
 

@@ -241,7 +241,6 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
     // Beim ersten Abhaken nach dem Öffnen erneut prüfen, dann mit höchstens 5 Minuten altem Ergebnis (D-069)
     void detectCountry((firstChecked ? 5 : 30) * 60 * 1000).then((code) => {
       if (!alive || !code || code === listCountry || !COUNTRY_BY_CODE.has(code)) return
-      if (COUNTRY_BY_CODE.get(code)?.lang === profile.lang) return
       if (countryChangeDeclined(id, code)) return
       void store.updateList({ country: code })
       setCountryMoved({ from: listCountry, to: code })

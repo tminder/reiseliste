@@ -257,7 +257,14 @@ test.describe('Nicht im Reiseland (D-075)', () => {
       return r.fulfill(json({ elements: [{ type: 'node', id: 1, lat: 47.3701, lon: 8.54, tags: { shop: 'supermarket', name: 'Coop' } }] }))
     })
     await seed(page, [item(1, 'Milch', 'milch')])
-    await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+    await page.addInitScript((id) => {
+      localStorage.setItem('rl:locConsent', 'yes')
+      // Fest gewähltes Reiseland Spanien, sonst wechselt die Liste in die Schweiz (D-040)
+      const key = 'rl:list:' + id
+      const data = JSON.parse(localStorage.getItem(key)!)
+      data.list.autoCountry = false
+      localStorage.setItem(key, JSON.stringify(data))
+    }, LIST)
     await page.goto(`/#/l/${LIST}`)
     await expect(page.locator('.add input')).toBeVisible()
     await page.waitForTimeout(1500)
@@ -309,11 +316,10 @@ test.describe('Reiseland nach Sprache (D-041)', () => {
     await expect(page.locator('form select').first().locator('option:checked')).toHaveText(/Automatisch \(🇪🇸 Spanien – Spanisch\)/, { timeout: 10_000 })
   })
 
-  test('Spanischsprachig in Spanien: Liste bleibt beim bisherigen Land', async ({ page, problems }) => {
+  test('Spanischsprachig in Spanien: Liste wechselt auch ins eigene Sprachgebiet (D-040)', async ({ page, problems }) => {
     void problems
     await open(page, 'es')
-    await page.waitForTimeout(3000)
-    await expect(page.locator('.topbar .sub')).toContainText(/Ital/)
+    await expect(page.locator('.topbar .sub')).toContainText(/Spain|Spanien/, { timeout: 10_000 }) // Oberfläche Englisch
   })
 })
 
