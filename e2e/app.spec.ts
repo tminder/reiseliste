@@ -324,7 +324,8 @@ test.describe('Reiseland nach Sprache (D-041)', () => {
   test('Spanischsprachig in Spanien: Liste wechselt auch ins eigene Sprachgebiet (D-040)', async ({ page, problems }) => {
     void problems
     await open(page, 'es')
-    await expect(page.locator('.topbar .sub')).toContainText(/Spain|Spanien/, { timeout: 10_000 }) // Oberfläche Englisch
+    await expect(page.locator('.toast')).toBeVisible({ timeout: 10_000 }) // Meldung zum Länderwechsel
+    await expect(page.locator('.topbar .sub')).toHaveCount(0) // zu Hause: kein Untertitel (D-081)
   })
 })
 
@@ -540,4 +541,70 @@ test('Feste Seiten mit Knopf zur App (D-090, D-091)', async ({ page, problems })
     await expect(page.getByRole('link', { name: cta }).first()).toHaveAttribute('href', '/')
     for (const img of await page.locator('img').all()) expect(await img.evaluate((i: HTMLImageElement) => i.naturalWidth)).toBeGreaterThan(0)
   }
+})
+
+test('Zeigen-Karte: Umschrift für Griechisch und Chinesisch, Vorlesen mit passender Stimme (D-092)', async ({ page, problems }) => {
+  void problems
+  // Stimmen nachbilden: Testbrowser haben keine
+  await page.addInitScript(() => {
+    const spoken: string[] = []
+    ;(window as unknown as { spoken: string[] }).spoken = spoken
+    const voices = [{ lang: 'el-GR', name: 'Melina', default: false, localService: true, voiceURI: 'el' }]
+    Object.defineProperty(window, 'speechSynthesis', {
+      value: { getVoices: () => voices, speak: (u: { text: string }) => spoken.push(u.text), cancel: () => {}, addEventListener: () => {}, removeEventListener: () => {} },
+    })
+    ;(window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
+      text: string
+      constructor(t: string) {
+        this.text = t
+      }
+    }
+  })
+  await seed(page, [item(1, 'Milch', 'milch')], 'GR')
+  await page.goto(`/#/l/${LIST}`)
+  await page.locator('.item', { hasText: 'Milch' }).getByRole('button', { name: 'Mehr' }).click()
+  await page.getByRole('menuitem', { name: /Personal/ }).click()
+  await expect(page.locator('.showcard-term')).toContainText('γάλα')
+  await expect(page.locator('.showcard-latin')).toHaveText('gála')
+  await page.getByRole('button', { name: 'Vorlesen' }).click()
+  expect(await page.evaluate(() => (window as unknown as { spoken: string[] }).spoken)).toEqual(['γάλα'])
+  await expect(page.locator('.showcard')).toBeVisible() // Vorlesen schliesst die Karte nicht
+})
+
+test('Zeigen-Karte Taiwan: Pinyin, ohne passende Stimme kein Vorlesen (D-092)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [item(1, 'Milch', 'milch')], 'TW')
+  await page.goto(`/#/l/${LIST}`)
+  await page.locator('.item', { hasText: 'Milch' }).getByRole('button', { name: 'Mehr' }).click()
+  await page.getByRole('menuitem', { name: /Personal/ }).click()
+  await expect(page.locator('.showcard-latin')).toHaveText('xiān nǎi')
+  await expect(page.getByRole('button', { name: 'Vorlesen' })).toHaveCount(0)
+})
+
+test('Umrechnen: Euro in Franken, Richtung tauschen (D-093)', async ({ page, problems }) => {
+  void problems
+  await page.route(/api\.frankfurter\.dev\/v2\/rate\/EUR\/CHF/, (r) =>
+    r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ date: '2026-11-20', base: 'EUR', quote: 'CHF', rate: 0.94 }) }),
+  )
+  await seed(page, [item(1, 'Milch', 'milch')])
+  await page.addInitScript(() => localStorage.setItem('rl:profile', JSON.stringify({ name: 'Tobias', lang: 'de', region: 'de-CH' })))
+  await page.goto(`/#/l/${LIST}`)
+  await page.getByRole('button', { name: 'Menü' }).click()
+  await page.getByRole('menuitem', { name: 'Umrechnen' }).click()
+  await expect(page.locator('.convert-result')).toContainText('9.40')
+  await expect(page.locator('.convert-result')).toContainText('CHF')
+  await page.getByRole('button', { name: 'Richtung tauschen' }).click()
+  await expect(page.locator('.convert-result')).toContainText('10.64')
+  await expect(page.locator('.sheet')).toContainText('20.11.2026')
+})
+
+test('Zu Hause: kein Reiseland unter dem Listennamen (D-081)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [item(1, 'Milch', 'milch')], 'CH-DE')
+  await page.addInitScript(() => localStorage.setItem('rl:profile', JSON.stringify({ name: 'Tobias', lang: 'de', region: 'de-CH' })))
+  await page.goto(`/#/l/${LIST}`)
+  await expect(page.locator('.item').first()).toContainText('Milch')
+  await expect(page.locator('.topbar .sub')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Menü' }).click()
+  await expect(page.getByRole('menuitem', { name: 'Umrechnen' })).toHaveCount(0) // gleiche Währung
 })

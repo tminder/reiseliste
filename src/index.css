@@ -736,6 +736,23 @@ button.sync-badge.warn {
 .toast .link {
   margin-left: auto;
 }
+/* Meldung mit Aktionen in einer Zeile (Reiseland geändert, D-040) */
+.toast.toast-row {
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+.toast-row .toast-icon {
+  flex: none;
+}
+.toast-row .toast-text {
+  flex: 1;
+  min-width: 0;
+}
+.toast-row .link {
+  margin-left: 0;
+  flex: none;
+  white-space: nowrap;
+}
 
 /* Fusszeile am unteren Rand, auch wenn die Seite fast leer ist (D-070) */
 .page:has(> .footer) {
@@ -845,6 +862,16 @@ button.term-btn {
 }
 .showcard-qty {
   color: var(--text);
+}
+.showcard-latin {
+  margin: -8px 0 0;
+  font-size: 1.4rem;
+  color: var(--muted);
+}
+.showcard-speak {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 .showcard-thanks {
   font-size: 1.3rem;
@@ -1383,4 +1410,33 @@ main.page:has(.group) {
 .copy-row button {
   flex: none;
   white-space: nowrap;
+}
+
+/* Umrechnen (D-093): Betrag mit Währung und Tausch-Knopf in einer Zeile, Ergebnis gross darunter */
+.convert {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+label.convert-from {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.convert-from input {
+  flex: 1;
+  min-width: 0;
+  font-size: 1.2rem;
+}
+.convert-from span {
+  font-weight: 600;
+}
+.convert-result {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 700;
 }

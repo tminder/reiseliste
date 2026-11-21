@@ -1,6 +1,6 @@
 // Ein Artikel der Liste: Name, Landesbegriff, Menge, Abhaken, Fotos, Tipp und Zeigen-Karte (D-032)
 import { useEffect, useRef, useState } from 'react'
-import { Camera, Check, Hand, Lightbulb, MoreHorizontal, Presentation, ThumbsDown, X, Trash2 } from 'lucide-react'
+import { Camera, Check, Hand, Lightbulb, MoreHorizontal, Presentation, ThumbsDown, X, Trash2, Volume2 } from 'lucide-react'
 import { CONCEPT_BY_ID, type Lang } from '../../data/dictionary'
 import { COUNTRY_BY_CODE } from '../../data/countries'
 import { t } from '../../i18n'
@@ -12,6 +12,8 @@ import { hasPhotos } from '../../lib/photos'
 import { ListStore, supabase, type Item } from '../../lib/store'
 import { sendFeedback, type Feedback } from '../../lib/feedback'
 import { formatQty } from '../format'
+import { loadRomanization, romanize } from '../../lib/romanize'
+import { speak, speechTag, useVoice } from '../../lib/speech'
 import { PhotoStrip } from './PhotoStrip'
 import { dupKey } from './helpers'
 
@@ -279,7 +281,7 @@ export function ItemRow({
           <PhotoStrip country={country} conceptId={item.conceptId} term={local} store={shopTag} storeName={shopName} />
         </div>
       )}
-      {showCard && local && <ShowCard term={local} qty={item.qty} own={own} target={target} onClose={() => setShowCard(false)} />}
+      {showCard && local && <ShowCard term={local} qty={item.qty} own={own} target={target} country={country} onClose={() => setShowCard(false)} />}
       {showReport && local && (
         <ReportSheet
           own={own}
@@ -300,12 +302,14 @@ function ShowCard({
   qty,
   own,
   target,
+  country,
   onClose,
 }: {
   term: string
   qty: string | null
   own: string
   target: Lang
+  country: string
   onClose: () => void
 }) {
   useEffect(() => {
@@ -313,6 +317,13 @@ function ShowCard({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
+  // Umschrift für fremde Schriften und Vorlesen (D-092)
+  const [, setLoaded] = useState(0)
+  useEffect(() => {
+    void loadRomanization(target).then(() => setLoaded((n) => n + 1))
+  }, [target])
+  const latin = romanize(term, target)
+  const voice = useVoice(speechTag(country, target))
   return (
     <div className="showcard" role="dialog" aria-modal="true" onClick={onClose}>
       <p className="showcard-ask" lang={target}>{WHERE_IS[target]}</p>
@@ -320,6 +331,18 @@ function ShowCard({
         {qty && <span className="showcard-qty">{formatQty(qty)} </span>}
         {term}
       </p>
+      {latin && <p className="showcard-latin">{latin}</p>}
+      {voice && (
+        <button
+          className="ghost showcard-speak"
+          onClick={(e) => {
+            e.stopPropagation()
+            speak(term, voice)
+          }}
+        >
+          <Volume2 size={20} /> {t('speak')}
+        </button>
+      )}
       <p className="showcard-thanks" lang={target}>{THANKS[target]}</p>
       <p className="showcard-own">{own}</p>
       <button className="ghost showcard-close" onClick={onClose} aria-label={t('close')}>

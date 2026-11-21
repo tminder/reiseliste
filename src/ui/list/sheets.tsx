@@ -1,14 +1,15 @@
 // Untere Blätter der Liste: Mitglieder, Liste bearbeiten, Teilen
 import { useEffect, useState } from 'react'
-import { Copy, UserMinus } from 'lucide-react'
+import { ArrowUpDown, Copy, UserMinus } from 'lucide-react'
 import { type Lang } from '../../data/dictionary'
 import { COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
-import { countryLabel, t } from '../../i18n'
+import { countryLabel, t, uiLang } from '../../i18n'
 import { CountryOptions } from '../CountryOptions'
 import { LocationSheet } from '../LocationSheet'
 import { useLocation } from '../useLocation'
 import { listUrl } from '../../lib/links'
 import { MAX } from '../../lib/limits'
+import { CURRENCIES, countryCurrency, formatMoney, getRate, homeCurrency, setHomeCurrency, type Rate } from '../../lib/currency'
 import { ListStore, supabase, type Profile } from '../../lib/store'
 
 export function MembersSheet({ store, profile, onClose }: { store: ListStore; profile: Profile; onClose: () => void }) {
@@ -228,6 +229,69 @@ export function ShareSheet({ id, name, onClose }: { id: string; name: string; on
             {t('close')}
           </button>
         </div>
+      </div>
+    </div>
+  )
+}
+
+/** Währung umrechnen (D-093): Betrag in der Währung des Reiselands ↔ eigene Währung */
+export function ConverterSheet({ country, profile, onClose }: { country: string; profile: Profile; onClose: () => void }) {
+  const local = countryCurrency(country) ?? 'EUR'
+  const [home, setHome] = useState(() => homeCurrency(profile))
+  const [toHome, setToHome] = useState(true)
+  const [amount, setAmount] = useState('10')
+  const [rate, setRate] = useState<Rate | null | undefined>(undefined)
+  useEffect(() => {
+    let alive = true
+    void getRate(local, home).then((r) => alive && setRate(r))
+    return () => {
+      alive = false
+    }
+  }, [local, home])
+  const locale = profile.region ?? uiLang()
+  const from = toHome ? local : home
+  const to = toHome ? home : local
+  const value = Number(amount.replace(/['’\s]/g, '').replace(',', '.'))
+  const result = rate && Number.isFinite(value) ? (toHome ? value * rate.rate : value / rate.rate) : null
+  return (
+    <div className="sheet-backdrop" onClick={onClose}>
+      <div className="sheet" role="dialog" aria-modal="true" aria-label={t('convert')} onClick={(e) => e.stopPropagation()}>
+        <h2>{t('convert')}</h2>
+        <div className="convert">
+          <label className="convert-from">
+            <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label={t('convertAmount', { currency: from })} />
+            <span>{from}</span>
+          </label>
+          <button className="ghost" aria-label={t('convertSwap')} onClick={() => setToHome(!toHome)}>
+            <ArrowUpDown size={18} />
+          </button>
+          <p className="convert-result" aria-live="polite">
+            {rate === undefined ? '…' : result != null ? `≈ ${formatMoney(result, to, locale)}` : '–'}
+          </p>
+        </div>
+        <label>
+          {t('yourCurrency')}
+          <select
+            value={home}
+            onChange={(e) => {
+              setRate(undefined)
+              setHome(e.target.value)
+              setHomeCurrency(e.target.value)
+            }}
+          >
+            {CURRENCIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </label>
+        <p className="muted small-text">
+          {rate === null ? t('rateMissing') : rate && rate.date ? t('rateFrom', { date: new Date(rate.date).toLocaleDateString(locale) }) : ''}
+        </p>
+        <button className="ghost" onClick={onClose}>
+          {t('close')}
+        </button>
       </div>
     </div>
   )

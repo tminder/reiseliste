@@ -1,6 +1,6 @@
 // Ansicht einer Liste: Eingabe, Artikel nach Abteilung, Laden, Menü, automatisches Reiseland
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
-import { ArrowLeft, Shield, Users, CloudAlert, CloudOff, Check, RotateCcw, MapPin, Menu, Plus, Settings, Share2, Trash2, UserRound, X } from 'lucide-react'
+import { ArrowLeft, Coins, Shield, Users, CloudAlert, CloudOff, Check, RotateCcw, MapPin, Menu, Plus, Settings, Share2, Trash2, UserRound, X } from 'lucide-react'
 import { CATEGORY_ORDER, CONCEPT_BY_ID, type Category, type Lang } from '../../data/dictionary'
 import { COUNTRY_BY_CODE } from '../../data/countries'
 import { categoryLabel, countryLabel, t } from '../../i18n'
@@ -18,7 +18,8 @@ import { AppHint } from './AppHint'
 import { ItemRow } from './ItemRow'
 import { ShopBar } from './ShopBar'
 import { DAY_MS, EXAMPLES, VISIT_ACCURACY_M, VISIT_RADIUS_M, countryChangeDeclined, declineCountryChange, dupKey, readVisit, saveVisit } from './helpers'
-import { EditSheet, MembersSheet, ShareSheet } from './sheets'
+import { ConverterSheet, EditSheet, MembersSheet, ShareSheet } from './sheets'
+import { countryCurrency, homeCurrency } from '../../lib/currency'
 
 function useStore(id: string, profile: Profile) {
   const store = useMemo(() => new ListStore(id), [id])
@@ -140,6 +141,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   const [showMenu, setShowMenu] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
   const [showMembers, setShowMembers] = useState(false)
+  const [showConvert, setShowConvert] = useState(false)
   const [confirmLeave, setConfirmLeave] = useState(false)
   // Einziges Mitglied? Dann „Liste löschen“ statt „Liste verlassen“ (D-036). Geprüft beim Öffnen des Menüs.
   // Startwert: zuletzt bekanntes Ergebnis, damit Menü und Warnung nicht kurz den falschen Text zeigen. undefined = unbekannt
@@ -353,10 +355,12 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
         </a>
         <div className="title">
           <h1>{list.name}</h1>
-          <span className="sub">
-            {/* „🇨🇭 Schweiz – Deutsch“ (D-088) */}
-            {country?.flag} {countryLabel(list.country, target)}
-          </span>
+          {/* „🇨🇭 Schweiz – Deutsch“ (D-088); zu Hause (gleiche Sprache und Abweichung wie im Profil) nicht nötig (D-081) */}
+          {!(target === profile.lang && (country?.variant ?? null) === (profile.region ?? null)) && (
+            <span className="sub">
+              {country?.flag} {countryLabel(list.country, target)}
+            </span>
+          )}
           <ShopBar shop={shop} chosenAt={shopChosenAt} shopping={shopping} firstChecked={firstChecked} country={list.country} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
         </div>
         <SyncBadge state={store.sync} error={lastSyncError} />
@@ -382,6 +386,18 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
                 >
                   <Users size={18} /> {t('members')}
                 </button>
+                {countryCurrency(list.country) && countryCurrency(list.country) !== homeCurrency(profile) && (
+                  // Umrechnen (D-093): nur wenn die Währung des Reiselands nicht die eigene ist
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setShowMenu(false)
+                      setShowConvert(true)
+                    }}
+                  >
+                    <Coins size={18} /> {t('convert')}
+                  </button>
+                )}
                 <button
                   role="menuitem"
                   onClick={() => {
@@ -440,8 +456,12 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
       <AppHint id={id} />
 
       {countryMoved && list.country === countryMoved.to && (
-        <div className="toast">
-          <MapPin size={16} /> {t('countryChanged', { country: `${COUNTRY_BY_CODE.get(countryMoved.to)?.flag ?? ''} ${countryLabel(countryMoved.to, COUNTRY_BY_CODE.get(countryMoved.to)?.lang ?? 'en')}` })}
+        // Eine Zeile: Symbol, Text (bricht bei Bedarf um), „Rückgängig“, ✕
+        <div className="toast toast-row">
+          <MapPin size={16} className="toast-icon" />
+          <span className="toast-text">
+            {t('countryChanged', { country: `${COUNTRY_BY_CODE.get(countryMoved.to)?.flag ?? ''} ${countryLabel(countryMoved.to, COUNTRY_BY_CODE.get(countryMoved.to)?.lang ?? 'en')}` })}
+          </span>
           <button
             className="link"
             onClick={() => {
@@ -624,6 +644,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
       )}
 
       {showShare && <ShareSheet id={id} name={list.name} onClose={() => setShowShare(false)} />}
+      {showConvert && <ConverterSheet country={list.country} profile={profile} onClose={() => setShowConvert(false)} />}
       {showMembers && <MembersSheet store={store} profile={profile} onClose={() => setShowMembers(false)} />}
       {confirmLeave && (
         // Warnung vor dem Entfernen (D-036)

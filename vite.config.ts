@@ -20,7 +20,7 @@ const CSP = [
   "script-src 'self'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.openfoodfacts.org",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://overpass-api.de https://overpass.private.coffee https://nominatim.openstreetmap.org https://*.openfoodfacts.org",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://overpass-api.de https://overpass.private.coffee https://nominatim.openstreetmap.org https://*.openfoodfacts.org https://api.frankfurter.dev",
   "worker-src 'self'",
   "manifest-src 'self'",
   "media-src 'self' blob:",
