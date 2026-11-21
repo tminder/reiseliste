@@ -531,3 +531,13 @@ test.describe('Neue Liste zu Hause in der Schweiz (D-087)', () => {
     await expect(page.locator('form select').first().locator('option:checked')).toHaveText(/Automatisch \(🇨🇭 Schweiz – Deutsch\)/)
   })
 })
+
+test('Startseiten /de/ und /en/ mit Knopf zur App (D-090)', async ({ page, problems }) => {
+  void problems
+  for (const [path, cta] of [['/de/', 'App öffnen'], ['/en/', 'Open the app']]) {
+    await page.goto(path)
+    await expect(page.locator('h1')).toBeVisible()
+    await expect(page.getByRole('link', { name: cta }).first()).toHaveAttribute('href', '/')
+    for (const img of await page.locator('img').all()) expect(await img.evaluate((i: HTMLImageElement) => i.naturalWidth)).toBeGreaterThan(0)
+  }
+})

@@ -554,3 +554,9 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Im Blatt „Liste teilen“ steht neben dem Link ein Knopf „Kopieren“. Er kopiert den Link und zeigt 2 Sekunden lang „Kopiert ✓“. „Link teilen“ öffnet wie bisher das Teilen-Menü des Geräts.
 - **Begründung:** Wunsch des Inhabers. Bisher kopierte „Link teilen“ nur auf Geräten ohne Teilen-Menü; auf dem Handy gab es keinen direkten Weg, den Link zu kopieren, z. B. für eine E-Mail.
 - **Folgen:** Erlaubt der Browser die Zwischenablage nicht, passiert beim Tipp nichts; der Link steht weiterhin im Feld zum Markieren.
+
+## D-090 · Startseiten auf Deutsch und Englisch
+
+- **Entscheidung:** Unter cartontheroad.app/de/ und /en/ gibt es je eine feste Startseite ohne JavaScript: Überschrift „Die Einkaufsliste für die Reise“, der Satz mit „Milch“ und „leche“, Knopf „App öffnen“ (führt zu cartontheroad.app), drei Screenshots aus der echten App (Eintippen mit Vorschlägen, Liste im Laden, „Dem Personal zeigen“), dann kurz Teilen, Reiseziele und „ohne Werbung und Tracking“, unten Datenschutz und Kontakt. Hell und dunkel nach Gerät. Für Google mit Sprachangaben (hreflang, Englisch als Standard) und in der Sitemap. Die App unter der Hauptadresse bleibt unverändert; der Service Worker speichert die Startseiten nicht und ersetzt sie nicht durch die App.
+- **Begründung:** Für den Test mit Nutzern (F-012): Die erste Testperson verstand die App ohne Erklärung nicht. Eine Startseite erklärt in wenigen Sekunden, was die App macht, und prüft dabei die Botschaft für spätere Store-Einträge. Weitere Sprachen erst zusammen mit der Oberfläche in dieser Sprache.
+- **Folgen:** Testpersonen bekommen am besten den Link cartontheroad.app/de/ bzw. /en/. Die Screenshots (`public/landing/`) sind feste Bilder und müssen bei grösseren Änderungen der Oberfläche neu erstellt werden; sie zeigen nachgestellte Daten (Liste „Barcelona“ im Mercadona). Texte nach dem Test überarbeiten.
