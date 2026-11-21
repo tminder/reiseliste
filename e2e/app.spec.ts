@@ -472,3 +472,33 @@ test('Namen bei Artikeln mit zwei Schreibenden (D-082)', async ({ page, problems
   await expect(page.locator('.item', { hasText: 'Milch' })).toContainText('leche · Tobias')
   await expect(page.locator('.item', { hasText: 'Brot' })).toContainText('Anna')
 })
+
+test('Offenen Artikel über das Menü „…“ löschen, mit Rückgängig (D-085)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [item(1, 'Milch', 'milch'), item(2, 'Brot', 'brot')])
+  await page.goto(`/#/l/${LIST}`)
+  const milch = page.locator('.item', { hasText: 'Milch' })
+  await expect(milch.getByRole('button', { name: 'Löschen' })).toHaveCount(0) // offen: kein ✕
+  await milch.getByRole('button', { name: 'Mehr' }).click()
+  await page.getByRole('menuitem', { name: 'Löschen' }).click()
+  await expect(page.locator('.item', { hasText: 'Milch' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /Rückgängig/ })).toBeVisible()
+})
+
+test.describe('Ladensuche: Fehler nur im Auswahlblatt (D-086)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
+
+  test('Zeile zeigt „Suche Laden …“, Blatt zeigt Fehler und Countdown', async ({ page, problems }) => {
+    void problems
+    await page.route(/nominatim/, (r) => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ address: { country_code: 'es' } }) }))
+    await page.route(/interpreter/, (r) => r.abort())
+    await seed(page, [item(1, 'Milch', 'milch')])
+    await page.goto(`/#/l/${LIST}`)
+    await expect(page.locator('.shopline')).toContainText('Suche Laden')
+    await page.waitForTimeout(1500)
+    await expect(page.locator('.shopline')).not.toContainText('OpenStreetMap')
+    await page.getByRole('button', { name: 'Laden ändern' }).click()
+    await expect(page.locator('.sheet')).toContainText('OpenStreetMap ist nicht erreichbar')
+    await expect(page.locator('.sheet')).toContainText(/Neuer Versuch|\d+ s/)
+  })
+})

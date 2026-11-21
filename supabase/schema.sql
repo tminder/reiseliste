@@ -19,6 +19,15 @@ create table if not exists public.list_members (
   primary key (list_id, user_id)
 );
 
+-- Aus einer Liste entfernte Geräte (D-084). Nur über Funktionen erreichbar (RLS ohne Regeln).
+create table if not exists public.list_removed (
+  list_id uuid not null references public.lists(id) on delete cascade,
+  user_id uuid not null,
+  removed_at timestamptz not null default now(),
+  primary key (list_id, user_id)
+);
+alter table public.list_removed enable row level security;
+
 create table if not exists public.items (
   id uuid primary key,
   list_id uuid not null references public.lists(id) on delete cascade,
@@ -127,6 +136,10 @@ begin
   if auth.uid() is null or not exists (select 1 from lists where id = p_list_id) then
     return false;
   end if;
+  -- Aus der Liste entfernt (D-084): dieses Gerät kann nicht wieder beitreten
+  if exists (select 1 from list_removed where list_id = p_list_id and user_id = auth.uid()) then
+    return false;
+  end if;
   -- Höchstens 50 Mitgliedschaften pro Liste (D-049)
   if not exists (select 1 from list_members where list_id = p_list_id and user_id = auth.uid())
      and (select count(*) from list_members where list_id = p_list_id) >= 50 then
@@ -214,6 +227,41 @@ returns table(name text, lang text) language sql stable security definer set sea
 $$;
 revoke all on function public.list_member_profiles(uuid) from public, anon;
 grant execute on function public.list_member_profiles(uuid) to authenticated;
+
+-- Mitglied entfernen (D-084): Jedes Mitglied darf andere entfernen, sich selbst nicht (dafür „Liste verlassen“).
+-- Eine Person ist Name + Sprache, wie in der Mitgliederliste; alle ihre Geräte werden entfernt und gesperrt.
+create or replace function public.remove_member(p_list_id uuid, p_name text, p_lang text)
+returns integer language plpgsql volatile security definer set search_path = public as $$
+declare
+  n integer;
+  my_name text;
+  my_lang text;
+begin
+  if not public.is_member(p_list_id) then return 0; end if;
+  select name, lang into my_name, my_lang from list_members where list_id = p_list_id and user_id = auth.uid();
+  if my_name is not distinct from p_name and my_lang is not distinct from p_lang then return 0; end if;
+  insert into list_removed(list_id, user_id)
+    select list_id, user_id from list_members
+    where list_id = p_list_id and user_id <> auth.uid()
+      and name is not distinct from p_name and lang is not distinct from p_lang
+  on conflict do nothing;
+  delete from list_members
+    where list_id = p_list_id and user_id <> auth.uid()
+      and name is not distinct from p_name and lang is not distinct from p_lang;
+  get diagnostics n = row_count;
+  return n;
+end;
+$$;
+revoke all on function public.remove_member(uuid, text, text) from public, anon;
+grant execute on function public.remove_member(uuid, text, text) to authenticated;
+
+-- Wurde dieses Gerät aus der Liste entfernt? (D-084) Damit die App es anzeigen kann.
+create or replace function public.was_removed(p_list_id uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from list_removed where list_id = p_list_id and user_id = auth.uid());
+$$;
+revoke all on function public.was_removed(uuid) from public, anon;
+grant execute on function public.was_removed(uuid) to authenticated;
 
 -- Liste löschen, wenn man das einzige Mitglied ist (D-036). „Einziges Mitglied“ heisst: alle Mitgliedschaften
 -- gehören zur selben Person (gleicher Name und gleiche Sprache, z. B. Handy und Laptop). Artikel und

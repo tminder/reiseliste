@@ -501,6 +501,9 @@ button.link.strong {
   flex: none;
   color: var(--accent);
 }
+.shop-current.muted {
+  color: var(--muted);
+}
 .shop-current .muted {
   flex: none;
 }
@@ -695,6 +698,18 @@ button.sync-badge.warn {
   grid-template-columns: 32px 1fr auto;
   align-items: center;
   gap: 10px;
+}
+.member-lang {
+  display: block;
+  font-size: 0.85rem;
+}
+/* Nachfrage beim Entfernen eines Mitglieds (D-084), unter der Zeile */
+.member-confirm {
+  grid-column: 2 / -1;
+  padding: 8px 0 4px;
+}
+.member-confirm p {
+  margin: 0 0 8px;
 }
 .avatar {
   width: 32px;

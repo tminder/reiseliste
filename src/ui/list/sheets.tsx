@@ -1,5 +1,6 @@
 // Untere Blätter der Liste: Mitglieder, Liste bearbeiten, Teilen
 import { useEffect, useState } from 'react'
+import { UserMinus } from 'lucide-react'
 import { type Lang } from '../../data/dictionary'
 import { COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
 import { countryName, t } from '../../i18n'
@@ -11,11 +12,30 @@ import { MAX } from '../../lib/limits'
 import { ListStore, supabase, type Profile } from '../../lib/store'
 
 export function MembersSheet({ store, profile, onClose }: { store: ListStore; profile: Profile; onClose: () => void }) {
-  const [members, setMembers] = useState<{ name: string | null; lang: Lang | null; me: boolean }[] | null>(null)
+  type Member = { name: string | null; lang: Lang | null; me: boolean }
+  const [members, setMembers] = useState<Member[] | null>(null)
+  // Mitglied entfernen (D-084): erst nachfragen, dann entfernen
+  const [asking, setAsking] = useState<Member | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [failed, setFailed] = useState(false)
   useEffect(() => {
     store.members().then(setMembers, () => setMembers([]))
   }, [store])
   const list = members?.length ? members : [{ name: profile.name, lang: profile.lang, me: true }]
+  const same = (a: Member, b: Member) => a.name === b.name && a.lang === b.lang
+  async function remove(m: Member) {
+    setBusy(true)
+    setFailed(false)
+    try {
+      await store.removeMember(m.name, m.lang)
+      setMembers((all) => (all ?? []).filter((x) => !same(x, m)))
+      setAsking(null)
+    } catch {
+      setFailed(true)
+    } finally {
+      setBusy(false)
+    }
+  }
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
@@ -29,8 +49,29 @@ export function MembersSheet({ store, profile, onClose }: { store: ListStore; pr
                 <span>
                   {m.name ?? t('unknown')}
                   {m.me && <span className="muted"> ({t('you')})</span>}
+                  <span className="muted member-lang">{m.lang ? LANG_LABEL[m.lang] : ''}</span>
                 </span>
-                <span className="muted">{m.lang ? LANG_LABEL[m.lang] : ''}</span>
+                {!m.me && supabase ? (
+                  <button className="ghost small" aria-label={t('removeMemberLabel', { name: m.name ?? t('unknown') })} onClick={() => setAsking(m)}>
+                    <UserMinus size={17} />
+                  </button>
+                ) : (
+                  <span />
+                )}
+                {asking && same(asking, m) && (
+                  <div className="member-confirm">
+                    <p>{t('removeMemberAsk', { name: m.name ?? t('unknown') })}</p>
+                    {failed && <p className="error-text small-text">{t('removeMemberFailed')}</p>}
+                    <div className="row-gap">
+                      <button className="danger-btn" disabled={busy} onClick={() => void remove(m)}>
+                        {t('removeMember')}
+                      </button>
+                      <button className="ghost small" onClick={() => setAsking(null)}>
+                        {t('cancel')}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </li>
             ))}
           </ul>

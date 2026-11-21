@@ -406,6 +406,8 @@ export class ListStore {
   items: Item[]
   sync: SyncState
   notFound = false
+  /** Dieses Gerät wurde von einem anderen Mitglied aus der Liste entfernt (D-084) */
+  removed = false
   private listeners = new Set<() => void>()
   private channel: RealtimeChannel | null = null
   private onOnline = () => void this.pushAndPull()
@@ -460,6 +462,13 @@ export class ListStore {
       return false
     }
     this.joined = data === true
+    if (!this.joined && this.list) {
+      const { data: removed } = await supabase.rpc('was_removed', { p_list_id: this.id })
+      if (removed === true && !this.removed) {
+        this.removed = true
+        this.listeners.forEach((fn) => fn())
+      }
+    }
     return this.joined
   }
 
@@ -500,6 +509,17 @@ export class ListStore {
   }
 
   /** Mitglieder der Liste (Name, Sprache). Ohne Supabase: leer. */
+  /** Andere Person (Name + Sprache, alle Geräte) aus der Liste entfernen (D-084). Gibt die Zahl entfernter Geräte zurück. */
+  async removeMember(name: string | null, lang: Lang | null): Promise<number> {
+    if (!supabase) return 0
+    const { data, error } = await supabase.rpc('remove_member', { p_list_id: this.id, p_name: name, p_lang: lang })
+    if (error) {
+      setError('Mitglied entfernen', error.message)
+      throw error
+    }
+    return typeof data === 'number' ? data : 0
+  }
+
   async members(): Promise<{ name: string | null; lang: Lang | null; me: boolean }[]> {
     if (!supabase) return []
     const [{ data }, { data: auth }] = await Promise.all([

@@ -2,7 +2,7 @@
 
 Priorität: **hoch**: vor dem Test mit echten Nutzern beheben · **mittel**: vor einem öffentlichen Start · **niedrig**: wenn es stört
 
-Stand: 2026-11-15 · Nur Schulden, die aktuell im Code bestehen.
+Stand: 2026-11-21 · Nur Schulden, die aktuell im Code bestehen.
 
 | ID | Schuld | Auswirkung | Lösungsidee | Prio |
 | --- | --- | --- | --- | --- |
@@ -38,3 +38,4 @@ Stand: 2026-11-15 · Nur Schulden, die aktuell im Code bestehen.
 | S-045 | Mit eingeschaltetem Community-Modul (D-027) lässt sich ein vorhandener Landesbegriff nicht mehr korrigieren: Ein Tipp auf den Begriff öffnet seit D-055 immer die Zeigen-Karte, „Begriff korrigieren“ gibt es nur noch bei Artikeln ohne Übersetzung. | Betrifft erst das Einschalten des Moduls. | Beim Einschalten einen eigenen Einstieg vorsehen, z. B. „Begriff korrigieren“ auf der Zeigen-Karte. | niedrig |
 | S-046 | Der Export „Wörterbuch-Feedback exportieren“ und die Abfrage bei Open Food Facts sind nur mit Beispieldaten getestet, nicht gegen das echte Supabase-Projekt. Fehlende Artikel („miss“) und Rückmeldungen ohne Vorschlag prüft nur Claude, ohne Beleg aus Produktdaten. | Fehler fallen erst beim ersten echten Lauf auf; einzelne falsche Begriffe können ins Wörterbuch kommen. | Ersten Lauf gemeinsam anschauen. Bei Bedarf die Produktdaten-Prüfung auf alle neuen Begriffe ausweiten. | mittel |
 | S-048 | Die Ladenzeile zeigt im Laden fest „Im <Laden>“ (D-078). Für weibliche Ladennamen ist das falsch („Im Migros“ statt „In der Migros“). | Wirkt bei Schweizer Ketten unbeholfen, vor allem bei Migros. Im Ausland meist unauffällig. | Einfachste Lösung: „Bei <Laden>“, passt für alle Namen. Oder eine kleine Liste von Ketten mit Artikel. | niedrig |
+| S-049 | „Mitglied entfernen“ (D-084) erkennt eine Person über Name + Sprache: Zwei verschiedene Mitglieder mit gleichem Namen und gleicher Sprache werden zusammen entfernt. | Selten, entfernt dann aber zu viel. | Mitglieder über die Geräte-Kennung unterscheiden statt über den Namen, dafür in der Mitgliederliste Geräte einer Person zusammenfassen. | niedrig |

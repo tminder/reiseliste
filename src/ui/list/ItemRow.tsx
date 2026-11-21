@@ -1,6 +1,6 @@
 // Ein Artikel der Liste: Name, Landesbegriff, Menge, Abhaken, Fotos, Tipp und Zeigen-Karte (D-032)
 import { useEffect, useRef, useState } from 'react'
-import { Camera, Check, Hand, Lightbulb, MoreHorizontal, Presentation, ThumbsDown, X } from 'lucide-react'
+import { Camera, Check, Hand, Lightbulb, MoreHorizontal, Presentation, ThumbsDown, X, Trash2 } from 'lucide-react'
 import { CONCEPT_BY_ID, type Lang } from '../../data/dictionary'
 import { COUNTRY_BY_CODE } from '../../data/countries'
 import { t } from '../../i18n'
@@ -130,6 +130,14 @@ export function ItemRow({
     .filter(Boolean)
     .flatMap((part, i) => (i ? [<span key={`sep${i}`} className="muted"> · </span>, part] : [part]))
 
+  const remove = () => {
+    onLocalChange(item.id)
+    void slideOut(rowRef.current ? [rowRef.current] : []).then(() => {
+      void store.updateItem(item.id, { deleted: true })
+      onDeleted([item.id], own)
+    })
+  }
+
   return (
     <div
       ref={rowRef}
@@ -180,8 +188,8 @@ export function ItemRow({
             <Hand size={18} />
           </button>
         )}
-        {local && !item.checked && (
-          // Kleines Menü (D-073): Zeigen-Karte fürs Personal, Rückmeldung zur Übersetzung (D-059)
+        {!item.checked && (
+          // Kleines Menü (D-073): Zeigen-Karte fürs Personal, Rückmeldung zur Übersetzung (D-059), Löschen (D-085)
           <div className="menu-wrap">
             <button className={`ghost small ${showMenu ? 'active' : ''}`} aria-label={t('itemMore')} aria-expanded={showMenu} onClick={() => setShowMenu(!showMenu)}>
               <MoreHorizontal size={18} />
@@ -190,16 +198,18 @@ export function ItemRow({
               <>
                 <div className="menu-backdrop" onClick={() => setShowMenu(false)} />
                 <div className="menu item-menu" role="menu">
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      setShowMenu(false)
-                      setShowCard(true)
-                    }}
-                  >
-                    <Presentation size={18} /> {t('showStaff')}
-                  </button>
-                  {supabase && (
+                  {local && (
+                    <button
+                      role="menuitem"
+                      onClick={() => {
+                        setShowMenu(false)
+                        setShowCard(true)
+                      }}
+                    >
+                      <Presentation size={18} /> {t('showStaff')}
+                    </button>
+                  )}
+                  {local && supabase && (
                     <button
                       role="menuitem"
                       onClick={() => {
@@ -210,20 +220,24 @@ export function ItemRow({
                       <ThumbsDown size={18} /> {t('wrongTerm')}
                     </button>
                   )}
+                  <button
+                    role="menuitem"
+                    className="danger"
+                    onClick={() => {
+                      setShowMenu(false)
+                      remove()
+                    }}
+                  >
+                    <Trash2 size={18} /> {t('delete')}
+                  </button>
                 </div>
               </>
             )}
           </div>
         )}
         {item.checked && (
-          // Löschen nur bei Abgehakten (D-055): ein offener Artikel verschwindet nicht versehentlich
-          <button className="ghost small" aria-label={t('delete')} onClick={() => {
-            onLocalChange(item.id)
-            void slideOut(rowRef.current ? [rowRef.current] : []).then(() => {
-              void store.updateItem(item.id, { deleted: true })
-              onDeleted([item.id], own)
-            })
-          }}>
+          // Abgehakte: Löschen direkt mit ✕ (D-055); offene über das Menü „…“ (D-085), mit Rückgängig
+          <button className="ghost small" aria-label={t('delete')} onClick={remove}>
             <X size={18} />
           </button>
         )}

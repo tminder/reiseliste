@@ -423,6 +423,23 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           )}
         </div>
       </header>
+      {store.removed && (
+        // Von einem anderen Mitglied entfernt (D-084): Liste bleibt lesbar, wird aber nicht mehr abgeglichen
+        <div className="note warn">
+          <p>{t('removedNotice')}</p>
+          <div className="row-gap">
+            <button
+              className="primary small"
+              onClick={() => {
+                void leaveList(id)
+                go('/')
+              }}
+            >
+              {t('removeFromMyLists')}
+            </button>
+          </div>
+        </div>
+      )}
       <AppHint id={id} />
       <ListHints items={store.items} translated={target !== profile.lang} />
 
@@ -492,7 +509,11 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
                     }}
                   >
                     {confirmSid === s.id ? <Check size={16} strokeWidth={3} className="confirm-check" /> : null}
-                    {s.name} <span className="muted">→ {nameIn(s.id, target, region)}</span>
+                    {s.name} {(() => {
+                      // Im eigenen Sprachraum keine gleichlautende Übersetzung (D-081)
+                      const local = nameIn(s.id, target, region)
+                      return local && local.toLowerCase() !== s.name.toLowerCase() ? <span className="muted">→ {local}</span> : null
+                    })()}
                     {/* Bestätigung nur über ✓ und Farbe, ohne Text (zu kurz zum Lesen, D-044) */}
                     {confirmSid !== s.id && onListLabel(s.id) && <span className="on-list">✓ {onListLabel(s.id)}</span>}
                   </button>

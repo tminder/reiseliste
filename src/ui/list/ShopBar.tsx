@@ -1,6 +1,6 @@
 // Laden in der Nähe finden und wählen (D-033), Ladenbesuch erkennen
 import { useEffect, useRef, useState } from 'react'
-import { Check, LocateFixed, MapPin, Pencil, Store as StoreIcon } from 'lucide-react'
+import { Check, ChevronDown, LocateFixed, MapPin, Store as StoreIcon } from 'lucide-react'
 import { t } from '../../i18n'
 import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, looksInside, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
 import { RETRY_S } from './helpers'
@@ -86,8 +86,8 @@ export function ShopBar({
       if (err.retry) {
         const wait = RETRY_S[Math.min(attempt, RETRY_S.length - 1)]
         setAttempt((a) => a + 1)
-        setState({ error: err.message, retryIn: wait })
-      } else setState({ error: err.message, permission: err.permission })
+        setState((s) => ({ error: err.message, retryIn: wait, more: s.more }))
+      } else setState((s) => ({ error: err.message, permission: err.permission, more: s.more }))
     }
   }
 
@@ -176,13 +176,6 @@ export function ShopBar({
   // Nicht im Reiseland: nichts anzeigen (ein gewählter Laden bleibt sichtbar, bis man sich entfernt, D-033)
   if (away && !shop) return null
 
-  if (state.loading && !current)
-    return (
-      <div className="shopline muted">
-        <MapPin size={15} /> {t('searchingShop')}
-      </div>
-    )
-
   if (state.permission && !current)
     return (
       <div className="shopline muted">
@@ -212,71 +205,72 @@ export function ShopBar({
       </div>
     )
 
-  if (state.error && !current)
-    return (
-      <div className="shopline muted" title={state.error}>
-        <MapPin size={15} /> {state.error}
-        {state.retryIn != null && <span>{t('retryIn', { s: state.retryIn })}</span>}
-        <button className="link" onClick={() => void detect(true)}>
-          {t('now')}
-        </button>
-      </div>
-    )
-
-  if (!current)
-    return (
-      <div className="shopline muted">
-        <MapPin size={15} />
-        {state.shops ? t('noSupermarketWithin', { dist: formatDistance(FAR_RADIUS_M) }) : t('noShop')}
-        <button className="icon-btn" aria-label={t('searchShop')} onClick={() => void detect(true)}>
-          <Pencil size={14} />
-        </button>
-      </div>
-    )
-
-  // Ein Laden (gewählt oder vorgeschlagen): die ganze Zeile öffnet die Auswahl als Blatt (D-072)
+  // Eine Zeile für alle Zustände: antippen öffnet die Auswahl als Blatt (D-072, D-086).
+  // Fehler und Countdown stehen nur im Blatt; in der Zeile steht solange „Suche Laden …“.
   const close = () => setState((st) => ({ ...st, more: false }))
+  const open = () => {
+    if (!state.shops && !state.loading && state.retryIn == null) void detect(true)
+    setState((st) => ({ ...st, more: true }))
+  }
   // Im Laden: „Im <Laden>“ statt Meter (D-078). Gemessen ab dem letzten Standort dieser Sitzung, nicht ab gespeicherten Distanzen.
-  const here = !!pos && current.lat != null && current.lon != null && looksInside(meters(pos.lat, pos.lon, current.lat, current.lon), pos.accuracy)
+  const here = !!current && !!pos && current.lat != null && current.lon != null && looksInside(meters(pos.lat, pos.lon, current.lat, current.lon), pos.accuracy)
+  const options = current ? [current, ...others] : (state.shops ?? []).slice(0, 6)
   return (
     <div className="shopline">
-      <button
-        className={here ? 'shop-current here' : 'shop-current'}
-        aria-label={t('changeShop')}
-        aria-expanded={!!state.more}
-        onClick={() => {
-          if (!state.shops) void detect(true)
-          setState((st) => ({ ...st, more: true }))
-        }}
-      >
-        <StoreIcon size={15} />
-        <span className="shop-name">
-          {here && <span className="muted">{t('shopIn')} </span>}
-          {current.name}
-        </span>
-        {!here && !shop && <span className="muted">{formatDistance(current.distance)}</span>}
-        <Pencil size={13} className="shop-edit" />
+      <button className={`shop-current${here ? ' here' : ''}${current ? '' : ' muted'}`} aria-label={t('changeShop')} aria-expanded={!!state.more} onClick={open}>
+        {current ? (
+          <>
+            <StoreIcon size={15} />
+            <span className="shop-name">
+              {here && <span className="muted">{t('shopIn')} </span>}
+              {current.name}
+            </span>
+            {!here && !shop && <span className="muted">{formatDistance(current.distance)}</span>}
+          </>
+        ) : (
+          <>
+            <MapPin size={15} />
+            <span className="shop-name">
+              {state.loading || state.error ? t('searchingShop') : state.shops ? t('noSupermarketWithin', { dist: formatDistance(FAR_RADIUS_M) }) : t('noShop')}
+            </span>
+          </>
+        )}
+        <ChevronDown size={14} className="shop-edit" />
       </button>
       {state.more && (
         <div className="sheet-backdrop" onClick={close}>
           <div className="sheet" role="dialog" aria-modal="true" aria-label={t('changeShop')} onClick={(e) => e.stopPropagation()}>
             <h2>{t('chooseShop')}</h2>
-            <ul className="shop-options">
-              {[current, ...others].map((x) => (
-                <li key={x.id}>
-                  <button
-                    className={x.id === current.id ? 'active' : ''}
-                    onClick={() => {
-                      onChoose(x)
-                      close()
-                    }}
-                  >
-                    <span className="shop-name">{x.name}</span>
-                    <span className="muted">{x.id === current.id ? <Check size={16} /> : formatDistance(x.distance)}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+            {options.length > 0 && (
+              <ul className="shop-options">
+                {options.map((x) => (
+                  <li key={x.id}>
+                    <button
+                      className={x.id === current?.id ? 'active' : ''}
+                      onClick={() => {
+                        onChoose(x)
+                        close()
+                      }}
+                    >
+                      <span className="shop-name">{x.name}</span>
+                      <span className="muted">{x.id === current?.id ? <Check size={16} /> : formatDistance(x.distance)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {state.error && (
+              <p className="muted small-text shop-error">
+                {state.error}
+                {state.retryIn != null && <> {t('retryIn', { s: state.retryIn })}</>}{' '}
+                <button className="link" onClick={() => void detect(true)}>
+                  {t('now')}
+                </button>
+              </p>
+            )}
+            {!options.length && !state.error && !state.loading && state.shops && (
+              <p className="muted small-text">{t('noSupermarketWithin', { dist: formatDistance(FAR_RADIUS_M) })}</p>
+            )}
             {state.loading && <p className="muted small-text">{t('searching')}</p>}
             <div className="row">
               <button

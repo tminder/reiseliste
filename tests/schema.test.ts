@@ -50,6 +50,33 @@ describe('schema.sql', () => {
     expect(await val(`select char_length(name) from list_members where list_id='${M}' and user_id='${B}'`)).toBe(40)
   })
 
+  it('Mitglied entfernen (D-084)', async () => {
+    const N = 'cccccccc-cccc-cccc-cccc-cccccccccccc'
+    const C = '44444444-4444-4444-4444-444444444444'
+    await as(A)
+    await db.exec(`insert into lists(id,name,country) values ('${N}','N','ES')`)
+    expect(await val(`select join_list('${N}','Tobias','de')`)).toBe(true)
+    await as(B)
+    expect(await val(`select join_list('${N}','Anna','en')`)).toBe(true)
+    await as(C)
+    expect(await val(`select join_list('${N}','Anna','en')`)).toBe(true) // Anna, zweites Gerät
+    expect(await val(`select remove_member('${N}','Anna','en')`)).toBe(0) // sich selbst nicht
+    await as(A)
+    expect(await val(`select remove_member('${N}','Tobias','de')`)).toBe(0) // sich selbst nicht
+    expect(await val(`select remove_member('${N}','Anna','en')`)).toBe(2) // beide Geräte
+    expect(await val(`select count(*) from list_members where list_id='${N}'`)).toBe(1)
+    await as(B)
+    expect(await val(`select join_list('${N}','Anna','en')`)).toBe(false) // gesperrt
+    expect(await val(`select was_removed('${N}')`)).toBe(true)
+    expect(await val(`select count(*) from lists where id='${N}'`)).toBe(0) // sieht die Liste nicht mehr
+    expect(await val(`select remove_member('${N}','Tobias','de')`)).toBe(0) // kein Mitglied mehr
+    expect(await fails(`select * from list_removed`)).toBeNull()
+    expect(await val(`select count(*) from list_removed`)).toBe(0) // Tabelle nur über Funktionen erreichbar
+    await as(A)
+    expect(await val(`select was_removed('${N}')`)).toBe(false)
+    expect(await val(`select delete_list('${N}')`)).toBe(true) // jetzt einziges Mitglied
+  })
+
   it('Längen-Grenzen (D-049)', async () => {
     await as(A)
     expect(await fails(`insert into lists(id,name,country) values (gen_random_uuid(), repeat('x',81),'ES')`)).toMatch(/lists_len/)
