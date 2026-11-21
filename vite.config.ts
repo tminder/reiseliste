@@ -48,9 +48,10 @@ export default defineConfig({
       workbox: {
         // Schrift des App-Namens auch offline (D-060)
         globPatterns: ['**/*.{js,css,html,woff2}'],
-        // Startseiten /de/ und /en/ (D-090) nicht offline speichern und nicht durch die App ersetzen
+        // Startseiten /de/ und /en/ (D-090) nicht offline speichern und nicht durch die App ersetzen.
+        // Ebenso Dateien mit Endung (sitemap.xml, robots.txt …): sonst öffnet der Service Worker dort die App.
         globIgnores: ['de/**', 'en/**', 'landing/**'],
-        navigateFallbackDenylist: [/^\/(de|en)\//],
+        navigateFallbackDenylist: [/^\/(de|en)(\/|$)/, /\.[a-z0-9]+$/i],
         // Einmal angesehene Produktfotos bleiben offline verfügbar
         runtimeCaching: [
           {
