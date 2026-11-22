@@ -111,7 +111,7 @@
   "weisswein": ["witte wijn"],
   "eiswuerfel": ["ijsblokjes"],
   "glace": ["ijs"],
-  "tkpizza": ["diepvriespizza"],
+  "tkpizza": ["pizza (diepvries)","diepvriespizza"],
   "pommes": ["diepvriesfrietjes"],
   "wcpapier": ["wc-papier"],
   "kuechenrolle": ["keukenrol"],
@@ -221,7 +221,7 @@
   "sekt": ["mousserende wijn","cava"],
   "rosewein": ["roséwijn","rosé"],
   "alkfreibier": ["alcoholvrij bier"],
-  "tkgemuese": ["diepvriesgroenten"],
+  "tkgemuese": ["groenten (diepvries)","diepvriesgroenten"],
   "fischstaebchen": ["vissticks"],
   "frischhaltefolie": ["huishoudfolie","vershoudfolie"],
   "gefrierbeutel": ["vriezerzakjes"],
@@ -309,7 +309,7 @@
   "whisky": ["whisky"],
   "sangria": ["sangria"],
   "energydrink": ["energiedrank"],
-  "tkbeeren": ["diepvriesfruit","bevroren bessen"],
+  "tkbeeren": ["fruit (diepvries)","diepvriesfruit","bevroren bessen"],
   "eisamstiel": ["waterijsjes"],
   "wcreiniger": ["wc-reiniger","toiletreiniger"],
   "bleiche": ["bleekmiddel","chloor"],
@@ -368,7 +368,7 @@
   "suessigkeiten": ["snoep"],
   "snacks": ["zoutjes","borrelhapjes"],
   "gewuerze": ["specerijen"],
-  "tkspinat": ["diepvriesspinazie"],
-  "tkfisch": ["diepvriesvis"],
-  "tkgarnelen": ["diepvriesgarnalen"]
+  "tkspinat": ["spinazie (diepvries)","diepvriesspinazie"],
+  "tkfisch": ["vis (diepvries)","diepvriesvis"],
+  "tkgarnelen": ["garnalen (diepvries)","diepvriesgarnalen"]
 }
