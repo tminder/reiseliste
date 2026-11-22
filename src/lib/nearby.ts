@@ -120,8 +120,10 @@ async function runQuery(query: string): Promise<OsmElement[]> {
 export const FAR_STEPS_M = [1_000, 3_000, 10_000, 20_000]
 export const FAR_RADIUS_M = FAR_STEPS_M[FAR_STEPS_M.length - 1]
 
-// Läden ziehen nicht um: ein Ergebnis gilt, bis man sich wirklich bewegt hat (D-033)
+// Läden ziehen nicht um: ein Ergebnis gilt, bis man sich wirklich bewegt hat (D-033, D-102).
+// Als Vorschlag beim Start höchstens 12 Stunden alt (danach ist man oft woanders); zum Wiederverwenden am gleichen Ort 7 Tage.
 const CACHE_MS = 12 * 60 * 60 * 1000
+const REUSE_MS = 7 * 24 * 60 * 60 * 1000
 /** Ab dieser Strecke gilt man als „woanders“ (mindestens aber die GPS-Ungenauigkeit) */
 const MOVED_M = 300
 /** War man in einem Laden, reicht eine kürzere Strecke */
@@ -170,7 +172,7 @@ function relocate(result: NearbyResult, lat: number, lon: number): NearbyResult 
  */
 /**
  * precise: Beginn des Einkaufs (D-046). Frischer Standort (höchstens 10 s alt), neue Suche schon ab
- * 75 m Abstand oder wenn die letzte Suche älter als 30 Minuten ist – in Städten liegen Läden oft nah beieinander.
+ * 75 m Abstand – in Städten liegen Läden oft nah beieinander. Ohne Ortswechsel keine neue Suche (D-102).
  */
 export async function findNearbyShops(force = false, precise = false): Promise<NearbyResult & { fresh: boolean; lat: number; lon: number }> {
   const pos = await getPosition(precise ? 10_000 : undefined)
@@ -178,8 +180,7 @@ export async function findNearbyShops(force = false, precise = false): Promise<N
 
   // Nicht wirklich bewegt (GPS-Sprünge in Gebäuden eingerechnet): letztes Ergebnis wiederverwenden, keine Anfrage
   const lastResult = readLast()
-  const maxAge = precise ? 30 * 60 * 1000 : CACHE_MS
-  if (!force && lastResult && Date.now() - lastResult.at < maxAge) {
+  if (!force && lastResult && Date.now() - lastResult.at < REUSE_MS) {
     const moved = meters(lat, lon, lastResult.lat, lastResult.lon)
     const base = precise ? 75 : lastResult.result.inside ? MOVED_INSIDE_M : MOVED_M
     const limit = Math.max(base, accuracy, precise ? 0 : (lastResult.accuracy ?? 0))
