@@ -367,5 +367,8 @@
   "getraenke": ["bebidas"],
   "suessigkeiten": ["golosinas","dulces"],
   "snacks": ["aperitivos","snacks"],
-  "gewuerze": ["especias"]
+  "gewuerze": ["especias"],
+  "tkspinat": ["espinacas congeladas"],
+  "tkfisch": ["pescado congelado"],
+  "tkgarnelen": ["gambas congeladas"]
 }

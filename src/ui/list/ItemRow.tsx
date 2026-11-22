@@ -13,6 +13,7 @@ import { ListStore, supabase, type Item } from '../../lib/store'
 import { sendFeedback, type Feedback } from '../../lib/feedback'
 import { formatQty } from '../format'
 import { loadRomanization, romanize } from '../../lib/romanize'
+import { attributesFor } from '../../lib/attributes'
 import { speak, speechTag, useVoice } from '../../lib/speech'
 import { PhotoStrip } from './PhotoStrip'
 import { dupKey } from './helpers'
@@ -90,6 +91,8 @@ export function ItemRow({
   const hint = hints?.[viewer] ?? hints?.en
   const [showMenu, setShowMenu] = useState(false)
   const [showReport, setShowReport] = useState(false)
+  // Merkmale wie „gefroren“ aus dem eingegebenen Text, in der Landessprache (D-098)
+  const attrs = local ? attributesFor(item.text, item.lang, item.conceptId, target) : []
   const sameAsOwn = !!local && local.trim().toLowerCase() === own.trim().toLowerCase()
   const photosOk = !!local && !!shopTag && hasPhotos(item.conceptId, override_)
   // Tipps (z. B. H-Milch im Regal) betreffen das Reiseland: zu Hause nicht zeigen (D-095)
@@ -119,6 +122,12 @@ export function ItemRow({
     local && !sameAsOwn && (
       <span key="local" className="local">
         <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
+        {attrs.map((a) => (
+          // Merkmal aus dem eigenen Text in der Landessprache (D-098)
+          <span key={a.id} className="attr" lang={target}>
+            {a.text}
+          </span>
+        ))}
       </span>
     ),
     !local && target !== viewer && (
@@ -294,7 +303,7 @@ export function ItemRow({
           {photosOk && local && <PhotoStrip country={country} conceptId={item.conceptId} term={local} store={shopTag} storeName={shopName} />}
         </div>
       )}
-      {showCard && local && <ShowCard term={local} qty={item.qty} own={own} target={target} country={country} onClose={() => setShowCard(false)} />}
+      {showCard && local && <ShowCard term={local} qty={item.qty} own={own} target={target} country={country} attrs={attrs.map((a) => a.text)} onClose={() => setShowCard(false)} />}
       {showReport && local && (
         <ReportSheet
           own={own}
@@ -316,6 +325,7 @@ function ShowCard({
   own,
   target,
   country,
+  attrs,
   onClose,
 }: {
   term: string
@@ -323,6 +333,7 @@ function ShowCard({
   own: string
   target: Lang
   country: string
+  attrs: string[]
   onClose: () => void
 }) {
   useEffect(() => {
@@ -344,6 +355,11 @@ function ShowCard({
         {qty && <span className="showcard-qty">{formatQty(qty)} </span>}
         {term}
       </p>
+      {attrs.length > 0 && (
+        <p className="showcard-attr" lang={target}>
+          {attrs.join(' · ')}
+        </p>
+      )}
       {latin && <p className="showcard-latin">{latin}</p>}
       {voice && (
         <button

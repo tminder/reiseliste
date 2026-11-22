@@ -367,5 +367,8 @@
   "getraenke": ["bevande","bibite"],
   "suessigkeiten": ["dolciumi","caramelle"],
   "snacks": ["snack salati","stuzzichini"],
-  "gewuerze": ["spezie"]
+  "gewuerze": ["spezie"],
+  "tkspinat": ["spinaci surgelati"],
+  "tkfisch": ["pesce surgelato"],
+  "tkgarnelen": ["gamberi surgelati"]
 }

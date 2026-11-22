@@ -367,5 +367,8 @@
   "getraenke": ["飲料"],
   "suessigkeiten": ["糖果"],
   "snacks": ["零食"],
-  "gewuerze": ["香料"]
+  "gewuerze": ["香料"],
+  "tkspinat": ["冷凍菠菜"],
+  "tkfisch": ["冷凍魚"],
+  "tkgarnelen": ["冷凍蝦仁"]
 }

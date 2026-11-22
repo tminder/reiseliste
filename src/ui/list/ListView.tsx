@@ -20,6 +20,7 @@ import { ShopBar } from './ShopBar'
 import { DAY_MS, EXAMPLES, VISIT_ACCURACY_M, VISIT_RADIUS_M, countryChangeDeclined, declineCountryChange, dupKey, readVisit, saveVisit, useNamesSetting } from './helpers'
 import { ConverterSheet, EditSheet, MembersSheet, ShareSheet } from './sheets'
 import { countryCurrency, homeCurrency } from '../../lib/currency'
+import { attributesFor } from '../../lib/attributes'
 
 function useStore(id: string, profile: Profile) {
   const store = useMemo(() => new ListStore(id), [id])
@@ -165,11 +166,15 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   const onArrived = (s: Shop) => {
     if (Date.now() - mountedAt > 30_000) return // nur direkt nach dem Öffnen der Liste
     setShopping(true)
+    setActiveAt(Date.now())
     setAutoShop(s)
   }
   // Erstes Abhaken nach dem Öffnen: Standort und Laden im Hintergrund auffrischen (D-069)
   const [firstChecked, setFirstChecked] = useState(false)
+  // Zuletzt im Laden aktiv (Ankunft oder Abhaken auf diesem Gerät): „Im <Laden>“ nur solange (D-078)
+  const [activeAt, setActiveAt] = useState<number | null>(null)
   const onChecked = () => {
+    setActiveAt(Date.now())
     setShopping(true)
     setFirstChecked(true)
   }
@@ -336,7 +341,9 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   // Pro Abteilung
   const groups = new Map<Category | 'sonstiges', Item[]>()
   for (const item of open) {
-    const cat = (item.conceptId && CONCEPT_BY_ID.get(item.conceptId)?.category) || 'sonstiges'
+    // Mit Merkmal „gefroren“ (gefrorene Himbeeren) in die Tiefkühl-Abteilung (D-098)
+    const frozen = attributesFor(item.text, item.lang, item.conceptId, target).some((a) => a.id === 'frozen')
+    const cat = frozen ? 'tk' : (item.conceptId && CONCEPT_BY_ID.get(item.conceptId)?.category) || 'sonstiges'
     groups.set(cat, [...(groups.get(cat) ?? []), item])
   }
   // Was schon offen auf der Liste steht, pro Artikel mit Menge („✓ 3x auf der Liste“, D-045)
@@ -364,7 +371,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
               {country?.flag} {countryLabel(list.country, target)}
             </span>
           )}
-          <ShopBar shop={shop} chosenAt={shopChosenAt} shopping={shopping} firstChecked={firstChecked} country={list.country} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
+          <ShopBar shop={shop} chosenAt={shopChosenAt} shopping={shopping} activeAt={activeAt} firstChecked={firstChecked} country={list.country} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
         </div>
         <SyncBadge state={store.sync} error={lastSyncError} />
         {/* Teilen direkt in der Kopfzeile, das Menü ist für den Rest (D-017) */}

@@ -367,5 +367,8 @@
  { "id": "getraenke", "category": "getraenke" },
  { "id": "suessigkeiten", "category": "vorrat", "off": "en:confectioneries" },
  { "id": "snacks", "category": "vorrat", "off": "en:salty-snacks" },
- { "id": "gewuerze", "category": "vorrat", "off": "en:spices" }
+ { "id": "gewuerze", "category": "vorrat", "off": "en:spices" },
+ { "id": "tkspinat", "category": "tk" },
+ { "id": "tkfisch", "category": "tk" },
+ { "id": "tkgarnelen", "category": "tk" }
 ]

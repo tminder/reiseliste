@@ -367,5 +367,8 @@
   "getraenke": ["bebidas"],
   "suessigkeiten": ["doces","guloseimas"],
   "snacks": ["aperitivos","snacks"],
-  "gewuerze": ["especiarias","temperos"]
+  "gewuerze": ["especiarias","temperos"],
+  "tkspinat": ["espinafres congelados"],
+  "tkfisch": ["peixe congelado"],
+  "tkgarnelen": ["camarão congelado"]
 }

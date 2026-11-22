@@ -367,5 +367,8 @@
   "getraenke": ["drinks","beverages"],
   "suessigkeiten": ["sweets","candy"],
   "snacks": ["snacks"],
-  "gewuerze": ["spices"]
+  "gewuerze": ["spices"],
+  "tkspinat": ["frozen spinach"],
+  "tkfisch": ["frozen fish"],
+  "tkgarnelen": ["frozen prawns","frozen shrimp"]
 }

@@ -367,5 +367,8 @@
   "getraenke": ["đồ uống"],
   "suessigkeiten": ["kẹo","đồ ngọt"],
   "snacks": ["đồ ăn vặt"],
-  "gewuerze": ["gia vị"]
+  "gewuerze": ["gia vị"],
+  "tkspinat": ["rau chân vịt đông lạnh"],
+  "tkfisch": ["cá đông lạnh"],
+  "tkgarnelen": ["tôm đông lạnh"]
 }

@@ -203,7 +203,7 @@ test('Datenschutzseite lädt nach', async ({ page, problems }) => {
 test.describe('Im Laden, GPS im Gebäude ungenau (D-078)', () => {
   test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 80 } })
 
-  test('„Im <Laden>“ statt Meterangabe', async ({ page, problems }) => {
+  test('„Im <Laden>“ erst nach dem ersten Abhaken', async ({ page, problems }) => {
     void problems
     const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
     await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
@@ -212,6 +212,11 @@ test.describe('Im Laden, GPS im Gebäude ungenau (D-078)', () => {
     )
     await seed(page, [item(1, 'Milch', 'milch')])
     await page.goto(`/#/l/${LIST}`)
+    // Vor dem Einkauf: Entfernung
+    await expect(page.locator('.shop-current')).toContainText(/Mercadona\s*\d+ m/)
+    await expect(page.locator('.shop-current.here')).toHaveCount(0)
+    // Erster Artikel abgehakt: Einkauf läuft
+    await page.locator('.item').first().locator('.check').click()
     await expect(page.locator('.shop-current.here')).toContainText('Im Mercadona') // 67 m entfernt, GPS auf 80 m genau
     await expect(page.locator('.shop-current')).not.toContainText(/\d+ m\b/)
   })
@@ -686,4 +691,19 @@ test('Namen bei Artikeln in den Listeneinstellungen ausschalten (D-097)', async 
   await expect(page.locator('.item', { hasText: 'Brot' })).not.toContainText('Anna')
   await page.reload()
   await expect(page.locator('.item', { hasText: 'Brot' })).not.toContainText('Anna') // bleibt gespeichert
+})
+
+test('Merkmal „gefroren“ in der Landessprache, eigener TK-Begriff ohne Zusatz (D-098)', async ({ page, problems }) => {
+  void problems
+  await seed(page)
+  await page.goto(`/#/l/${LIST}`)
+  await add(page, 'gefrorene Himbeeren')
+  await add(page, 'TK-Spinat')
+  await expect(page.locator('.item', { hasText: 'Himbeeren' }).locator('.attr')).toHaveText('❄️ congelado')
+  await expect(page.locator('h3', { hasText: /Tiefkühl/ })).toBeVisible() // gefrorene Himbeeren bei Tiefkühl
+  await expect(page.locator('.item', { hasText: 'TK-Spinat' })).toContainText('espinacas congeladas')
+  await expect(page.locator('.item', { hasText: 'TK-Spinat' }).locator('.attr')).toHaveCount(0)
+  await page.locator('.item', { hasText: 'Himbeeren' }).getByRole('button', { name: 'Mehr' }).click()
+  await page.getByRole('menuitem', { name: /Personal/ }).click()
+  await expect(page.locator('.showcard-attr')).toHaveText('❄️ congelado')
 })

@@ -23,7 +23,7 @@ Stand: 2026-11-22 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-004 · Übersetzung im MVP nur über ein eingebautes Wörterbuch
 
-- **Entscheidung:** Artikel werden über ein festes Wörterbuch übersetzt (`src/data/dictionary/`, 369 Grundbegriffe inkl. Küchenutensilien in der Abteilung „Küche & Geschirr“, 11 Sprachen, Aufbau siehe D-053. In der deutschen Datei stehen zusätzlich Schweizer Ausdrücke als Varianten, z. B. Rahm, Poulet, Rüebli, Zucchetti, Chriesi, Schoggi, Kehrichtsack, Bidon. Sie werden bei der Eingabe erkannt, angezeigt wird die erste, standarddeutsche Variante; nur bei Listen für die Deutschschweiz und Liechtenstein gilt die Schweizer Abweichung). Es gibt keine KI und keinen externen Übersetzungsdienst. Unbekannte Artikel können Nutzer mit einem eigenen Landesbegriff ergänzen.
+- **Entscheidung:** Artikel werden über ein festes Wörterbuch übersetzt (`src/data/dictionary/`, 372 Grundbegriffe inkl. Küchenutensilien in der Abteilung „Küche & Geschirr“, 11 Sprachen, Aufbau siehe D-053. In der deutschen Datei stehen zusätzlich Schweizer Ausdrücke als Varianten, z. B. Rahm, Poulet, Rüebli, Zucchetti, Chriesi, Schoggi, Kehrichtsack, Bidon. Sie werden bei der Eingabe erkannt, angezeigt wird die erste, standarddeutsche Variante; nur bei Listen für die Deutschschweiz und Liechtenstein gilt die Schweizer Abweichung). Es gibt keine KI und keinen externen Übersetzungsdienst. Unbekannte Artikel können Nutzer mit einem eigenen Landesbegriff ergänzen.
 - **Begründung:** Keine laufenden Kosten, offline verfügbar, die Begriffe sind vorhersehbar.
 - **Folgen:** Die Abdeckung ist begrenzt (siehe Ziel in Z-1). Das Wörterbuch wird über Rückmeldungen der Nutzer verbessert (D-059, S-001). Die KI-Ergänzung ist offen (F-004).
 
@@ -483,11 +483,11 @@ Stand: 2026-11-22 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Begründung:** Wunsch des Inhabers, eine leichtere Wirkung zu testen. Auf dem Home-Bildschirm brächte es nichts: iOS füllt durchsichtige Stellen schwarz, Android meist weiss oder farbig.
 - **Folgen:** Auf hellem Hintergrund wird die Strasse weiss und das Logo wirkt zweigeteilt; bei 30 px ist die Lücke klein. Nach dem Test entscheiden: behalten oder `logo-transparent.svg` wieder durch `favicon.svg` ersetzen (`index.html`, `src/ui/AppLogo.tsx`).
 
-## D-078 · Im Laden „Im Mercadona“ statt Meterangabe
+## D-078 · „Im <Laden>“ während des Einkaufs
 
-- **Entscheidung:** Liegt der angezeigte Laden innerhalb von 50 m oder innerhalb der GPS-Ungenauigkeit (höchstens 100 m) vom letzten Standort dieser Sitzung (`looksInside`), steht in der Ladenzeile „Im <Laden>“ (englisch „At <shop>“, „Im“ in Grau) statt der Meterangabe, und das Laden-Symbol erscheint in der Akzentfarbe. Das gilt auch für einen von Hand gewählten Laden. Gemessen wird ab dem eigenen Standort, nicht ab gespeicherten Distanzen. In der Ladenauswahl bleiben die Meter. Eine farbige Marke „hier“ wurde verworfen, sie passte optisch nicht.
-- **Begründung:** Im Laden ist eine Meterangabe überflüssig und schwankt wegen der GPS-Ungenauigkeit. „Im …“ bestätigt auf einen Blick, dass die App den richtigen Laden erkannt hat. Ein Laden ist in OpenStreetMap oft nur ein Punkt, und grosse Supermärkte sind 50–80 m lang, darum wären 20 m zu knapp. Im Gebäude ist GPS oft 50–100 m ungenau, eine feste Grenze mit Anforderung an die Genauigkeit greift dort kaum (so im Test des Inhabers). Die Erkennung „Einkauf beginnt“ (D-020) bleibt streng (50 m, GPS auf 60 m genau), weil sie sonst einen Einkauf im falschen Laden erfassen könnte.
-- **Folgen:** Bei sehr ungenauem GPS kann ein Laden bis 100 m entfernt als „Im …“ erscheinen, wenn man davor steht. Die Anzeige folgt der regelmässigen Prüfung (D-080).
+- **Entscheidung:** Während des Einkaufs steht in der Ladenzeile „Im <Laden>“ (englisch „At <shop>“, „Im“ in Grau) statt der Meterangabe, und das Laden-Symbol erscheint in der Akzentfarbe. Der Einkauf beginnt mit dem ersten Abhaken auf diesem Gerät oder beim Öffnen der Liste direkt im Supermarkt (D-020) und gilt bis 30 Minuten nach dem letzten Abhaken. Zusätzlich muss der Laden innerhalb von 50 m oder innerhalb der GPS-Ungenauigkeit (höchstens 100 m) vom letzten Standort dieser Sitzung liegen (`looksInside`); wer sich entfernt, sieht wieder die Entfernung. Das gilt auch für einen von Hand gewählten Laden. In der Ladenauswahl bleiben die Meter.
+- **Begründung:** „Im …“ soll heissen „du kaufst gerade hier ein“, nicht „du stehst in der Nähe“ (Wunsch des Inhabers). Eine feste Grenze von 20 m griffe im Gebäude kaum, weil GPS dort oft 50–100 m ungenau ist und der Ladenpunkt in OpenStreetMap oft in der Gebäudemitte liegt. Die Erkennung „Einkauf beginnt“ (D-020) bleibt streng (50 m, GPS auf 60 m genau), weil sie sonst einen Einkauf im falschen Laden erfassen könnte.
+- **Folgen:** Vor dem ersten Abhaken steht immer die Entfernung, auch im Laden. Abhaken durch andere Mitglieder zählt nicht. Die Anzeige folgt der regelmässigen Prüfung (D-080).
 
 ## D-079 · Auffindbarkeit und Vorschau beim Teilen
 
@@ -602,3 +602,9 @@ Stand: 2026-11-22 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** In den Listen-Einstellungen gibt es „Namen bei Artikeln zeigen“ (Standard: an). Die Einstellung gilt pro Liste und nur auf diesem Gerät.
 - **Begründung:** Wunsch des Inhabers. Wer die Namen nicht braucht, hat eine ruhigere Liste; andere Mitglieder entscheiden für sich selbst.
 - **Folgen:** Ein neues Gerät zeigt die Namen wieder, bis man sie dort ausschaltet.
+
+## D-098 · Merkmale wie „gefroren“ und eigene Tiefkühl-Begriffe
+
+- **Entscheidung:** Häufige Tiefkühl-Artikel sind eigene Begriffe, korrekt übersetzt: neu TK-Spinat, TK-Fisch und TK-Crevetten, dazu Varianten wie „gefrorene Beeren“, „gefrorenes Gemüse“, „gefrorene Pizza“ bei den bestehenden (TK-Beeren, TK-Gemüse, TK-Pizza, Pommes, Fischstäbchen, Glace). Gibt es keinen eigenen Begriff, erkennt die App Merkmale im eingegebenen Text (gefroren/tiefgekühlt/TK, Bio, laktosefrei, glutenfrei, vegan) und zeigt sie als kleine Marke neben dem Landesbegriff in der Grundform: „gefrorene Himbeeren“ → „frambuesas“ + „❄️ congelado“. Auf der Zeigen-Karte steht das Merkmal unter dem Begriff. Artikel mit „gefroren“ stehen in der Abteilung Tiefkühl. Ein Bindestrich trennt nun auch Wörter beim Erkennen („Bio-Joghurt“ → Joghurt).
+- **Begründung:** Frage des Inhabers zu „gefrorene Himbeeren“. Ein angehängtes Wort wäre in vielen Sprachen grammatisch falsch (frambuesas congeladas, pan congelado); als getrennte Marke ist die Grundform verständlich, und das Personal sieht das Merkmal.
+- **Folgen:** Die Merkmal-Wörter sind von Claude übersetzt (S-001). Merkmale werden nur erkannt, wenn der Artikel selbst bekannt ist. „Bio“ wird am Wortanfang erkannt; seltene Fehltreffer sind möglich.

@@ -870,6 +870,24 @@ button.term-btn {
 .showcard-qty {
   color: var(--text);
 }
+/* Merkmal wie „congelado“ (D-098): kleine Marke neben dem Landesbegriff */
+.attr {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.showcard-attr {
+  margin: -8px 0 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent);
+}
 .showcard-latin {
   margin: -8px 0 0;
   font-size: 1.4rem;

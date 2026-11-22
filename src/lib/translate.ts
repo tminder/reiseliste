@@ -187,8 +187,8 @@ export function findConcept(text: string, lang: Lang): string | null {
     if (hit) return hit
   }
 
-  // Enthaltenes Wort, nur in der eigenen Sprache und ab 3 Zeichen ("Milch fettarm", "frische Tomaten")
-  const padded = ` ${n} `
+  // Enthaltenes Wort, nur in der eigenen Sprache und ab 3 Zeichen ("Milch fettarm", "frische Tomaten", "Bio-Joghurt")
+  const padded = ` ${n} ${n.includes('-') ? n.replace(/-/g, ' ') + ' ' : ''}`
   // Chinesisch: ohne Leerzeichen zwischen Wörtern, Begriffe meist 2 Zeichen („冰牛奶“ enthält „牛奶“)
   if (lang === 'zh') {
     for (const { alias, id } of aliasesByLang.get(lang) ?? []) if (alias.length >= 2 && n.includes(alias)) return id

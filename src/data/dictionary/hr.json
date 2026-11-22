@@ -367,5 +367,8 @@
   "getraenke": ["pića"],
   "suessigkeiten": ["slatkiši"],
   "snacks": ["grickalice"],
-  "gewuerze": ["začini"]
+  "gewuerze": ["začini"],
+  "tkspinat": ["smrznuti špinat"],
+  "tkfisch": ["smrznuta riba"],
+  "tkgarnelen": ["smrznuti škampi"]
 }

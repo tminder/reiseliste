@@ -367,5 +367,8 @@
   "getraenke": ["dranken"],
   "suessigkeiten": ["snoep"],
   "snacks": ["zoutjes","borrelhapjes"],
-  "gewuerze": ["specerijen"]
+  "gewuerze": ["specerijen"],
+  "tkspinat": ["diepvriesspinazie"],
+  "tkfisch": ["diepvriesvis"],
+  "tkgarnelen": ["diepvriesgarnalen"]
 }

@@ -8,7 +8,7 @@ Einkaufsliste für Reisende: Du schreibst in deiner Sprache, und im Laden steht 
 
 - Liste pro Reise mit Reiseland (29 Länder, Landessprachen: DE, ES, PT, FR, IT, NL, HR, EL, VI, ZH, EN). Sprache im Profil, international nutzbar, auch für Expats
 - Eingabe in 11 Sprachen (DE, EN, ES, PT, FR, IT, NL, HR, EL, VI, ZH), inklusive Mengen („2 Milch“, „500 g Hackfleisch“)
-- Übersetzung über ein eingebautes Wörterbuch mit 369 Grundbegriffen (inkl. Küchenutensilien und Schweizer Ausdrücken wie Rahm, Poulet, Rüebli, Chriesi, Schoggi) und eigenen Begriffen für Mexiko, Argentinien, Brasilien, die USA, Österreich und die Deutschschweiz, ohne KI und ohne laufende Kosten
+- Übersetzung über ein eingebautes Wörterbuch mit 372 Grundbegriffen (inkl. Küchenutensilien und Schweizer Ausdrücken wie Rahm, Poulet, Rüebli, Chriesi, Schoggi) und eigenen Begriffen für Mexiko, Argentinien, Brasilien, die USA, Österreich und die Deutschschweiz, ohne KI und ohne laufende Kosten
 - Vorschläge aus dem Wörterbuch beim Tippen
 - Wörterbuch lernt aus Rückmeldungen: fehlende Wörter und „Begriff stimmt nicht?“ werden anonym gesammelt und von Hand ausgewertet (`docs/woerterbuch-feedback.md`)
 - Sortierung nach Abteilungen, Abhaken, eine Ansicht für Planen und Einkaufen (Löschen nur bei Abgehakten)

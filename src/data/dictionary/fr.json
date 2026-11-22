@@ -367,5 +367,8 @@
   "getraenke": ["boissons"],
   "suessigkeiten": ["confiseries","bonbons"],
   "snacks": ["biscuits apéritif","amuse-bouches"],
-  "gewuerze": ["épices"]
+  "gewuerze": ["épices"],
+  "tkspinat": ["épinards surgelés"],
+  "tkfisch": ["poisson surgelé"],
+  "tkgarnelen": ["crevettes surgelées"]
 }

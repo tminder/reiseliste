@@ -7,10 +7,14 @@ import { RETRY_S } from './helpers'
 import { useCountdown } from '../useCountdown'
 import { cachedCountry, detectCountry } from '../../lib/country'
 
+/** „Im <Laden>“ höchstens so lange nach dem letzten Abhaken bzw. der Ankunft (D-078) */
+const ACTIVE_MS = 30 * 60 * 1000
+
 export function ShopBar({
   shop,
   chosenAt,
   shopping,
+  activeAt,
   firstChecked,
   country,
   onChoose,
@@ -22,6 +26,8 @@ export function ShopBar({
   chosenAt: number | null
   /** Einkauf hat begonnen: löst eine genauere Prüfung im Hintergrund aus (D-046, D-055) */
   shopping: boolean
+  /** Zuletzt beim Einkaufen aktiv (Ankunft im Laden, Abhaken): „Im <Laden>“ nur bis 30 Minuten danach (D-078) */
+  activeAt: number | null
   /** Erstes Abhaken nach dem Öffnen: Laden nochmals genau prüfen, auch wenn der Einkauf schon lief (D-069) */
   firstChecked?: boolean
   /** Reiseland der Liste (App-Code, z. B. „CH-DE“): gesucht wird nur, wenn man dort ist (D-075) */
@@ -205,8 +211,14 @@ export function ShopBar({
     if (!state.shops && !state.loading && state.retryAt == null) void detect(true)
     setState((st) => ({ ...st, more: true }))
   }
-  // Im Laden: „Im <Laden>“ statt Meter (D-078). Gemessen ab dem letzten Standort dieser Sitzung, nicht ab gespeicherten Distanzen.
-  const here = !!current && !!pos && current.lat != null && current.lon != null && looksInside(meters(pos.lat, pos.lon, current.lat, current.lon), pos.accuracy)
+  // Im Laden: „Im <Laden>“ statt Meter (D-078), nur während des Einkaufs (erstes Abhaken oder Ankunft, dann bis 30 Minuten
+  // nach der letzten Aktivität) und solange man beim Laden ist. Gemessen ab dem letzten Standort dieser Sitzung.
+  const here =
+    !!current &&
+    activeAt != null &&
+    Date.now() - activeAt < ACTIVE_MS &&
+    !!pos &&
+    current.lat != null && current.lon != null && looksInside(meters(pos.lat, pos.lon, current.lat, current.lon), pos.accuracy)
   const options = current ? [current, ...others] : (state.shops ?? []).slice(0, 6)
   return (
     <div className="shopline">
