@@ -136,7 +136,7 @@
   "hoursOpensAt": "öffnet {time}",
   "hoursOpensOn": "öffnet {day} {time}",
   "hoursSource": "Öffnungszeiten laut OpenStreetMap, ohne Gewähr. Feiertage sind nicht berücksichtigt.",
-  "hoursClosedShort": "zu",
+  "hoursClosedShort": "geschlossen",
   "openInMaps": "{name} in der Karten-App öffnen",
   "cancel": "Abbrechen",
   "shareList": "Liste teilen",

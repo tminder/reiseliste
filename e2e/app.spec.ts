@@ -746,7 +746,7 @@ test.describe('Öffnungszeiten (D-099)', () => {
     void problems
     await open(page, new Date(2026, 10, 22, 10, 0)) // Sonntag
     await expect(page.locator('.shop-current.closed')).toBeVisible() // dezent grau (D-101)
-    await expect(page.locator('.shop-hours')).toHaveText('· zu')
+    await expect(page.locator('.shop-hours')).toHaveText('· geschlossen')
     await page.getByRole('button', { name: 'Laden ändern' }).click()
     await expect(page.locator('.shop-hours-long')).toHaveText(/geschlossen · öffnet Mo\.? 09:00/)
     await expect(page.locator('.sheet')).toContainText('laut OpenStreetMap')
