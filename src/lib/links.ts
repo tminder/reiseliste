@@ -37,9 +37,35 @@ export const openedByLink = (id: string) => ENTRY.id === id && !ENTRY.known
  * maps.apple.com bleibt in der Home-Bildschirm-App im eingebauten Browser hängen. Android: `geo:` zeigt die Auswahl
  * der Karten-Apps. Sonst OpenStreetMap im Browser. `external`: nur die Web-Karte in neuem Tab öffnen.
  */
-export function mapLink(lat: number, lon: number, name: string): { href: string; external: boolean } {
+export type MapApp = 'apple' | 'google'
+
+/** Auf dem iPhone gewählte Karten-App (D-101); null = noch nicht gewählt. Android und Computer brauchen keine Wahl. */
+export function mapApp(): MapApp | null {
+  try {
+    const v = localStorage.getItem('rl:mapApp')
+    return v === 'apple' || v === 'google' ? v : null
+  } catch {
+    return null
+  }
+}
+export function setMapApp(v: MapApp | null) {
+  try {
+    if (v) localStorage.setItem('rl:mapApp', v)
+    else localStorage.removeItem('rl:mapApp')
+  } catch {
+    /* egal */
+  }
+}
+/** Muss vor dem Öffnen gefragt werden, welche Karten-App? (iPhone: Web kann nicht prüfen, welche installiert ist) */
+export const needsMapChoice = () => isIos() && !mapApp()
+
+export function mapLink(lat: number, lon: number, name: string, app: MapApp | null = mapApp()): { href: string; external: boolean } {
   const q = encodeURIComponent(name)
-  if (isIos()) return { href: `maps://?ll=${lat},${lon}&q=${q}`, external: false }
+  if (isIos()) {
+    // Google Maps über sein eigenes Schema; Apple Karten über `maps:` (D-101)
+    if (app === 'google') return { href: `comgooglemaps://?q=${lat},${lon}&center=${lat},${lon}&zoom=17`, external: false }
+    return { href: `maps://?ll=${lat},${lon}&q=${q}`, external: false }
+  }
   if (isAndroid()) return { href: `geo:${lat},${lon}?q=${lat},${lon}(${q})`, external: false }
   return { href: `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=18/${lat}/${lon}`, external: true }
 }

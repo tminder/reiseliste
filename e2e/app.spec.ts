@@ -825,6 +825,9 @@ test.describe('Karten-Link auf dem iPhone (D-101)', () => {
     await page.goto(`/#/l/${LIST}`)
     await page.getByRole('button', { name: 'Laden ändern' }).click()
     const link = page.getByRole('link', { name: 'Mercadona in der Karten-App öffnen' })
+    await page.evaluate(() => localStorage.setItem('rl:mapApp', 'apple'))
+    await page.reload()
+    await page.getByRole('button', { name: 'Laden ändern' }).click()
     await expect(link).toHaveAttribute('href', 'maps://?ll=41.392,2.17&q=Mercadona')
     await expect(link).not.toHaveAttribute('target', '_blank')
   })
@@ -847,5 +850,33 @@ test.describe('Adresse nachschlagen (D-101)', () => {
     await page.goto(`/#/l/${LIST}`)
     await page.getByRole('button', { name: 'Laden ändern' }).click()
     await expect(page.locator('.shop-options li', { hasText: 'Coop' })).toContainText('Bahnhofstrasse 12')
+  })
+})
+
+test.describe('Karten-App auf dem iPhone wählen (D-101)', () => {
+  test.use({
+    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
+    permissions: ['geolocation'],
+    geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 },
+  })
+  test('erst fragen, dann Google Maps direkt', async ({ page, problems }) => {
+    void problems
+    const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
+    await page.route(/interpreter/, (r) => r.fulfill(json({ elements: [{ type: 'node', id: 1, lat: 41.392, lon: 2.17, tags: { shop: 'supermarket', name: 'Mercadona' } }] })))
+    await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+    await seed(page, [item(1, 'Milch', 'milch')])
+    await page.goto(`/#/l/${LIST}`)
+    await page.getByRole('button', { name: 'Laden ändern' }).click()
+    await page.getByRole('link', { name: 'Mercadona in der Karten-App öffnen' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Mit welcher Karten-App öffnen?' })
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByRole('link', { name: 'Google Maps' })).toHaveAttribute('href', /^comgooglemaps:\/\/\?q=41\.392,2\.17/)
+    // Wahl speichern, ohne wirklich zu navigieren
+    await page.evaluate(() => localStorage.setItem('rl:mapApp', 'google'))
+    await page.reload()
+    await page.getByRole('button', { name: 'Laden ändern' }).click()
+    await expect(page.getByRole('link', { name: 'Mercadona in der Karten-App öffnen' })).toHaveAttribute('href', /^comgooglemaps:/)
+    await expect(page.locator('.sheet')).toContainText('Karten-App: Google Maps.')
   })
 })

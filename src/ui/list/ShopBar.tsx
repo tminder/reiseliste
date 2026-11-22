@@ -1,7 +1,7 @@
 // Laden in der Nähe finden und wählen (D-033), Ladenbesuch erkennen
 import { useEffect, useRef, useState } from 'react'
 import { Check, ChevronDown, LocateFixed, Map as MapIcon, MapPin, Store as StoreIcon } from 'lucide-react'
-import { mapLink } from '../../lib/links'
+import { isIos, mapApp, mapLink, needsMapChoice, setMapApp } from '../../lib/links'
 import { knownStreet, lookupStreets } from '../../lib/nearby'
 import { t, uiLang } from '../../i18n'
 import { describeHours } from '../../lib/openingHours'
@@ -64,6 +64,8 @@ export function ShopBar({
   const lastCheck = useRef(0)
   // Nachgeschlagene Adressen für Läden ohne eigene Adresse (D-101)
   const [streets, setStreets] = useState<Record<string, string>>({})
+  // Laden, für den die Karten-App gewählt wird (iPhone, D-101)
+  const [mapFor, setMapFor] = useState<Shop | null>(null)
   // Letzter eigener Standort dieser Sitzung: für die Anzeige „Im <Laden>“ (D-078)
   const [pos, setPos] = useState<{ lat: number; lon: number; accuracy: number } | null>(null)
 
@@ -305,6 +307,13 @@ export function ShopBar({
                         href={mapLink(x.lat, x.lon, x.name).href}
                         {...(mapLink(x.lat, x.lon, x.name).external ? { target: '_blank', rel: 'noreferrer' } : {})}
                         aria-label={t('openInMaps', { name: x.name })}
+                        onClick={(e) => {
+                          // iPhone ohne gewählte Karten-App: erst fragen (D-101)
+                          if (needsMapChoice()) {
+                            e.preventDefault()
+                            setMapFor(x)
+                          }
+                        }}
                       >
                         <MapIcon size={18} />
                       </a>
@@ -327,6 +336,47 @@ export function ShopBar({
             )}
             {state.loading && <p className="muted small-text">{t('searching')}</p>}
             {options.some((x) => hoursOf(x)) && <p className="muted small-text">{t('hoursSource')}</p>}
+            {isIos() && mapApp() && (
+              <p className="muted small-text">
+                {t('mapAppCurrent', { app: mapApp() === 'google' ? 'Google Maps' : t('appleMaps') })}{' '}
+                <button
+                  className="link"
+                  onClick={() => {
+                    setMapApp(null)
+                    setState((st) => ({ ...st }))
+                  }}
+                >
+                  {t('change')}
+                </button>
+              </p>
+            )}
+            {mapFor && mapFor.lat != null && mapFor.lon != null && (
+              // Karten-App wählen (iPhone, D-101): Web kann nicht prüfen, welche installiert ist; Wahl wird gespeichert
+              <div className="sheet-backdrop" onClick={() => setMapFor(null)}>
+                <div className="sheet" role="dialog" aria-modal="true" aria-label={t('mapAppChoose')} onClick={(e) => e.stopPropagation()}>
+                  <h2>{t('mapAppChoose')}</h2>
+                  <div className="stack">
+                    {(['apple', 'google'] as const).map((app) => (
+                      <a
+                        key={app}
+                        className="button ghost"
+                        href={mapLink(mapFor.lat!, mapFor.lon!, mapFor.name, app).href}
+                        onClick={() => {
+                          setMapApp(app)
+                          setMapFor(null)
+                        }}
+                      >
+                        {app === 'google' ? 'Google Maps' : t('appleMaps')}
+                      </a>
+                    ))}
+                  </div>
+                  <p className="muted small-text">{t('mapAppHint')}</p>
+                  <button className="ghost" onClick={() => setMapFor(null)}>
+                    {t('cancel')}
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="row">
               <button
                 className="ghost"
