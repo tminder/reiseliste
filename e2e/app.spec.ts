@@ -872,6 +872,7 @@ test.describe('Karten-App auf dem iPhone wählen (D-101)', () => {
     const dialog = page.getByRole('dialog', { name: 'Mit welcher Karten-App öffnen?' })
     await expect(dialog).toBeVisible()
     await expect(dialog.getByRole('link', { name: 'Google Maps' })).toHaveAttribute('href', /^comgooglemaps:\/\/\?q=41\.392,2\.17/)
+    await expect(dialog.getByRole('link', { name: 'OpenStreetMap' })).toHaveAttribute('href', /openstreetmap\.org\/\?mlat=41\.392/)
     // Wahl speichern, ohne wirklich zu navigieren
     await page.evaluate(() => localStorage.setItem('rl:mapApp', 'google'))
     await page.reload()

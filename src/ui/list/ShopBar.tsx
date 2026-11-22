@@ -10,6 +10,9 @@ import { RETRY_S } from './helpers'
 import { useCountdown } from '../useCountdown'
 import { cachedCountry, detectCountry } from '../../lib/country'
 
+/** Namen der Karten-Apps (D-101); Apple Karten ist übersetzt */
+const MAP_APP_NAME: Partial<Record<'apple' | 'google' | 'osm', string>> = { google: 'Google Maps', osm: 'OpenStreetMap' }
+
 /** „Im <Laden>“ höchstens so lange nach dem letzten Abhaken bzw. der Ankunft (D-078) */
 const ACTIVE_MS = 30 * 60 * 1000
 
@@ -338,7 +341,7 @@ export function ShopBar({
             {options.some((x) => hoursOf(x)) && <p className="muted small-text">{t('hoursSource')}</p>}
             {isIos() && mapApp() && (
               <p className="muted small-text">
-                {t('mapAppCurrent', { app: mapApp() === 'google' ? 'Google Maps' : t('appleMaps') })}{' '}
+                {t('mapAppCurrent', { app: MAP_APP_NAME[mapApp()!] ?? t('appleMaps') })}{' '}
                 <button
                   className="link"
                   onClick={() => {
@@ -356,17 +359,18 @@ export function ShopBar({
                 <div className="sheet" role="dialog" aria-modal="true" aria-label={t('mapAppChoose')} onClick={(e) => e.stopPropagation()}>
                   <h2>{t('mapAppChoose')}</h2>
                   <div className="stack">
-                    {(['apple', 'google'] as const).map((app) => (
+                    {(['apple', 'google', 'osm'] as const).map((app) => (
                       <a
                         key={app}
                         className="button ghost"
                         href={mapLink(mapFor.lat!, mapFor.lon!, mapFor.name, app).href}
+                        {...(app === 'osm' ? { target: '_blank', rel: 'noreferrer' } : {})}
                         onClick={() => {
                           setMapApp(app)
                           setMapFor(null)
                         }}
                       >
-                        {app === 'google' ? 'Google Maps' : t('appleMaps')}
+                        {MAP_APP_NAME[app] ?? t('appleMaps')}
                       </a>
                     ))}
                   </div>
