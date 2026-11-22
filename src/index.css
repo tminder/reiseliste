@@ -4,8 +4,8 @@
   --text: #0f172a;
   --muted: #64748b;
   --line: #e2e8f0;
-  --accent: #0f766e;
-  --accent-soft: #ccfbf1;
+  --accent: #15803d;
+  --accent-soft: #dcfce7;
   --warn: #b45309;
   --warn-soft: #fef3c7;
   --radius: 14px;
@@ -22,8 +22,8 @@
     --text: #e5e7eb;
     --muted: #94a3b8;
     --line: #1f2937;
-    --accent: #2dd4bf;
-    --accent-soft: #134e4a;
+    --accent: #4ade80;
+    --accent-soft: #14532d;
     --warn: #fbbf24;
     --warn-soft: #422006;
   }
@@ -129,7 +129,7 @@ button.primary {
 }
 @media (prefers-color-scheme: dark) {
   button.primary {
-    color: #042f2e;
+    color: #052e16;
   }
 }
 button.primary:disabled {
@@ -1171,7 +1171,7 @@ button.scanner-alt {
   flex: 1 1 auto;
 }
 .undo-bar .link {
-  color: #5eead4;
+  color: #86efac;
   font-weight: 700;
   white-space: nowrap;
 }

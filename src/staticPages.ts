@@ -39,7 +39,7 @@ function layout(lang: Lang, page: Page, title: string, description: string, body
     <link rel="alternate" hreflang="x-default" href="${BASE}${PATHS[page].en}" />
     <link rel="icon" type="image/svg+xml" href="/logo-transparent.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="theme-color" content="#0f766e" />
+    <meta name="theme-color" content="#15803d" />
     <link rel="stylesheet" href="/landing/landing.css" />
   </head>
   <body>

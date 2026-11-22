@@ -5,7 +5,7 @@ Kommuniziere mit dem Projektinhaber auf Deutsch.
 
 ## Planungsdateien aktiv pflegen (Pflicht)
 
-`docs/01-ziele.md`, `docs/02-entscheidungen.md`, `docs/03-offene-fragen.md` und `docs/04-technische-schulden.md` zeigen immer den **aktuellen Stand**. Halte sie bei jeder Arbeit am Projekt automatisch aktuell, ohne dass du darum gebeten wirst. Das gilt für Code-Änderungen ebenso wie für reine Gespräche über Produkt oder Technik.
+`docs/01-ziele.md`, `docs/02-entscheidungen.md`, `docs/03-offene-fragen.md`, `docs/04-technische-schulden.md` und `docs/05-pruefungen.md` zeigen immer den **aktuellen Stand**. Halte sie bei jeder Arbeit am Projekt automatisch aktuell, ohne dass du darum gebeten wirst. Das gilt für Code-Änderungen ebenso wie für reine Gespräche über Produkt oder Technik.
 
 Nach jeder Aufgabe prüfst du:
 
@@ -17,6 +17,7 @@ Nach jeder Aufgabe prüfst du:
 | eine Frage beantwortet ist | `F-` löschen, die Antwort als `D-` festhalten |
 | du eine Abkürzung nimmst, etwas ungetestet lässt oder eine Schwäche entdeckst | neue `S-` eintragen |
 | eine Schuld behoben ist | `S-` löschen |
+| etwas regelmässig von Hand geprüft oder erneuert werden muss | neue `R-` eintragen; fällt es weg, `R-` löschen |
 | sich Ziele oder Zielgruppen ändern | `01-ziele.md` anpassen |
 
 Regeln (Details in `docs/README.md`):

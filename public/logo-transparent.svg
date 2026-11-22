@@ -4,5 +4,5 @@
     <clipPath id="c"><rect width="512" height="512" rx="112"/></clipPath>
     <mask id="road"><rect width="512" height="512" fill="#fff"/><path d="M -400 420 L -30 420 C 200 420, 280 320, 540 330 L 900 344" fill="none" stroke="#000" stroke-width="56" stroke-linejoin="round"/></mask>
   </defs>
-  <g clip-path="url(#c)"><rect width="512" height="512" fill="#14b8a6" mask="url(#road)"/><g transform="translate(215.8 252.0) rotate(-15.36) scale(1.15)" fill="#ffffff"><path d="M -60 -48 L 106 -48 L 84 30 L -44 30 Z"/><path d="M -106 -80 L -70 -80 L -44 30 L 84 30 L 106 -48 L -60 -48" fill="none" stroke="#ffffff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/><circle cx="-30" cy="68" r="18"/><circle cx="68" cy="68" r="18"/></g></g>
+  <g clip-path="url(#c)"><rect width="512" height="512" fill="#22c55e" mask="url(#road)"/><g transform="translate(215.8 252.0) rotate(-15.36) scale(1.15)" fill="#ffffff"><path d="M -60 -48 L 106 -48 L 84 30 L -44 30 Z"/><path d="M -106 -80 L -70 -80 L -44 30 L 84 30 L 106 -48 L -60 -48" fill="none" stroke="#ffffff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/><circle cx="-30" cy="68" r="18"/><circle cx="68" cy="68" r="18"/></g></g>
 </svg>

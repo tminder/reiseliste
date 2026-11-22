@@ -80,7 +80,7 @@ export default defineConfig({
         name: 'Cart on the Road – Einkaufsliste für Reisen',
         short_name: 'Cart',
         description: 'Geteilte Einkaufsliste, die jeden Artikel in der Landessprache zeigt.',
-        theme_color: '#0f766e',
+        theme_color: '#15803d',
         background_color: '#f8fafc',
         display: 'standalone',
         icons: [

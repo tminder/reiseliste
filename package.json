@@ -12,7 +12,8 @@
     "build:e2e": "vite build --mode e2e --outDir dist-e2e",
     "e2e": "playwright test",
     "review:export": "node scripts/review-export.mjs",
-    "dict:pinyin": "node scripts/pinyin.mjs"
+    "dict:pinyin": "node scripts/pinyin.mjs",
+    "landing:shots": "playwright test --config scripts/landing-shots.config.ts && python3 scripts/landing-webp.py"
   },
   "dependencies": {
     "@fontsource/grand-hotel": "^5.3.0",
