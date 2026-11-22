@@ -295,13 +295,17 @@ export function ShopBar({
                       }}
                     >
                       <span className="shop-option-text">
-                        <span className="shop-name">{x.name}</span>
+                        <span className="shop-name">
+                          {x.name}
+                          {/* Gewählt: Häkchen direkt nach dem Namen, rechts bleibt die Distanz (D-101) */}
+                          {x.id === current?.id && <Check size={16} className="shop-check" aria-label={t('selected')} />}
+                        </span>
                         {/* Strasse (D-101) und Öffnungszeiten (D-099) in einer zweiten Zeile */}
                         {(x.street || streetOf(x) || hoursOf(x)) && (
                           <span className="muted shop-hours-long">{[x.street ?? streetOf(x), hoursOf(x)?.long].filter(Boolean).join(' · ')}</span>
                         )}
                       </span>
-                      <span className="muted">{x.id === current?.id ? <Check size={16} /> : formatDistance(x.distance)}</span>
+                      <span className="muted">{formatDistance(x.distance)}</span>
                     </button>
                     {x.lat != null && x.lon != null && (
                       // Karten-App öffnen (D-101); Antippen der Zeile wählt weiterhin den Laden

@@ -143,6 +143,7 @@
   "mapAppHint": "Your choice is saved on this device.",
   "mapAppCurrent": "Maps app: {app}.",
   "change": "Change",
+  "selected": "selected",
   "cancel": "Cancel",
   "shareList": "Share list",
   "demoShare": "Demo mode: without Supabase others cannot see the list.",

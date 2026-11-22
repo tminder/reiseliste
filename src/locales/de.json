@@ -143,6 +143,7 @@
   "mapAppHint": "Die Wahl wird auf diesem Gerät gespeichert.",
   "mapAppCurrent": "Karten-App: {app}.",
   "change": "Ändern",
+  "selected": "gewählt",
   "cancel": "Abbrechen",
   "shareList": "Liste teilen",
   "demoShare": "Demo-Modus: Ohne Supabase sehen andere die Liste nicht.",
