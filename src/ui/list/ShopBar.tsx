@@ -69,6 +69,7 @@ export function ShopBar({
   const [streets, setStreets] = useState<Record<string, string>>({})
   // Laden, für den die Karten-App gewählt wird (iPhone, D-101)
   const [mapFor, setMapFor] = useState<Shop | null>(null)
+  const [pickMapApp, setPickMapApp] = useState(false)
   // Letzter eigener Standort dieser Sitzung: für die Anzeige „Im <Laden>“ (D-078)
   const [pos, setPos] = useState<{ lat: number; lon: number; accuracy: number } | null>(null)
 
@@ -346,16 +347,39 @@ export function ShopBar({
             {isIos() && mapApp() && (
               <p className="muted small-text">
                 {t('mapAppCurrent', { app: MAP_APP_NAME[mapApp()!] ?? t('appleMaps') })}{' '}
-                <button
-                  className="link"
-                  onClick={() => {
-                    setMapApp(null)
-                    setState((st) => ({ ...st }))
-                  }}
-                >
+                <button className="link" onClick={() => setPickMapApp(true)}>
                   {t('change')}
                 </button>
               </p>
+            )}
+            {pickMapApp && (
+              // Karten-App ändern (D-101): direkt wählen, ohne Laden zu öffnen
+              <div className="sheet-backdrop" onClick={() => setPickMapApp(false)}>
+                <div className="sheet" role="dialog" aria-modal="true" aria-label={t('mapAppPick')} onClick={(e) => e.stopPropagation()}>
+                  <h2>{t('mapAppPick')}</h2>
+                  <ul className="shop-options">
+                    {(['apple', 'google', 'osm'] as const).map((app) => (
+                      <li key={app}>
+                        <button
+                          className={mapApp() === app ? 'active' : ''}
+                          onClick={() => {
+                            setMapApp(app)
+                            setPickMapApp(false)
+                          }}
+                        >
+                          <span className="shop-name">
+                            {MAP_APP_NAME[app] ?? t('appleMaps')}
+                            {mapApp() === app && <Check size={16} className="shop-check" aria-label={t('selected')} />}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <button className="ghost" onClick={() => setPickMapApp(false)}>
+                    {t('cancel')}
+                  </button>
+                </div>
+              </div>
             )}
             {mapFor && mapFor.lat != null && mapFor.lon != null && (
               // Karten-App wählen (iPhone, D-101): Web kann nicht prüfen, welche installiert ist; Wahl wird gespeichert

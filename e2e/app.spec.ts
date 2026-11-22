@@ -881,5 +881,12 @@ test.describe('Karten-App auf dem iPhone wählen (D-101)', () => {
     await page.getByRole('button', { name: 'Laden ändern' }).click()
     await expect(page.getByRole('link', { name: 'Mercadona in der Karten-App öffnen' })).toHaveAttribute('href', /^comgooglemaps:/)
     await expect(page.locator('.sheet')).toContainText('Karten-App: Google Maps.')
+    // Ändern: Auswahl erscheint direkt, Wahl wird übernommen
+    await page.locator('.sheet').getByRole('button', { name: 'Ändern' }).click()
+    const pick = page.getByRole('dialog', { name: 'Karten-App wählen' })
+    await pick.getByRole('button', { name: 'OpenStreetMap' }).click()
+    await expect(pick).toHaveCount(0)
+    await expect(page.locator('.sheet')).toContainText('Karten-App: OpenStreetMap.')
+    await expect(page.getByRole('link', { name: 'Mercadona in der Karten-App öffnen' })).toHaveAttribute('href', /openstreetmap\.org/)
   })
 })

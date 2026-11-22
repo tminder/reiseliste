@@ -144,6 +144,7 @@
   "mapAppCurrent": "Karten-App: {app}.",
   "change": "Ändern",
   "selected": "gewählt",
+  "mapAppPick": "Karten-App wählen",
   "cancel": "Abbrechen",
   "shareList": "Liste teilen",
   "demoShare": "Demo-Modus: Ohne Supabase sehen andere die Liste nicht.",
