@@ -905,3 +905,30 @@ test.describe('Schliesst bald (D-099)', () => {
     await expect(page.locator('.shop-hours')).toHaveText('· schliesst 21:30')
   })
 })
+
+test.describe('Läden ohne Öffnungszeiten (D-099)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
+  test('nicht vorgezogen, in der Auswahl „Öffnungszeiten unbekannt“', async ({ page, problems }) => {
+    void problems
+    const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
+    await page.clock.setFixedTime(new Date(2026, 10, 22, 11, 0)) // Sonntag
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
+    await page.route(/interpreter/, (r) =>
+      r.fulfill(
+        json({
+          elements: [
+            { type: 'node', id: 1, lat: 41.392, lon: 2.17, tags: { shop: 'supermarket', name: 'Mercadona', opening_hours: 'Mo-Sa 09:00-21:30; Su off' } },
+            { type: 'node', id: 2, lat: 41.394, lon: 2.17, tags: { shop: 'supermarket', name: 'Dia' } },
+            { type: 'node', id: 3, lat: 41.396, lon: 2.17, tags: { shop: 'supermarket', name: 'Carrefour Express', opening_hours: 'Mo-Su 08:00-22:00' } },
+          ],
+        }),
+      ),
+    )
+    await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+    await seed(page, [item(1, 'Milch', 'milch')])
+    await page.goto(`/#/l/${LIST}`)
+    await expect(page.locator('.shop-current')).toContainText('Carrefour Express') // sicher offen, vor dem näheren Dia ohne Zeiten
+    await page.getByRole('button', { name: 'Laden ändern' }).click()
+    await expect(page.locator('.shop-options li', { hasText: 'Dia' })).toContainText('Öffnungszeiten unbekannt')
+  })
+})

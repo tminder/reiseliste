@@ -130,6 +130,7 @@
   "showNames": "Show names on items",
   "showNamesHint": "Who added an item. Only on this device.",
   "hoursClosesAt": "closes {time}",
+  "hoursUnknown": "opening hours unknown",
   "hoursUntil": "until {time}",
   "hoursOpenUntil": "open until {time}",
   "hoursOpen24": "open 24 hours",

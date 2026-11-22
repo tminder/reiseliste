@@ -111,12 +111,12 @@ export function ShopBar({
   }
 
   // Den angezeigten Vorschlag nach oben melden (für die Fotos)
-  // Vorschlag: der nächste Laden, der nicht geschlossen ist (D-099). Steht man in einem Laden (inside), gilt dieser.
-  // Unbekannte Öffnungszeiten zählen als offen; sind alle zu, der nächste.
+  // Vorschlag: der nächste Laden, der laut Öffnungszeiten offen ist (D-099). Läden ohne Zeiten werden nicht vorgezogen;
+  // ist keiner sicher offen, gilt der nächste. Steht man in einem Laden (inside), gilt dieser.
   const firstShop = (() => {
     const shops = state.shops ?? []
     if (state.inside) return shops[0] ?? null
-    return shops.find((x) => describeHours(x.hours, t, uiLang())?.open !== false) ?? shops[0] ?? null
+    return shops.find((x) => describeHours(x.hours, t, uiLang())?.open === true) ?? shops[0] ?? null
   })()
   const suggestion = !shop && !state.dismissed && !away ? firstShop : null
   useEffect(() => {
@@ -303,9 +303,11 @@ export function ShopBar({
                           {x.id === current?.id && <Check size={16} className="shop-check" aria-label={t('selected')} />}
                         </span>
                         {/* Strasse (D-101) und Öffnungszeiten (D-099) in einer zweiten Zeile */}
-                        {(x.street || streetOf(x) || hoursOf(x)) && (
-                          <span className="muted shop-hours-long">{[x.street ?? streetOf(x), hoursOf(x)?.long].filter(Boolean).join(' · ')}</span>
-                        )}
+                        <span className="muted shop-hours-long">
+                          {(x.street ?? streetOf(x)) && <>{x.street ?? streetOf(x)} · </>}
+                          {/* Geschlossen in Orange, damit es sich von „unbekannt“ abhebt (D-099) */}
+                          <span className={hoursOf(x)?.open === false ? 'hours-closed' : undefined}>{hoursOf(x)?.long ?? t('hoursUnknown')}</span>
+                        </span>
                       </span>
                       <span className="muted">{formatDistance(x.distance)}</span>
                     </button>

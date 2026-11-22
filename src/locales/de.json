@@ -130,6 +130,7 @@
   "showNames": "Namen bei Artikeln zeigen",
   "showNamesHint": "Wer einen Artikel geschrieben hat. Nur auf diesem Gerät.",
   "hoursClosesAt": "schliesst {time}",
+  "hoursUnknown": "Öffnungszeiten unbekannt",
   "hoursUntil": "bis {time}",
   "hoursOpenUntil": "offen bis {time}",
   "hoursOpen24": "rund um die Uhr offen",
