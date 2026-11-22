@@ -119,7 +119,8 @@ export function ItemRow({
   const subParts = [
     // Landesbegriff; im eigenen Sprachraum weg, wenn er gleich lautet wie der eigene Begriff (D-081).
     // Zeigen-Karte fürs Personal über das Menü „…“ (D-073); hier nur Text, ein Tipp hakt ab
-    local && !sameAsOwn && (
+    // Zu Hause nie (D-081): „Herdöpfel“ ist schon richtig, und ein Teilwort („Verpackte Äpfel“ → „Äpfel“) bringt nichts
+    local && !sameAsOwn && abroad && (
       <span key="local" className="local">
         <span className="flag">{COUNTRY_BY_CODE.get(country)?.flag}</span> {local}
         {attrs.map((a) => (

@@ -707,3 +707,14 @@ test('Merkmal „gefroren“ in der Landessprache, eigener TK-Begriff ohne Zusat
   await page.getByRole('menuitem', { name: /Personal/ }).click()
   await expect(page.locator('.showcard-attr')).toHaveText('❄️ congelado')
 })
+
+test('Zu Hause keine Übersetzung, auch bei Mundart und Teilwörtern (D-081)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [], 'CH-DE')
+  await page.addInitScript(() => localStorage.setItem('rl:profile', JSON.stringify({ name: 'Tobias', lang: 'de', region: 'de-CH' })))
+  await page.goto(`/#/l/${LIST}`)
+  await add(page, 'Herdöpfel')
+  await add(page, 'Verpackte Äpfel')
+  await expect(page.locator('.item')).toHaveCount(2)
+  await expect(page.locator('.item .local')).toHaveCount(0)
+})
