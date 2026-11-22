@@ -808,3 +808,24 @@ test.describe('Vorschlag: nächster geöffneter Laden (D-099)', () => {
     await expect(page.getByRole('link', { name: 'Carrefour Express in der Karten-App öffnen' })).toHaveAttribute('href', /openstreetmap\.org\/\?mlat=41\.395&mlon=2\.17/)
   })
 })
+
+test.describe('Karten-Link auf dem iPhone (D-101)', () => {
+  test.use({
+    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
+    permissions: ['geolocation'],
+    geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 },
+  })
+  test('öffnet Apple Karten direkt, nicht im Browser', async ({ page, problems }) => {
+    void problems
+    const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
+    await page.route(/interpreter/, (r) => r.fulfill(json({ elements: [{ type: 'node', id: 1, lat: 41.392, lon: 2.17, tags: { shop: 'supermarket', name: 'Mercadona' } }] })))
+    await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+    await seed(page, [item(1, 'Milch', 'milch')])
+    await page.goto(`/#/l/${LIST}`)
+    await page.getByRole('button', { name: 'Laden ändern' }).click()
+    const link = page.getByRole('link', { name: 'Mercadona in der Karten-App öffnen' })
+    await expect(link).toHaveAttribute('href', 'maps://?ll=41.392,2.17&q=Mercadona')
+    await expect(link).not.toHaveAttribute('target', '_blank')
+  })
+})

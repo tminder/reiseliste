@@ -1,7 +1,7 @@
 // Laden in der Nähe finden und wählen (D-033), Ladenbesuch erkennen
 import { useEffect, useRef, useState } from 'react'
 import { Check, ChevronDown, LocateFixed, Map as MapIcon, MapPin, Store as StoreIcon } from 'lucide-react'
-import { mapUrl } from '../../lib/links'
+import { mapLink } from '../../lib/links'
 import { t, uiLang } from '../../i18n'
 import { describeHours } from '../../lib/openingHours'
 import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, looksInside, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
@@ -283,7 +283,12 @@ export function ShopBar({
                     </button>
                     {x.lat != null && x.lon != null && (
                       // Karten-App öffnen (D-101); Antippen der Zeile wählt weiterhin den Laden
-                      <a className="shop-map" href={mapUrl(x.lat, x.lon, x.name)} target="_blank" rel="noreferrer" aria-label={t('openInMaps', { name: x.name })}>
+                      <a
+                        className="shop-map"
+                        href={mapLink(x.lat, x.lon, x.name).href}
+                        {...(mapLink(x.lat, x.lon, x.name).external ? { target: '_blank', rel: 'noreferrer' } : {})}
+                        aria-label={t('openInMaps', { name: x.name })}
+                      >
                         <MapIcon size={18} />
                       </a>
                     )}
