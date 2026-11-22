@@ -127,10 +127,12 @@ const MOVED_INSIDE_M = 150
 export type NearbyResult = { shops: Shop[]; inside: boolean; accuracy?: number }
 type LastResult = { at: number; lat: number; lon: number; accuracy?: number; result: NearbyResult }
 
-// Letztes Suchergebnis im lokalen Speicher – übersteht ein Neuladen der Seite
+// Letztes Suchergebnis im lokalen Speicher – übersteht ein Neuladen der Seite.
+// Schlüssel mit Version: Ergebnisse älterer Versionen (ohne Öffnungszeiten D-099, ohne Ketten-Läden D-100) neu suchen.
+const LAST_KEY = 'rl:nearby2'
 function readLast(): LastResult | null {
   try {
-    const raw = localStorage.getItem('rl:nearby')
+    const raw = localStorage.getItem(LAST_KEY)
     return raw ? (JSON.parse(raw) as LastResult) : null
   } catch {
     return null
@@ -138,7 +140,7 @@ function readLast(): LastResult | null {
 }
 function writeLast(v: LastResult) {
   try {
-    localStorage.setItem('rl:nearby', JSON.stringify(v))
+    localStorage.setItem(LAST_KEY, JSON.stringify(v))
   } catch {
     /* egal */
   }
