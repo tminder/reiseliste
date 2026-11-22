@@ -892,6 +892,10 @@ button.term-btn {
   font-size: 0.78rem;
   font-weight: 500;
   line-height: 1.5;
+  /* mittig zur Textzeile statt auf der Grundlinie (sass sonst zu tief) */
+  vertical-align: middle;
+  position: relative;
+  top: -0.08em;
 }
 .showcard-attr {
   margin: -8px 0 0;

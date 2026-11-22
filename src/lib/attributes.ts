@@ -1,4 +1,4 @@
-// Merkmale wie „gefroren“, „bio“, „laktosefrei“ (D-098).
+// Merkmale wie „gefroren“ (❄️), „bio“ (🌱), „laktosefrei“ (D-098).
 // Das Wörterbuch kennt „Himbeeren“, aber nicht jede Kombination. Steht ein Merkmal im eingegebenen Text,
 // zeigt die App es zusätzlich in der Landessprache – in der Grundform, ohne Anspruch auf korrekte Beugung
 // („frambuesas“ + „congelado“). Für häufige Kombinationen gibt es eigene Begriffe (TK-Beeren, TK-Spinat …).
@@ -40,6 +40,7 @@ const ATTRIBUTES: Attribute[] = [
   },
   {
     id: 'organic',
+    icon: '🌱',
     words: { de: ['bio'], en: ['organic'], es: ['ecologic', 'bio'], pt: ['biologic', 'bio'], fr: ['bio'], it: ['biologic', 'bio'], nl: ['biologisch', 'bio'], hr: ['organsk', 'bio'], el: ['βιολογικ'], vi: ['hữu cơ'], zh: ['有機'] },
     label: { de: 'Bio', en: 'organic', es: 'ecológico', pt: 'biológico', fr: 'bio', it: 'biologico', nl: 'biologisch', hr: 'organski', el: 'βιολογικό', vi: 'hữu cơ', zh: '有機' },
     skip: () => false,

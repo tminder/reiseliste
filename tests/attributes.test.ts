@@ -27,10 +27,10 @@ describe('Merkmale', () => {
   })
 
   it('Bio, laktosefrei, mehrere Merkmale', () => {
-    expect(show('Bio-Joghurt', 'de', 'fr').attrs).toEqual(['bio'])
+    expect(show('Bio-Joghurt', 'de', 'fr').attrs).toEqual(['🌱 bio'])
     expect(show('laktosefreie Milch', 'de', 'es').attrs).toEqual([]) // eigener Begriff „laktosefrei“
-    expect(show('vegane Bio-Butter', 'de', 'el').attrs).toEqual(['βιολογικό', 'vegan'])
-    expect(show('frozen organic raspberries', 'en', 'es').attrs).toEqual(['❄️ congelado', 'ecológico'])
+    expect(show('vegane Bio-Butter', 'de', 'el').attrs).toEqual(['🌱 βιολογικό', 'vegan'])
+    expect(show('frozen organic raspberries', 'en', 'es').attrs).toEqual(['❄️ congelado', '🌱 ecológico'])
   })
 
   it('kein Merkmal: nichts', () => {
