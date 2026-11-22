@@ -20,7 +20,7 @@ import { ShopBar } from './ShopBar'
 import { DAY_MS, EXAMPLES, VISIT_ACCURACY_M, VISIT_RADIUS_M, countryChangeDeclined, declineCountryChange, dupKey, readVisit, saveVisit, useNamesSetting } from './helpers'
 import { ConverterSheet, EditSheet, MembersSheet, ShareSheet } from './sheets'
 import { countryCurrency, homeCurrency } from '../../lib/currency'
-import { attributesFor, suggestWithAttributes } from '../../lib/attributes'
+import { attributeLabel, attributesFor, suggestWithAttributes } from '../../lib/attributes'
 
 function useStore(id: string, profile: Profile) {
   const store = useMemo(() => new ListStore(id), [id])
@@ -557,8 +557,9 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
         <div className="again">
           <span className="muted small-text">{t('examples')}</span>
           <div className="chips">
-            {EXAMPLES.map(([qty, id]) => {
-              const text = `${qty ? qty + ' ' : ''}${nameIn(id, profile.lang, profile.region) ?? ''}`
+            {EXAMPLES.map(([qty, id, attr]) => {
+              // Merkmal wie bei den Vorschlägen: „Himbeeren (tiefgekühlt)“ (D-098)
+              const text = `${qty ? qty + ' ' : ''}${nameIn(id, profile.lang, profile.region) ?? ''}${attr ? ` (${attributeLabel(attr, profile.lang, false)})` : ''}`
               return (
                 <button key={id} className="chip" onMouseDown={(e) => e.preventDefault()} onClick={() => add(text, id)}>
                   <Plus size={14} /> {text}

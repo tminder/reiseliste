@@ -59,12 +59,16 @@ export function declineCountryChange(listId: string, code: string) {
   }
 }
 
-/** Beispiele unter dem Eingabefeld, solange es nichts „Schon mal gekauft“ gibt: Menge und Artikel */
-export const EXAMPLES: [string | null, string][] = [
+/**
+ * Beispiele unter dem Eingabefeld, solange es nichts „Schon mal gekauft“ gibt: Menge, Artikel und Merkmal (D-030, D-098).
+ * Zeigen, was geht: Stückzahl, Gewicht, „tiefgekühlt“, „Bio“.
+ */
+export const EXAMPLES: [string | null, string, string?][] = [
   ['2', 'milch'],
   [null, 'brot'],
   ['500 g', 'hack'],
-  ['1 kg', 'tomaten'],
+  [null, 'himbeeren', 'frozen'],
+  ['6', 'eier', 'organic'],
 ]
 
 /** Namen bei Artikeln zeigen (D-097): Einstellung pro Liste, nur auf diesem Gerät. Standard: an. */

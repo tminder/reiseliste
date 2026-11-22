@@ -57,6 +57,10 @@ test('Profil anlegen, Liste erstellen, Artikel übersetzt', async ({ page, probl
   await expect(page.locator('.add input')).toBeVisible()
   await add(page, 'Milch')
   await expect(page.locator('.item').first()).toContainText('leche')
+  // Beispiele zeigen auch Merkmale (D-098)
+  await expect(page.locator('.again .chip')).toContainText(['2 Milch', 'Brot', '500 g Hackfleisch', 'Himbeeren (tiefgekühlt)', '6 Eier (Bio)'])
+  await page.locator('.again .chip', { hasText: 'Himbeeren' }).click()
+  await expect(page.locator('.item', { hasText: 'Himbeeren' })).toContainText('frambuesas❄️ congelado')
 })
 
 test('Übersicht zeigt die anderen Teilnehmer, jüngste Aktivität zuerst', async ({ page, problems }) => {
