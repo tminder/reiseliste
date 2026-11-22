@@ -829,3 +829,23 @@ test.describe('Karten-Link auf dem iPhone (D-101)', () => {
     await expect(link).not.toHaveAttribute('target', '_blank')
   })
 })
+
+test.describe('Adresse nachschlagen (D-101)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 47.37, longitude: 8.54, accuracy: 20 } })
+  test('Laden ohne Adresse: nächste Adresse im Umkreis', async ({ page, problems }) => {
+    void problems
+    const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'ch', state: 'Zürich' } })))
+    await page.route(/interpreter/, (r) => {
+      const q = decodeURIComponent(r.request().postData() ?? '')
+      if (q.includes('addr:housenumber'))
+        return r.fulfill(json({ elements: [{ type: 'way', id: 9, center: { lat: 47.37121, lon: 8.54 }, tags: { 'addr:street': 'Bahnhofstrasse', 'addr:housenumber': '12' } }] }))
+      return r.fulfill(json({ elements: [{ type: 'node', id: 1, lat: 47.3712, lon: 8.54, tags: { shop: 'supermarket', name: 'Coop' } }] }))
+    })
+    await seed(page, [item(1, 'Milch', 'milch')], 'CH-DE')
+    await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+    await page.goto(`/#/l/${LIST}`)
+    await page.getByRole('button', { name: 'Laden ändern' }).click()
+    await expect(page.locator('.shop-options li', { hasText: 'Coop' })).toContainText('Bahnhofstrasse 12')
+  })
+})

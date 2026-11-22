@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Check, ChevronDown, LocateFixed, Map as MapIcon, MapPin, Store as StoreIcon } from 'lucide-react'
 import { mapLink } from '../../lib/links'
+import { knownStreet, lookupStreets } from '../../lib/nearby'
 import { t, uiLang } from '../../i18n'
 import { describeHours } from '../../lib/openingHours'
 import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, looksInside, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
@@ -61,6 +62,8 @@ export function ShopBar({
   })
 
   const lastCheck = useRef(0)
+  // Nachgeschlagene Adressen für Läden ohne eigene Adresse (D-101)
+  const [streets, setStreets] = useState<Record<string, string>>({})
   // Letzter eigener Standort dieser Sitzung: für die Anzeige „Im <Laden>“ (D-078)
   const [pos, setPos] = useState<{ lat: number; lon: number; accuracy: number } | null>(null)
 
@@ -175,6 +178,20 @@ export function ShopBar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shop])
 
+  // Ladenauswahl offen: fehlende Adressen der angezeigten Läden nachschlagen (D-101), still, Fehler egal
+  useEffect(() => {
+    if (!state.more || !state.shops?.length) return
+    let alive = true
+    const shown = [...(shop ? [shop] : []), ...state.shops.slice(0, 6)]
+    lookupStreets(shown).then(
+      (r) => alive && setStreets(r),
+      () => {},
+    )
+    return () => {
+      alive = false
+    }
+  }, [state.more, state.shops, shop])
+
   // Countdown und automatischer neuer Versuch bei überlastetem Server (D-094)
   const retryIn = useCountdown(shop ? null : state.retryAt, () => void detect())
 
@@ -232,7 +249,7 @@ export function ShopBar({
   const locale = uiLang()
   // Öffnungszeiten aus OpenStreetMap (D-099); fehlen sie beim gewählten Laden, aus der letzten Suche
   const hoursOf = (s: Shop) => describeHours(s.hours ?? state.shops?.find((x) => x.id === s.id)?.hours, t, locale)
-  const streetOf = (s: Shop) => state.shops?.find((x) => x.id === s.id)?.street
+  const streetOf = (s: Shop) => state.shops?.find((x) => x.id === s.id)?.street ?? (streets[s.id] || knownStreet(s) || undefined)
   return (
     <div className="shopline">
       <button className={`shop-current${here ? ' here' : ''}${current ? '' : ' muted'}${current && hoursOf(current)?.open === false ? ' closed' : ''}`} aria-label={t('changeShop')} aria-expanded={!!state.more} onClick={open}>

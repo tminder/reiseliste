@@ -314,3 +314,51 @@ export function isInsideSupermarket(r: NearbyResult): Shop | null {
   if (!isHere(first.distance, r.accuracy)) return null
   return first
 }
+
+// ---------- Adressen nachschlagen (D-101) ----------
+// Viele Läden haben in OpenStreetMap keine eigene Adresse (z. B. in der Schweiz: Adresse am Gebäude oder als eigener Punkt).
+// Fehlt sie, sucht die App beim Öffnen der Ladenauswahl die nächste Adresse im Umkreis von 40 m, in einer einzigen Anfrage
+// für alle angezeigten Läden. Ergebnisse (auch „keine gefunden“) werden auf dem Gerät gespeichert.
+
+const STREETS_KEY = 'rl:streets'
+const STREET_RADIUS_M = 40
+
+function readStreets(): Record<string, string> {
+  try {
+    return JSON.parse(localStorage.getItem(STREETS_KEY) ?? '{}') as Record<string, string>
+  } catch {
+    return {}
+  }
+}
+
+/** Bekannte Strasse eines Ladens: aus dem Laden selbst oder nachgeschlagen; '' = keine gefunden, undefined = unbekannt */
+export function knownStreet(shop: Shop): string | undefined {
+  return shop.street ?? readStreets()[shop.id]
+}
+
+export async function lookupStreets(shops: Shop[]): Promise<Record<string, string>> {
+  const saved = readStreets()
+  const todo = shops.filter((s) => !s.street && saved[s.id] === undefined && s.lat != null && s.lon != null).slice(0, 8)
+  if (!todo.length) return saved
+  const query = `[out:json][timeout:15];(${todo
+    .map((s) => `nwr(around:${STREET_RADIUS_M},${s.lat},${s.lon})["addr:street"]["addr:housenumber"];`)
+    .join('')});out center tags 80;`
+  const found = await runQuery(query)
+  for (const s of todo) {
+    let best: { d: number; street: string } | null = null
+    for (const el of found) {
+      const p = el.center ?? (el.lat != null && el.lon != null ? { lat: el.lat, lon: el.lon } : null)
+      const tags = el.tags ?? {}
+      if (!p || !tags['addr:street']) continue
+      const d = meters(s.lat!, s.lon!, p.lat, p.lon)
+      if (d <= STREET_RADIUS_M && (!best || d < best.d)) best = { d, street: `${tags['addr:street']} ${tags['addr:housenumber'] ?? ''}`.trim() }
+    }
+    saved[s.id] = best?.street ?? ''
+  }
+  try {
+    localStorage.setItem(STREETS_KEY, JSON.stringify(saved))
+  } catch {
+    /* egal */
+  }
+  return saved
+}
