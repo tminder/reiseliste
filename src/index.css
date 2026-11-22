@@ -544,6 +544,11 @@ button.link.strong {
 .shop-options button.active .muted {
   color: var(--accent);
 }
+/* Strasse und Zeiten bleiben grau, auch beim gewählten Laden: Grün heisst hier nur „gewählt“ (Häkchen), nicht „offen“ (D-101) */
+.shop-options button.active .shop-hours-long {
+  color: var(--muted);
+  font-weight: 400;
+}
 button.chip {
   font-size: 0.8rem;
   padding: 4px 10px;
