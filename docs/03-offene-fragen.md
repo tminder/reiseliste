@@ -1,6 +1,6 @@
 # Offene Fragen
 
-Stand: 2026-11-15 · Nur Fragen, die aktuell offen sind.
+Stand: 2026-11-22 · Nur Fragen, die aktuell offen sind.
 
 | ID | Frage | Warum wichtig |
 | --- | --- | --- |
@@ -16,3 +16,4 @@ Stand: 2026-11-15 · Nur Fragen, die aktuell offen sind.
 | F-013 | Rechtliche Restpunkte zum Datenschutz (D-023): Braucht es einen EU-Vertreter nach Art. 27 DSGVO, oder greift die Ausnahme für gelegentliche Verarbeitung mit geringem Risiko? Soll eine Fachperson die Datenschutzerklärung vor einem öffentlichen Start prüfen? Darf man Packungsfotos mit Marken so anzeigen? | Spätestens vor dem Start über den privaten Testkreis hinaus. |
 | F-014 | Backend langfristig: Supabase Cloud (US-Firma, EU- oder Zürich-Region), ein europäischer Anbieter (z. B. Nhost aus Schweden) oder selbst gehostet (Supabase oder PocketBase auf einem Server in der Schweiz/EU)? | Datenhoheit (US CLOUD Act), Kosten, Pausieren im Gratis-Tarif (D-039), Betriebsaufwand (S-033) und Umbauaufwand. Spätestens vor einem öffentlichen Start entscheiden. |
 | F-016 | Wie speichert die native App Profil und Anmeldung: nur lokal, mit Keychain/Keystore, mit iCloud bzw. Android-Backup, auf dem Server oder mit freiwilligem Konto (Apple, Google, E-Mail)? Optionen und Vorschlag: [Konzept native App](konzept-native-app.md), Abschnitt 4. | Entscheidet, ob Profil und Listen eine Neuinstallation oder einen Gerätewechsel überleben, und wie viele Personendaten anfallen. Vor dem Bau der nativen App (F-006) klären. |
+| F-019 | Ladensuche und Produkte monetarisieren? Ideen des Inhabers: Werbung für einen Laden in der Nähe (z. B. hervorgehobener Supermarkt in der Ladenauswahl) und Werbung bei Produkten (z. B. Aktionen in Läden in der Nähe). Erst in Zukunft bei mehr Nutzern prüfen, zusammen mit dem Geschäftsmodell (F-003). | Braucht viele aktive Nutzer und Partner (Ketten, Werbenetzwerke). Muss klar als Werbung gekennzeichnet sein und darf das Versprechen „ohne Tracking“ nicht brechen (keine Weitergabe von Standortdaten); dann Datenschutzerklärung und Einwilligung anpassen. |
