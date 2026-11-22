@@ -241,8 +241,15 @@ export function suggest(input: string, lang: Lang, limit = 5, region?: string): 
     const raw = [...own, ...namesIn(c.id, lang)]
     if (!raw.length) continue
     const names = raw.map(norm)
-    if (names.some((x) => x.startsWith(n))) starts.push({ id: c.id, name: raw[0] })
-    else if (names.some((x) => x.includes(n))) contains.push({ id: c.id, name: raw[0] })
+    // Angezeigt wird das Wort, das passt („Passata“ statt „Tomatensauce“, D-096); hat die Länder-Abweichung
+    // ein eigenes Wort (Rahm statt Sahne), gilt dieses
+    const shown = (i: number) => (own.length ? raw[0] : raw[i])
+    const s = names.findIndex((x) => x.startsWith(n))
+    if (s >= 0) starts.push({ id: c.id, name: shown(s) })
+    else {
+      const i = names.findIndex((x) => x.includes(n))
+      if (i >= 0) contains.push({ id: c.id, name: shown(i) })
+    }
   }
   return [...starts, ...contains].slice(0, limit)
 }

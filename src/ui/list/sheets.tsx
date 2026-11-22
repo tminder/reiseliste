@@ -90,6 +90,7 @@ export function EditSheet({
   name,
   country,
   autoClear,
+  showNames,
   autoCountry,
   lang,
   onSave,
@@ -100,9 +101,11 @@ export function EditSheet({
   lang: Lang
   country: string
   autoClear: boolean
+  /** Namen bei Artikeln zeigen (D-097), nur auf diesem Gerät */
+  showNames: boolean
   /** Reiseland automatisch nach Standort (D-057) */
   autoCountry: boolean
-  onSave: (name: string, country: string, autoClear: boolean, autoCountry: boolean) => void
+  onSave: (name: string, country: string, autoClear: boolean, autoCountry: boolean, showNames: boolean) => void
   onClose: () => void
 }) {
   const [n, setN] = useState(name)
@@ -112,6 +115,7 @@ export function EditSheet({
   const loc = useLocation()
   const [askLocation, setAskLocation] = useState(false)
   const [ac, setAc] = useState(autoClear)
+  const [names, setNames] = useState(showNames)
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <form
@@ -120,7 +124,7 @@ export function EditSheet({
         onSubmit={(e) => {
           e.preventDefault()
           if (auto && !autoCountry && !loc.available) return setAskLocation(true)
-          onSave(n.trim() || name, c, ac, auto)
+          onSave(n.trim() || name, c, ac, auto, names)
         }}
       >
         <h2>{t('editListTitle')}</h2>
@@ -150,6 +154,13 @@ export function EditSheet({
             <span className="muted small-text block">{t('autoClearHint')}</span>
           </span>
         </label>
+        <label className="check-row">
+          <input type="checkbox" checked={names} onChange={(e) => setNames(e.target.checked)} />
+          <span>
+            {t('showNames')}
+            <span className="muted small-text block">{t('showNamesHint')}</span>
+          </span>
+        </label>
         <div className="row">
           <button className="primary">{t('save')}</button>
           <button type="button" className="ghost" onClick={onClose}>
@@ -163,7 +174,7 @@ export function EditSheet({
           lang={lang}
           country={c}
           submitLabel={t('save')}
-          onDone={(country, a) => onSave(n.trim() || name, country, ac, a)}
+          onDone={(country, a) => onSave(n.trim() || name, country, ac, a, names)}
           onClose={() => setAskLocation(false)}
         />
       )}

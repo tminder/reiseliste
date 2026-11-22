@@ -359,5 +359,13 @@
   "wasserkocher": ["hervidor de agua","hervidor eléctrico"],
   "mokkakanne": ["cafetera italiana"],
   "kuehlbox": ["nevera portátil"],
-  "zopf": ["trenza de pan","pan trenzado"]
+  "zopf": ["trenza de pan","pan trenzado"],
+  "passata": ["tomate tamizado","passata"],
+  "gemuese": ["verduras","hortalizas"],
+  "fruechte": ["fruta"],
+  "fleisch": ["carne"],
+  "getraenke": ["bebidas"],
+  "suessigkeiten": ["golosinas","dulces"],
+  "snacks": ["aperitivos","snacks"],
+  "gewuerze": ["especias"]
 }

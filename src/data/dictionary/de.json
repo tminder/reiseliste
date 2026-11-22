@@ -76,7 +76,7 @@
   "olivenoel": ["Olivenöl"],
   "sonnenblumenoel": ["Sonnenblumenöl","Speiseöl"],
   "essig": ["Essig"],
-  "tomatensauce": ["Tomatensauce","Passata"],
+  "tomatensauce": ["Tomatensauce"],
   "dosentomaten": ["Dosentomaten","gehackte Tomaten"],
   "ketchup": ["Ketchup"],
   "senf": ["Senf"],
@@ -359,5 +359,13 @@
   "wasserkocher": ["Wasserkocher"],
   "mokkakanne": ["Espressokocher","Mokkakanne","Bialetti"],
   "kuehlbox": ["Kühlbox","Kühltasche"],
-  "zopf": ["Zopf","Butterzopf","Züpfe"]
+  "zopf": ["Zopf","Butterzopf","Züpfe"],
+  "passata": ["Passata","passierte Tomaten"],
+  "gemuese": ["Gemüse"],
+  "fruechte": ["Früchte","Obst"],
+  "fleisch": ["Fleisch"],
+  "getraenke": ["Getränke"],
+  "suessigkeiten": ["Süssigkeiten","Süßigkeiten"],
+  "snacks": ["Snacks","Knabbereien","Apéro-Gebäck"],
+  "gewuerze": ["Gewürze"]
 }

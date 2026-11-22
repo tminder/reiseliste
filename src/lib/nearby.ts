@@ -1,4 +1,5 @@
 import { t } from '../i18n'
+import { timeout } from './net'
 // Nächstgelegenen Supermarkt erkennen: Standort des Geräts + OpenStreetMap (Overpass API).
 // Der Standort wird nur mit Erlaubnis abgefragt und an die Overpass API geschickt. Auf dem Gerät bleiben die Stelle der letzten Suche (12 h) und der gewählte Laden (D-033).
 
@@ -96,7 +97,8 @@ async function runQuery(query: string): Promise<OsmElement[]> {
   let lastError = t('errOsmUnreachable')
   for (const url of ENDPOINTS) {
     try {
-      const res = await fetch(url, { method: 'POST', body: new URLSearchParams({ data: query }) })
+      // Zeitlimit: Die Abfrage selbst darf 25 s dauern (D-094)
+      const res = await fetch(url, { method: 'POST', body: new URLSearchParams({ data: query }), signal: timeout(35_000) })
       if (res.ok) return ((await res.json()) as { elements: OsmElement[] }).elements
       lastError =
         res.status === 429 || res.status === 504

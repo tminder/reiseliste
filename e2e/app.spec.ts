@@ -608,3 +608,82 @@ test('Zu Hause: kein Reiseland unter dem Listennamen (D-081)', async ({ page, pr
   await page.getByRole('button', { name: 'Menü' }).click()
   await expect(page.getByRole('menuitem', { name: 'Umrechnen' })).toHaveCount(0) // gleiche Währung
 })
+
+test.describe('Fotos mit Laden (D-094)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
+  test('Open Food Facts nicht erreichbar: Countdown und automatischer neuer Versuch', async ({ page, problems }) => {
+  void problems
+  const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
+  await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
+  await page.route(/interpreter/, (r) => r.fulfill(json({ elements: [{ type: 'node', id: 1, lat: 41.3901, lon: 2.17, tags: { shop: 'supermarket', name: 'Mercadona', brand: 'Mercadona' } }] })))
+  await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+  await page.clock.install()
+  let calls = 0
+  await page.route(/openfoodfacts\.org\/api/, (r) => {
+    calls++
+    if (calls === 1) return r.abort()
+    return r.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'access-control-allow-origin': '*' },
+      body: JSON.stringify({ products: [{ code: '1', product_name: 'Leche entera', brands: 'Hacendado', image_front_small_url: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=' }] }),
+    })
+  })
+  await seed(page, [item(1, 'Milch', 'milch')])
+  await page.goto(`/#/l/${LIST}`)
+  await page.locator('.item', { hasText: 'Milch' }).getByRole('button', { name: 'Produktfotos' }).click()
+  await expect(page.locator('.photos-note')).toContainText(/Neuer Versuch in 1[45] s/)
+  await page.clock.fastForward(5_000)
+  await expect(page.locator('.photos-note')).toContainText(/Neuer Versuch in (9|10) s/)
+  await page.clock.fastForward(11_000)
+  await expect(page.locator('.photos')).toContainText('Leche entera')
+  expect(calls).toBe(2)
+  })
+})
+
+test('Tipp im Bereich der Fotos, nur auf Reisen (D-095)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [item(1, 'H-Milch', 'hmilch')])
+  await page.goto(`/#/l/${LIST}`)
+  const row = page.locator('.item', { hasText: 'H-Milch' })
+  await row.getByRole('button', { name: 'Tipp' }).click()
+  await expect(row.locator('.item-wide .hint')).toContainText('Regal')
+  await expect(row).not.toHaveClass(/checked/) // Tipp öffnen hakt nicht ab
+})
+
+test('Zu Hause kein Tipp (D-095)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [item(1, 'H-Milch', 'hmilch')], 'CH-DE')
+  await page.addInitScript(() => localStorage.setItem('rl:profile', JSON.stringify({ name: 'Tobias', lang: 'de', region: 'de-CH' })))
+  await page.goto(`/#/l/${LIST}`)
+  await expect(page.locator('.item').first()).toContainText('H-Milch')
+  await expect(page.getByRole('button', { name: 'Tipp' })).toHaveCount(0)
+})
+
+test('Vorschlag zeigt das getippte Wort: Passata, Obst (D-096)', async ({ page, problems }) => {
+  void problems
+  await seed(page)
+  await page.addInitScript(() => localStorage.setItem('rl:profile', JSON.stringify({ name: 'Tobias', lang: 'de', region: 'de-CH' })))
+  await page.goto(`/#/l/${LIST}`)
+  await page.locator('.add input').fill('Pass')
+  await expect(page.locator('.suggestions button').first()).toHaveText(/Passata\s*→\s*tomate tamizado/)
+  await page.locator('.suggestions button').first().click()
+  await expect(page.locator('.item').first()).toContainText('Passata')
+  await expect(page.locator('.item').first()).not.toContainText('Tomatensauce')
+  await page.locator('.add input').fill('Obs')
+  await expect(page.locator('.suggestions button').first()).toHaveText(/Obst\s*→\s*fruta/)
+})
+
+test('Namen bei Artikeln in den Listeneinstellungen ausschalten (D-097)', async ({ page, problems }) => {
+  void problems
+  await seed(page, [item(1, 'Milch', 'milch'), { ...item(2, 'Brot', 'brot'), author: 'Anna' }])
+  await page.goto(`/#/l/${LIST}`)
+  await expect(page.locator('.item', { hasText: 'Brot' })).toContainText('Anna')
+  await page.getByRole('button', { name: 'Menü' }).click()
+  await page.getByRole('menuitem', { name: /Listen-Einstellungen/ }).click()
+  await page.getByLabel(/Namen bei Artikeln zeigen/).uncheck()
+  await page.getByRole('button', { name: 'Speichern' }).click()
+  await expect(page.locator('.item', { hasText: 'Brot' })).not.toContainText('Anna')
+  await page.reload()
+  await expect(page.locator('.item', { hasText: 'Brot' })).not.toContainText('Anna') // bleibt gespeichert
+})

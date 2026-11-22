@@ -1,6 +1,6 @@
 # Entscheidungen
 
-Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
+Stand: 2026-11-22 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
 
 ---
 
@@ -23,7 +23,7 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-004 · Übersetzung im MVP nur über ein eingebautes Wörterbuch
 
-- **Entscheidung:** Artikel werden über ein festes Wörterbuch übersetzt (`src/data/dictionary/`, 361 Grundbegriffe inkl. Küchenutensilien in der Abteilung „Küche & Geschirr“, 11 Sprachen, Aufbau siehe D-053. In der deutschen Datei stehen zusätzlich Schweizer Ausdrücke als Varianten, z. B. Rahm, Poulet, Rüebli, Zucchetti, Chriesi, Schoggi, Kehrichtsack, Bidon. Sie werden bei der Eingabe erkannt, angezeigt wird die erste, standarddeutsche Variante; nur bei Listen für die Deutschschweiz und Liechtenstein gilt die Schweizer Abweichung). Es gibt keine KI und keinen externen Übersetzungsdienst. Unbekannte Artikel können Nutzer mit einem eigenen Landesbegriff ergänzen.
+- **Entscheidung:** Artikel werden über ein festes Wörterbuch übersetzt (`src/data/dictionary/`, 369 Grundbegriffe inkl. Küchenutensilien in der Abteilung „Küche & Geschirr“, 11 Sprachen, Aufbau siehe D-053. In der deutschen Datei stehen zusätzlich Schweizer Ausdrücke als Varianten, z. B. Rahm, Poulet, Rüebli, Zucchetti, Chriesi, Schoggi, Kehrichtsack, Bidon. Sie werden bei der Eingabe erkannt, angezeigt wird die erste, standarddeutsche Variante; nur bei Listen für die Deutschschweiz und Liechtenstein gilt die Schweizer Abweichung). Es gibt keine KI und keinen externen Übersetzungsdienst. Unbekannte Artikel können Nutzer mit einem eigenen Landesbegriff ergänzen.
 - **Begründung:** Keine laufenden Kosten, offline verfügbar, die Begriffe sind vorhersehbar.
 - **Folgen:** Die Abdeckung ist begrenzt (siehe Ziel in Z-1). Das Wörterbuch wird über Rückmeldungen der Nutzer verbessert (D-059, S-001). Die KI-Ergänzung ist offen (F-004).
 
@@ -59,7 +59,7 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-010 · Produktfotos aus Open Food Facts, über die Produktkategorie
 
-- **Entscheidung:** Ein Kamera-Knopf am Artikel zeigt bis zu 4 Packungsfotos aus Open Food Facts, als eigene Zeile über die ganze Breite der Artikelkarte (Wunsch des Inhabers). Den Knopf gibt es nur bei offenen Artikeln und nur, wenn ein Laden gefunden oder gewählt ist (D-011). Ohne Laden sind allgemeine Landesfotos wenig hilfreich. Gesucht wird über die **Produktkategorie** (z. B. Milch → `en:milks`), nicht per Freitext. Die Suche ist auf Produkte im Reiseland beschränkt, die meistgescannten kommen zuerst. Zuerst kommen Produkte der Kette dieses Ladens, sonst die üblichen Produkte im Land. Für lose Ware (Obst, Gemüse, Frischfleisch, Fisch) und für Non-Food (Haushalt, Drogerie, Baby) gibt es keinen Foto-Knopf. Für eigene Landesbegriffe ohne Eintrag im Wörterbuch wird per Freitext gesucht. Dabei zählen nur Produkte, deren Name mit dem Begriff beginnt oder ihn als ganzes Wort enthält. Die Fotos werden nur auf Antippen gesucht („Fotos werden gesucht …“), 30 Tage lokal gespeichert und bleiben offline verfügbar. Ist Open Food Facts ausgelastet oder nicht erreichbar, versucht es die App automatisch erneut, mit denselben Wartezeiten wie bei der Ladensuche (15 s, 30 s, 1, 2, dann alle 5 Min.), mit Countdown und „jetzt“. Die Quelle wird genannt (CC BY-SA). Es gibt keine KI-Bilder und keine Fotos aus Online-Shops von Supermärkten oder Herstellern.
+- **Entscheidung:** Ein Kamera-Knopf am Artikel zeigt bis zu 4 Packungsfotos aus Open Food Facts, als eigene Zeile über die ganze Breite der Artikelkarte (Wunsch des Inhabers). Den Knopf gibt es nur bei offenen Artikeln und nur, wenn ein Laden gefunden oder gewählt ist (D-011). Ohne Laden sind allgemeine Landesfotos wenig hilfreich. Gesucht wird über die **Produktkategorie** (z. B. Milch → `en:milks`), nicht per Freitext. Die Suche ist auf Produkte im Reiseland beschränkt, die meistgescannten kommen zuerst. Zuerst kommen Produkte der Kette dieses Ladens, sonst die üblichen Produkte im Land. Für lose Ware (Obst, Gemüse, Frischfleisch, Fisch) und für Non-Food (Haushalt, Drogerie, Baby) gibt es keinen Foto-Knopf. Für eigene Landesbegriffe ohne Eintrag im Wörterbuch wird per Freitext gesucht. Dabei zählen nur Produkte, deren Name mit dem Begriff beginnt oder ihn als ganzes Wort enthält. Die Fotos werden nur auf Antippen gesucht („Fotos werden gesucht …“), 30 Tage lokal gespeichert und bleiben offline verfügbar. Ist Open Food Facts ausgelastet oder nicht erreichbar, versucht es die App automatisch erneut (15 s, 30 s, 1, 2, dann alle 5 Min.), mit Countdown und „jetzt“ (D-094). Im selben Bereich steht über den Fotos der Tipp zum Artikel, falls es einen gibt (D-095). Die Quelle wird genannt (CC BY-SA). Es gibt keine KI-Bilder und keine Fotos aus Online-Shops von Supermärkten oder Herstellern.
 - **Begründung:** Die Freitextsuche lieferte oft Unpassendes, z. B. bei „tomates“ Ketchup und Pastasauce (Rückmeldung des Inhabers). Kategorien sind deutlich treffsicherer. Open Food Facts kennt fast nur verpackte Lebensmittel, ein Knopf ohne sinnvolle Treffer wäre schlechter als gar keiner. Es sind nur wenige Suchanfragen pro Minute erlaubt, deshalb wird nur auf Antippen geladen und zwischengespeichert.
 
 ## D-011 · Supermarkt erkennen: Vorschlag über OpenStreetMap, Bestätigung durch den Nutzer
@@ -332,7 +332,7 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-055 · Eine Ansicht statt Laden- und Bearbeiten-Ansicht
 
-- **Entscheidung:** Die Liste hat nur noch eine Ansicht, Wunsch des Inhabers. Das Eingabefeld steht immer oben. Jeder offene Artikel zeigt Tipp (💡), Fotos (📷, mit Laden), in Listen mit mindestens zwei Personen „Ich hole das“ (✋, D-065) und das Menü „…“ mit Zeigen-Karte und Rückmeldung (D-073). Die Schrift hat die Grösse der früheren Bearbeiten-Ansicht. Löschen als sichtbares ✕ gibt es nur bei abgehakten Artikeln, damit offene nicht versehentlich verschwinden; offene löscht man über das Menü „…“ (D-085). Der Knopf „Ladenansicht/Bearbeiten“ und die Hinweise „Ladenansicht eingeschaltet · zurück“ entfallen.
+- **Entscheidung:** Die Liste hat nur noch eine Ansicht, Wunsch des Inhabers. Das Eingabefeld steht immer oben. Jeder offene Artikel zeigt Fotos und Tipp (📷, D-095), in Listen mit mindestens zwei Personen „Ich hole das“ (✋, D-065) und das Menü „…“ mit Zeigen-Karte und Rückmeldung (D-073). Die Schrift hat die Grösse der früheren Bearbeiten-Ansicht. Löschen als sichtbares ✕ gibt es nur bei abgehakten Artikeln, damit offene nicht versehentlich verschwinden; offene löscht man über das Menü „…“ (D-085). Der Knopf „Ladenansicht/Bearbeiten“ und die Hinweise „Ladenansicht eingeschaltet · zurück“ entfallen.
 - **Einkauf beginnt** (unsichtbar): beim ersten Abhaken oder beim Öffnen direkt im Supermarkt (D-020). Ab dann wird ein Ladenbesuch erfasst (D-043), und der Laden wird einmal genauer geprüft (D-046).
 - **Begründung:** Zwei Ansichten mit automatischem Wechsel waren schwer zu verstehen; im Laden will man auch schnell etwas ergänzen.
 - **Folgen:** Mehr Knöpfe pro Zeile. Die grosse Ladenschrift fällt weg. Der Kreis zum Abhaken bleibt 30 px gross, reagiert aber auf einen Bereich von rund 50 px (Wunsch des Inhabers).
@@ -455,13 +455,13 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-073 · Ganze Karte hakt ab, Menü „…“ für Zeigen-Karte und Rückmeldung
 
-- **Entscheidung:** Ein Tipp irgendwo auf eine Artikelkarte hakt den Artikel ab bzw. öffnet ihn wieder, auch auf Name und Übersetzung. Ausgenommen sind die Knöpfe auf der Karte (💡, ✋, …, ✕), die Fotos und Eingabefelder. Der Kreis bleibt als Anzeige und eigener Knopf. Die Übersetzung ist kein eigener Knopf mehr. Hinter dem Knopf „…“ (alle offenen Artikel) liegt ein kleines Menü mit „Dem Personal zeigen“ (Zeigen-Karte, D-032, nur mit Übersetzung), „Begriff stimmt nicht?“ (D-059, nur mit Übersetzung und Supabase) und „Löschen“ (D-085). Der Kamera-Knopf für Produktfotos (D-010) bleibt direkt auf der Karte, weil man ihn oft braucht und das Symbol zeigt, dass es Bilder gibt.
+- **Entscheidung:** Ein Tipp irgendwo auf eine Artikelkarte hakt den Artikel ab bzw. öffnet ihn wieder, auch auf Name und Übersetzung. Ausgenommen sind die Knöpfe auf der Karte (📷, ✋, …, ✕), Fotos und Tipp sowie Eingabefelder. Der Kreis bleibt als Anzeige und eigener Knopf. Die Übersetzung ist kein eigener Knopf mehr. Hinter dem Knopf „…“ (alle offenen Artikel) liegt ein kleines Menü mit „Dem Personal zeigen“ (Zeigen-Karte, D-032, nur mit Übersetzung), „Begriff stimmt nicht?“ (D-059, nur mit Übersetzung und Supabase und nicht zu Hause, D-095) und „Löschen“ (D-085). Der Kamera-Knopf für Produktfotos (D-010) bleibt direkt auf der Karte, weil man ihn oft braucht und das Symbol zeigt, dass es Bilder gibt.
 - **Begründung:** Wunsch des Inhabers. Eine grosse Tippfläche hilft im Laden mit einer Hand; Zeigen-Karte und Fotos braucht man seltener.
 - **Folgen:** Abhaken aus Versehen ist leichter möglich, aber harmlos: Der Artikel rutscht nach „Im Wagen“ und ein Tipp holt ihn zurück. Text auf der Karte lässt sich nicht mehr markieren.
 
 ## D-074 · Knöpfe am Artikel ohne Rahmen, mittig
 
-- **Entscheidung:** Die Knöpfe einer Artikelkarte (💡, 📷, ✋, …, ✕) haben keinen Rahmen mehr, nur ruhige graue Symbole mit gleich grosser Tippfläche (38 px); ein aktiver Knopf ist petrolfarben hinterlegt. Kreis und Knöpfe stehen senkrecht mittig neben Name und Übersetzung. Aufbau der Karte: Kreis | Name, darunter Übersetzung und Person | Knöpfe; Fotos und Hinweise darunter über die ganze Breite.
+- **Entscheidung:** Die Knöpfe einer Artikelkarte (📷, ✋, …, ✕) haben keinen Rahmen mehr, nur ruhige graue Symbole mit gleich grosser Tippfläche (38 px); ein aktiver Knopf ist petrolfarben hinterlegt. Kreis und Knöpfe stehen senkrecht mittig neben Name und Übersetzung. Aufbau der Karte: Kreis | Name, darunter Übersetzung und Person | Knöpfe; Fotos und Hinweise darunter über die ganze Breite.
 - **Begründung:** Wahl des Inhabers (Variante C aus fünf). Seit die ganze Karte abhakt (D-073), müssen die Knöpfe nicht mehr auffallen; Rahmen wirkten schwer und unruhig.
 - **Folgen:** Die Zeile mit Übersetzung und Person nutzt nicht mehr die ganze Breite, sondern endet links der Knöpfe; lange Begriffe brechen früher um.
 
@@ -509,7 +509,7 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-082 · Namen bei Artikeln nur mit mehreren Personen
 
-- **Entscheidung:** Unter einem Artikel steht der Name der Person, die ihn geschrieben hat, nur, wenn mehrere Personen beteiligt sind: laut Server mindestens zwei Mitglieder, oder in der Liste haben verschiedene Personen geschrieben. Allein steht unter dem Artikel nur der Landesbegriff. Bleibt gar keine Zeile übrig (allein und im eigenen Sprachraum, D-081), steht der Name mittig in der Karte.
+- **Entscheidung:** Unter einem Artikel steht der Name der Person, die ihn geschrieben hat, nur, wenn mehrere Personen beteiligt sind (und die Namen in den Listen-Einstellungen nicht ausgeschaltet sind, D-097): laut Server mindestens zwei Mitglieder, oder in der Liste haben verschiedene Personen geschrieben. Allein steht unter dem Artikel nur der Landesbegriff. Bleibt gar keine Zeile übrig (allein und im eigenen Sprachraum, D-081), steht der Name mittig in der Karte.
 - **Begründung:** Allein wiederholt sich der eigene Name unter jedem Artikel. Gleiche Regel wie bei „Ich hole das“ (D-065).
 - **Folgen:** Tritt eine zweite Person bei, erscheinen die Namen beim nächsten Öffnen der Liste, spätestens wenn sie etwas schreibt.
 
@@ -578,3 +578,27 @@ Stand: 2026-11-21 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** Im Menü der Liste gibt es „Umrechnen“, wenn die Währung des Reiselands nicht die eigene ist. Ein Blatt rechnet einen Betrag von der Landeswährung in die eigene Währung um („10 EUR ≈ CHF 9.40“), mit Knopf zum Tauschen der Richtung. Die eigene Währung ergibt sich aus dem Profil (Deutsch (Schweiz) → CHF) bzw. der Gerätesprache, sonst EUR, und lässt sich im Blatt ändern (auf dem Gerät gespeichert). Kurse von Frankfurter (api.frankfurter.dev, Referenzkurse u. a. der EZB, gratis, ohne Schlüssel), 12 Stunden auf dem Gerät gespeichert; ohne Netz gilt der letzte Kurs mit Datum. Hinweis: „Im Laden kann der Kurs der Karte leicht abweichen.“ Typische Produktpreise gibt es nicht (Idee verworfen: Open Prices hat für die meisten Länder zu wenige Daten).
 - **Begründung:** Idee des Inhabers. Im Laden will man schnell wissen, was etwas in der eigenen Währung kostet.
 - **Folgen:** Neuer externer Dienst, in der Datenschutzerklärung und der Content-Security-Policy eingetragen; übertragen werden nur die Währungscodes und die IP-Adresse, nur wenn man „Umrechnen“ öffnet.
+
+## D-094 · Wiederholte Versuche: Countdown nach der Uhr, Zeitlimit pro Anfrage
+
+- **Entscheidung:** Der Countdown bis zum nächsten automatischen Versuch (Fotos von Open Food Facts, Ladensuche) rechnet mit dem Zeitpunkt des Versuchs statt Sekunde für Sekunde herunterzuzählen (`src/ui/useCountdown.ts`). Er stimmt auch, wenn das Handy Zeitgeber im Hintergrund bremst, und der Versuch startet spätestens beim Zurückkehren in die App. Jede Anfrage an Open Food Facts hat ein Zeitlimit von 15 s, an Overpass von 35 s. Liefert Open Food Facts statt JSON eine Fehlerseite, gilt das als „nicht erreichbar“ mit neuem Versuch. Fotos warten länger als die Ladensuche: 15 s, 30 s, 1, 2, dann alle 5 Minuten.
+- **Begründung:** Rückmeldung des Inhabers: Bei „Open Food Facts nicht erreichbar“ lief der Zähler nicht immer. Ursachen: Zeitgeber, die das Handy im Hintergrund anhält; Anfragen ohne Zeitlimit, die hängen bleiben und alle weiteren blockieren (Foto-Anfragen laufen nacheinander); und die Wartezeit aus der Ladensuche (ab 5 s, D-086), die bei Open Food Facts mit wenigen erlaubten Suchen pro Minute zu früh wiederholte.
+- **Folgen:** Getestet mit nachgebildeter Uhr; das Verhalten im Hintergrund auf dem Handy nur indirekt.
+
+## D-095 · Tipp im Fotobereich, Tipp und Rückmeldung nur auf Reisen
+
+- **Entscheidung:** Der Tipp zu einem Artikel (z. B. H-Milch im Regal) hat keinen eigenen Knopf mehr. Er steht über den Fotos im selben Bereich, den der Kamera-Knopf öffnet. Gibt es keine Fotos (kein Laden, lose Ware), zeigt derselbe Knopf eine Glühbirne und öffnet nur den Tipp. Tipp und „Begriff stimmt nicht?“ erscheinen nur auf Reisen, nicht zu Hause (gleiche Sprache und Länder-Abweichung wie im Profil, wie D-081).
+- **Begründung:** Wunsch des Inhabers. Weniger Knöpfe pro Artikel; Tipps und Übersetzungsfehler betreffen das Reiseland.
+- **Folgen:** Wer den Tipp sucht, findet ihn hinter der Kamera, wenn es Fotos gibt.
+
+## D-096 · Vorschläge zeigen das passende Wort; Passata und Sammelbegriffe
+
+- **Entscheidung:** Ein Vorschlag zeigt das Wort, auf das die Eingabe passt, nicht immer den ersten Namen des Artikels („Obs“ → „Obst → fruta“ statt „Früchte“). Gewählt wird es auch so in die Liste übernommen. Hat die Länder-Abweichung im Profil ein eigenes Wort (Rahm statt Sahne), gilt weiterhin dieses. Ein Artikel mit dem gleichen Wort ersetzt den eingegebenen Text nur noch, wenn die Länder-Abweichung ein eigenes Wort hat. Neu im Wörterbuch: Passata als eigener Artikel (getrennt von Tomatensauce, Spanien „tomate tamizado“, Fotos aus `en:strained-tomatoes`) sowie die Sammelbegriffe Gemüse, Früchte/Obst, Fleisch, Getränke, Süssigkeiten, Snacks und Gewürze, je in allen 11 Sprachen.
+- **Begründung:** Rückmeldung des Inhabers: Bei „Passata“ kam der Vorschlag „Tomatensauce“, und in der Liste stand danach „Tomatensauce“. Passata (passierte Tomaten) ist zudem ein anderes Produkt als Tomatensauce. Sammelbegriffe stehen oft auf Einkaufszetteln.
+- **Folgen:** Die neuen Begriffe sind von Claude übersetzt, nicht von Muttersprachlern geprüft; Vietnamesisch und Chinesisch sind am unsichersten (S-001). Rückmeldungen über „Begriff stimmt nicht?“ fliessen in die Auswertung (D-059).
+
+## D-097 · Namen bei Artikeln ausschaltbar
+
+- **Entscheidung:** In den Listen-Einstellungen gibt es „Namen bei Artikeln zeigen“ (Standard: an). Die Einstellung gilt pro Liste und nur auf diesem Gerät.
+- **Begründung:** Wunsch des Inhabers. Wer die Namen nicht braucht, hat eine ruhigere Liste; andere Mitglieder entscheiden für sich selbst.
+- **Folgen:** Ein neues Gerät zeigt die Namen wieder, bis man sie dort ausschaltet.

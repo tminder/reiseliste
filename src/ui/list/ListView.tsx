@@ -17,7 +17,7 @@ import { formatQty, go } from '../format'
 import { AppHint } from './AppHint'
 import { ItemRow } from './ItemRow'
 import { ShopBar } from './ShopBar'
-import { DAY_MS, EXAMPLES, VISIT_ACCURACY_M, VISIT_RADIUS_M, countryChangeDeclined, declineCountryChange, dupKey, readVisit, saveVisit } from './helpers'
+import { DAY_MS, EXAMPLES, VISIT_ACCURACY_M, VISIT_RADIUS_M, countryChangeDeclined, declineCountryChange, dupKey, readVisit, saveVisit, useNamesSetting } from './helpers'
 import { ConverterSheet, EditSheet, MembersSheet, ShareSheet } from './sheets'
 import { countryCurrency, homeCurrency } from '../../lib/currency'
 
@@ -257,8 +257,11 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   const country = list ? COUNTRY_BY_CODE.get(list.country) : undefined
   const target: Lang = country?.lang ?? 'en'
   const region = country?.variant
-  // Namen bei Artikeln nur, wenn mehrere Personen beteiligt sind (D-082): Mitglieder laut Server oder verschiedene Schreibende
-  const showAuthors = sole === false || new Set(store.items.filter((i) => !i.deleted).map((i) => i.author)).size > 1
+  // Zu Hause = gleiche Sprache und gleiche Länder-Abweichung wie im Profil (D-081, D-095)
+  const abroad = !(target === profile.lang && (country?.variant ?? null) === (profile.region ?? null))
+  // Namen bei Artikeln: nur mit mehreren Personen (D-082), in den Listeneinstellungen ausschaltbar, nur auf diesem Gerät (D-097)
+  const [namesOn, setNamesOn] = useNamesSetting(id)
+  const showAuthors = namesOn && (sole === false || new Set(store.items.filter((i) => !i.deleted).map((i) => i.author)).size > 1)
   const items = store.items.filter((i) => !i.deleted)
   // Wörterbuch nur für die benötigten Sprachen laden (D-053): eigene, Landessprache, Sprachen der Einträge
   const langsReady = useLanguages([profile.lang, target, ...items.map((i) => i.lang)], [profile.lang, target])
@@ -356,7 +359,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
         <div className="title">
           <h1>{list.name}</h1>
           {/* „🇨🇭 Schweiz – Deutsch“ (D-088); zu Hause (gleiche Sprache und Abweichung wie im Profil) nicht nötig (D-081) */}
-          {!(target === profile.lang && (country?.variant ?? null) === (profile.region ?? null)) && (
+          {abroad && (
             <span className="sub">
               {country?.flag} {countryLabel(list.country, target)}
             </span>
@@ -598,7 +601,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           <section key={cat} className="group">
             <h3 data-flip={cat}>{cat === 'sonstiges' ? t('other') : categoryLabel(cat)}</h3>
             {groups.get(cat)!.map((item) => (
-              <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} canClaim={sole === false} showAuthor={showAuthors} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
+              <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} canClaim={sole === false} showAuthor={showAuthors} abroad={abroad} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
             ))}
           </section>
         ))}
@@ -619,7 +622,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
             </button>
           </h3>
           {done.map((item) => (
-            <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} canClaim={sole === false} showAuthor={showAuthors} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
+            <ItemRow key={item.id} item={item} store={store} target={target} region={region} country={list.country} shopTag={photoShop ? shopTag(photoShop) : undefined} shopName={photoShop?.brand ?? photoShop?.name} viewer={profile.lang} viewerRegion={profile.region} me={profile.name} canClaim={sole === false} showAuthor={showAuthors} abroad={abroad} onDeleted={(ids, name) => showUndo(ids, t('deletedOne', { name }))} onLocalChange={markLocal} onChecked={onChecked} />
           ))}
         </section>
       )}
@@ -674,9 +677,11 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           name={list.name}
           country={list.country}
           autoClear={list.autoClear !== false}
+          showNames={namesOn}
           autoCountry={list.autoCountry !== false}
           lang={profile.lang}
-          onSave={(name, country, autoClear, autoCountry) => {
+          onSave={(name, country, autoClear, autoCountry, showNames) => {
+            setNamesOn(showNames)
             void store.updateList({
               name,
               country,

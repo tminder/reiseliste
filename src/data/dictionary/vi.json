@@ -359,5 +359,13 @@
   "wasserkocher": ["ấm đun nước siêu tốc","ấm siêu tốc"],
   "mokkakanne": ["ấm pha cà phê moka","bình moka"],
   "kuehlbox": ["thùng giữ lạnh","thùng đá"],
-  "zopf": ["bánh mì bện"]
+  "zopf": ["bánh mì bện"],
+  "passata": ["cà chua xay nhuyễn"],
+  "gemuese": ["rau củ"],
+  "fruechte": ["trái cây","hoa quả"],
+  "fleisch": ["thịt"],
+  "getraenke": ["đồ uống"],
+  "suessigkeiten": ["kẹo","đồ ngọt"],
+  "snacks": ["đồ ăn vặt"],
+  "gewuerze": ["gia vị"]
 }

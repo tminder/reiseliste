@@ -359,5 +359,13 @@
   "wasserkocher": ["kuhalo za vodu"],
   "mokkakanne": ["moka kuhalo za kavu"],
   "kuehlbox": ["prijenosni hladnjak","rashladna torba"],
-  "zopf": ["pletenica"]
+  "zopf": ["pletenica"],
+  "passata": ["pasirana rajčica","passata"],
+  "gemuese": ["povrće"],
+  "fruechte": ["voće"],
+  "fleisch": ["meso"],
+  "getraenke": ["pića"],
+  "suessigkeiten": ["slatkiši"],
+  "snacks": ["grickalice"],
+  "gewuerze": ["začini"]
 }

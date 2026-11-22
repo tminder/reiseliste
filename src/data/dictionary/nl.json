@@ -359,5 +359,13 @@
   "wasserkocher": ["waterkoker"],
   "mokkakanne": ["percolator"],
   "kuehlbox": ["koelbox","koeltas"],
-  "zopf": ["vlechtbrood"]
+  "zopf": ["vlechtbrood"],
+  "passata": ["gezeefde tomaten","passata"],
+  "gemuese": ["groente","groenten"],
+  "fruechte": ["fruit"],
+  "fleisch": ["vlees"],
+  "getraenke": ["dranken"],
+  "suessigkeiten": ["snoep"],
+  "snacks": ["zoutjes","borrelhapjes"],
+  "gewuerze": ["specerijen"]
 }

@@ -359,5 +359,13 @@
   "wasserkocher": ["快煮壺","電熱水壺"],
   "mokkakanne": ["摩卡壺"],
   "kuehlbox": ["保冷箱","冰桶"],
-  "zopf": ["辮子麵包"]
+  "zopf": ["辮子麵包"],
+  "passata": ["番茄泥"],
+  "gemuese": ["蔬菜"],
+  "fruechte": ["水果"],
+  "fleisch": ["肉類"],
+  "getraenke": ["飲料"],
+  "suessigkeiten": ["糖果"],
+  "snacks": ["零食"],
+  "gewuerze": ["香料"]
 }

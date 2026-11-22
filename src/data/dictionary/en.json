@@ -76,7 +76,7 @@
   "olivenoel": ["olive oil"],
   "sonnenblumenoel": ["sunflower oil","cooking oil"],
   "essig": ["vinegar"],
-  "tomatensauce": ["tomato sauce","passata"],
+  "tomatensauce": ["tomato sauce","pasta sauce"],
   "dosentomaten": ["chopped tomatoes","tinned tomatoes"],
   "ketchup": ["ketchup"],
   "senf": ["mustard"],
@@ -359,5 +359,13 @@
   "wasserkocher": ["kettle","electric kettle"],
   "mokkakanne": ["moka pot","stovetop espresso maker"],
   "kuehlbox": ["cool box","cooler","cool bag"],
-  "zopf": ["plaited bread","braided loaf"]
+  "zopf": ["plaited bread","braided loaf"],
+  "passata": ["passata","strained tomatoes"],
+  "gemuese": ["vegetables","veggies"],
+  "fruechte": ["fruit"],
+  "fleisch": ["meat"],
+  "getraenke": ["drinks","beverages"],
+  "suessigkeiten": ["sweets","candy"],
+  "snacks": ["snacks"],
+  "gewuerze": ["spices"]
 }

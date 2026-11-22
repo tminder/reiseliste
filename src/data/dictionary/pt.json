@@ -359,5 +359,13 @@
   "wasserkocher": ["chaleira elétrica"],
   "mokkakanne": ["cafeteira italiana"],
   "kuehlbox": ["geleira","mala térmica"],
-  "zopf": ["pão entrançado","trança"]
+  "zopf": ["pão entrançado","trança"],
+  "passata": ["polpa de tomate","passata"],
+  "gemuese": ["legumes","hortaliças"],
+  "fruechte": ["fruta"],
+  "fleisch": ["carne"],
+  "getraenke": ["bebidas"],
+  "suessigkeiten": ["doces","guloseimas"],
+  "snacks": ["aperitivos","snacks"],
+  "gewuerze": ["especiarias","temperos"]
 }

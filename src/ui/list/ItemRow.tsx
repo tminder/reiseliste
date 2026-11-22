@@ -30,6 +30,7 @@ export function ItemRow({
   me,
   canClaim,
   showAuthor,
+  abroad,
   onDeleted,
   onLocalChange,
   onChecked,
@@ -51,6 +52,8 @@ export function ItemRow({
   canClaim: boolean
   /** Name der Person anzeigen: nur, wenn mehrere in der Liste sind (D-082) */
   showAuthor: boolean
+  /** Nicht zu Hause (andere Sprache oder Länder-Abweichung als im Profil): Tipp und „Begriff stimmt nicht?“ zeigen (D-095) */
+  abroad: boolean
   /** Für „Gelöscht · Rückgängig“ (D-042) */
   onDeleted: (ids: string[], name: string) => void
   /** Eigene Änderung melden, damit sie nicht als „von anderen“ aufleuchtet (D-044) */
@@ -69,15 +72,19 @@ export function ItemRow({
   const shownChecked = pending ?? item.checked
   const rowRef = useRef<HTMLDivElement>(null)
   const [showPhotos, setShowPhotos] = useState(false)
-  const [showHint, setShowHint] = useState(false)
   const [override, setOverride] = useState(item.localOverride ?? '')
   // Eigene Landesbegriffe gibt es nur mit dem Community-Modul (D-027)
   const override_ = FEATURES.community ? item.localOverride : null
   const local = override_ || nameIn(item.conceptId, target, region)
   // Gross: der Artikel in der Sprache des Betrachters (sonst wie eingegeben). Klein: Landessprache.
   // Gleiche Sprache, andere Länder-Abweichung (Sahne → Rahm, D-056): nur ersetzen, wenn der Text genau ein Name des Artikels ist,
-  // sonst gingen Zusätze verloren („Schwarze Schokolade“)
-  const sameLangSwap = item.lang === viewer && !!viewerRegion && exactConcept(item.text, item.lang) === item.conceptId
+  // sonst gingen Zusätze verloren („Schwarze Schokolade“). Und nur, wenn die Abweichung ein eigenes Wort hat:
+  // „Passata“ bleibt „Passata“ und wird nicht zum ersten Namen „Tomatensauce“ (D-096)
+  const sameLangSwap =
+    item.lang === viewer &&
+    !!viewerRegion &&
+    exactConcept(item.text, item.lang) === item.conceptId &&
+    nameIn(item.conceptId, viewer, viewerRegion) !== nameIn(item.conceptId, viewer)
   const own = ((item.lang !== viewer || sameLangSwap) && nameIn(item.conceptId, viewer, viewerRegion)) || item.text
   const hints = item.conceptId ? CONCEPT_BY_ID.get(item.conceptId)?.hint : undefined
   const hint = hints?.[viewer] ?? hints?.en
@@ -85,6 +92,8 @@ export function ItemRow({
   const [showReport, setShowReport] = useState(false)
   const sameAsOwn = !!local && local.trim().toLowerCase() === own.trim().toLowerCase()
   const photosOk = !!local && !!shopTag && hasPhotos(item.conceptId, override_)
+  // Tipps (z. B. H-Milch im Regal) betreffen das Reiseland: zu Hause nicht zeigen (D-095)
+  const tipOk = !!hint && abroad
 
   // Abhaken bzw. wieder öffnen (D-044): erst Häkchen und Durchstreichen zeigen, dann rutscht die Zeile an ihren neuen Platz
   function toggle() {
@@ -164,15 +173,15 @@ export function ItemRow({
       </div>
       {/* Knöpfe ohne Rahmen, mittig neben Name und Übersetzung (D-074) */}
       <div className="item-actions">
-        {hint && !item.checked && (
-          <button className={`ghost small ${showHint ? 'active' : ''}`} aria-label={t('tip')} onClick={() => setShowHint(!showHint)}>
-            <Lightbulb size={18} />
-          </button>
-        )}
-        {photosOk && !item.checked && (
-          // Fotos direkt sichtbar (D-073): oft gebraucht, und das Symbol zeigt, dass es Bilder gibt
-          <button className={`ghost small ${showPhotos ? 'active' : ''}`} aria-label={t('photos')} onClick={() => setShowPhotos(!showPhotos)}>
-            <Camera size={18} />
+        {(photosOk || tipOk) && !item.checked && (
+          // Fotos direkt sichtbar (D-073), der Tipp steht im selben Bereich darüber (D-095). Nur Tipp: Glühbirne als Symbol
+          <button
+            className={`ghost small ${showPhotos ? 'active' : ''}`}
+            aria-label={photosOk ? t('photos') : t('tip')}
+            aria-expanded={showPhotos}
+            onClick={() => setShowPhotos(!showPhotos)}
+          >
+            {photosOk ? <Camera size={18} /> : <Lightbulb size={18} />}
           </button>
         )}
         {!item.checked && (canClaim || claimedBy === me) && (
@@ -211,7 +220,7 @@ export function ItemRow({
                       <Presentation size={18} /> {t('showStaff')}
                     </button>
                   )}
-                  {local && supabase && (
+                  {local && supabase && abroad && (
                     <button
                       role="menuitem"
                       onClick={() => {
@@ -273,12 +282,16 @@ export function ItemRow({
         {editing && (
           <p className="muted small-text correction-hint">{t('correctionHint')}</p>
         )}
-        {showHint && hint && !item.checked && <div className="hint">{hint}</div>}
       </div>
       {/* Fotos über die ganze Breite der Karte, unter Text und Knöpfen */}
-      {showPhotos && local && (
+      {showPhotos && !item.checked && (photosOk || tipOk) && (
         <div className="item-wide">
-          <PhotoStrip country={country} conceptId={item.conceptId} term={local} store={shopTag} storeName={shopName} />
+          {tipOk && (
+            <p className="hint">
+              <Lightbulb size={14} /> {hint}
+            </p>
+          )}
+          {photosOk && local && <PhotoStrip country={country} conceptId={item.conceptId} term={local} store={shopTag} storeName={shopName} />}
         </div>
       )}
       {showCard && local && <ShowCard term={local} qty={item.qty} own={own} target={target} country={country} onClose={() => setShowCard(false)} />}

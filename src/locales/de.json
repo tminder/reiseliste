@@ -127,6 +127,8 @@
   "yourCurrency": "Deine Währung",
   "rateFrom": "Referenzkurs vom {date}. Im Laden kann der Kurs der Karte leicht abweichen.",
   "rateMissing": "Kein Kurs verfügbar. Bist du online?",
+  "showNames": "Namen bei Artikeln zeigen",
+  "showNamesHint": "Wer einen Artikel geschrieben hat. Nur auf diesem Gerät.",
   "cancel": "Abbrechen",
   "shareList": "Liste teilen",
   "demoShare": "Demo-Modus: Ohne Supabase sehen andere die Liste nicht.",

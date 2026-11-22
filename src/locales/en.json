@@ -127,6 +127,8 @@
   "yourCurrency": "Your currency",
   "rateFrom": "Reference rate from {date}. Your card’s rate may differ slightly.",
   "rateMissing": "No rate available. Are you online?",
+  "showNames": "Show names on items",
+  "showNamesHint": "Who added an item. Only on this device.",
   "cancel": "Cancel",
   "shareList": "Share list",
   "demoShare": "Demo mode: without Supabase others cannot see the list.",

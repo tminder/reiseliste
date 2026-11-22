@@ -4,6 +4,7 @@ import { Check, ChevronDown, LocateFixed, MapPin, Store as StoreIcon } from 'luc
 import { t } from '../../i18n'
 import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, looksInside, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
 import { RETRY_S } from './helpers'
+import { useCountdown } from '../useCountdown'
 import { cachedCountry, detectCountry } from '../../lib/country'
 
 export function ShopBar({
@@ -38,7 +39,8 @@ export function ShopBar({
     error?: string
     permission?: boolean
     help?: boolean
-    retryIn?: number
+    /** Zeitpunkt des nächsten automatischen Versuchs (D-094) */
+    retryAt?: number
     more?: boolean
     dismissed?: boolean
   }>(() => recentSuggestion() ?? {})
@@ -86,7 +88,7 @@ export function ShopBar({
       if (err.retry) {
         const wait = RETRY_S[Math.min(attempt, RETRY_S.length - 1)]
         setAttempt((a) => a + 1)
-        setState((s) => ({ error: err.message, retryIn: wait, more: s.more }))
+        setState((s) => ({ error: err.message, retryAt: Date.now() + wait * 1000, more: s.more }))
       } else setState((s) => ({ error: err.message, permission: err.permission, more: s.more }))
     }
   }
@@ -158,17 +160,8 @@ export function ShopBar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shop])
 
-  // Countdown und automatischer neuer Versuch bei überlastetem Server
-  useEffect(() => {
-    if (state.retryIn == null || shop) return
-    if (state.retryIn <= 0) {
-      void detect()
-      return
-    }
-    const t = window.setTimeout(() => setState((s) => (s.retryIn != null ? { ...s, retryIn: s.retryIn - 1 } : s)), 1000)
-    return () => window.clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.retryIn, shop])
+  // Countdown und automatischer neuer Versuch bei überlastetem Server (D-094)
+  const retryIn = useCountdown(shop ? null : state.retryAt, () => void detect())
 
   const current = shop ?? (state.dismissed ? null : (state.shops?.[0] ?? null))
   const others = (state.shops ?? []).filter((x) => x.id !== current?.id).slice(0, 5)
@@ -209,7 +202,7 @@ export function ShopBar({
   // Fehler und Countdown stehen nur im Blatt; in der Zeile steht solange „Suche Laden …“.
   const close = () => setState((st) => ({ ...st, more: false }))
   const open = () => {
-    if (!state.shops && !state.loading && state.retryIn == null) void detect(true)
+    if (!state.shops && !state.loading && state.retryAt == null) void detect(true)
     setState((st) => ({ ...st, more: true }))
   }
   // Im Laden: „Im <Laden>“ statt Meter (D-078). Gemessen ab dem letzten Standort dieser Sitzung, nicht ab gespeicherten Distanzen.
@@ -262,7 +255,7 @@ export function ShopBar({
             {state.error && (
               <p className="muted small-text shop-error">
                 {state.error}
-                {state.retryIn != null && <> {t('retryIn', { s: state.retryIn })}</>}{' '}
+                {retryIn != null && <> {t('retryIn', { s: retryIn })}</>}{' '}
                 <button className="link" onClick={() => void detect(true)}>
                   {t('now')}
                 </button>

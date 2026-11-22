@@ -76,7 +76,7 @@
   "olivenoel": ["olio d'oliva"],
   "sonnenblumenoel": ["olio di semi di girasole"],
   "essig": ["aceto"],
-  "tomatensauce": ["passata di pomodoro"],
+  "tomatensauce": ["sugo di pomodoro","salsa di pomodoro"],
   "dosentomaten": ["pomodori pelati"],
   "ketchup": ["ketchup"],
   "senf": ["senape"],
@@ -359,5 +359,13 @@
   "wasserkocher": ["bollitore"],
   "mokkakanne": ["moka","caffettiera"],
   "kuehlbox": ["borsa frigo","frigo portatile"],
-  "zopf": ["treccia di pane"]
+  "zopf": ["treccia di pane"],
+  "passata": ["passata di pomodoro","passata"],
+  "gemuese": ["verdura","ortaggi"],
+  "fruechte": ["frutta"],
+  "fleisch": ["carne"],
+  "getraenke": ["bevande","bibite"],
+  "suessigkeiten": ["dolciumi","caramelle"],
+  "snacks": ["snack salati","stuzzichini"],
+  "gewuerze": ["spezie"]
 }

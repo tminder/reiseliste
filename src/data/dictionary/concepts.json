@@ -359,5 +359,13 @@
  { "id": "wasserkocher", "category": "kueche" },
  { "id": "mokkakanne", "category": "kueche" },
  { "id": "kuehlbox", "category": "kueche" },
- { "id": "zopf", "category": "brot" }
+ { "id": "zopf", "category": "brot" },
+ { "id": "passata", "category": "vorrat", "off": "en:strained-tomatoes" },
+ { "id": "gemuese", "category": "obst" },
+ { "id": "fruechte", "category": "obst" },
+ { "id": "fleisch", "category": "fleisch" },
+ { "id": "getraenke", "category": "getraenke" },
+ { "id": "suessigkeiten", "category": "vorrat", "off": "en:confectioneries" },
+ { "id": "snacks", "category": "vorrat", "off": "en:salty-snacks" },
+ { "id": "gewuerze", "category": "vorrat", "off": "en:spices" }
 ]

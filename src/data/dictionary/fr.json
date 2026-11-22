@@ -359,5 +359,13 @@
   "wasserkocher": ["bouilloire","bouilloire électrique"],
   "mokkakanne": ["cafetière italienne"],
   "kuehlbox": ["glacière","sac isotherme"],
-  "zopf": ["pain tressé","tresse"]
+  "zopf": ["pain tressé","tresse"],
+  "passata": ["coulis de tomate","passata"],
+  "gemuese": ["légumes"],
+  "fruechte": ["fruits"],
+  "fleisch": ["viande"],
+  "getraenke": ["boissons"],
+  "suessigkeiten": ["confiseries","bonbons"],
+  "snacks": ["biscuits apéritif","amuse-bouches"],
+  "gewuerze": ["épices"]
 }

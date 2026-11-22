@@ -298,8 +298,15 @@ button.link {
   font-size: 0.9em;
 }
 .hint {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--warn);
+}
+/* Tipp über den Fotos (D-095) */
+.item-wide .hint {
+  margin: 4px 0 6px;
+}
+.item-wide .hint svg {
+  vertical-align: -0.15em;
 }
 .check {
   width: 30px;

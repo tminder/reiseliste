@@ -1,5 +1,6 @@
 // Hilfen der Listenansicht: Ladenbesuch, gleicher Artikel (D-045), abgelehnter Länderwechsel (D-040)
 import { exactConcept, normalize } from '../../lib/translate'
+import { useState } from 'react'
 import { type Item } from '../../lib/store'
 
 // Wartezeiten zwischen automatischen neuen Versuchen, wenn OpenStreetMap ausgelastet ist (danach alle 5 Min.)
@@ -65,3 +66,25 @@ export const EXAMPLES: [string | null, string][] = [
   ['500 g', 'hack'],
   ['1 kg', 'tomaten'],
 ]
+
+/** Namen bei Artikeln zeigen (D-097): Einstellung pro Liste, nur auf diesem Gerät. Standard: an. */
+export function useNamesSetting(listId: string): [boolean, (on: boolean) => void] {
+  const key = `rl:hideNames:${listId}`
+  const [on, setOn] = useState(() => {
+    try {
+      return localStorage.getItem(key) !== '1'
+    } catch {
+      return true
+    }
+  })
+  const set = (v: boolean) => {
+    setOn(v)
+    try {
+      if (v) localStorage.removeItem(key)
+      else localStorage.setItem(key, '1')
+    } catch {
+      /* egal */
+    }
+  }
+  return [on, set]
+}

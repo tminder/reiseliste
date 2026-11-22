@@ -10,6 +10,7 @@
 
 import { t } from '../i18n'
 import { normalize } from './translate'
+import { timeout } from './net'
 import { CONCEPTS } from '../data/dictionary'
 
 export interface Photo {
@@ -96,13 +97,19 @@ type OffProduct = { code: string; product_name?: string; brands?: string; image_
 async function fetchJson(url: string): Promise<OffProduct[]> {
   let res: Response
   try {
-    res = await fetch(url)
+    // Ohne Zeitlimit kann eine hängende Anfrage alle weiteren blockieren (Anfragen laufen nacheinander, D-094)
+    res = await fetch(url, { signal: timeout(15_000) })
   } catch {
     throw new PhotoError(t('errOffUnreachable'), true)
   }
   if (res.status === 429 || res.status >= 500) throw new PhotoError(t('errOffBusy', { status: res.status }), true)
   if (!res.ok) throw new PhotoError(t('errOffStatus', { status: res.status }))
-  return ((await res.json()) as { products?: OffProduct[] }).products ?? []
+  try {
+    return ((await res.json()) as { products?: OffProduct[] }).products ?? []
+  } catch {
+    // Ausgelastet liefert Open Food Facts manchmal eine HTML-Seite statt JSON
+    throw new PhotoError(t('errOffUnreachable'), true)
+  }
 }
 
 function toPhotos(products: OffProduct[]): Photo[] {
