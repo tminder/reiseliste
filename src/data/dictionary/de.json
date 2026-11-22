@@ -111,7 +111,7 @@
   "weisswein": ["Weisswein","Weißwein"],
   "eiswuerfel": ["Eiswürfel","Eiswürfeli"],
   "glace": ["Eis","Glace","Speiseeis"],
-  "tkpizza": ["Tiefkühlpizza","TK-Pizza","gefrorene Pizza"],
+  "tkpizza": ["Tiefkühlpizza","gefrorene Pizza","TK-Pizza"],
   "pommes": ["Pommes","Pommes frites","Frites"],
   "wcpapier": ["Toilettenpapier","WC-Papier","Klopapier"],
   "kuechenrolle": ["Küchenrolle","Haushaltspapier","Haushaltpapier"],
@@ -221,7 +221,7 @@
   "sekt": ["Sekt","Prosecco","Schaumwein"],
   "rosewein": ["Roséwein","Rosé"],
   "alkfreibier": ["alkoholfreies Bier"],
-  "tkgemuese": ["Tiefkühlgemüse","TK-Gemüse","gefrorenes Gemüse"],
+  "tkgemuese": ["Tiefkühlgemüse","tiefgekühltes Gemüse","gefrorenes Gemüse","TK-Gemüse"],
   "fischstaebchen": ["Fischstäbchen"],
   "frischhaltefolie": ["Frischhaltefolie","Klarsichtfolie"],
   "gefrierbeutel": ["Gefrierbeutel","Zipbeutel"],
@@ -309,7 +309,7 @@
   "whisky": ["Whisky"],
   "sangria": ["Sangria"],
   "energydrink": ["Energydrink","Energy-Drink"],
-  "tkbeeren": ["TK-Beeren","tiefgekühlte Beeren","gefrorene Beeren","Tiefkühlbeeren"],
+  "tkbeeren": ["tiefgekühlte Beeren","Tiefkühlbeeren","gefrorene Beeren","TK-Beeren"],
   "eisamstiel": ["Eis am Stiel","Glace am Stängel"],
   "wcreiniger": ["WC-Reiniger","Toilettenreiniger"],
   "bleiche": ["Bleiche","Chlorreiniger"],
@@ -368,7 +368,7 @@
   "suessigkeiten": ["Süssigkeiten","Süßigkeiten"],
   "snacks": ["Snacks","Knabbereien","Apéro-Gebäck"],
   "gewuerze": ["Gewürze"],
-  "tkspinat": ["TK-Spinat","Tiefkühlspinat","gefrorener Spinat"],
-  "tkfisch": ["TK-Fisch","Tiefkühlfisch","gefrorener Fisch"],
-  "tkgarnelen": ["TK-Crevetten","TK-Garnelen","gefrorene Crevetten"]
+  "tkspinat": ["Tiefkühlspinat","tiefgekühlter Spinat","gefrorener Spinat","TK-Spinat"],
+  "tkfisch": ["Tiefkühlfisch","tiefgekühlter Fisch","gefrorener Fisch","TK-Fisch"],
+  "tkgarnelen": ["tiefgekühlte Garnelen","tiefgekühlte Crevetten","gefrorene Garnelen","gefrorene Crevetten","TK-Garnelen","TK-Crevetten"]
 }

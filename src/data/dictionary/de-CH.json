@@ -6,5 +6,7 @@
   "haehnchen": ["Poulet"],
   "haehnchenbrust": ["Pouletbrust"],
   "paprika": ["Peperoni"],
-  "zucchini": ["Zucchetti"]
+  "zucchini": ["Zucchetti"],
+  "garnelen": ["Crevetten"],
+  "tkgarnelen": ["tiefgekühlte Crevetten"]
 }

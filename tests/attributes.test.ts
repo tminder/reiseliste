@@ -17,7 +17,7 @@ describe('Merkmale', () => {
   })
 
   it('eigener TK-Begriff: kein Zusatz', () => {
-    expect(show('TK-Spinat', 'de', 'es')).toEqual({ id: 'tkspinat', term: 'espinacas congeladas', attrs: [] })
+    expect(show('Tiefkühlspinat', 'de', 'es')).toEqual({ id: 'tkspinat', term: 'espinacas congeladas', attrs: [] })
     expect(show('gefrorene Beeren', 'de', 'es').attrs).toEqual([])
   })
 
