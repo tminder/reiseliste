@@ -150,9 +150,10 @@ button.link {
   text-align: left;
 }
 
+/* Pfeil, Listenname und Knöpfe auf einer Linie, auch wenn unter dem Namen das Land steht */
 .topbar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   justify-content: space-between;
 }
@@ -174,6 +175,14 @@ button.link {
   color: var(--accent);
   text-decoration: none;
   font-size: 1.3rem;
+}
+.topbar .back {
+  display: flex;
+  align-items: center;
+  height: 38px;
+}
+.topbar h1 {
+  line-height: 38px;
 }
 .list-link {
   color: inherit;

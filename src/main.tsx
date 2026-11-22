@@ -45,6 +45,16 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') versionCheck()
 })
 
+// iOS lässt die Seite nach dem Schliessen der Tastatur manchmal ein Stück verschoben, obwohl alles Platz hat:
+// Dann erscheint ein Scrollbalken und die Kopfzeile ist oben angeschnitten. Passt die Seite, zurück nach oben (S-053).
+function resetStrayScroll() {
+  setTimeout(() => {
+    if (window.scrollY > 0 && document.documentElement.scrollHeight <= window.innerHeight + 1) window.scrollTo(0, 0)
+  }, 300)
+}
+window.visualViewport?.addEventListener('resize', resetStrayScroll)
+document.addEventListener('focusout', resetStrayScroll)
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

@@ -807,9 +807,9 @@ test.describe('Vorschlag: nächster geöffneter Laden (D-099)', () => {
     await expect(page.locator('.shop-options li', { hasText: 'Carrefour' })).toContainText('Carrer de Balmes 12offen bis 22:00') // eigene Zeilen
     await expect(page.locator('.shop-options li', { hasText: 'Carrefour' })).toContainText(/\d+ m/) // Distanz auch beim gewählten Laden
     await expect(page.locator('.shop-options li', { hasText: 'Carrefour' }).locator('.shop-check')).toBeVisible()
-    // Geschlossen: grau, ohne Distanz (D-101)
+    // Geschlossen: grau (D-101)
     await expect(page.locator('.shop-options li', { hasText: 'Mercadona' }).locator('button').first()).toHaveClass(/closed/)
-    await expect(page.locator('.shop-options li', { hasText: 'Mercadona' })).not.toContainText(/\d+ m/)
+    await expect(page.locator('.shop-options li', { hasText: 'Mercadona' })).toContainText(/\d+ m/) // Distanz bleibt in der Auswahl
     await expect(page.getByRole('link', { name: 'Carrefour Express in der Karten-App öffnen' })).toHaveAttribute('href', /openstreetmap\.org\/\?mlat=41\.395&mlon=2\.17/)
   })
 })

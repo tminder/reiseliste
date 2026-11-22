@@ -310,8 +310,8 @@ export function ShopBar({
                           <span className={hoursOf(x)?.open === false ? 'hours-closed' : undefined}>{hoursOf(x)?.long ?? t('hoursUnknown')}</span>
                         </span>
                       </span>
-                      {/* Grau bei geschlossen und bei unbekannten Zeiten; Distanz nur, wenn nicht geschlossen (D-101) */}
-                      {hoursOf(x)?.open !== false && <span className="muted">{formatDistance(x.distance)}</span>}
+                      {/* Grau bei geschlossen und bei unbekannten Zeiten; Distanz immer, für die Wahl (D-101) */}
+                      <span className="muted">{formatDistance(x.distance)}</span>
                     </button>
                     {x.lat != null && x.lon != null && (
                       // Karten-App öffnen (D-101); Antippen der Zeile wählt weiterhin den Laden
