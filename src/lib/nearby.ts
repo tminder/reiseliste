@@ -161,7 +161,7 @@ function relocate(result: NearbyResult, lat: number, lon: number): NearbyResult 
 /**
  * Läden in der Nähe – eine einzige Anfrage an OpenStreetMap (schont die Server, vermeidet Sperren).
  * `inside` = true: Läden im Umkreis der GPS-Genauigkeit (man ist wohl drin), alle Ladenarten, Supermärkte zuerst.
- * Sonst die nächsten Supermärkte; pro Stufe (1, 3, 10, 20 km) höchstens 40 Treffer, damit die Antwort klein bleibt.
+ * Sonst die nächsten Supermärkte und kleinen Läden einer Kette (D-100); pro Stufe (1, 3, 10, 20 km) höchstens 40 Treffer, damit die Antwort klein bleibt.
  */
 /**
  * precise: Beginn des Einkaufs (D-046). Frischer Standort (höchstens 10 s alt), neue Suche schon ab
@@ -186,7 +186,7 @@ export async function findNearbyShops(force = false, precise = false): Promise<N
   const at = `${lat},${lon}`
   const query = `[out:json][timeout:25];
 nwr(around:${radius},${at})["shop"~"^(supermarket|convenience|greengrocer|chemist)$"];out center tags 30;
-${FAR_STEPS_M.map((r) => `nwr(around:${r},${at})["shop"="supermarket"];out center tags 40;`).join('\n')}`
+${FAR_STEPS_M.map((r) => `(nwr(around:${r},${at})["shop"="supermarket"];nwr(around:${r},${at})["shop"="convenience"]["brand"];);out center tags 40;`).join('\n')}`
 
   const seen = new Set<string>()
   const all = (await runQuery(query))
@@ -205,7 +205,8 @@ ${FAR_STEPS_M.map((r) => `nwr(around:${r},${at})["shop"="supermarket"];out cente
         lat: p.lat,
         lon: p.lon,
         ...(tags.opening_hours ? { hours: tags.opening_hours } : {}),
-        rank: tags.shop === 'supermarket' ? 0 : 1, // Supermärkte vor Kiosken, Drogerien usw.
+        // Supermärkte und kleine Läden einer Kette (Denner Express, Coop Pronto, Migrolino …, D-100) vor Kiosken, Drogerien usw.
+        rank: tags.shop === 'supermarket' || (tags.shop === 'convenience' && !!tags.brand) ? 0 : 1,
       }
     })
     .filter((s): s is Shop & { rank: number } => !!s)

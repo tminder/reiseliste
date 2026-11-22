@@ -749,3 +749,31 @@ test.describe('Öffnungszeiten (D-099)', () => {
     await expect(page.locator('.sheet')).toContainText('laut OpenStreetMap')
   })
 })
+
+test.describe('Kleine Läden einer Kette (D-100)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 47.37, longitude: 8.54, accuracy: 20 } })
+  test('Denner Express 400 m entfernt wird vorgeschlagen, Kiosk ohne Marke nicht', async ({ page, problems }) => {
+    void problems
+    const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
+    let query = ''
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'ch', state: 'Zürich' } })))
+    await page.route(/interpreter/, (r) => {
+      query = decodeURIComponent(r.request().postData() ?? '')
+      return r.fulfill(
+        json({
+          elements: [
+            { type: 'node', id: 1, lat: 47.3736, lon: 8.54, tags: { shop: 'convenience', name: 'Denner Express', brand: 'Denner' } },
+            { type: 'node', id: 2, lat: 47.3725, lon: 8.54, tags: { shop: 'convenience', name: 'Kiosk am Eck' } },
+          ],
+        }),
+      )
+    })
+    await seed(page, [item(1, 'Milch', 'milch')], 'CH-DE')
+    await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+    await page.goto(`/#/l/${LIST}`)
+    await expect(page.locator('.shop-current')).toContainText('Denner Express')
+    expect(query).toContain('["shop"="convenience"]["brand"]')
+    await page.getByRole('button', { name: 'Laden ändern' }).click()
+    await expect(page.locator('.shop-options')).not.toContainText('Kiosk am Eck')
+  })
+})
