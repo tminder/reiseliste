@@ -258,7 +258,7 @@ export function ShopBar({
   const streetOf = (s: Shop) => state.shops?.find((x) => x.id === s.id)?.street ?? (streets[s.id] || knownStreet(s) || undefined)
   return (
     <div className="shopline">
-      <button className={`shop-current${here ? ' here' : ''}${current ? '' : ' muted'}${current && hoursOf(current)?.open === false ? ' closed' : ''}`} aria-label={t('changeShop')} aria-expanded={!!state.more} onClick={open}>
+      <button className={`shop-current${here ? ' here' : ''}${current ? '' : ' muted'}${current && !here && hoursOf(current)?.open !== true ? ' closed' : ''}`} aria-label={t('changeShop')} aria-expanded={!!state.more} onClick={open}>
         {current ? (
           <>
             <StoreIcon size={15} />
@@ -266,7 +266,7 @@ export function ShopBar({
               {here && <span className="muted">{t('shopIn')} </span>}
               {shopTitle(current, streetOf(current))}
             </span>
-            {!here && !shop && <span className="muted">{formatDistance(current.distance)}</span>}
+            {!here && !shop && hoursOf(current)?.open !== false && <span className="muted">{formatDistance(current.distance)}</span>}
             {/* Zeile oben knapp: nur wenn geschlossen ein dezentes „· zu“ (D-101); Zeiten stehen in der Auswahl */}
             {hoursOf(current)?.open === false && <span className="muted shop-hours">· {t('hoursClosedShort')}</span>}
             {hoursOf(current)?.closesSoon && <span className="muted shop-hours">· {hoursOf(current)!.closesSoon}</span>}
@@ -290,7 +290,7 @@ export function ShopBar({
                 {options.map((x) => (
                   <li key={x.id}>
                     <button
-                      className={`${x.id === current?.id ? 'active' : ''}${hoursOf(x)?.open === false ? ' closed' : ''}`}
+                      className={`${x.id === current?.id ? 'active' : ''}${hoursOf(x)?.open !== true ? ' closed' : ''}`}
                       onClick={() => {
                         onChoose(x)
                         close()
@@ -303,14 +303,15 @@ export function ShopBar({
                           {/* Gewählt: Häkchen direkt nach dem Namen, rechts bleibt die Distanz (D-101) */}
                           {x.id === current?.id && <Check size={16} className="shop-check" aria-label={t('selected')} />}
                         </span>
-                        {/* Strasse (D-101) und Öffnungszeiten (D-099) in einer zweiten Zeile */}
+                        {/* Strasse (D-101) und Öffnungszeiten (D-099) je auf einer eigenen Zeile */}
+                        {(x.street ?? streetOf(x)) && <span className="muted shop-hours-long">{x.street ?? streetOf(x)}</span>}
                         <span className="muted shop-hours-long">
-                          {(x.street ?? streetOf(x)) && <>{x.street ?? streetOf(x)} · </>}
                           {/* Geschlossen in Orange, damit es sich von „unbekannt“ abhebt (D-099) */}
                           <span className={hoursOf(x)?.open === false ? 'hours-closed' : undefined}>{hoursOf(x)?.long ?? t('hoursUnknown')}</span>
                         </span>
                       </span>
-                      <span className="muted">{formatDistance(x.distance)}</span>
+                      {/* Grau bei geschlossen und bei unbekannten Zeiten; Distanz nur, wenn nicht geschlossen (D-101) */}
+                      {hoursOf(x)?.open !== false && <span className="muted">{formatDistance(x.distance)}</span>}
                     </button>
                     {x.lat != null && x.lon != null && (
                       // Karten-App öffnen (D-101); Antippen der Zeile wählt weiterhin den Laden
