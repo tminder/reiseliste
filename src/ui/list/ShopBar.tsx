@@ -1,6 +1,7 @@
 // Laden in der Nähe finden und wählen (D-033), Ladenbesuch erkennen
 import { useEffect, useRef, useState } from 'react'
-import { Check, ChevronDown, LocateFixed, MapPin, Store as StoreIcon } from 'lucide-react'
+import { Check, ChevronDown, LocateFixed, Map as MapIcon, MapPin, Store as StoreIcon } from 'lucide-react'
+import { mapUrl } from '../../lib/links'
 import { t, uiLang } from '../../i18n'
 import { describeHours } from '../../lib/openingHours'
 import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, looksInside, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
@@ -231,9 +232,10 @@ export function ShopBar({
   const locale = uiLang()
   // Öffnungszeiten aus OpenStreetMap (D-099); fehlen sie beim gewählten Laden, aus der letzten Suche
   const hoursOf = (s: Shop) => describeHours(s.hours ?? state.shops?.find((x) => x.id === s.id)?.hours, t, locale)
+  const streetOf = (s: Shop) => state.shops?.find((x) => x.id === s.id)?.street
   return (
     <div className="shopline">
-      <button className={`shop-current${here ? ' here' : ''}${current ? '' : ' muted'}`} aria-label={t('changeShop')} aria-expanded={!!state.more} onClick={open}>
+      <button className={`shop-current${here ? ' here' : ''}${current ? '' : ' muted'}${current && hoursOf(current)?.open === false ? ' closed' : ''}`} aria-label={t('changeShop')} aria-expanded={!!state.more} onClick={open}>
         {current ? (
           <>
             <StoreIcon size={15} />
@@ -242,8 +244,8 @@ export function ShopBar({
               {current.name}
             </span>
             {!here && !shop && <span className="muted">{formatDistance(current.distance)}</span>}
-            {/* Öffnungszeiten (D-099): kurz in der Zeile, ausführlich in der Auswahl */}
-            {hoursOf(current)?.short && <span className={hoursOf(current)!.open ? 'muted shop-hours' : 'shop-hours closed'}>· {hoursOf(current)!.short}</span>}
+            {/* Zeile oben knapp: nur wenn geschlossen ein dezentes „· zu“ (D-101); Zeiten stehen in der Auswahl */}
+            {hoursOf(current)?.open === false && <span className="muted shop-hours">· {t('hoursClosedShort')}</span>}
           </>
         ) : (
           <>
@@ -264,7 +266,7 @@ export function ShopBar({
                 {options.map((x) => (
                   <li key={x.id}>
                     <button
-                      className={x.id === current?.id ? 'active' : ''}
+                      className={`${x.id === current?.id ? 'active' : ''}${hoursOf(x)?.open === false ? ' closed' : ''}`}
                       onClick={() => {
                         onChoose(x)
                         close()
@@ -272,10 +274,19 @@ export function ShopBar({
                     >
                       <span className="shop-option-text">
                         <span className="shop-name">{x.name}</span>
-                        {hoursOf(x) && <span className={hoursOf(x)!.open ? 'muted shop-hours-long' : 'shop-hours-long closed'}>{hoursOf(x)!.long}</span>}
+                        {/* Strasse (D-101) und Öffnungszeiten (D-099) in einer zweiten Zeile */}
+                        {(x.street || streetOf(x) || hoursOf(x)) && (
+                          <span className="muted shop-hours-long">{[x.street ?? streetOf(x), hoursOf(x)?.long].filter(Boolean).join(' · ')}</span>
+                        )}
                       </span>
                       <span className="muted">{x.id === current?.id ? <Check size={16} /> : formatDistance(x.distance)}</span>
                     </button>
+                    {x.lat != null && x.lon != null && (
+                      // Karten-App öffnen (D-101); Antippen der Zeile wählt weiterhin den Laden
+                      <a className="shop-map" href={mapUrl(x.lat, x.lon, x.name)} target="_blank" rel="noreferrer" aria-label={t('openInMaps', { name: x.name })}>
+                        <MapIcon size={18} />
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

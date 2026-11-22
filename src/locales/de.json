@@ -136,6 +136,8 @@
   "hoursOpensAt": "öffnet {time}",
   "hoursOpensOn": "öffnet {day} {time}",
   "hoursSource": "Öffnungszeiten laut OpenStreetMap, ohne Gewähr. Feiertage sind nicht berücksichtigt.",
+  "hoursClosedShort": "zu",
+  "openInMaps": "{name} in der Karten-App öffnen",
   "cancel": "Abbrechen",
   "shareList": "Liste teilen",
   "demoShare": "Demo-Modus: Ohne Supabase sehen andere die Liste nicht.",

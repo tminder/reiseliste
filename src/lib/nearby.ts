@@ -14,6 +14,8 @@ export interface Shop {
   lon?: number
   /** Öffnungszeiten aus OpenStreetMap (`opening_hours`), roh (D-099) */
   hours?: string
+  /** Strasse und Hausnummer aus OpenStreetMap (D-101) */
+  street?: string
 }
 
 /** retry = true: vorübergehendes Problem (Server ausgelastet, kein Netz, GPS-Timeout) – später nochmal versuchen */
@@ -207,6 +209,7 @@ ${FAR_STEPS_M.map((r) => `(nwr(around:${r},${at})["shop"="supermarket"];nwr(arou
         lat: p.lat,
         lon: p.lon,
         ...(tags.opening_hours ? { hours: tags.opening_hours } : {}),
+        ...(tags['addr:street'] ? { street: `${tags['addr:street']}${tags['addr:housenumber'] ? ' ' + tags['addr:housenumber'] : ''}` } : {}),
         // Supermärkte und kleine Läden einer Kette (Denner Express, Coop Pronto, Migrolino …, D-100) vor Kiosken, Drogerien usw.
         rank: tags.shop === 'supermarket' || (tags.shop === 'convenience' && !!tags.brand) ? 0 : 1,
       }

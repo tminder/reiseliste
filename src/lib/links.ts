@@ -31,3 +31,11 @@ const ENTRY = (() => {
 
 /** Wurde diese Liste über einen fremden Link geöffnet (nicht selbst angelegt oder schon gespeichert)? */
 export const openedByLink = (id: string) => ENTRY.id === id && !ENTRY.known
+
+/** Laden in der Karten-App öffnen (D-101): iPhone Apple Karten, Android Auswahl der Karten-Apps, sonst OpenStreetMap */
+export function mapUrl(lat: number, lon: number, name: string): string {
+  const q = encodeURIComponent(name)
+  if (isIos()) return `https://maps.apple.com/?ll=${lat},${lon}&q=${q}`
+  if (isAndroid()) return `geo:${lat},${lon}?q=${lat},${lon}(${q})`
+  return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=18/${lat}/${lon}`
+}

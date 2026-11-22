@@ -136,6 +136,8 @@
   "hoursOpensAt": "opens {time}",
   "hoursOpensOn": "opens {day} {time}",
   "hoursSource": "Opening hours from OpenStreetMap, without guarantee. Public holidays are not considered.",
+  "hoursClosedShort": "closed",
+  "openInMaps": "Open {name} in maps",
   "cancel": "Cancel",
   "shareList": "Share list",
   "demoShare": "Demo mode: without Supabase others cannot see the list.",

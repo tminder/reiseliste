@@ -733,17 +733,20 @@ test.describe('Öffnungszeiten (D-099)', () => {
     await page.goto(`/#/l/${LIST}`)
   }
 
-  test('offen: „bis 21:30“ in der Zeile', async ({ page, problems }) => {
+  test('offen: Zeiten in der Auswahl, Zeile knapp', async ({ page, problems }) => {
     void problems
     await open(page, new Date(2026, 10, 23, 10, 0)) // Montag
     await expect(page.locator('.shop-current')).toContainText('Mercadona')
-    await expect(page.locator('.shop-hours')).toHaveText('· bis 21:30')
+    await expect(page.locator('.shop-hours')).toHaveCount(0) // offen: Zeile bleibt knapp (D-101)
+    await page.getByRole('button', { name: 'Laden ändern' }).click()
+    await expect(page.locator('.shop-hours-long')).toHaveText('offen bis 21:30')
   })
 
   test('Sonntag: „geschlossen“, im Blatt mit nächster Öffnung', async ({ page, problems }) => {
     void problems
     await open(page, new Date(2026, 10, 22, 10, 0)) // Sonntag
-    await expect(page.locator('.shop-hours.closed')).toHaveText('· geschlossen')
+    await expect(page.locator('.shop-current.closed')).toBeVisible() // dezent grau (D-101)
+    await expect(page.locator('.shop-hours')).toHaveText('· zu')
     await page.getByRole('button', { name: 'Laden ändern' }).click()
     await expect(page.locator('.shop-hours-long')).toHaveText(/geschlossen · öffnet Mo\.? 09:00/)
     await expect(page.locator('.sheet')).toContainText('laut OpenStreetMap')
@@ -790,7 +793,7 @@ test.describe('Vorschlag: nächster geöffneter Laden (D-099)', () => {
         json({
           elements: [
             { type: 'node', id: 1, lat: 41.392, lon: 2.17, tags: { shop: 'supermarket', name: 'Mercadona', opening_hours: 'Mo-Sa 09:00-21:30; Su off' } },
-            { type: 'node', id: 2, lat: 41.395, lon: 2.17, tags: { shop: 'supermarket', name: 'Carrefour Express', opening_hours: 'Mo-Su 08:00-22:00' } },
+            { type: 'node', id: 2, lat: 41.395, lon: 2.17, tags: { shop: 'supermarket', name: 'Carrefour Express', opening_hours: 'Mo-Su 08:00-22:00', 'addr:street': 'Carrer de Balmes', 'addr:housenumber': '12' } },
           ],
         }),
       ),
@@ -799,6 +802,9 @@ test.describe('Vorschlag: nächster geöffneter Laden (D-099)', () => {
     await seed(page, [item(1, 'Milch', 'milch')])
     await page.goto(`/#/l/${LIST}`)
     await expect(page.locator('.shop-current')).toContainText('Carrefour Express')
-    await expect(page.locator('.shop-hours')).toHaveText('· bis 22:00')
+    // Ladenauswahl: Strasse und Zeiten, Link zur Karte (D-101)
+    await page.getByRole('button', { name: 'Laden ändern' }).click()
+    await expect(page.locator('.shop-options li', { hasText: 'Carrefour' })).toContainText('Carrer de Balmes 12 · offen bis 22:00')
+    await expect(page.getByRole('link', { name: 'Carrefour Express in der Karten-App öffnen' })).toHaveAttribute('href', /openstreetmap\.org\/\?mlat=41\.395&mlon=2\.17/)
   })
 })

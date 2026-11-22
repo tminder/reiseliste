@@ -1471,9 +1471,32 @@ label.convert-from {
   flex: none;
   white-space: nowrap;
 }
-.shop-hours.closed,
-.shop-hours-long.closed {
-  color: var(--warn);
+/* Geschlossen (D-101): dezent grau statt Warnfarbe */
+.shop-current.closed,
+.shop-current.closed > svg:first-child,
+.shop-options button.closed .shop-name {
+  color: var(--muted);
+}
+/* Zeile in der Ladenauswahl mit Karten-Knopf rechts (D-101) */
+.shop-options li {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--line);
+}
+.shop-options li > button {
+  flex: 1;
+  min-width: 0;
+  border-bottom: 0;
+}
+.shop-options button > .muted {
+  white-space: nowrap;
+}
+.shop-map {
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding: 0 6px 0 14px;
+  color: var(--accent);
 }
 .shop-option-text {
   display: flex;
