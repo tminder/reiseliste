@@ -520,6 +520,23 @@ test.describe('Ladensuche: Fehler nur im Auswahlblatt (D-086)', () => {
     await expect(page.locator('.sheet')).toContainText('OpenStreetMap ist nicht erreichbar')
     await expect(page.locator('.sheet')).toContainText(/Neuer Versuch|\d+ s/)
   })
+
+  test('Läuft der neue Versuch, verschwinden Fehler und Countdown', async ({ page, problems }) => {
+    void problems
+    await page.clock.install()
+    await page.route(/nominatim/, (r) => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ address: { country_code: 'es' } }) }))
+    let fail = true
+    await page.route(/interpreter/, (r) => (fail ? r.abort() : undefined)) // danach hängt die Anfrage
+    await seed(page, [item(1, 'Milch', 'milch')])
+    await page.goto(`/#/l/${LIST}`)
+    await page.getByRole('button', { name: 'Laden ändern' }).click()
+    await expect(page.locator('.sheet')).toContainText('Neuer Versuch in')
+    fail = false
+    await page.clock.runFor(20_000)
+    await expect(page.locator('.sheet')).toContainText('Suche')
+    await expect(page.locator('.sheet')).not.toContainText('Neuer Versuch')
+    await expect(page.locator('.sheet')).not.toContainText('nicht erreichbar')
+  })
 })
 
 test.describe('Neue Liste zu Hause in der Schweiz (D-087)', () => {

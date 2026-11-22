@@ -73,8 +73,12 @@ export function ShopBar({
   // Letzter eigener Standort dieser Sitzung: für die Anzeige „Im <Laden>“ (D-078)
   const [pos, setPos] = useState<{ lat: number; lon: number; accuracy: number } | null>(null)
 
-  /** manual: „Neu suchen“ – immer neue Anfrage. Sonst still im Hintergrund, neue Anfrage nur nach Ortswechsel. */
-  async function detect(manual = false, precise = false) {
+  /**
+   * manual: „Neu suchen“ – immer neue Anfrage. Sonst still im Hintergrund, neue Anfrage nur nach Ortswechsel.
+   * retry: automatischer neuer Versuch nach einem Fehler; ein offenes Auswahlblatt bleibt offen.
+   */
+  async function detect(manual = false, precise = false, retry = false) {
+    const keep = manual || retry
     lastCheck.current = Date.now()
     if (!manual) {
       // Erst prüfen, ob man im Reiseland ist; null = Land nicht unterstützt, also sicher nicht das Reiseland
@@ -87,12 +91,13 @@ export function ShopBar({
     }
     if (manual) setAttempt(0)
     // Ohne bisheriges Ergebnis „Suche …“ zeigen, sonst bleibt der bisherige Laden ruhig stehen
-    setState((s) => ({ ...s, loading: manual || !s.shops, more: manual ? s.more : false }))
+    // Fehler und Countdown weg, sobald der neue Versuch läuft: sonst stand „Neuer Versuch in 0 s“ bis zum Ergebnis da
+    setState((s) => ({ ...s, loading: manual || !s.shops, more: keep ? s.more : false, error: undefined, retryAt: undefined }))
     try {
       const result = await findNearbyShops(manual, precise)
       setPos({ lat: result.lat, lon: result.lon, accuracy: result.accuracy ?? 999 })
       setAttempt(0)
-      setState((s) => ({ shops: result.shops, inside: result.inside, accuracy: result.accuracy, more: manual ? s.more : false, dismissed: result.fresh ? false : s.dismissed }))
+      setState((s) => ({ shops: result.shops, inside: result.inside, accuracy: result.accuracy, more: keep ? s.more : false, dismissed: result.fresh ? false : s.dismissed }))
       const here = isInsideSupermarket(result)
       if (here) onArrived(here)
     } catch (e) {
@@ -199,7 +204,7 @@ export function ShopBar({
   }, [state.more, state.shops, shop])
 
   // Countdown und automatischer neuer Versuch bei überlastetem Server (D-094)
-  const retryIn = useCountdown(shop ? null : state.retryAt, () => void detect())
+  const retryIn = useCountdown(shop ? null : state.retryAt, () => void detect(false, false, true))
 
   const current = shop ?? (state.dismissed ? null : firstShop)
   const others = (state.shops ?? []).filter((x) => x.id !== current?.id).slice(0, 5)

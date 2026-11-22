@@ -533,7 +533,7 @@ Stand: 2026-11-22 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-086 · Ladensuche: Fehler im Blatt, am Anfang häufiger neu versuchen
 
-- **Entscheidung:** Ist OpenStreetMap nicht erreichbar oder ausgelastet, steht in der Ladenzeile „Suche Laden …“. Die Fehlermeldung mit Countdown und „jetzt“ steht nur im Blatt „Laden wählen“, das ein Tipp auf die Zeile öffnet. Neue Versuche nach 5, 10, 20 und 30 s, nach 1 und 2 Minuten, dann alle 5 Minuten. Der Stift in der Ladenzeile ist durch einen kleinen Pfeil ersetzt.
+- **Entscheidung:** Ist OpenStreetMap nicht erreichbar oder ausgelastet, steht in der Ladenzeile „Suche Laden …“. Die Fehlermeldung mit Countdown und „jetzt“ steht nur im Blatt „Laden wählen“, das ein Tipp auf die Zeile öffnet. Neue Versuche nach 5, 10, 20 und 30 s, nach 1 und 2 Minuten, dann alle 5 Minuten. Läuft ein neuer Versuch, verschwinden Meldung und Countdown, es steht nur „Suche …“; ein offenes Blatt bleibt dabei offen und zeigt danach die Läden (vorher blieb „Neuer Versuch in 0 s“ stehen, bis die Anfrage zu Ende war). Der Stift in der Ladenzeile ist durch einen kleinen Pfeil ersetzt.
 - **Begründung:** Wunsch des Inhabers. Die lange Fehlermeldung verdrängte den Kopf der Liste, und ausgelastete Server sind oft nach wenigen Sekunden wieder frei.
 - **Folgen:** In den ersten 30 Sekunden bis zu vier Versuche, verteilt auf zwei Overpass-Server. Danach so sparsam wie bisher.
 
