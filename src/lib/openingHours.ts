@@ -106,17 +106,23 @@ export function openState(week: Week, now = new Date()): OpenState {
 /** Kurztext für die Anzeige: { short: „bis 21:00“ / „geschlossen“, long: „offen bis 21:00“ / „geschlossen · öffnet Mo 08:00“, open } */
 export function describeHours(
   raw: string | undefined,
-  t: (key: 'hoursUntil' | 'hoursOpenUntil' | 'hoursOpen24' | 'hoursClosed' | 'hoursOpensAt' | 'hoursOpensOn', v?: Record<string, string>) => string,
+  t: (key: 'hoursUntil' | 'hoursOpenUntil' | 'hoursOpen24' | 'hoursClosed' | 'hoursOpensAt' | 'hoursOpensOn' | 'hoursClosesAt', v?: Record<string, string>) => string,
   locale: string,
   now = new Date(),
-): { open: boolean; short: string; long: string } | null {
+): { open: boolean; short: string; long: string; closesSoon?: string } | null {
   const week = parseOpeningHours(raw)
   if (!week) return null
   const s = openState(week, now)
   const time = (d: Date) => d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
   if (s.open)
     return s.until
-      ? { open: true, short: t('hoursUntil', { time: time(s.until) }), long: t('hoursOpenUntil', { time: time(s.until) }) }
+      ? {
+          open: true,
+          short: t('hoursUntil', { time: time(s.until) }),
+          long: t('hoursOpenUntil', { time: time(s.until) }),
+          // Schliesst in höchstens einer Stunde (D-099): „schliesst 18:30“
+          ...(s.until.getTime() - now.getTime() <= 60 * 60 * 1000 ? { closesSoon: t('hoursClosesAt', { time: time(s.until) }) } : {}),
+        }
       : { open: true, short: '', long: t('hoursOpen24') }
   if (!s.next) return { open: false, short: t('hoursClosed'), long: t('hoursClosed') }
   const sameDay = s.next.toDateString() === now.toDateString()

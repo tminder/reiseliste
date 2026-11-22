@@ -890,3 +890,18 @@ test.describe('Karten-App auf dem iPhone wählen (D-101)', () => {
     await expect(page.getByRole('link', { name: 'Mercadona in der Karten-App öffnen' })).toHaveAttribute('href', /openstreetmap\.org/)
   })
 })
+
+test.describe('Schliesst bald (D-099)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
+  test('weniger als eine Stunde vor Ladenschluss: „schliesst 21:30“', async ({ page, problems }) => {
+    void problems
+    const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
+    await page.clock.setFixedTime(new Date(2026, 10, 23, 20, 45)) // Montag
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
+    await page.route(/interpreter/, (r) => r.fulfill(json({ elements: [{ type: 'node', id: 1, lat: 41.392, lon: 2.17, tags: { shop: 'supermarket', name: 'Mercadona', opening_hours: 'Mo-Sa 09:00-21:30' } }] })))
+    await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+    await seed(page, [item(1, 'Milch', 'milch')])
+    await page.goto(`/#/l/${LIST}`)
+    await expect(page.locator('.shop-hours')).toHaveText('· schliesst 21:30')
+  })
+})

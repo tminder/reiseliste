@@ -129,6 +129,7 @@
   "rateMissing": "No rate available. Are you online?",
   "showNames": "Show names on items",
   "showNamesHint": "Who added an item. Only on this device.",
+  "hoursClosesAt": "closes {time}",
   "hoursUntil": "until {time}",
   "hoursOpenUntil": "open until {time}",
   "hoursOpen24": "open 24 hours",

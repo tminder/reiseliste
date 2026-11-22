@@ -269,6 +269,7 @@ export function ShopBar({
             {!here && !shop && <span className="muted">{formatDistance(current.distance)}</span>}
             {/* Zeile oben knapp: nur wenn geschlossen ein dezentes „· zu“ (D-101); Zeiten stehen in der Auswahl */}
             {hoursOf(current)?.open === false && <span className="muted shop-hours">· {t('hoursClosedShort')}</span>}
+            {hoursOf(current)?.closesSoon && <span className="muted shop-hours">· {hoursOf(current)!.closesSoon}</span>}
           </>
         ) : (
           <>

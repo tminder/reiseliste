@@ -129,6 +129,7 @@
   "rateMissing": "Kein Kurs verfügbar. Bist du online?",
   "showNames": "Namen bei Artikeln zeigen",
   "showNamesHint": "Wer einen Artikel geschrieben hat. Nur auf diesem Gerät.",
+  "hoursClosesAt": "schliesst {time}",
   "hoursUntil": "bis {time}",
   "hoursOpenUntil": "offen bis {time}",
   "hoursOpen24": "rund um die Uhr offen",
