@@ -130,8 +130,9 @@ export type NearbyResult = { shops: Shop[]; inside: boolean; accuracy?: number }
 type LastResult = { at: number; lat: number; lon: number; accuracy?: number; result: NearbyResult }
 
 // Letztes Suchergebnis im lokalen Speicher – übersteht ein Neuladen der Seite.
-// Schlüssel mit Version: Ergebnisse älterer Versionen (ohne Öffnungszeiten D-099, ohne Ketten-Läden D-100) neu suchen.
-const LAST_KEY = 'rl:nearby2'
+// Schlüssel mit Version: Ergebnisse älterer Versionen neu suchen. Bei jedem neuen Feld der Läden erhöhen
+// (2: Öffnungszeiten D-099, Ketten-Läden D-100; 3: Strasse D-101).
+const LAST_KEY = 'rl:nearby3'
 function readLast(): LastResult | null {
   try {
     const raw = localStorage.getItem(LAST_KEY)
