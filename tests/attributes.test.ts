@@ -16,6 +16,11 @@ describe('Merkmale', () => {
     expect(show('gefrorene Himbeeren', 'de', 'es')).toEqual({ id: 'himbeeren', term: expect.any(String), attrs: ['❄️ congelado'] })
   })
 
+  it('auch nachgestellt und mit Tippfehlern', () => {
+    for (const t of ['Himbeeren tiefgekühlt', 'Himbeeren (tiefgekühlt)', 'gefrohrene Himbeeren', 'Himbeeren teifgekühlt', 'TK-Himbeeren'])
+      expect(show(t, 'de', 'es'), t).toEqual({ id: 'himbeeren', term: expect.any(String), attrs: ['❄️ congelado'] })
+  })
+
   it('eigener TK-Begriff: kein Zusatz', () => {
     expect(show('Tiefkühlspinat', 'de', 'es')).toEqual({ id: 'tkspinat', term: 'espinacas congeladas', attrs: [] })
     expect(show('gefrorene Beeren', 'de', 'es').attrs).toEqual([])

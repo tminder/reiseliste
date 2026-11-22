@@ -22,7 +22,8 @@ const ATTRIBUTES: Attribute[] = [
     id: 'frozen',
     icon: '❄️',
     words: {
-      de: ['gefroren', 'tiefgekuhlt', 'tiefgefroren', 'tiefkuhl', 'tk'],
+      // mit häufigen Tippfehlern (gefrohren, teifgekühlt)
+      de: ['gefroren', 'gefrohren', 'tiefgekuhlt', 'teifgekuhlt', 'tiefgefroren', 'tiefgefrohren', 'tiefkuhl', 'tk'],
       en: ['frozen'],
       es: ['congelad'],
       pt: ['congelad'],
