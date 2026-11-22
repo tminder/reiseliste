@@ -136,7 +136,7 @@ type LastResult = { at: number; lat: number; lon: number; accuracy?: number; res
 // Letztes Suchergebnis im lokalen Speicher – übersteht ein Neuladen der Seite.
 // Schlüssel mit Version: Ergebnisse älterer Versionen neu suchen. Bei jedem neuen Feld der Läden erhöhen
 // (2: Öffnungszeiten D-099, Ketten-Läden D-100; 3: Strasse D-101; 4: Filiale D-103).
-const LAST_KEY = 'rl:nearby4'
+const LAST_KEY = 'rl:nearby5'
 function readLast(): LastResult | null {
   try {
     const raw = localStorage.getItem(LAST_KEY)
@@ -176,6 +176,14 @@ function relocate(result: NearbyResult, lat: number, lon: number): NearbyResult 
  * precise: Beginn des Einkaufs (D-046). Frischer Standort (höchstens 10 s alt), neue Suche schon ab
  * 75 m Abstand – in Städten liegen Läden oft nah beieinander. Ohne Ortswechsel keine neue Suche (D-102).
  */
+/**
+ * Ketten, deren kleine Läden in OpenStreetMap oft ohne Marke (`brand`) als „convenience“ eingetragen sind,
+ * z. B. „Denner Express“ an der Landenbergstrasse in Zürich. Erkannt am ersten Wort des Namens (D-100).
+ */
+const CHAIN_NAMES =
+  '^(Denner|Coop|Migros|Migrolino|Volg|Spar|Avec|Aldi|Lidl|Carrefour|Mercadona|Dia|Billa|Rewe|Edeka|Penny|Netto|Albert Heijn|Jumbo|Tesco|Sainsbury|Monoprix|Franprix|Intermarché|Auchan|Conad|Pam|Despar|Eurospin|Konzum|Tommy|Pingo Doce|Continente|Sklavenitis|AB)( |-|$)'
+const CHAIN_RE = new RegExp(CHAIN_NAMES, 'i')
+
 export async function findNearbyShops(force = false, precise = false): Promise<NearbyResult & { fresh: boolean; lat: number; lon: number }> {
   const pos = await getPosition(precise ? 10_000 : undefined)
   const { latitude: lat, longitude: lon, accuracy } = pos.coords
@@ -194,7 +202,7 @@ export async function findNearbyShops(force = false, precise = false): Promise<N
   const at = `${lat},${lon}`
   const query = `[out:json][timeout:25];
 nwr(around:${radius},${at})["shop"~"^(supermarket|convenience|greengrocer|chemist)$"];out center tags 30;
-${FAR_STEPS_M.map((r) => `(nwr(around:${r},${at})["shop"="supermarket"];nwr(around:${r},${at})["shop"="convenience"]["brand"];);out center tags 40;`).join('\n')}`
+${FAR_STEPS_M.map((r) => `(nwr(around:${r},${at})["shop"="supermarket"];nwr(around:${r},${at})["shop"="convenience"]["brand"];nwr(around:${r},${at})["shop"="convenience"]["name"~"${CHAIN_NAMES}",i];);out center tags 40;`).join('\n')}`
 
   const seen = new Set<string>()
   const all = (await runQuery(query))
@@ -216,7 +224,7 @@ ${FAR_STEPS_M.map((r) => `(nwr(around:${r},${at})["shop"="supermarket"];nwr(arou
         ...(tags.branch ? { branch: tags.branch } : {}),
         ...(tags['addr:street'] ? { street: `${tags['addr:street']}${tags['addr:housenumber'] ? ' ' + tags['addr:housenumber'] : ''}` } : {}),
         // Supermärkte und kleine Läden einer Kette (Denner Express, Coop Pronto, Migrolino …, D-100) vor Kiosken, Drogerien usw.
-        rank: tags.shop === 'supermarket' || (tags.shop === 'convenience' && !!tags.brand) ? 0 : 1,
+        rank: tags.shop === 'supermarket' || (tags.shop === 'convenience' && (!!tags.brand || CHAIN_RE.test(name))) ? 0 : 1,
       }
     })
     .filter((s): s is Shop & { rank: number } => !!s)

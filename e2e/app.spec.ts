@@ -765,7 +765,7 @@ test.describe('Kleine Läden einer Kette (D-100)', () => {
       return r.fulfill(
         json({
           elements: [
-            { type: 'node', id: 1, lat: 47.3736, lon: 8.54, tags: { shop: 'convenience', name: 'Denner Express', brand: 'Denner' } },
+            { type: 'node', id: 1, lat: 47.3736, lon: 8.54, tags: { shop: 'convenience', name: 'Denner Express' } }, // ohne Marke, nur Name (wie Landenbergstrasse)
             { type: 'node', id: 2, lat: 47.3725, lon: 8.54, tags: { shop: 'convenience', name: 'Kiosk am Eck' } },
           ],
         }),
@@ -776,6 +776,7 @@ test.describe('Kleine Läden einer Kette (D-100)', () => {
     await page.goto(`/#/l/${LIST}`)
     await expect(page.locator('.shop-current')).toContainText('Denner Express')
     expect(query).toContain('["shop"="convenience"]["brand"]')
+    expect(query).toContain('["shop"="convenience"]["name"~"^(Denner|')
     await page.getByRole('button', { name: 'Laden ändern' }).click()
     await expect(page.locator('.shop-options')).not.toContainText('Kiosk am Eck')
   })
