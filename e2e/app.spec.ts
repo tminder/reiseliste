@@ -801,7 +801,7 @@ test.describe('Vorschlag: nächster geöffneter Laden (D-099)', () => {
     await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
     await seed(page, [item(1, 'Milch', 'milch')])
     await page.goto(`/#/l/${LIST}`)
-    await expect(page.locator('.shop-current')).toContainText('Carrefour Express')
+    await expect(page.locator('.shop-current')).toContainText('Carrefour Express Carrer de Balmes') // Strasse dazu (D-103)
     // Ladenauswahl: Strasse und Zeiten, Link zur Karte (D-101)
     await page.getByRole('button', { name: 'Laden ändern' }).click()
     await expect(page.locator('.shop-options li', { hasText: 'Carrefour' })).toContainText('Carrer de Balmes 12 · offen bis 22:00')

@@ -371,7 +371,6 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
               {country?.flag} {countryLabel(list.country, target)}
             </span>
           )}
-          <ShopBar shop={shop} chosenAt={shopChosenAt} shopping={shopping} activeAt={activeAt} firstChecked={firstChecked} country={list.country} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
         </div>
         <SyncBadge state={store.sync} error={lastSyncError} />
         {/* Teilen direkt in der Kopfzeile, das Menü ist für den Rest (D-017) */}
@@ -446,6 +445,10 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
           )}
         </div>
       </header>
+      {/* Laden in eigener Zeile über die ganze Breite (D-103), eingerückt wie der Listenname */}
+      <div className="list-shop">
+        <ShopBar shop={shop} chosenAt={shopChosenAt} shopping={shopping} activeAt={activeAt} firstChecked={firstChecked} country={list.country} onChoose={chooseShop} onSuggest={setSuggested} onArrived={onArrived} />
+      </div>
       {store.removed && (
         // Von einem anderen Mitglied entfernt (D-084): Liste bleibt lesbar, wird aber nicht mehr abgeglichen
         <div className="note warn">

@@ -560,12 +560,12 @@ button.chip {
   text-decoration: none;
   color: var(--muted);
 }
-.topbar:has(.shopline) {
-  align-items: flex-start;
+/* Ladenzeile unter der Kopfzeile, volle Breite, eingerückt wie der Listenname (D-103) */
+.list-shop {
+  margin: -8px 0 0 32px;
 }
-.topbar:has(.shopline) .back,
-.topbar:has(.shopline) > button {
-  margin-top: 2px;
+.list-shop:empty {
+  display: none;
 }
 
 .menu-wrap {

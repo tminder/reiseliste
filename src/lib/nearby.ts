@@ -16,6 +16,8 @@ export interface Shop {
   hours?: string
   /** Strasse und Hausnummer aus OpenStreetMap (D-101) */
   street?: string
+  /** Filiale (`branch`), z. B. „Wipkingen“ (D-103) */
+  branch?: string
 }
 
 /** retry = true: vorübergehendes Problem (Server ausgelastet, kein Netz, GPS-Timeout) – später nochmal versuchen */
@@ -133,8 +135,8 @@ type LastResult = { at: number; lat: number; lon: number; accuracy?: number; res
 
 // Letztes Suchergebnis im lokalen Speicher – übersteht ein Neuladen der Seite.
 // Schlüssel mit Version: Ergebnisse älterer Versionen neu suchen. Bei jedem neuen Feld der Läden erhöhen
-// (2: Öffnungszeiten D-099, Ketten-Läden D-100; 3: Strasse D-101).
-const LAST_KEY = 'rl:nearby3'
+// (2: Öffnungszeiten D-099, Ketten-Läden D-100; 3: Strasse D-101; 4: Filiale D-103).
+const LAST_KEY = 'rl:nearby4'
 function readLast(): LastResult | null {
   try {
     const raw = localStorage.getItem(LAST_KEY)
@@ -211,6 +213,7 @@ ${FAR_STEPS_M.map((r) => `(nwr(around:${r},${at})["shop"="supermarket"];nwr(arou
         lat: p.lat,
         lon: p.lon,
         ...(tags.opening_hours ? { hours: tags.opening_hours } : {}),
+        ...(tags.branch ? { branch: tags.branch } : {}),
         ...(tags['addr:street'] ? { street: `${tags['addr:street']}${tags['addr:housenumber'] ? ' ' + tags['addr:housenumber'] : ''}` } : {}),
         // Supermärkte und kleine Läden einer Kette (Denner Express, Coop Pronto, Migrolino …, D-100) vor Kiosken, Drogerien usw.
         rank: tags.shop === 'supermarket' || (tags.shop === 'convenience' && !!tags.brand) ? 0 : 1,
@@ -362,4 +365,17 @@ export async function lookupStreets(shops: Shop[]): Promise<Record<string, strin
     /* egal */
   }
   return saved
+}
+
+/**
+ * Name für die Ladenzeile (D-103): Filialen einer Kette unterscheidbar machen. „Coop“ → „Coop Wipkingen“ (Filiale aus
+ * OpenStreetMap) bzw. „Coop Scheffelstrasse“ (Strasse ohne Hausnummer). Immer ergänzt, auch bei „Coop City“, weil
+ * es mehrere davon geben kann; steht die Angabe schon im Namen, nicht doppelt.
+ */
+export function shopTitle(shop: Shop, street?: string): string {
+  const name = shop.name
+  if (shop.branch && !name.includes(shop.branch)) return `${name} ${shop.branch}`
+  const streetName = (street ?? shop.street ?? '').replace(/\s+\d+\s*\w?$/, '').trim()
+  if (streetName && !name.includes(streetName)) return `${name} ${streetName}`
+  return name
 }

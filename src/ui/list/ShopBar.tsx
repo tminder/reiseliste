@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Check, ChevronDown, LocateFixed, Map as MapIcon, MapPin, Store as StoreIcon } from 'lucide-react'
 import { isIos, mapApp, mapLink, needsMapChoice, setMapApp } from '../../lib/links'
-import { knownStreet, lookupStreets } from '../../lib/nearby'
+import { knownStreet, lookupStreets, shopTitle } from '../../lib/nearby'
 import { t, uiLang } from '../../i18n'
 import { describeHours } from '../../lib/openingHours'
 import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, looksInside, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
@@ -264,7 +264,7 @@ export function ShopBar({
             <StoreIcon size={15} />
             <span className="shop-name">
               {here && <span className="muted">{t('shopIn')} </span>}
-              {current.name}
+              {shopTitle(current, streetOf(current))}
             </span>
             {!here && !shop && <span className="muted">{formatDistance(current.distance)}</span>}
             {/* Zeile oben knapp: nur wenn geschlossen ein dezentes „· zu“ (D-101); Zeiten stehen in der Auswahl */}
@@ -298,7 +298,8 @@ export function ShopBar({
                     >
                       <span className="shop-option-text">
                         <span className="shop-name">
-                          {x.name}
+                          {/* Filiale zum Namen; die Strasse steht schon in der zweiten Zeile (D-103) */}
+                          {shopTitle(x, '')}
                           {/* Gewählt: Häkchen direkt nach dem Namen, rechts bleibt die Distanz (D-101) */}
                           {x.id === current?.id && <Check size={16} className="shop-check" aria-label={t('selected')} />}
                         </span>
