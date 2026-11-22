@@ -1465,3 +1465,22 @@ label.convert-from {
   font-size: 1.7rem;
   font-weight: 700;
 }
+
+/* Öffnungszeiten (D-099) */
+.shop-hours {
+  flex: none;
+  white-space: nowrap;
+}
+.shop-hours.closed,
+.shop-hours-long.closed {
+  color: var(--warn);
+}
+.shop-option-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  text-align: left;
+}
+.shop-hours-long {
+  font-size: 0.8rem;
+}

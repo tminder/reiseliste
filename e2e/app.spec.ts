@@ -718,3 +718,34 @@ test('Zu Hause keine Übersetzung, auch bei Mundart und Teilwörtern (D-081)', a
   await expect(page.locator('.item')).toHaveCount(2)
   await expect(page.locator('.item .local')).toHaveCount(0)
 })
+
+test.describe('Öffnungszeiten (D-099)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
+  const json = (body: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) })
+  async function open(page: Page, when: Date) {
+    await page.clock.setFixedTime(when)
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
+    await page.route(/interpreter/, (r) =>
+      r.fulfill(json({ elements: [{ type: 'node', id: 1, lat: 41.392, lon: 2.17, tags: { shop: 'supermarket', name: 'Mercadona', opening_hours: 'Mo-Sa 09:00-21:30; Su off' } }] })),
+    )
+    await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+    await seed(page, [item(1, 'Milch', 'milch')])
+    await page.goto(`/#/l/${LIST}`)
+  }
+
+  test('offen: „bis 21:30“ in der Zeile', async ({ page, problems }) => {
+    void problems
+    await open(page, new Date(2026, 10, 23, 10, 0)) // Montag
+    await expect(page.locator('.shop-current')).toContainText('Mercadona')
+    await expect(page.locator('.shop-hours')).toHaveText('· bis 21:30')
+  })
+
+  test('Sonntag: „geschlossen“, im Blatt mit nächster Öffnung', async ({ page, problems }) => {
+    void problems
+    await open(page, new Date(2026, 10, 22, 10, 0)) // Sonntag
+    await expect(page.locator('.shop-hours.closed')).toHaveText('· geschlossen')
+    await page.getByRole('button', { name: 'Laden ändern' }).click()
+    await expect(page.locator('.shop-hours-long')).toHaveText(/geschlossen · öffnet Mo\.? 09:00/)
+    await expect(page.locator('.sheet')).toContainText('laut OpenStreetMap')
+  })
+})

@@ -12,6 +12,8 @@ export interface Shop {
   /** Lage des Ladens (für Distanz bei wiederverwendetem Ergebnis und „weggefahren?“, D-033) */
   lat?: number
   lon?: number
+  /** Öffnungszeiten aus OpenStreetMap (`opening_hours`), roh (D-099) */
+  hours?: string
 }
 
 /** retry = true: vorübergehendes Problem (Server ausgelastet, kein Netz, GPS-Timeout) – später nochmal versuchen */
@@ -202,6 +204,7 @@ ${FAR_STEPS_M.map((r) => `nwr(around:${r},${at})["shop"="supermarket"];out cente
         distance: meters(lat, lon, p.lat, p.lon),
         lat: p.lat,
         lon: p.lon,
+        ...(tags.opening_hours ? { hours: tags.opening_hours } : {}),
         rank: tags.shop === 'supermarket' ? 0 : 1, // Supermärkte vor Kiosken, Drogerien usw.
       }
     })

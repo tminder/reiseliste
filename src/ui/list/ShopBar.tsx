@@ -1,7 +1,8 @@
 // Laden in der Nähe finden und wählen (D-033), Ladenbesuch erkennen
 import { useEffect, useRef, useState } from 'react'
 import { Check, ChevronDown, LocateFixed, MapPin, Store as StoreIcon } from 'lucide-react'
-import { t } from '../../i18n'
+import { t, uiLang } from '../../i18n'
+import { describeHours } from '../../lib/openingHours'
 import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, looksInside, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
 import { RETRY_S } from './helpers'
 import { useCountdown } from '../useCountdown'
@@ -220,6 +221,9 @@ export function ShopBar({
     !!pos &&
     current.lat != null && current.lon != null && looksInside(meters(pos.lat, pos.lon, current.lat, current.lon), pos.accuracy)
   const options = current ? [current, ...others] : (state.shops ?? []).slice(0, 6)
+  const locale = uiLang()
+  // Öffnungszeiten aus OpenStreetMap (D-099); fehlen sie beim gewählten Laden, aus der letzten Suche
+  const hoursOf = (s: Shop) => describeHours(s.hours ?? state.shops?.find((x) => x.id === s.id)?.hours, t, locale)
   return (
     <div className="shopline">
       <button className={`shop-current${here ? ' here' : ''}${current ? '' : ' muted'}`} aria-label={t('changeShop')} aria-expanded={!!state.more} onClick={open}>
@@ -231,6 +235,8 @@ export function ShopBar({
               {current.name}
             </span>
             {!here && !shop && <span className="muted">{formatDistance(current.distance)}</span>}
+            {/* Öffnungszeiten (D-099): kurz in der Zeile, ausführlich in der Auswahl */}
+            {hoursOf(current)?.short && <span className={hoursOf(current)!.open ? 'muted shop-hours' : 'shop-hours closed'}>· {hoursOf(current)!.short}</span>}
           </>
         ) : (
           <>
@@ -257,7 +263,10 @@ export function ShopBar({
                         close()
                       }}
                     >
-                      <span className="shop-name">{x.name}</span>
+                      <span className="shop-option-text">
+                        <span className="shop-name">{x.name}</span>
+                        {hoursOf(x) && <span className={hoursOf(x)!.open ? 'muted shop-hours-long' : 'shop-hours-long closed'}>{hoursOf(x)!.long}</span>}
+                      </span>
                       <span className="muted">{x.id === current?.id ? <Check size={16} /> : formatDistance(x.distance)}</span>
                     </button>
                   </li>
@@ -277,6 +286,7 @@ export function ShopBar({
               <p className="muted small-text">{t('noSupermarketWithin', { dist: formatDistance(FAR_RADIUS_M) })}</p>
             )}
             {state.loading && <p className="muted small-text">{t('searching')}</p>}
+            {options.some((x) => hoursOf(x)) && <p className="muted small-text">{t('hoursSource')}</p>}
             <div className="row">
               <button
                 className="ghost"
