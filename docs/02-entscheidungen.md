@@ -142,7 +142,7 @@ Stand: 2026-11-22 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-025 · Die App heisst „Cart on the Road“
 
-- **Entscheidung:** Der Name der App ist „Cart on the Road“ (Oberfläche DE und EN, Manifest, Seitentitel, Datenschutz, README). Kurzname unter dem Icon: „Cart on Road“. Untertitel im Manifest: „Einkaufsliste für Reisen“. Repo `tminder/reiseliste`, URL und interne Schlüssel (`rl:`) bleiben unverändert.
+- **Entscheidung:** Der Name der App ist „Cart on the Road“ (Oberfläche DE und EN, Manifest, Seitentitel, Datenschutz, README). Kurzname unter dem Icon: „Cart“ (Wunsch des Inhabers; wirkt nur bei neuer Installation). Untertitel im Manifest: „Einkaufsliste für Reisen“. Repo `tminder/reiseliste`, URL und interne Schlüssel (`rl:`) bleiben unverändert.
 - **Begründung:** Vorschlag des Inhabers, Ersatz für den Arbeitstitel „Proviant“ (generisch, Getränkemarke aus Berlin, ausserhalb des deutschen Sprachraums kaum verständlich). Anspielung auf „On the Road“, beschreibt das Icon (Einkaufswagen auf Strasse, D-026), auf Englisch international verständlich. Websuche ohne gleichnamige App, Marke oder Firma.
 - **Folgen:** Der Name beschreibt das Produkt und ist darum schwer als Marke zu schützen. Websuchen nach dem Namen zeigen vor allem Golfwagen-Verkehrsrecht, im Store braucht es den Untertitel. 16 Zeichen, deshalb der Kurzname für den Home-Bildschirm. Domains und Markenregister sind noch nicht geprüft (F-005). Bereits installierte PWAs zeigen den neuen Namen erst nach einem Update bzw. neuem Hinzufügen zum Home-Bildschirm.
 

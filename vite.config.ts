@@ -78,7 +78,7 @@ export default defineConfig({
       },
       manifest: {
         name: 'Cart on the Road – Einkaufsliste für Reisen',
-        short_name: 'Cart on Road',
+        short_name: 'Cart',
         description: 'Geteilte Einkaufsliste, die jeden Artikel in der Landessprache zeigt.',
         theme_color: '#0f766e',
         background_color: '#f8fafc',
