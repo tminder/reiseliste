@@ -101,7 +101,14 @@ export function ShopBar({
   }
 
   // Den angezeigten Vorschlag nach oben melden (für die Fotos)
-  const suggestion = !shop && !state.dismissed && !away ? (state.shops?.[0] ?? null) : null
+  // Vorschlag: der nächste Laden, der nicht geschlossen ist (D-099). Steht man in einem Laden (inside), gilt dieser.
+  // Unbekannte Öffnungszeiten zählen als offen; sind alle zu, der nächste.
+  const firstShop = (() => {
+    const shops = state.shops ?? []
+    if (state.inside) return shops[0] ?? null
+    return shops.find((x) => describeHours(x.hours, t, uiLang())?.open !== false) ?? shops[0] ?? null
+  })()
+  const suggestion = !shop && !state.dismissed && !away ? firstShop : null
   useEffect(() => {
     onSuggest(suggestion)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -170,7 +177,7 @@ export function ShopBar({
   // Countdown und automatischer neuer Versuch bei überlastetem Server (D-094)
   const retryIn = useCountdown(shop ? null : state.retryAt, () => void detect())
 
-  const current = shop ?? (state.dismissed ? null : (state.shops?.[0] ?? null))
+  const current = shop ?? (state.dismissed ? null : firstShop)
   const others = (state.shops ?? []).filter((x) => x.id !== current?.id).slice(0, 5)
 
   // Nicht im Reiseland: nichts anzeigen (ein gewählter Laden bleibt sichtbar, bis man sich entfernt, D-033)
