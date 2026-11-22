@@ -65,7 +65,7 @@ const ATTRIBUTES: Attribute[] = [
   },
 ]
 
-export type ShownAttribute = { id: string; text: string }
+export type ShownAttribute = { id: string; text: string; icon?: string; label: string }
 
 /** Merkmale im eingegebenen Text, als Zusatz in der Landessprache. Leer, wenn der Artikel sie schon enthält. */
 export function attributesFor(text: string, lang: Lang, conceptId: string | null, target: Lang): ShownAttribute[] {
@@ -78,7 +78,7 @@ export function attributesFor(text: string, lang: Lang, conceptId: string | null
     const words = (a.words[lang] ?? []).map((w) => normalize(w, lang).replace(/-/g, ' '))
     // Chinesisch ohne Leerzeichen: enthalten genügt; sonst am Wortanfang („tiefgekühlte“, „TK-Spinat“)
     const hit = words.some((w) => (lang === 'zh' ? n.includes(w) : padded.includes(` ${w}`)))
-    if (hit) out.push({ id: a.id, text: `${a.icon ? a.icon + ' ' : ''}${a.label[target]}` })
+    if (hit) out.push({ id: a.id, text: `${a.icon ? a.icon + ' ' : ''}${a.label[target]}`, icon: a.icon, label: a.label[target] })
   }
   return out
 }

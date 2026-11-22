@@ -897,6 +897,13 @@ button.term-btn {
   position: relative;
   top: -0.08em;
 }
+.attr-icon {
+  margin-left: 6px;
+  font-size: 0.95rem;
+  vertical-align: middle;
+  position: relative;
+  top: -0.08em;
+}
 .showcard-attr {
   margin: -8px 0 0;
   font-size: 1.6rem;

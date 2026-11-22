@@ -186,11 +186,18 @@ export function ItemRow({
         <div className="main">
           {qty && <span className="qty">{formatQty(qty)}</span>}
           <span className="txt">{own}</span>
-          {ownAttrs.map((a) => (
-            <span key={a.id} className="attr">
-              {a.text}
-            </span>
-          ))}
+          {/* Beim eigenen Begriff nur das Symbol, der Text steht in der Übersetzung darunter (D-098) */}
+          {ownAttrs.map((a) =>
+            a.icon ? (
+              <span key={a.id} className="attr-icon" role="img" aria-label={a.label} title={a.label}>
+                {a.icon}
+              </span>
+            ) : (
+              <span key={a.id} className="attr">
+                {a.label}
+              </span>
+            ),
+          )}
         </div>
       </div>
       {/* Knöpfe ohne Rahmen, mittig neben Name und Übersetzung (D-074) */}
