@@ -4,7 +4,7 @@
 // („frambuesas“ + „congelado“). Für häufige Kombinationen gibt es eigene Begriffe (TK-Beeren, TK-Spinat …).
 import type { Lang } from '../data/dictionary'
 import { CONCEPT_BY_ID } from '../data/dictionary'
-import { normalize } from './translate'
+import { normalize, suggest } from './translate'
 
 type Attribute = {
   id: string
@@ -80,4 +80,58 @@ export function attributesFor(text: string, lang: Lang, conceptId: string | null
     if (hit) out.push({ id: a.id, text: `${a.icon ? a.icon + ' ' : ''}${a.label[target]}` })
   }
   return out
+}
+
+/** Ist das Wort (normalisiert) ein Merkmal? partial: auch angefangene Wörter ab 3 Zeichen („tiefg“), beim Tippen */
+function attributeOf(token: string, lang: Lang, partial: boolean): Attribute | undefined {
+  return ATTRIBUTES.find((a) =>
+    (a.words[lang] ?? []).some((w) => {
+      const nw = normalize(w, lang)
+      if (nw.includes(' ')) return false // mehrteilige Merkmale („sin lactosa“) nur über attributesFor
+      return token.startsWith(nw) || (partial && token.length >= 3 && nw.startsWith(token))
+    }),
+  )
+}
+
+/**
+ * Eingabe ohne Merkmal-Wörter, in der eingegebenen Schreibweise (D-098):
+ * „himbeeren tiefgekühlt“ → { rest: 'himbeeren', ids: ['frozen'] }, „TK-Himbeeren“ → { rest: 'Himbeeren', ids: ['frozen'] }.
+ * Chinesisch (ohne Leerzeichen) wird nicht zerlegt.
+ */
+export function splitAttributes(text: string, lang: Lang, partial = false): { rest: string; ids: string[] } {
+  if (lang === 'zh') return { rest: text, ids: [] }
+  const ids: string[] = []
+  const rest: string[] = []
+  for (const raw of text.replace(/[()]/g, ' ').split(/[\s-]+/).filter(Boolean)) {
+    const a = attributeOf(normalize(raw, lang), lang, partial)
+    if (a) {
+      if (!ids.includes(a.id)) ids.push(a.id)
+    } else rest.push(raw)
+  }
+  return { rest: rest.join(' '), ids }
+}
+
+/** Merkmal in einer Sprache, mit Symbol: „❄️ tiefgekühlt“ */
+export function attributeLabel(id: string, lang: Lang, icon = true): string {
+  const a = ATTRIBUTES.find((x) => x.id === id)
+  if (!a) return id
+  return `${icon && a.icon ? a.icon + ' ' : ''}${a.label[lang]}`
+}
+
+/**
+ * Vorschläge beim Tippen, auch mit Merkmal (D-098): „himbeeren tiefg“ → „Himbeeren (tiefgekühlt)“.
+ * Zuerst die normalen Treffer („tiefgekühlte Beeren“ ist ein eigener Begriff), dann Artikel + Merkmal.
+ */
+export function suggestWithAttributes(input: string, lang: Lang, limit = 5, region?: string): { id: string; name: string }[] {
+  const plain = suggest(input, lang, limit, region)
+  if (plain.length >= limit) return plain
+  const { rest, ids } = splitAttributes(input, lang, true)
+  if (!ids.length || !rest.trim()) return plain
+  const extra = suggest(rest, lang, limit, region)
+    .filter((x) => !plain.some((p) => p.id === x.id))
+    .map((x) => {
+      const own = ids.filter((id) => !ATTRIBUTES.find((a) => a.id === id)?.skip(x.id))
+      return own.length ? { id: x.id, name: `${x.name} (${own.map((id) => attributeLabel(id, lang, false)).join(', ')})` } : x
+    })
+  return [...plain, ...extra].slice(0, limit)
 }

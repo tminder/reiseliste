@@ -699,7 +699,9 @@ test('Merkmal „gefroren“ in der Landessprache, eigener TK-Begriff ohne Zusat
   await page.goto(`/#/l/${LIST}`)
   await add(page, 'gefrorene Himbeeren')
   await add(page, 'Tiefkühlspinat')
-  await expect(page.locator('.item', { hasText: 'Himbeeren' }).locator('.attr')).toHaveText('❄️ congelado')
+  // Eigener Begriff aufgeräumt mit Marke, darunter die Landessprache (D-098)
+  await expect(page.locator('.item', { hasText: 'Himbeeren' }).locator('.main')).toHaveText('Himbeeren❄️ tiefgekühlt')
+  await expect(page.locator('.item', { hasText: 'Himbeeren' }).locator('.local .attr')).toHaveText('❄️ congelado')
   await expect(page.locator('h3', { hasText: /Tiefkühl/ })).toBeVisible() // gefrorene Himbeeren bei Tiefkühl
   await expect(page.locator('.item', { hasText: 'Tiefkühlspinat' })).toContainText('espinacas congeladas')
   await expect(page.locator('.item', { hasText: 'Tiefkühlspinat' }).locator('.attr')).toHaveCount(0)
@@ -717,6 +719,12 @@ test('Zu Hause keine Übersetzung, auch bei Mundart und Teilwörtern (D-081)', a
   await add(page, 'Verpackte Äpfel')
   await expect(page.locator('.item')).toHaveCount(2)
   await expect(page.locator('.item .local')).toHaveCount(0)
+  // Merkmal als Marke auch zu Hause, Vorschlag mit Merkmal (D-098)
+  await page.locator('.add input').fill('himbeeren tief')
+  await expect(page.locator('.suggestions')).toContainText('Himbeeren (tiefgekühlt)')
+  await page.locator('.add input').fill('himbeeren tiefgekühlt')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('.item', { hasText: 'Himbeeren' }).locator('.main')).toHaveText('Himbeeren❄️ tiefgekühlt')
 })
 
 test.describe('Öffnungszeiten (D-099)', () => {

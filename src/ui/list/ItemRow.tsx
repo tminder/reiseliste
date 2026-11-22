@@ -13,7 +13,7 @@ import { ListStore, supabase, type Item } from '../../lib/store'
 import { sendFeedback, type Feedback } from '../../lib/feedback'
 import { formatQty } from '../format'
 import { loadRomanization, romanize } from '../../lib/romanize'
-import { attributesFor } from '../../lib/attributes'
+import { attributesFor, splitAttributes } from '../../lib/attributes'
 import { speak, speechTag, useVoice } from '../../lib/speech'
 import { PhotoStrip } from './PhotoStrip'
 import { dupKey } from './helpers'
@@ -86,7 +86,14 @@ export function ItemRow({
     !!viewerRegion &&
     exactConcept(item.text, item.lang) === item.conceptId &&
     nameIn(item.conceptId, viewer, viewerRegion) !== nameIn(item.conceptId, viewer)
-  const own = ((item.lang !== viewer || sameLangSwap) && nameIn(item.conceptId, viewer, viewerRegion)) || item.text
+  const ownRaw = ((item.lang !== viewer || sameLangSwap) && nameIn(item.conceptId, viewer, viewerRegion)) || item.text
+  // Merkmale beim eigenen Begriff (D-098): „himbeeren tiefgekühlt“ → „Himbeeren“ + „❄️ tiefgekühlt“, wie bei der Übersetzung.
+  // Nur, wenn der Rest genau der Artikel ist; sonst bleibt der Text wie eingegeben („Bio-Milch fettarm“)
+  const ownFound = attributesFor(item.text, item.lang, item.conceptId, viewer)
+  const ownSplit = ownFound.length ? splitAttributes(item.text, item.lang) : null
+  const ownClean = ownSplit && ownSplit.ids.length && exactConcept(ownSplit.rest, item.lang) === item.conceptId ? ownSplit.rest : null
+  const ownAttrs = item.lang !== viewer || ownClean ? ownFound : []
+  const own = item.lang === viewer && ownClean && !sameLangSwap ? ownClean.charAt(0).toLocaleUpperCase(viewer) + ownClean.slice(1) : ownRaw
   const hints = item.conceptId ? CONCEPT_BY_ID.get(item.conceptId)?.hint : undefined
   const hint = hints?.[viewer] ?? hints?.en
   const [showMenu, setShowMenu] = useState(false)
@@ -179,6 +186,11 @@ export function ItemRow({
         <div className="main">
           {qty && <span className="qty">{formatQty(qty)}</span>}
           <span className="txt">{own}</span>
+          {ownAttrs.map((a) => (
+            <span key={a.id} className="attr">
+              {a.text}
+            </span>
+          ))}
         </div>
       </div>
       {/* Knöpfe ohne Rahmen, mittig neben Name und Übersetzung (D-074) */}

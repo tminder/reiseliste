@@ -38,3 +38,20 @@ describe('Merkmale', () => {
     expect(show('Biber', 'de', 'es').attrs).toEqual([]) // kein Artikel
   })
 })
+
+describe('Merkmale beim Tippen und beim eigenen Begriff', async () => {
+  const { splitAttributes, suggestWithAttributes } = await import('../src/lib/attributes')
+  it('zerlegt in Rest und Merkmale', () => {
+    expect(splitAttributes('himbeeren tiefgekühlt', 'de')).toEqual({ rest: 'himbeeren', ids: ['frozen'] })
+    expect(splitAttributes('Himbeeren (tiefgekühlt)', 'de')).toEqual({ rest: 'Himbeeren', ids: ['frozen'] })
+    expect(splitAttributes('TK-Himbeeren', 'de')).toEqual({ rest: 'Himbeeren', ids: ['frozen'] })
+    expect(splitAttributes('Bio-Milch fettarm', 'de')).toEqual({ rest: 'Milch fettarm', ids: ['organic'] })
+  })
+  it('Vorschläge mit Merkmal, auch angefangen', () => {
+    expect(suggestWithAttributes('himbeeren tiefgekühlt', 'de')).toContainEqual({ id: 'himbeeren', name: 'Himbeeren (tiefgekühlt)' })
+    expect(suggestWithAttributes('himbeeren tief', 'de')).toContainEqual({ id: 'himbeeren', name: 'Himbeeren (tiefgekühlt)' })
+    expect(suggestWithAttributes('gefrorene himb', 'de')).toContainEqual({ id: 'himbeeren', name: 'Himbeeren (tiefgekühlt)' })
+    expect(suggestWithAttributes('bio jogh', 'de')[0]).toEqual({ id: 'joghurt', name: 'Joghurt (Bio)' })
+    expect(suggestWithAttributes('spinat tief', 'de')[0].id).toBe('tkspinat') // eigener Begriff zuerst, ohne Zusatz
+  })
+})

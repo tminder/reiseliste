@@ -8,7 +8,7 @@ import { flash, reducedMotion, slideOut, useFlip } from '../../lib/motion'
 import { addQty, canAddQty } from '../../lib/qty'
 import { reportError } from '../../lib/errors'
 import { sendFeedback } from '../../lib/feedback'
-import { findConcept, isLoaded, loadLanguages, nameIn, onLanguagesLoaded, splitQuantity, suggest } from '../../lib/translate'
+import { findConcept, isLoaded, loadLanguages, nameIn, onLanguagesLoaded, splitQuantity } from '../../lib/translate'
 import { getChosenShopAt, getPosition, getChosenShop, meters, setChosenShop, shopTag, type Shop } from '../../lib/nearby'
 import { detectCountry } from '../../lib/country'
 import { MAX } from '../../lib/limits'
@@ -20,7 +20,7 @@ import { ShopBar } from './ShopBar'
 import { DAY_MS, EXAMPLES, VISIT_ACCURACY_M, VISIT_RADIUS_M, countryChangeDeclined, declineCountryChange, dupKey, readVisit, saveVisit, useNamesSetting } from './helpers'
 import { ConverterSheet, EditSheet, MembersSheet, ShareSheet } from './sheets'
 import { countryCurrency, homeCurrency } from '../../lib/currency'
-import { attributesFor } from '../../lib/attributes'
+import { attributesFor, suggestWithAttributes } from '../../lib/attributes'
 
 function useStore(id: string, profile: Profile) {
   const store = useMemo(() => new ListStore(id), [id])
@@ -270,7 +270,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   const items = store.items.filter((i) => !i.deleted)
   // Wörterbuch nur für die benötigten Sprachen laden (D-053): eigene, Landessprache, Sprachen der Einträge
   const langsReady = useLanguages([profile.lang, target, ...items.map((i) => i.lang)], [profile.lang, target])
-  const suggestions = suggest(input, profile.lang, 5, profile.region)
+  const suggestions = suggestWithAttributes(input, profile.lang, 5, profile.region)
 
   // Bestehende Zeile zeigen: aufleuchten, Menge hüpft kurz (D-044). Nicht hinscrollen, die Leiste unten bestätigt.
   function highlight(itemId: string) {
