@@ -209,8 +209,11 @@ async function byText(country: string, term: string): Promise<Photo[]> {
 }
 
 /** Produkte der Kette zuerst (gibt es welche, „fromStore“), sonst die meistgescannten im Land */
-function pick(all: Photo[], store?: string): PhotoResult {
-  const inStore = store ? all.filter((p) => p.stores?.includes(store)) : []
+export function pick(all: Photo[], store?: string): PhotoResult {
+  // Kette auch erkennen, wenn Open Food Facts nur den Hauptnamen führt: „carrefour-express“ → auch „carrefour“,
+  // „coop-pronto“ → „coop“ (D-010). Allgemein über das erste Wort, ohne Liste einzelner Ketten.
+  const tags = store ? [store, store.split('-')[0]].filter((x, i, a) => x.length >= 3 && a.indexOf(x) === i) : []
+  const inStore = tags.length ? all.filter((p) => p.stores?.some((s) => tags.includes(s))) : []
   return inStore.length ? { photos: inStore.slice(0, MAX), fromStore: true } : { photos: all.slice(0, MAX), fromStore: false }
 }
 

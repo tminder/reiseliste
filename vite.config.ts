@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -47,6 +48,15 @@ const cspMeta = (): Plugin => ({
 export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
   define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
+  // Ungenutzte Teile von supabase-js durch Platzhalter ersetzen (Datei-Speicher, Edge Functions): kleineres Start-Bundle
+  resolve: {
+    alias: {
+      '@supabase/storage-js': new URL('./src/lib/supabaseStubs.ts', import.meta.url).pathname,
+      '@supabase/functions-js': new URL('./src/lib/supabaseStubs.ts', import.meta.url).pathname,
+    },
+  },
+  // Tests: supabase-js durch Vite laufen lassen, damit die Platzhalter auch dort gelten (tests/supabaseStubs.test.ts)
+  test: { server: { deps: { inline: [/@supabase\/supabase-js/] } } },
   plugins: [
     react(),
     versionFile(),
