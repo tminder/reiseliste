@@ -12,6 +12,8 @@ export default defineConfig({
     baseURL: 'http://localhost:4180',
     locale: 'de-DE',
     viewport: { width: 390, height: 760 },
+    // Ohne Animationen: Tests müssen nicht auf Gleit- und Abhak-Animationen warten (D-044 bleibt getestet über die Zustände)
+    contextOptions: { reducedMotion: 'reduce' },
     launchOptions: process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {},
   },
   webServer: {
