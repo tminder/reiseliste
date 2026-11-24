@@ -34,7 +34,7 @@ export function hasPhotos(conceptId: string | null, localOverride: string | null
 }
 
 /** Länder-Codes der App → Länder-Tag in Open Food Facts */
-const OFF_COUNTRY: Record<string, string> = {
+export const OFF_COUNTRY: Record<string, string> = {
   ES: 'en:spain',
   PT: 'en:portugal',
   IT: 'en:italy',
@@ -53,8 +53,17 @@ const OFF_COUNTRY: Record<string, string> = {
   IE: 'en:ireland',
   US: 'en:united-states',
   MX: 'en:mexico',
+  'CH-DE': 'en:switzerland',
   'CH-FR': 'en:switzerland',
   'CH-IT': 'en:switzerland',
+  LI: 'en:switzerland', // gleiche Läden wie in der Schweiz, kaum eigene Einträge
+  DE: 'en:germany',
+  AT: 'en:austria',
+  BR: 'en:brazil',
+  AR: 'en:argentina',
+  CA: 'en:canada',
+  AU: 'en:australia',
+  NZ: 'en:new-zealand',
 }
 
 const TTL = 90 * 24 * 60 * 60 * 1000
@@ -63,9 +72,10 @@ const FIELDS = 'code,product_name,brands,image_front_small_url,stores_tags'
 
 export type PhotoResult = { photos: Photo[]; fromStore: boolean }
 
-// Version 3: ein Eintrag pro Land und Artikel, mit Läden (vorher getrennt pro Kette)
+// Version 4: ein Eintrag pro Land und Artikel, mit Läden (3 hatte für Deutschland, Österreich, Deutschschweiz u. a.
+// leere Ergebnisse gespeichert, weil der Länder-Tag fehlte)
 function cacheKey(country: string, what: string) {
-  return `rl:photos3:${country}:${what}`
+  return `rl:photos4:${country}:${what}`
 }
 
 /** Einträge früherer Versionen entfernen (S-054), einmal pro Sitzung */
@@ -76,7 +86,7 @@ function cleanOldCache() {
   try {
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const k = localStorage.key(i)
-      if (k?.startsWith('rl:photos2:')) localStorage.removeItem(k)
+      if (k && /^rl:photos[23]?:/.test(k)) localStorage.removeItem(k)
     }
   } catch {
     /* egal */
@@ -164,12 +174,13 @@ function toPhotos(products: OffProduct[]): Photo[] {
 async function byCategory(country: string, category: string): Promise<Photo[]> {
   const params = new URLSearchParams({
     categories_tags: category,
-    countries_tags: OFF_COUNTRY[country] ?? 'en:world',
     sort_by: 'unique_scans_n',
     page_size: '24',
     fields: FIELDS,
     app_name: 'CartOnTheRoad',
   })
+  // Unbekanntes Land: ohne Länderfilter („en:world“ gibt es als Tag nicht und lieferte 0 Treffer)
+  if (OFF_COUNTRY[country]) params.set('countries_tags', OFF_COUNTRY[country])
   return toPhotos(await fetchJson(`https://world.openfoodfacts.org/api/v2/search?${params}`))
 }
 
@@ -179,15 +190,17 @@ async function byText(country: string, term: string): Promise<Photo[]> {
     search_terms: term,
     search_simple: '1',
     action: 'process',
-    tagtype_0: 'countries',
-    tag_contains_0: 'contains',
-    tag_0: (OFF_COUNTRY[country] ?? 'en:world').replace('en:', ''),
     sort_by: 'unique_scans_n',
     page_size: '40',
     json: '1',
     fields: FIELDS,
     app_name: 'CartOnTheRoad',
   })
+  if (OFF_COUNTRY[country]) {
+    params.set('tagtype_0', 'countries')
+    params.set('tag_contains_0', 'contains')
+    params.set('tag_0', OFF_COUNTRY[country].replace('en:', ''))
+  }
   const needle = normalize(term)
   return toPhotos(await fetchJson(`https://world.openfoodfacts.org/cgi/search.pl?${params}`)).filter((p) => {
     const n = normalize(p.name)
