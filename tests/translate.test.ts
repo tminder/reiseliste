@@ -161,3 +161,25 @@ describe('Schokoladensorten (D-045)', () => {
     expect(exactConcept('feine Schokolade', 'de')).toBeNull()
   })
 })
+
+describe('Tippfehler (D-105)', async () => {
+  const { editDistance, suggest } = await import('../src/lib/translate')
+  it('Abstand: einfügen, löschen, ersetzen, vertauschen', () => {
+    expect(editDistance('mlich', 'milch', 2)).toBe(1)
+    expect(editDistance('joghrt', 'joghurt', 2)).toBe(1)
+    expect(editDistance('abcdef', 'uvwxyz', 1)).toBe(2) // bricht früh ab
+  })
+  it('erkennt Artikel mit Tippfehlern, kurze Wörter nicht', () => {
+    expect(findConcept('Mlich', 'de')).toBe('milch')
+    expect(findConcept('Tomtaen', 'de')).toBe('tomaten')
+    expect(findConcept('Mozarella', 'de')).toBe('mozzarella')
+    expect(findConcept('Mlich fettarm', 'de')).toBe('milch')
+    expect(findConcept('cheeze', 'en')).toBe('kaese')
+    expect(findConcept('Zeitung', 'de')).toBeNull()
+    expect(findConcept('bred', 'en')).toBeNull() // unter 5 Buchstaben keine Toleranz
+  })
+  it('Vorschläge mit Tippfehler nur, wenn sonst nichts passt', () => {
+    expect(suggest('Joghrt', 'de')[0]).toEqual({ id: 'joghurt', name: 'Joghurt' })
+    expect(suggest('Salat', 'de').map((s) => s.id)).not.toContain('salami')
+  })
+})

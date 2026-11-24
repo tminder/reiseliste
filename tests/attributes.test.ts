@@ -17,7 +17,7 @@ describe('Merkmale', () => {
   })
 
   it('auch nachgestellt und mit Tippfehlern', () => {
-    for (const t of ['Himbeeren tiefgekühlt', 'Himbeeren (tiefgekühlt)', 'gefrohrene Himbeeren', 'Himbeeren teifgekühlt', 'TK-Himbeeren'])
+    for (const t of ['Himbeeren tiefgekühlt', 'Himbeeren (tiefgekühlt)', 'gefrohrene Himbeeren', 'Himbeeren teifgekühlt', 'TK-Himbeeren', 'Himbeeren tiefgekült', 'Himberen gefroren'])
       expect(show(t, 'de', 'es'), t).toEqual({ id: 'himbeeren', term: expect.any(String), attrs: ['❄️ congelado'] })
   })
 
@@ -53,5 +53,15 @@ describe('Merkmale beim Tippen und beim eigenen Begriff', async () => {
     expect(suggestWithAttributes('gefrorene himb', 'de')).toContainEqual({ id: 'himbeeren', name: 'Himbeeren (tiefgekühlt)' })
     expect(suggestWithAttributes('bio jogh', 'de')[0]).toEqual({ id: 'joghurt', name: 'Joghurt (Bio)' })
     expect(suggestWithAttributes('spinat tief', 'de')[0].id).toBe('tkspinat') // eigener Begriff zuerst, ohne Zusatz
+  })
+})
+
+describe('keine Fehltreffer im Wörterbuch', () => {
+  it('kein Artikelname in irgendeiner Sprache löst ein Merkmal aus', async () => {
+    const { CONCEPTS } = await import('../src/data/dictionary')
+    const { namesIn } = await import('../src/lib/translate')
+    const hits: string[] = []
+    for (const l of LANGS) for (const c of CONCEPTS) for (const n of namesIn(c.id, l)) if (attributesFor(n, l, c.id, 'en').length) hits.push(`${l}:${n}`)
+    expect(hits).toEqual([])
   })
 })

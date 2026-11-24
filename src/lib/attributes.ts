@@ -4,7 +4,7 @@
 // („frambuesas“ + „congelado“). Für häufige Kombinationen gibt es eigene Begriffe (TK-Beeren, TK-Spinat …).
 import type { Lang } from '../data/dictionary'
 import { CONCEPT_BY_ID } from '../data/dictionary'
-import { normalize, suggest } from './translate'
+import { allowedEdits, editDistance, normalize, suggest } from './translate'
 
 type Attribute = {
   id: string
@@ -22,8 +22,8 @@ const ATTRIBUTES: Attribute[] = [
     id: 'frozen',
     icon: '❄️',
     words: {
-      // mit häufigen Tippfehlern (gefrohren, teifgekühlt)
-      de: ['gefroren', 'gefrohren', 'tiefgekuhlt', 'teifgekuhlt', 'tiefgefroren', 'tiefgefrohren', 'tiefkuhl', 'tk'],
+      // Tippfehler wie „gefrohren“, „teifgekühlt“ erkennt die unscharfe Suche (D-105)
+      de: ['gefroren', 'tiefgekuhlt', 'tiefgefroren', 'tiefkuhl', 'tk'],
       en: ['frozen'],
       es: ['congelad'],
       pt: ['congelad'],
@@ -36,7 +36,8 @@ const ATTRIBUTES: Attribute[] = [
       zh: ['冷凍'],
     },
     label: { de: 'tiefgekühlt', en: 'frozen', es: 'congelado', pt: 'congelado', fr: 'surgelé', it: 'surgelato', nl: 'diepvries', hr: 'smrznuto', el: 'κατεψυγμένο', vi: 'đông lạnh', zh: '冷凍' },
-    skip: (id) => CONCEPT_BY_ID.get(id)?.category === 'tk',
+    // Tiefkühl-Begriffe haben es schon; Gefrierbeutel („bolsas de congelación“) sind nicht gefroren
+    skip: (id) => CONCEPT_BY_ID.get(id)?.category === 'tk' || id === 'gefrierbeutel',
   },
   {
     id: 'organic',
@@ -77,10 +78,18 @@ export function attributesFor(text: string, lang: Lang, conceptId: string | null
     if (a.skip(conceptId)) continue
     const words = (a.words[lang] ?? []).map((w) => normalize(w, lang).replace(/-/g, ' '))
     // Chinesisch ohne Leerzeichen: enthalten genügt; sonst am Wortanfang („tiefgekühlte“, „TK-Spinat“)
-    const hit = words.some((w) => (lang === 'zh' ? n.includes(w) : padded.includes(` ${w}`)))
+    const tokens = lang === 'zh' ? [] : padded.trim().split(' ')
+    const hit = words.some((w) => (lang === 'zh' ? n.includes(w) : padded.includes(` ${w}`) || (!w.includes(' ') && tokens.some((t) => fuzzyStart(t, w, lang)))))
     if (hit) out.push({ id: a.id, text: `${a.icon ? a.icon + ' ' : ''}${a.label[target]}`, icon: a.icon, label: a.label[target] })
   }
   return out
+}
+
+/** Beginnt das Wort mit dem Merkmal, bis auf Tippfehler? „gefrohrene“ ~ „gefroren“, „teifgekuhlt“ ~ „tiefgekuhlt“ (D-105) */
+function fuzzyStart(token: string, word: string, lang: Lang): boolean {
+  const max = allowedEdits(word.length, lang)
+  if (!max || token.length < word.length - max) return false
+  return [word.length - 1, word.length, word.length + 1].some((len) => editDistance(token.slice(0, len), word, max) <= max)
 }
 
 /** Ist das Wort (normalisiert) ein Merkmal? partial: auch angefangene Wörter ab 3 Zeichen („tiefg“), beim Tippen */
@@ -89,7 +98,8 @@ function attributeOf(token: string, lang: Lang, partial: boolean): Attribute | u
     (a.words[lang] ?? []).some((w) => {
       const nw = normalize(w, lang)
       if (nw.includes(' ')) return false // mehrteilige Merkmale („sin lactosa“) nur über attributesFor
-      return token.startsWith(nw) || (partial && token.length >= 3 && nw.startsWith(token))
+      if (token.startsWith(nw) || (partial && token.length >= 3 && nw.startsWith(token))) return true
+      return fuzzyStart(token, nw, lang)
     }),
   )
 }

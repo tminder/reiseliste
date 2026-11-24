@@ -31,6 +31,37 @@ function stems(word: string, lang?: Lang): string[] {
   return [...out]
 }
 
+/**
+ * Tippfehler (D-105): erlaubte Abweichung je nach Wortlänge. Unter 5 Buchstaben keine („Reis“ ≠ „Eis“),
+ * ab 5 einer, ab 9 zwei. Chinesisch und Vietnamesisch nicht (Zeichen bzw. Tonzeichen tragen Bedeutung).
+ */
+export function allowedEdits(length: number, lang?: Lang): number {
+  if (lang === 'zh' || lang === 'vi') return 0
+  return length >= 9 ? 2 : length >= 5 ? 1 : 0
+}
+
+/** Abstand zweier Wörter in Tippfehlern (einfügen, löschen, ersetzen, zwei Nachbarn vertauschen); über max → max + 1 */
+export function editDistance(a: string, b: string, max: number): number {
+  if (Math.abs(a.length - b.length) > max) return max + 1
+  let prev2: number[] = []
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j)
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i]
+    let rowMin = i
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1
+      let v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost)
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) v = Math.min(v, prev2[j - 2] + 1)
+      cur.push(v)
+      if (v < rowMin) rowMin = v
+    }
+    if (rowMin > max) return max + 1
+    prev2 = prev
+    prev = cur
+  }
+  return prev[b.length]
+}
+
 interface IndexHit {
   id: string
   lang: Lang
@@ -200,6 +231,26 @@ export function findConcept(text: string, lang: Lang): string | null {
       if (variant.length >= 3 && padded.includes(` ${variant} `)) return id
     }
   }
+  return fuzzyConcept(n, lang)
+}
+
+/**
+ * Mit Tippfehlern (D-105): zuerst die ganze Eingabe („Mlich“, „Joghrt“), dann einzelne Wörter („Mlich fettarm“).
+ * Nur in der eigenen Sprache, der nächste Treffer gewinnt.
+ */
+function fuzzyConcept(n: string, lang: Lang): string | null {
+  const words = n.split(/[\s-]+/).filter(Boolean)
+  for (const candidate of words.length > 1 ? [n, ...words] : [n]) {
+    const max = allowedEdits(candidate.length, lang)
+    if (!max) continue
+    let best: { d: number; id: string } | null = null
+    for (const { alias, id } of aliasesByLang.get(lang) ?? []) {
+      if (alias.length < 5) continue
+      const d = Math.min(...[alias, ...stems(alias, lang)].map((v) => editDistance(candidate, v, max)))
+      if (d <= max && (!best || d < best.d)) best = { d, id }
+    }
+    if (best) return best.id
+  }
   return null
 }
 
@@ -251,5 +302,23 @@ export function suggest(input: string, lang: Lang, limit = 5, region?: string): 
       if (i >= 0) contains.push({ id: c.id, name: shown(i) })
     }
   }
-  return [...starts, ...contains].slice(0, limit)
+  if (starts.length + contains.length) return [...starts, ...contains].slice(0, limit)
+  // Tippfehler (D-105), nur wenn sonst nichts passt: Anfang des Namens mit kleiner Abweichung („Mlich“, „Joghrt“)
+  const max = allowedEdits(n.length, lang)
+  const fuzzy: { id: string; name: string; d: number }[] = []
+  if (max && !plain) {
+    for (const c of CONCEPTS) {
+      const own = (region && REGION.get(region)?.[c.id]) || []
+      const raw = [...own, ...namesIn(c.id, lang)]
+      let best: { d: number; i: number } | null = null
+      raw.forEach((r, i) => {
+        const x = norm(r)
+        const d = Math.min(...[n.length - 1, n.length, n.length + 1].map((len) => editDistance(n, x.slice(0, len), max)))
+        if (d <= max && (!best || d < best.d)) best = { d, i }
+      })
+      if (best) fuzzy.push({ id: c.id, name: own.length ? raw[0] : raw[(best as { i: number }).i], d: (best as { d: number }).d })
+    }
+    fuzzy.sort((a, b) => a.d - b.d)
+  }
+  return [...starts, ...contains, ...fuzzy.map(({ id, name }) => ({ id, name }))].slice(0, limit)
 }
