@@ -12,6 +12,8 @@ Die Dateien zeigen immer den **aktuellen Stand**, keine Historie. Die Historie s
 
 Konzepte (Entwürfe, noch nicht entschieden): [Native App](konzept-native-app.md)
 
+Betrieb und Störungen (Anleitung für den Inhaber): [betrieb.md](betrieb.md)
+
 ## Regeln
 
 - **Nur der aktuelle Stand.** Es gibt keine Status-Spalten, keine Einträge „erledigt“ oder „ersetzt“ und kein Änderungsprotokoll.

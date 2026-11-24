@@ -6,7 +6,7 @@
 #   SUPABASE_DB_URL     Verbindungs-URL „Session pooler“ aus Supabase (Connect → Session pooler), mit Passwort
 #   BACKUP_PASSPHRASE   langes Passwort zum Verschlüsseln, zusätzlich sicher aufbewahren (Passwort-Manager)
 #
-# Wiederherstellen (siehe auch docs/betrieb.md, sobald vorhanden):
+# Wiederherstellen (siehe auch docs/betrieb.md):
 #   1. Artefakt herunterladen und entpacken
 #   2. gpg --decrypt backup-….sql.gz.gpg | gunzip > backup.sql
 #   3. In einem leeren Supabase-Projekt: psql "<neue DB-URL>" -f backup.sql

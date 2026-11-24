@@ -192,18 +192,6 @@ button.link {
   min-width: 0; /* damit die Teilnehmerzeile mit „…“ abschneidet */
 }
 
-.sync {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-.sync-offline,
-.sync-error {
-  color: var(--warn);
-}
-.sync-synced::before {
-  content: '● ';
-  color: var(--accent);
-}
 
 .add {
   display: flex;
@@ -811,14 +799,6 @@ button.sync-badge.warn {
 .privacy ul {
   padding-left: 18px;
 }
-
-button.term-btn {
-  padding: 0;
-  font: inherit;
-  color: var(--text);
-  text-decoration: underline dotted var(--muted);
-  text-underline-offset: 3px;
-}
 .correction-hint {
   margin: 2px 0 0;
 }
@@ -974,12 +954,6 @@ button.term-btn {
   align-items: center;
   gap: 4px;
 }
-.new-list-toggle {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
 
 /* Listenübersicht: letzte Änderung und Entfernen (D-036) */
 .list-card {
@@ -1099,17 +1073,6 @@ button.scanner-alt {
   right: 12px;
   color: #fff;
   background: rgb(0 0 0 / 0.4);
-}
-
-/* Startseite: Neu / Öffnen übereinander, oberhalb von „Deine Listen“ */
-.home-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.home-actions > .new-list-toggle {
-  align-self: stretch;
-  justify-content: flex-start;
 }
 
 /* Startseite: Knopfleiste waagrecht, bei Platzmangel seitlich scrollbar */
