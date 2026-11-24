@@ -775,6 +775,29 @@ test.describe('„Automatisch (…)“ in den Listen-Einstellungen (D-057)', () 
     await expect(select.locator('option[value="auto"]')).toContainText('Spanien')
     await expect(page.locator('.sheet')).toContainText('auch zu Hause')
   })
+
+  test('fest gewähltes Land → „Automatisch“: neues Land ohne Hinweis „Reiseland geändert“', async ({ page, problems }) => {
+    void problems
+    const json = (b: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(b) })
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
+    await page.route(/interpreter/, (r) => r.fulfill(json({ elements: [] })))
+    await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+    await seed(page, [item(1, 'Milch', 'milch')], 'IT')
+    await page.addInitScript((id) => {
+      const raw = JSON.parse(localStorage.getItem('rl:list:' + id)!)
+      raw.list.autoCountry = false
+      localStorage.setItem('rl:list:' + id, JSON.stringify(raw))
+    }, LIST)
+    await page.goto(`/#/l/${LIST}`)
+    await expect(page.locator('.item').first()).toContainText('latte')
+    await page.getByRole('button', { name: 'Menü' }).click()
+    await page.getByRole('menuitem', { name: /Listen-Einstellungen/ }).click()
+    await page.getByLabel('Reiseland').selectOption('auto')
+    await page.getByRole('button', { name: 'Speichern' }).click()
+    await expect(page.locator('.item').first()).toContainText('leche')
+    await page.waitForTimeout(800)
+    await expect(page.getByText(/Reiseland auf/)).toHaveCount(0)
+  })
 })
 
 test('Merkmal „gefroren“ in der Landessprache, eigener TK-Begriff ohne Zusatz (D-098)', async ({ page, problems }) => {

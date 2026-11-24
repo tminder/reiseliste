@@ -133,8 +133,8 @@ export function EditSheet({
         onSubmit={(e) => {
           e.preventDefault()
           if (auto && !autoCountry && !loc.available) return setAskLocation(true)
-          // Automatisch: das bisherige Land speichern; den Wechsel ins erkannte Land macht die Liste mit Hinweis und „Rückgängig“ (D-040)
-          onSave(n.trim() || name, auto ? country : c, ac, auto, names)
+          // Automatisch gewählt: gleich das Land in Klammern speichern, ohne Hinweis „Reiseland geändert“ (der gilt nur für Wechsel unterwegs, D-040)
+          onSave(n.trim() || name, auto ? autoPreview : c, ac, auto, names)
         }}
       >
         <h2>{t('editListTitle')}</h2>
