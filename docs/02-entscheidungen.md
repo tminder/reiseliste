@@ -95,7 +95,7 @@ Stand: 2026-11-24 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Neue App-Versionen werden automatisch geladen. Geprüft wird beim Start, stündlich und jedes Mal, wenn die App wieder in den Vordergrund kommt, und bei einer neuen Version lädt die Seite selbst neu. Listendaten kommen per Echtzeit. Zusätzlich gleicht die App ab, wenn sie in den Vordergrund kommt und wenn der Echtzeit-Kanal nach einer Unterbrechung wieder verbunden ist. Alle 20 Sekunden nur, solange der Kanal nicht verbunden ist oder Änderungen auf dem Gerät warten.
 - **Begründung:** Wunsch des Inhabers. Handys trennen die Echtzeit-Verbindung im Hintergrund, der Abgleich fängt das auf.
-- **Folgen:** Ein Update kann die Seite mitten in der Eingabe neu laden. Bereits gespeicherte Artikel gehen dabei nicht verloren. Bricht der Echtzeit-Kanal unbemerkt ab (ohne Statusmeldung), fehlen Änderungen bis zum nächsten Wechsel in die App.
+- **Folgen:** Ein Update kann die Seite mitten in der Eingabe neu laden; ein angefangener Artikel im Eingabefeld bleibt dabei erhalten (im Tab gespeichert), und das harte Neuladen wartet, solange man tippt. Bereits gespeicherte Artikel gehen ohnehin nicht verloren. Bricht der Echtzeit-Kanal unbemerkt ab (ohne Statusmeldung), fehlen Änderungen bis zum nächsten Wechsel in die App.
 
 ## D-017 · Kopfzeile und Menü (☰) in der Liste
 

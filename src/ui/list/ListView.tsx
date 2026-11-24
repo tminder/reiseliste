@@ -88,7 +88,23 @@ function useLanguages(langs: Lang[], required: Lang[]): boolean {
 export function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile; onEditProfile: () => void }) {
   const { store } = useStore(id, profile)
   useEffect(() => setLastList(id), [id])
-  const [input, setInput] = useState('')
+  // Angefangene Eingabe übersteht ein Neuladen (neue Version, D-016): im Tab gespeichert, nur bis zum Schliessen
+  const draftKey = `rl:draft:${id}`
+  const [input, setInput] = useState(() => {
+    try {
+      return sessionStorage.getItem(draftKey) ?? ''
+    } catch {
+      return ''
+    }
+  })
+  useEffect(() => {
+    try {
+      if (input) sessionStorage.setItem(draftKey, input)
+      else sessionStorage.removeItem(draftKey)
+    } catch {
+      /* egal */
+    }
+  }, [draftKey, input])
   // „Gelöscht · Rückgängig“ für 5 Sekunden (D-042)
   // Leiste unten mit Hinweis und Aktionen („Rückgängig“, „Separat hinzufügen“)
   const [undo, setUndo] = useState<{ label: string; actions: { label: string; run: () => void }[] } | null>(null)

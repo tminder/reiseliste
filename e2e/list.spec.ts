@@ -376,3 +376,15 @@ test('Zu Hause keine Übersetzung, auch bei Mundart und Teilwörtern (D-081)', a
   await page.keyboard.press('Enter')
   await expect(page.locator('.item', { hasText: 'Himbeeren' }).locator('.main')).toHaveText('Himbeeren❄️')
 })
+
+test('Angefangene Eingabe übersteht ein Neuladen (D-016)', async ({ page, problems }) => {
+  void problems
+  await seed(page)
+  await page.goto(`/#/l/${LIST}`)
+  await page.locator('.add input').fill('Oliven')
+  await page.reload()
+  await expect(page.locator('.add input')).toHaveValue('Oliven')
+  await add(page, 'Oliven')
+  await page.reload()
+  await expect(page.locator('.add input')).toHaveValue('')
+})

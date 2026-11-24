@@ -31,6 +31,9 @@ const TRIED_KEY = 'rl:reloadFor'
  */
 export async function reloadIfOutdated() {
   if (!navigator.onLine || import.meta.env.DEV) return
+  // Mitten im Tippen nicht neu laden (D-016): beim nächsten Zurückkehren in die App wieder prüfen
+  const el = document.activeElement
+  if ((el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) && el.value) return
   try {
     const res = await fetch(`${import.meta.env.BASE_URL}version.json?t=${Date.now()}`, { cache: 'no-store' })
     if (!res.ok) return
