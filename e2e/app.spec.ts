@@ -699,7 +699,7 @@ test.describe('Fotos mit Laden (D-094)', () => {
   await seed(page, [item(1, 'Milch', 'milch')])
   await page.goto(`/#/l/${LIST}`)
   await page.locator('.item', { hasText: 'Milch' }).getByRole('button', { name: 'Produktfotos' }).click()
-  await expect(page.locator('.photos-note')).toContainText(/Neuer Versuch in (59|60) s/) // Limit pro Minute: frühestens nach 60 s
+  await expect(page.locator('.photos-note')).toHaveText(/^Fotos gerade nicht verfügbar\. Neuer Versuch in (1 Min\.|59 s)$/) // frühestens nach 60 s, ohne „jetzt“
   await page.clock.fastForward(5_000)
   await expect(page.locator('.photos-note')).toContainText(/Neuer Versuch in (54|55) s/)
   await page.clock.fastForward(56_000)

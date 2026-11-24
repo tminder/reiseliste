@@ -62,13 +62,9 @@ export function PhotoStrip({
   if (state.error)
     return (
       <div className="photos-note">
+        {/* Kurz, ohne „jetzt“: Open Food Facts erlaubt nur wenige Suchen pro Minute, früher fragen riskiert eine Sperre (D-094) */}
         {state.error}
-        {retryIn != null && ` ${t('retryIn', { s: retryIn })} · `}
-        {retryIn != null && (
-          <button className="link" onClick={() => setAttempt((a) => a + 1)}>
-            {t('now')}
-          </button>
-        )}
+        {retryIn != null && ` ${retryIn >= 60 ? t('retryInMin', { m: Math.ceil(retryIn / 60) }) : t('retryIn', { s: retryIn })}`}
       </div>
     )
   if (!state.photos) return <div className="photos-note">{t('photosSearching')}</div>
