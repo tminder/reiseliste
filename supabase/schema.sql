@@ -364,12 +364,26 @@ $$;
 revoke all on function public.ping() from public;
 grant execute on function public.ping() to anon, authenticated;
 
+-- Zeitstempel vom Server statt von der Uhr des Geräts (D-108): Jede Änderung bekommt die Serverzeit. Die App
+-- übernimmt den Stand vom Server und vergleicht nur Serverzeiten, falsch gehende Handyuhren spielen keine Rolle mehr.
+create or replace function public.touch_updated_at()
+returns trigger language plpgsql as $$
+begin
+  new.updated_at := now();
+  return new;
+end;
+$$;
+drop trigger if exists lists_touch on public.lists;
+create trigger lists_touch before insert or update on public.lists for each row execute function public.touch_updated_at();
+drop trigger if exists items_touch on public.items;
+create trigger items_touch before insert or update on public.items for each row execute function public.touch_updated_at();
+
 -- Stand dieses Skripts (D-107). Bei JEDER Änderung an diesem Skript erhöhen, hier und in der Funktion.
 -- Der Workflow „Supabase wach halten“ vergleicht täglich und nach jedem Push von schema.sql mit der Datenbank
 -- und schlägt fehl (GitHub schickt eine Mail), solange das Skript nicht im SQL-Editor ausgeführt wurde.
--- SCHEMA_VERSION 1
+-- SCHEMA_VERSION 2
 create or replace function public.schema_version()
-returns integer language sql immutable as $$ select 1 $$;
+returns integer language sql immutable as $$ select 2 $$;
 revoke all on function public.schema_version() from public;
 grant execute on function public.schema_version() to anon, authenticated;
 

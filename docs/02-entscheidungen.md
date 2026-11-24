@@ -41,9 +41,9 @@ Stand: 2026-11-24 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-007 · Offline zuerst, letzte Änderung gewinnt
 
-- **Entscheidung:** Jede Änderung landet zuerst im lokalen Speicher und in einer Warteschlange und wird dann an Supabase geschickt. Gibt es Konflikte, gewinnt die Version mit dem neueren `updated_at`.
+- **Entscheidung:** Jede Änderung landet zuerst im lokalen Speicher und in einer Warteschlange und wird dann an Supabase geschickt. Konflikte werden pro Feld gelöst, mit Zeitstempeln vom Server (D-108).
 - **Begründung:** Erfüllt Z-4 bei minimaler Komplexität.
-- **Folgen:** Gleichzeitige Änderungen am selben Artikel können sich überschreiben (S-004, S-005).
+- **Folgen:** Ändern zwei Personen gleichzeitig dasselbe Feld eines Artikels, gilt die zuletzt angekommene Änderung (D-108).
 
 ## D-008 · Landessprache über das Reiseland der Liste, Vorschlag per Standort
 
@@ -664,3 +664,9 @@ Stand: 2026-11-24 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 - **Entscheidung:** `supabase/schema.sql` trägt eine Versionsnummer (Kommentar `-- SCHEMA_VERSION n` und Funktion `schema_version()`), die bei jeder Änderung des Skripts erhöht wird; ein Test prüft, dass beide übereinstimmen. Der Workflow „Supabase wach halten“ vergleicht täglich und gleich nach jedem Push, der `schema.sql` ändert, die Nummer der Datenbank mit dem Skript. Weichen sie ab, schlägt er fehl, und GitHub schickt dem Inhaber eine Mail mit dem Link zum SQL-Editor.
 - **Begründung:** Datenbank-Änderungen muss der Inhaber von Hand ausführen. Vergessen fiel bisher erst auf, wenn eine Funktion beim Nutzen scheiterte (z. B. „Mitglied entfernen“, D-084).
 - **Folgen:** Bis das Skript einmal mit der neuen Funktion ausgeführt ist, schlägt der Workflow fehl. Die App selbst prüft nichts, Nutzer sehen davon nichts.
+
+## D-108 · Sync: Änderungen pro Feld, Zeitstempel vom Server
+
+- **Entscheidung:** Das Gerät schickt bei Änderungen nur die geänderten Felder (z. B. `checked`), neue Zeilen ganz. In der Warteschlange gibt es pro Zeile einen Eintrag, mehrere Änderungen werden zusammengeführt; bestätigte Felder fallen weg, inzwischen erneut geänderte bleiben für den nächsten Versand (`src/lib/syncOps.ts`). Die Datenbank setzt `updated_at` bei jeder Änderung selbst auf die Serverzeit (Trigger `touch_updated_at`). Die App übernimmt den Stand vom Server; nur noch nicht gesendete Felder dieses Geräts gelten davor. Verspätete ältere Stände (z. B. ein Echtzeit-Ereignis nach einem frischeren Abruf) werden anhand der Serverzeit übergangen. Ältere Warteschlangen (ganze Zeilen) werden beim Lesen umgewandelt.
+- **Begründung:** Vorher gewann bei gleichzeitigen Änderungen immer die ganze Zeile, und die Uhr des Geräts entschied: Hakte jemand offline ab, während ein anderer die Menge änderte, ging eine der beiden Änderungen verloren; ein Handy mit falsch gehender Uhr konnte neuere Änderungen anderer überschreiben.
+- **Folgen:** Ändern zwei Personen dasselbe Feld, gilt die zuletzt beim Server angekommene Änderung. Die Logik ist mit Unit-Tests geprüft, der Abgleich mit dem echten Supabase aber weiterhin nicht automatisch (S-002). `supabase/schema.sql` muss einmal ausgeführt werden (Version 2); bis dahin gilt die Zeit des Geräts wie bisher.

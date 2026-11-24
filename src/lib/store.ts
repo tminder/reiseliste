@@ -1,5 +1,6 @@
 import { MAX, clip, clipOrNull } from './limits'
 import { tidyStorage } from './storageCleanup'
+import { acknowledge, enqueue, migrateOp, overlay, type Op, type Table } from './syncOps'
 import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js'
 import type { Lang } from '../data/dictionary'
 import { rankPeople, type ActivityRow, type MemberRow } from './people'
@@ -312,21 +313,22 @@ export function forgetList(id: string) {
 
 // ---------- Warteschlange für Änderungen (offline-fähig) ----------
 
-type Op = { table: 'lists'; row: ShoppingList } | { table: 'items'; row: Item }
-
 const queue = {
-  all: () => LS.get<Op[]>('rl:queue', []),
+  all: (): Op[] =>
+    LS.get<unknown[]>('rl:queue', [])
+      .map((o) => migrateOp(o, (table, row) => (table === 'lists' ? toRemoteList(row as ShoppingList) : toRemoteItem(row as Item))))
+      .filter((o): o is Op => !!o),
   push(op: Op) {
-    // Pro Zeile nur die neueste Version behalten
-    const ops = this.all().filter((o) => !(o.table === op.table && o.row.id === op.row.id))
-    ops.push(op)
-    LS.set('rl:queue', ops)
+    LS.set('rl:queue', enqueue(this.all(), op))
   },
-  remove(op: Op) {
-    LS.set(
-      'rl:queue',
-      this.all().filter((o) => !(o.table === op.table && o.row.id === op.row.id && o.row.updatedAt === op.row.updatedAt)),
-    )
+  done(sent: Op) {
+    LS.set('rl:queue', acknowledge(this.all(), sent))
+  },
+  drop(sent: Op) {
+    LS.set('rl:queue', this.all().filter((o) => !(o.table === sent.table && o.id === sent.id)))
+  },
+  pending(table: Table, id: string): Op | undefined {
+    return this.all().find((o) => o.table === table && o.id === id)
   },
 }
 
@@ -382,17 +384,19 @@ export function flushQueue(): Promise<boolean> {
     try {
       if (!(await ensureAuth())) return false
       for (const op of queue.all()) {
-        const { error } =
-          op.table === 'lists'
-            ? await supabase.from('lists').upsert(toRemoteList(op.row))
-            : await supabase.from('items').upsert(toRemoteItem(op.row))
+        // Neue Zeile: ganz einfügen (oder überschreiben, falls schon da). Sonst nur die geänderten Felder (D-108).
+        const { error } = op.insert
+          ? await supabase.from(op.table).upsert({ id: op.id, ...op.fields })
+          : await supabase.from(op.table).update(op.fields).eq('id', op.id)
         if (error) {
           setError(`Speichern (${op.table})`, error.message)
           // Dauerhafte Ablehnung (Grenze überschritten, D-049): verwerfen statt endlos wiederholen
           const permanent = error.code === '23514' || error.code === '22001' || (error.code === 'P0001' && error.message.startsWith('limit:'))
           if (!permanent) return false
+          queue.drop(op)
+          continue
         }
-        queue.remove(op)
+        queue.done(op)
       }
       return true
     } catch (e) {
@@ -407,7 +411,6 @@ export function flushQueue(): Promise<boolean> {
 
 // ---------- Store für eine Liste ----------
 
-const newer = (a: { updatedAt: string }, b: { updatedAt: string }) => a.updatedAt >= b.updatedAt
 const now = () => new Date().toISOString()
 
 export class ListStore {
@@ -576,9 +579,22 @@ export class ListStore {
     this.setSync(pushed ? 'synced' : 'error')
   }
 
+  /**
+   * Stand vom Server übernehmen (D-108): Der Server ist massgebend, nur noch nicht gesendete Felder dieses Geräts gelten
+   * davor. Ältere Stände (z. B. ein verspätetes Echtzeit-Ereignis nach einem frischeren Abruf) werden übergangen;
+   * verglichen wird mit dem zuletzt vom Server gesehenen Zeitstempel, nicht mit der Uhr des Geräts (D-108).
+   */
+  private seen = new Map<string, string>()
+  private fresh(id: string, at: string): boolean {
+    const last = this.seen.get(id)
+    if (last && at < last) return false
+    this.seen.set(id, at)
+    return true
+  }
+
   private applyList(remote: ShoppingList, emit = true) {
-    if (!this.list || newer(remote, this.list)) {
-      this.list = remote
+    if (this.fresh(`l:${remote.id}`, remote.updatedAt)) {
+      this.list = fromRemoteList(overlay(toRemoteList(remote), queue.pending('lists', remote.id)))
       this.notFound = false
       rememberList(this.id)
     }
@@ -586,9 +602,11 @@ export class ListStore {
   }
 
   private applyItem(remote: Item, emit = true) {
-    const idx = this.items.findIndex((i) => i.id === remote.id)
-    if (idx === -1) this.items = [...this.items, remote]
-    else if (newer(remote, this.items[idx])) this.items = this.items.map((i, k) => (k === idx ? remote : i))
+    if (this.fresh(`i:${remote.id}`, remote.updatedAt)) {
+      const merged = fromRemoteItem(overlay(toRemoteItem(remote), queue.pending('items', remote.id)))
+      const idx = this.items.findIndex((i) => i.id === remote.id)
+      this.items = idx === -1 ? [...this.items, merged] : this.items.map((i, k) => (k === idx ? merged : i))
+    }
     if (emit) this.emit()
   }
 
@@ -605,14 +623,18 @@ export class ListStore {
   create(name: string, country: string, autoCountry = true) {
     this.list = { id: this.id, name: clip(name, MAX.listName), country, ...(autoCountry ? {} : { autoCountry: false }), updatedAt: now() }
     rememberList(this.id)
-    return this.write({ table: 'lists', row: this.list })
+    return this.write({ table: 'lists', id: this.id, fields: toRemoteList(this.list), insert: true })
   }
 
   updateList(patch: Partial<Pick<ShoppingList, 'name' | 'country' | 'autoClear' | 'autoCountry'>>) {
     if (!this.list) return
     if (patch.name !== undefined) patch = { ...patch, name: clip(patch.name, MAX.listName) }
     this.list = { ...this.list, ...patch, updatedAt: now() }
-    return this.write({ table: 'lists', row: this.list })
+    // Nur die geänderten Felder senden (D-108)
+    const remote = toRemoteList(this.list)
+    const cols: Record<string, string> = { name: 'name', country: 'country', autoClear: 'auto_clear', autoCountry: 'auto_country' }
+    const fields = Object.fromEntries(Object.keys(patch).map((k) => [cols[k], remote[cols[k] as keyof typeof remote]]))
+    return this.write({ table: 'lists', id: this.id, fields: { ...fields, updated_at: this.list.updatedAt } })
   }
 
   addItem(data: Pick<Item, 'text' | 'qty' | 'lang' | 'conceptId' | 'author'>) {
@@ -636,7 +658,7 @@ export class ListStore {
       author: clip(data.author, MAX.personName),
     }
     this.items = [...this.items, item]
-    return this.write({ table: 'items', row: item })
+    return this.write({ table: 'items', id: item.id, fields: toRemoteItem(item), insert: true })
   }
 
   /** Alle abgehakten Artikel entfernen (D-030) */
@@ -658,6 +680,9 @@ export class ListStore {
     if (!current) return
     const updated = { ...current, ...patch, updatedAt: now() }
     this.items = this.items.map((i) => (i.id === id ? updated : i))
-    return this.write({ table: 'items', row: updated })
+    // Nur die geänderten Felder senden (D-108)
+    const cols: Record<string, string> = { checked: 'checked', deleted: 'deleted', localOverride: 'local_override', qty: 'qty', claimedBy: 'claimed_by' }
+    const fields = Object.fromEntries(Object.entries(patch).map(([k, v]) => [cols[k], v ?? null]))
+    return this.write({ table: 'items', id, fields: { ...fields, updated_at: updated.updatedAt } })
   }
 }

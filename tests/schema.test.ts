@@ -39,6 +39,17 @@ beforeAll(async () => {
 }, 30_000)
 
 describe('schema.sql', () => {
+  it('Zeitstempel vom Server, nicht vom Gerät (D-108)', async () => {
+    await as(A)
+    const X = '99999999-8888-7777-6666-555555555555'
+    await db.exec(`insert into lists(id,name,country,updated_at) values ('${X}','Uhr','ES','2001-01-01T00:00:00Z')`)
+    expect(await val(`select join_list('${X}','Tobias','de')`)).toBe(true)
+    expect(await val(`select updated_at > now() - interval '1 minute' from lists where id='${X}'`)).toBe(true)
+    await db.exec(`update lists set name='Uhr 2', updated_at='2099-01-01T00:00:00Z' where id='${X}'`)
+    expect(await val(`select updated_at < now() + interval '1 minute' from lists where id='${X}'`)).toBe(true)
+    await db.exec('reset role')
+  })
+
   it('Versionsnummer: Kommentar und Funktion stimmen überein (D-107)', async () => {
     const marked = Number(/^-- SCHEMA_VERSION (\d+)$/m.exec(readFileSync('supabase/schema.sql', 'utf8'))?.[1])
     expect(marked).toBeGreaterThan(0)
