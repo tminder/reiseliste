@@ -225,7 +225,7 @@
   "locSheetBlocked": "Location is blocked in your browser settings, so the app cannot ask. Choose the travel country; “Automatic” works again once you allow location there.",
   "countriesSuggested": "Suggested",
   "countriesAll": "All countries",
-  "autoCountryHint": "Follows your location, except in a country of your own language.",
+  "autoCountryHint": "Follows your location to any supported country, including home. Applies to everyone the list is shared with.",
   "examples": "For example – tap to add:",
   "wrongTerm": "Wrong term?",
   "reportTitle": "Report wrong translation",

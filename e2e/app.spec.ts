@@ -757,6 +757,26 @@ test('Namen bei Artikeln in den Listeneinstellungen ausschalten (D-097)', async 
   await expect(page.locator('.item', { hasText: 'Brot' })).not.toContainText('Anna') // bleibt gespeichert
 })
 
+test.describe('„Automatisch (…)“ in den Listen-Einstellungen (D-057)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
+  test('zeigt, was automatisch gilt, nicht das zuletzt fest gewählte Land', async ({ page, problems }) => {
+    void problems
+    const json = (b: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(b) })
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
+    await page.route(/interpreter/, (r) => r.fulfill(json({ elements: [] })))
+    await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+    await seed(page, [item(1, 'Milch', 'milch')])
+    await page.goto(`/#/l/${LIST}`)
+    await page.getByRole('button', { name: 'Menü' }).click()
+    await page.getByRole('menuitem', { name: /Listen-Einstellungen/ }).click()
+    const select = page.getByLabel('Reiseland')
+    await select.selectOption('IT')
+    await select.selectOption('auto')
+    await expect(select.locator('option[value="auto"]')).toContainText('Spanien')
+    await expect(page.locator('.sheet')).toContainText('auch zu Hause')
+  })
+})
+
 test('Merkmal „gefroren“ in der Landessprache, eigener TK-Begriff ohne Zusatz (D-098)', async ({ page, problems }) => {
   void problems
   await seed(page)

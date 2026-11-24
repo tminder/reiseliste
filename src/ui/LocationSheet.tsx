@@ -40,9 +40,9 @@ export function LocationSheet({
       setMode('choose')
       return
     }
-    // Erlaubt: aktuelles Land übernehmen, wenn es unterstützt wird und nicht die eigene Sprache hat; sonst die Vorauswahl
+    // Erlaubt: aktuelles Land übernehmen, wenn es unterstützt wird, auch im eigenen Sprachraum (D-041, D-087); sonst die Vorauswahl
     const here = r === 'granted' ? await detectCountry() : undefined
-    const code = here && COUNTRY_BY_CODE.get(here)?.lang !== lang ? here : country
+    const code = here && COUNTRY_BY_CODE.has(here) ? here : country
     onDone(code, true)
   }
 

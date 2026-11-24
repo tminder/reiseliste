@@ -225,7 +225,7 @@
   "locSheetBlocked": "Der Standort ist in den Browser-Einstellungen gesperrt, deshalb kann die App nicht fragen. Wähle das Reiseland; „Automatisch“ geht wieder, sobald du den Standort dort erlaubst.",
   "countriesSuggested": "Vorschläge",
   "countriesAll": "Alle Länder",
-  "autoCountryHint": "Wechselt mit deinem Standort, ausser im Land deiner Sprache.",
+  "autoCountryHint": "Wechselt mit deinem Standort in jedes unterstützte Land, auch zu Hause. Gilt für alle, mit denen die Liste geteilt ist.",
   "examples": "Zum Beispiel – antippen zum Hinzufügen:",
   "wrongTerm": "Begriff stimmt nicht?",
   "reportTitle": "Übersetzung falsch melden",

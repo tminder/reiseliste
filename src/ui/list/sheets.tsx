@@ -6,6 +6,8 @@ import { COUNTRY_BY_CODE, LANG_LABEL } from '../../data/countries'
 import { countryLabel, t, uiLang } from '../../i18n'
 import { CountryOptions } from '../CountryOptions'
 import { LocationSheet } from '../LocationSheet'
+import { cachedCountry } from '../../lib/country'
+import { countryChangeDeclined } from './helpers'
 import { useLocation } from '../useLocation'
 import { listUrl } from '../../lib/links'
 import { MAX } from '../../lib/limits'
@@ -87,6 +89,7 @@ export function MembersSheet({ store, profile, onClose }: { store: ListStore; pr
 }
 
 export function EditSheet({
+  id,
   name,
   country,
   autoClear,
@@ -96,6 +99,7 @@ export function EditSheet({
   onSave,
   onClose,
 }: {
+  id: string
   name: string
   /** Sprache des Profils (für die vorgeschlagenen Länder) */
   lang: Lang
@@ -115,6 +119,11 @@ export function EditSheet({
   const loc = useLocation()
   const [askLocation, setAskLocation] = useState(false)
   const [ac, setAc] = useState(autoClear)
+  // Was „Automatisch“ jetzt ergäbe (D-057): das erkannte Land, sonst das bisherige der Liste. Nicht das eben fest
+  // gewählte Land (das stand früher in Klammern, wenn man auf ein Land und zurück auf „Automatisch“ wechselte).
+  // Ohne Standort kein Land in Klammern, es wäre nur geraten (D-067).
+  const here = cachedCountry()
+  const autoPreview = here && COUNTRY_BY_CODE.has(here) && !countryChangeDeclined(id, here) ? here : country
   const [names, setNames] = useState(showNames)
   return (
     <div className="sheet-backdrop" onClick={onClose}>
@@ -124,7 +133,8 @@ export function EditSheet({
         onSubmit={(e) => {
           e.preventDefault()
           if (auto && !autoCountry && !loc.available) return setAskLocation(true)
-          onSave(n.trim() || name, c, ac, auto, names)
+          // Automatisch: das bisherige Land speichern; den Wechsel ins erkannte Land macht die Liste mit Hinweis und „Rückgängig“ (D-040)
+          onSave(n.trim() || name, auto ? country : c, ac, auto, names)
         }}
       >
         <h2>{t('editListTitle')}</h2>
@@ -142,7 +152,11 @@ export function EditSheet({
               setC(e.target.value)
             }}
           >
-            <option value="auto">{t('autoCountry', { country: `${COUNTRY_BY_CODE.get(c)?.flag ?? ''} ${countryLabel(c, COUNTRY_BY_CODE.get(c)?.lang ?? 'en')}` })}</option>
+            <option value="auto">
+              {loc.available
+                ? t('autoCountry', { country: `${COUNTRY_BY_CODE.get(autoPreview)?.flag ?? ''} ${countryLabel(autoPreview, COUNTRY_BY_CODE.get(autoPreview)?.lang ?? 'en')}` })
+                : t('autoCountryPlain')}
+            </option>
             <CountryOptions lang={lang} />
           </select>
         </label>
@@ -172,7 +186,7 @@ export function EditSheet({
         <LocationSheet
           loc={loc}
           lang={lang}
-          country={c}
+          country={country}
           submitLabel={t('save')}
           onDone={(country, a) => onSave(n.trim() || name, country, ac, a, names)}
           onClose={() => setAskLocation(false)}

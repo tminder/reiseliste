@@ -685,6 +685,7 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
       )}
       {showEdit && (
         <EditSheet
+          id={id}
           name={list.name}
           country={list.country}
           autoClear={list.autoClear !== false}

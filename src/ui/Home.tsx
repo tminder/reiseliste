@@ -20,6 +20,9 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
   // Vorauswahl: kein Land mit der eigenen Sprache, dort braucht es keine Übersetzung (D-041)
   const [country, setCountry] = useState(() => ['ES', 'IT', 'FR'].find((c) => COUNTRY_BY_CODE.get(c)?.lang !== profile.lang) ?? 'ES')
   const touched = useRef(false)
+  // Was „Automatisch“ ergibt (D-057): das erkannte Land, sonst die Vorauswahl. Getrennt vom fest gewählten Land,
+  // damit nach „Italien“ und zurück auf „Automatisch“ nicht Italien in Klammern steht
+  const [autoCode, setAutoCode] = useState(country)
   // Reiseland: standardmässig automatisch nach Standort (D-057), sonst fest gewähltes Land
   // „Automatisch“ ist immer die Vorauswahl; fehlt der Standort, fragt „Liste erstellen“ zuerst danach (D-066, D-067)
   const loc = useLocation()
@@ -83,6 +86,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
       // Auch im eigenen Sprachraum (D-087): Dort zeigt die Liste keine Übersetzung (D-081), und auf der Reise
       // wechselt „Automatisch“ ins fremde Land (D-040)
       if (!alive || !code) return
+      setAutoCode(code)
       if (!touched.current) setCountry(code)
     })
     return () => {
@@ -101,7 +105,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
     e.preventDefault()
     if (!name.trim()) return
     if (auto && !loc.available) return setAskLocation(true)
-    make(country, auto)
+    make(auto ? autoCode : country, auto)
   }
 
   return (
@@ -169,7 +173,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
             >
               {/* Ohne Standort kein Land in Klammern: es wäre nur geraten (D-067) */}
               <option value="auto">
-                {loc.available ? t('autoCountry', { country: `${COUNTRY_BY_CODE.get(country)?.flag ?? ''} ${countryLabel(country, COUNTRY_BY_CODE.get(country)?.lang ?? 'en')}` }) : t('autoCountryPlain')}
+                {loc.available ? t('autoCountry', { country: `${COUNTRY_BY_CODE.get(autoCode)?.flag ?? ''} ${countryLabel(autoCode, COUNTRY_BY_CODE.get(autoCode)?.lang ?? 'en')}` }) : t('autoCountryPlain')}
               </option>
               <CountryOptions lang={profile.lang} />
             </select>
@@ -180,7 +184,7 @@ export function Home({ profile, onEditProfile }: { profile: Profile; onEditProfi
         </form>
       )}
       {askLocation && (
-        <LocationSheet loc={loc} lang={profile.lang} country={country} submitLabel={t('createList')} onDone={make} onClose={() => setAskLocation(false)} />
+        <LocationSheet loc={loc} lang={profile.lang} country={autoCode} submitLabel={t('createList')} onDone={make} onClose={() => setAskLocation(false)} />
       )}
 
       {lists.length > 0 && (
