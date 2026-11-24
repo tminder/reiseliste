@@ -310,7 +310,7 @@ Stand: 2026-11-24 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 - **Entscheidung:** Vor jedem Deployment laufen in GitHub Actions: Lint, Vitest (`npm test`: Wörterbuch und Oberflächentexte auf fehlende Übersetzungen, Übersetzung, Mengen, Fehlerbereinigung und das Datenbank-Schema mit PGlite, einem echten Postgres im Speicher) und Playwright-Oberflächentests (`npm run e2e`, Ordner `e2e/`). Die Oberflächentests laufen gegen einen eigenen Build ohne Supabase, alle fremden Server sind gesperrt. Sie spielen durch: Profil und Liste anlegen, Übersetzung, Länder-Abweichung (Mexiko), Mengen zusammenzählen, eine Ansicht mit Löschen nur bei Abgehakten und Zeigen-Karte, Menü und Profil, Teilen mit QR-Code, Liste löschen mit Rückgängig, Datenschutzseite. Jeder Test schlägt zusätzlich fehl, wenn ein JavaScript-Fehler oder ein Verstoss gegen die Content-Security-Policy auftritt. Schlägt etwas fehl, wird nicht veröffentlicht; der Bericht liegt 7 Tage als Artefakt beim Lauf.
 - **Begründung:** Befund der MVP-Beurteilung, vom Inhaber freigegeben. Änderungen werden damit sicherer, auch grössere Umbauten wie das Aufteilen der Oberfläche in `src/ui/`.
-- **Folgen:** Ein Deployment dauert rund 2 Minuten länger. Neue Funktionen bekommen einen Ablauf in `e2e/app.spec.ts`, Schema-Änderungen einen Fall in `tests/schema.test.ts`.
+- **Folgen:** Ein Deployment dauert rund 2 Minuten länger. Neue Funktionen bekommen einen Ablauf in `e2e/` (list, shop oder country), Schema-Änderungen einen Fall in `tests/schema.test.ts`.
 
 ## D-053 · Übersetzungen als Datendateien pro Sprache, mit Länder-Abweichungen
 
