@@ -9,15 +9,15 @@ import { addQty, canAddQty } from '../../lib/qty'
 import { reportError } from '../../lib/errors'
 import { sendFeedback } from '../../lib/feedback'
 import { findConcept, isLoaded, loadLanguages, nameIn, onLanguagesLoaded, splitQuantity } from '../../lib/translate'
-import { getChosenShopAt, getPosition, getChosenShop, meters, setChosenShop, shopTag, type Shop } from '../../lib/nearby'
-import { detectCountry } from '../../lib/country'
+import { getChosenShopAt, getChosenShop, setChosenShop, shopTag, type Shop } from '../../lib/nearby'
 import { MAX } from '../../lib/limits'
 import { ListStore, scheduleDelete, isSoleMember, knownSole, leaveList, setLastList, lastSyncError, supabase, type Item, type Profile, type SyncState } from '../../lib/store'
 import { formatQty, go } from '../format'
 import { AppHint } from './AppHint'
 import { ItemRow } from './ItemRow'
 import { ShopBar } from './ShopBar'
-import { DAY_MS, EXAMPLES, VISIT_ACCURACY_M, VISIT_RADIUS_M, countryChangeDeclined, declineCountryChange, dupKey, readVisit, saveVisit, useNamesSetting } from './helpers'
+import { EXAMPLES, declineCountryChange, dupKey, useNamesSetting } from './helpers'
+import { useAutoClearDay, useAutoCountry, useDocumentTitle, useDraft, useShopVisit } from './hooks'
 import { ConverterSheet, EditSheet, MembersSheet, ShareSheet } from './sheets'
 import { countryCurrency, homeCurrency } from '../../lib/currency'
 import { attributeLabel, attributesFor, suggestWithAttributes } from '../../lib/attributes'
@@ -88,23 +88,7 @@ function useLanguages(langs: Lang[], required: Lang[]): boolean {
 export function ListView({ id, profile, onEditProfile }: { id: string; profile: Profile; onEditProfile: () => void }) {
   const { store } = useStore(id, profile)
   useEffect(() => setLastList(id), [id])
-  // Angefangene Eingabe übersteht ein Neuladen (neue Version, D-016): im Tab gespeichert, nur bis zum Schliessen
-  const draftKey = `rl:draft:${id}`
-  const [input, setInput] = useState(() => {
-    try {
-      return sessionStorage.getItem(draftKey) ?? ''
-    } catch {
-      return ''
-    }
-  })
-  useEffect(() => {
-    try {
-      if (input) sessionStorage.setItem(draftKey, input)
-      else sessionStorage.removeItem(draftKey)
-    } catch {
-      /* egal */
-    }
-  }, [draftKey, input])
+  const [input, setInput] = useDraft(id)
   // „Gelöscht · Rückgängig“ für 5 Sekunden (D-042)
   // Leiste unten mit Hinweis und Aktionen („Rückgängig“, „Separat hinzufügen“)
   const [undo, setUndo] = useState<{ label: string; actions: { label: string; run: () => void }[] } | null>(null)
@@ -120,9 +104,12 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   // ---- Weiche Übergänge (D-044) ----
   const mainRef = useRef<HTMLElement>(null)
   const localChanges = useRef(new Map<string, number>())
+  // Date.now() nur in Handlern, nicht beim Rendern (Hinweis von oxlint ist hier ein Fehlalarm)
+  // oxlint-disable-next-line react/purity
   const markLocal = (itemId: string) => localChanges.current.set(itemId, Date.now())
   useFlip(
     mainRef,
+    // oxlint-disable-next-line react/purity
     (itemId) => Date.now() - (localChanges.current.get(itemId) ?? 0) < 5000,
   )
   // Bestätigung direkt am Eingabefeld (D-044): angetippter Vorschlag zeigt kurz „✓“, „+“ wird zum Häkchen
@@ -138,16 +125,10 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   // ---- Erledigte automatisch entfernen (D-043): nach 1 Tag oder beim Verlassen des Ladens ----
   const autoClear = store.list ? store.list.autoClear !== false : false
   const showUndoRef = useRef(showUndo)
-  showUndoRef.current = showUndo
-  // Nach 1 Tag: beim Öffnen und alle 5 Minuten, solange die Liste offen ist
   useEffect(() => {
-    if (!autoClear) return
-    const run = () =>
-      void store.removeChecked(DAY_MS).then((ids) => ids.length && showUndoRef.current(ids, t('autoClearedDay', { n: ids.length })))
-    run()
-    const iv = window.setInterval(run, 5 * 60 * 1000)
-    return () => window.clearInterval(iv)
-  }, [autoClear, store])
+    showUndoRef.current = showUndo
+  })
+  useAutoClearDay(store, autoClear, showUndoRef)
   // „Schon mal gekauft“ nur, solange das Eingabefeld aktiv ist (D-030)
   const [inputFocused, setInputFocused] = useState(false)
   const blurTimer = useRef<number | undefined>(undefined)
@@ -180,8 +161,10 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   const [mountedAt] = useState(() => Date.now())
   const [autoShop, setAutoShop] = useState<Shop | null>(null)
   const onArrived = (s: Shop) => {
+    // oxlint-disable-next-line react/purity
     if (Date.now() - mountedAt > 30_000) return // nur direkt nach dem Öffnen der Liste
     setShopping(true)
+    // oxlint-disable-next-line react/purity
     setActiveAt(Date.now())
     setAutoShop(s)
   }
@@ -204,76 +187,12 @@ export function ListView({ id, profile, onEditProfile }: { id: string; profile: 
   // merkt sich die App den Besuch. Ist man später (beim Zurückkehren in die App oder alle 2 Minuten) weiter als 150 m weg,
   // werden Erledigte entfernt. Ein bloss vorgeschlagener Laden in der Nähe zählt nicht als Besuch.
   const visitShop = shopping ? (autoShop ?? photoShop) : null
-  const visitShopRef = useRef(visitShop)
-  visitShopRef.current = visitShop
-  useEffect(() => {
-    if (!autoClear) return
-    let busy = false
-    const check = async () => {
-      const visit = readVisit(id)
-      const vs = visitShopRef.current
-      const candidate = !visit && vs?.lat != null && vs.lon != null ? vs : null
-      if ((!visit && !candidate) || busy || document.visibilityState !== 'visible') return
-      busy = true
-      try {
-        const { latitude, longitude, accuracy } = (await getPosition(10_000)).coords
-        if (candidate) {
-          if (accuracy <= VISIT_ACCURACY_M && meters(latitude, longitude, candidate.lat!, candidate.lon!) <= VISIT_RADIUS_M)
-            saveVisit(id, { lat: candidate.lat!, lon: candidate.lon!, at: Date.now() })
-        } else if (visit && meters(latitude, longitude, visit.lat, visit.lon) > Math.max(150, accuracy)) {
-          saveVisit(id, null)
-          const ids = await store.removeChecked()
-          if (ids.length) showUndoRef.current(ids, t('autoClearedShop', { n: ids.length }))
-        }
-      } catch {
-        /* ohne Standort: später nochmals, spätestens greift die 1-Tages-Regel */
-      } finally {
-        busy = false
-      }
-    }
-    const iv = window.setInterval(() => void check(), 2 * 60 * 1000)
-    const onVisible = () => void check()
-    document.addEventListener('visibilitychange', onVisible)
-    void check()
-    return () => {
-      window.clearInterval(iv)
-      document.removeEventListener('visibilitychange', onVisible)
-    }
-  }, [autoClear, id, store, visitShop?.id, visitShop?.lat, visitShop?.lon])
+  useShopVisit(id, store, autoClear, visitShop, showUndoRef)
 
   const list = store.list
-  // Seitentitel = Listenname (D-076): Tabs, Lesezeichen, Verlauf und Vorschauen, die die Seite ausführen
-  useEffect(() => {
-    if (!list?.name) return
-    document.title = `${list.name} · ${t('appName')}`
-    return () => {
-      document.title = t('appName')
-    }
-  }, [list?.name])
+  useDocumentTitle(list?.name)
 
-  // Reiseland automatisch anpassen, wenn man in einem anderen unterstützten Land ist (D-040).
-  // Keine Änderung in einem Land mit der eigenen Sprache (dort braucht man keine Übersetzung, D-041)
-  // oder in einem nicht unterstützten Land.
-  const [countryMoved, setCountryMoved] = useState<{ from: string; to: string } | null>(null)
-  const listCountry = list?.country
-  const autoCountry = list ? list.autoCountry !== false : false
-  useEffect(() => {
-    // Nur bei „Automatisch“ (D-057); bei fest gewähltem Land bleibt es dabei
-    if (!listCountry || !autoCountry) return
-    let alive = true
-    // Beim ersten Abhaken nach dem Öffnen erneut prüfen, dann mit höchstens 5 Minuten altem Ergebnis (D-069)
-    void detectCountry((firstChecked ? 5 : 30) * 60 * 1000).then((code) => {
-      if (!alive || !code || code === listCountry || !COUNTRY_BY_CODE.has(code)) return
-      if (countryChangeDeclined(id, code)) return
-      void store.updateList({ country: code })
-      setCountryMoved({ from: listCountry, to: code })
-    })
-    return () => {
-      alive = false
-    }
-    // Nur beim Öffnen der Liste bzw. wenn sie geladen ist, auf „Automatisch“ gestellt wird oder beim ersten Abhaken
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, !!listCountry, autoCountry, firstChecked])
+  const [countryMoved, setCountryMoved] = useAutoCountry(id, store, list, firstChecked)
 
   const country = list ? COUNTRY_BY_CODE.get(list.country) : undefined
   const target: Lang = country?.lang ?? 'en'
