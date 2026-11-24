@@ -76,7 +76,7 @@
  { "id": "olivenoel", "category": "vorrat", "off": "en:olive-oils" },
  { "id": "sonnenblumenoel", "category": "vorrat", "off": "en:sunflower-oils" },
  { "id": "essig", "category": "vorrat", "off": "en:vinegars" },
- { "id": "tomatensauce", "category": "vorrat", "off": "en:tomato-sauces", "offNot": ["en:ketchup"] },
+ { "id": "tomatensauce", "category": "vorrat", "off": "en:tomato-sauces" },
  { "id": "dosentomaten", "category": "vorrat", "off": "en:canned-tomatoes" },
  { "id": "ketchup", "category": "vorrat", "off": "en:ketchup" },
  { "id": "senf", "category": "vorrat", "off": "en:mustards" },
