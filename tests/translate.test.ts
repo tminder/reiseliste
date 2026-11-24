@@ -183,3 +183,21 @@ describe('Tippfehler (D-105)', async () => {
     expect(suggest('Salat', 'de').map((s) => s.id)).not.toContain('salami')
   })
 })
+
+describe('Endungen pro Sprache (S-012)', () => {
+  it('Einzahl findet den Artikel, auch wo nur die Mehrzahl im Wörterbuch steht', () => {
+    expect(findConcept('pomodoro', 'it')).toBe('tomaten')
+    expect(findConcept('uovo', 'it')).toBe('eier')
+    expect(findConcept('rajčica', 'hr')).toBe('tomaten')
+    expect(findConcept('ντομάτα', 'el')).toBe('tomaten')
+    expect(findConcept('cebolla', 'es')).toBe('zwiebeln')
+    expect(findConcept('oignon', 'fr')).toBe('zwiebeln')
+  })
+  it('jeder Name im Wörterbuch führt zu seinem eigenen Artikel', async () => {
+    const { CONCEPTS } = await import('../src/data/dictionary')
+    const { namesIn } = await import('../src/lib/translate')
+    const wrong: string[] = []
+    for (const l of LANGS) for (const c of CONCEPTS) for (const n of namesIn(c.id, l)) if (findConcept(n, l) !== c.id) wrong.push(`${l}:${n}`)
+    expect(wrong).toEqual([])
+  })
+})

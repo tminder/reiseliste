@@ -21,11 +21,28 @@ export function normalize(s: string, lang?: Lang): string {
     .trim()
 }
 
-/** Grobe Plural-/Endungsvarianten, damit "Tomate" und "Tomaten" beide treffen. */
+/**
+ * Endungen pro Sprache (S-012): Einzahl und Mehrzahl sollen auf denselben Stamm kommen („Tomate“/„Tomaten“,
+ * „pomodoro“/„pomodori“, „ντομάτα“/„ντομάτες“). Bewusst grob: nur das Wortende, kein Wörterbuch der Formen.
+ */
+const SUFFIXES: Partial<Record<Lang, string[]>> = {
+  de: ['en', 'n', 'e', 's', 'es'],
+  en: ['es', 's'],
+  nl: ['en', 's'],
+  es: ['es', 's'],
+  pt: ['es', 's'],
+  fr: ['s', 'x'],
+  // Italienisch und Kroatisch: Einzahl und Mehrzahl unterscheiden sich im letzten Vokal
+  it: ['a', 'e', 'i', 'o'],
+  hr: ['a', 'e', 'i', 'o', 'u'],
+  // Griechisch (ohne Tonos, siehe normalize): -α/-ες, -ι/-ια, -ο/-α, -ος/-οι, -η/-ες
+  el: ['ες', 'ια', 'οι', 'ος', 'ας', 'α', 'ε', 'η', 'ι', 'ο', 'ς'],
+}
+
 function stems(word: string, lang?: Lang): string[] {
   const out = new Set([word])
   if (lang === 'vi' || lang === 'zh') return [...out] // keine Endungen
-  for (const suf of ['en', 'n', 'e', 's', 'es']) {
+  for (const suf of (lang && SUFFIXES[lang]) ?? SUFFIXES.de!) {
     if (word.length > suf.length + 2 && word.endsWith(suf)) out.add(word.slice(0, -suf.length))
   }
   return [...out]
