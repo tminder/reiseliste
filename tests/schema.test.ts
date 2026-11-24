@@ -39,6 +39,12 @@ beforeAll(async () => {
 }, 30_000)
 
 describe('schema.sql', () => {
+  it('Versionsnummer: Kommentar und Funktion stimmen überein (D-107)', async () => {
+    const marked = Number(/^-- SCHEMA_VERSION (\d+)$/m.exec(readFileSync('supabase/schema.sql', 'utf8'))?.[1])
+    expect(marked).toBeGreaterThan(0)
+    expect(await val('select schema_version()')).toBe(marked)
+  })
+
   it('Listen und Mitgliedschaft', async () => {
     await as(A)
     await db.exec(`insert into lists(id,name,country) values ('${L}','L','ES'),('${M}','M','ES')`)

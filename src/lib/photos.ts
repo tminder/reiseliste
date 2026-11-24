@@ -78,7 +78,7 @@ function cacheKey(country: string, what: string) {
   return `rl:photos4:${country}:${what}`
 }
 
-/** Einträge früherer Versionen entfernen (S-054), einmal pro Sitzung */
+/** Einträge früherer Versionen entfernen (D-106), einmal pro Sitzung */
 let cleaned = false
 function cleanOldCache() {
   if (cleaned) return

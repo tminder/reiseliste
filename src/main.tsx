@@ -6,8 +6,11 @@ import App from './App.tsx'
 import { registerSW } from 'virtual:pwa-register'
 import { reloadIfOutdated } from './lib/hardReload'
 import { installErrorReporting } from './lib/errors'
+import { tidyStorage } from './lib/storageCleanup'
 
 installErrorReporting()
+// Gerätespeicher aufräumen, sobald die App steht (D-106)
+window.setTimeout(() => tidyStorage(), 3000)
 
 // Nach einem harten Neuladen (D-035) den Zeitstempel wieder aus der Adresse entfernen
 if (new URLSearchParams(location.search).has('r')) {

@@ -364,4 +364,13 @@ $$;
 revoke all on function public.ping() from public;
 grant execute on function public.ping() to anon, authenticated;
 
+-- Stand dieses Skripts (D-107). Bei JEDER Änderung an diesem Skript erhöhen, hier und in der Funktion.
+-- Der Workflow „Supabase wach halten“ vergleicht täglich und nach jedem Push von schema.sql mit der Datenbank
+-- und schlägt fehl (GitHub schickt eine Mail), solange das Skript nicht im SQL-Editor ausgeführt wurde.
+-- SCHEMA_VERSION 1
+create or replace function public.schema_version()
+returns integer language sql immutable as $$ select 1 $$;
+revoke all on function public.schema_version() from public;
+grant execute on function public.schema_version() to anon, authenticated;
+
 notify pgrst, 'reload schema';

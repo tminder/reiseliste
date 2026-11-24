@@ -1,4 +1,5 @@
 import { MAX, clip, clipOrNull } from './limits'
+import { tidyStorage } from './storageCleanup'
 import { createClient, type RealtimeChannel, type SupabaseClient } from '@supabase/supabase-js'
 import type { Lang } from '../data/dictionary'
 import { rankPeople, type ActivityRow, type MemberRow } from './people'
@@ -90,10 +91,17 @@ const LS = {
     }
   },
   set(key: string, value: unknown) {
+    const text = JSON.stringify(value)
     try {
-      localStorage.setItem(key, JSON.stringify(value))
+      localStorage.setItem(key, text)
     } catch {
-      /* Speicher voll oder gesperrt – App läuft im Speicher weiter */
+      // Speicher voll (D-106): Zwischenspeicher leeren und nochmals – sonst gingen z. B. offline gemachte Änderungen verloren
+      try {
+        tidyStorage(true)
+        localStorage.setItem(key, text)
+      } catch {
+        /* gesperrt oder immer noch voll – App läuft im Speicher weiter */
+      }
     }
   },
 }
@@ -299,6 +307,7 @@ export function forgetList(id: string) {
   localStorage.removeItem(`rl:list:${id}`)
   localStorage.removeItem(`rl:people:${id}`)
   localStorage.removeItem(`rl:sole:${id}`)
+  // Übrige Einstellungen der Liste (Laden, Besuch, abgelehnte Länder, Namen) räumt tidyStorage beim nächsten Start auf (D-106)
 }
 
 // ---------- Warteschlange für Änderungen (offline-fähig) ----------

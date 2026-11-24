@@ -1,5 +1,7 @@
 # Supabase wach halten (D-039): Gratis-Projekte werden nach 7 Tagen ohne Datenbank-Aktivität pausiert.
 # Ruft täglich die Funktion ping() auf (schreibt einen Zeitstempel in die Tabelle keepalive).
+# Prüft dabei, ob supabase/schema.sql in der Datenbank ausgeführt ist (D-107): Sonst schlägt der Lauf fehl, und GitHub
+# schickt eine Mail. Läuft auch gleich nach jedem Push, der schema.sql ändert.
 # URL und Publishable Key stehen ohnehin öffentlich in .env.production – es braucht kein Secret.
 
 name: Supabase wach halten
@@ -8,6 +10,9 @@ on:
   schedule:
     - cron: '37 4 * * *' # täglich 04:37 UTC
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [supabase/schema.sql]
 
 permissions:
   contents: read
@@ -26,7 +31,17 @@ jobs:
           code=$(curl -s -o /tmp/out -w '%{http_code}' -X POST "$URL/rest/v1/rpc/ping" \
             -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}')
           echo "ping(): HTTP $code $(cat /tmp/out)"
-          if [ "$code" = "200" ]; then exit 0; fi
+          if [ "$code" = "200" ]; then
+            # Stand der Datenbank gegen supabase/schema.sql
+            want=$(grep -oE '^-- SCHEMA_VERSION [0-9]+' supabase/schema.sql | awk '{print $3}')
+            have=$(curl -s -X POST "$URL/rest/v1/rpc/schema_version" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}')
+            echo "schema_version(): Datenbank $have, Skript $want"
+            if [ "$have" != "$want" ]; then
+              echo "::error::Datenbank nicht auf dem Stand von supabase/schema.sql (Datenbank: $have, Skript: $want). Skript im Supabase-SQL-Editor ausführen: https://supabase.com/dashboard/project/evglhiivucccditqtjkm/sql/new"
+              exit 1
+            fi
+            exit 0
+          fi
           # 2. Falls ping() noch fehlt (schema.sql nicht ausgeführt): einfache Leseanfrage
           code=$(curl -s -o /tmp/out -w '%{http_code}' "$URL/rest/v1/lists?select=id&limit=1" -H "apikey: $KEY")
           echo "Leseanfrage: HTTP $code"
