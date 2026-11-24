@@ -5,16 +5,15 @@ import { isIos, mapApp, mapLink, needsMapChoice, setMapApp } from '../../lib/lin
 import { knownStreet, lookupStreets, shopTitle } from '../../lib/nearby'
 import { t, uiLang } from '../../i18n'
 import { describeHours } from '../../lib/openingHours'
-import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, looksInside, osmCooldownS, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
+import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, osmCooldownS, setLocationConsent, LEFT_SHOP_M, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
 import { RETRY_S } from './helpers'
 import { useCountdown } from '../useCountdown'
+import { pickSuggestion, shouldDropChosen, showsInside } from '../../lib/shopRules'
 import { cachedCountry, detectCountry } from '../../lib/country'
 
 /** Namen der Karten-Apps (D-101); Apple Karten ist übersetzt */
 const MAP_APP_NAME: Partial<Record<'apple' | 'google' | 'osm', string>> = { google: 'Google Maps', osm: 'OpenStreetMap' }
 
-/** „Im <Laden>“ höchstens so lange nach dem letzten Abhaken bzw. der Ankunft (D-078) */
-const ACTIVE_MS = 30 * 60 * 1000
 
 export function ShopBar({
   shop,
@@ -118,11 +117,7 @@ export function ShopBar({
   // Den angezeigten Vorschlag nach oben melden (für die Fotos)
   // Vorschlag: der nächste Laden, der laut Öffnungszeiten offen ist (D-099). Läden ohne Zeiten werden nicht vorgezogen;
   // ist keiner sicher offen, gilt der nächste. Steht man in einem Laden (inside), gilt dieser.
-  const firstShop = (() => {
-    const shops = state.shops ?? []
-    if (state.inside) return shops[0] ?? null
-    return shops.find((x) => describeHours(x.hours, t, uiLang())?.open === true) ?? shops[0] ?? null
-  })()
+  const firstShop = pickSuggestion(state.shops ?? [], !!state.inside)
   const suggestion = !shop && !state.dismissed && !away ? firstShop : null
   useEffect(() => {
     onSuggest(suggestion)
@@ -135,13 +130,14 @@ export function ShopBar({
   /** Gewählter Laden: verwerfen, wenn man sich weiter als LEFT_SHOP_M entfernt hat (D-033) */
   async function checkLeft(limitM = LEFT_SHOP_M): Promise<boolean> {
     if (!shop || shop.lat == null || shop.lon == null) return false
-    // Gerade erst von Hand gewählt (oft ein Laden, zu dem man erst hingeht): stehen lassen
+    // Gerade erst von Hand gewählt (oft ein Laden, zu dem man erst hingeht): ohne Standortabfrage stehen lassen
     if (chosenAt && Date.now() - chosenAt < CHOSEN_GRACE_MS) return false
     lastCheck.current = Date.now()
     try {
       const { latitude, longitude, accuracy } = (await getPosition(limitM < LEFT_SHOP_M ? 10_000 : undefined)).coords
-      setPos({ lat: latitude, lon: longitude, accuracy })
-      if (meters(latitude, longitude, shop.lat, shop.lon) > Math.max(limitM, accuracy)) {
+      const here = { lat: latitude, lon: longitude, accuracy }
+      setPos(here)
+      if (shouldDropChosen(shop, chosenAt, here, Date.now(), limitM)) {
         onChoose(null)
         return true
       }
@@ -250,12 +246,7 @@ export function ShopBar({
   }
   // Im Laden: „Im <Laden>“ statt Meter (D-078), nur während des Einkaufs (erstes Abhaken oder Ankunft, dann bis 30 Minuten
   // nach der letzten Aktivität) und solange man beim Laden ist. Gemessen ab dem letzten Standort dieser Sitzung.
-  const here =
-    !!current &&
-    activeAt != null &&
-    Date.now() - activeAt < ACTIVE_MS &&
-    !!pos &&
-    current.lat != null && current.lon != null && looksInside(meters(pos.lat, pos.lon, current.lat, current.lon), pos.accuracy)
+  const here = showsInside(current, activeAt, pos)
   const options = current ? [current, ...others] : (state.shops ?? []).slice(0, 6)
   const locale = uiLang()
   // Öffnungszeiten aus OpenStreetMap (D-099); fehlen sie beim gewählten Laden, aus der letzten Suche

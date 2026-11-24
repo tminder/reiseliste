@@ -1,4 +1,5 @@
 import { t } from '../i18n'
+import { canReuse } from './shopRules'
 import { timeout } from './net'
 // Nächstgelegenen Supermarkt erkennen: Standort des Geräts + OpenStreetMap (Overpass API).
 // Der Standort wird nur mit Erlaubnis abgefragt und an die Overpass API geschickt. Auf dem Gerät bleiben die Stelle der letzten Suche (12 h) und der gewählte Laden (D-033).
@@ -158,10 +159,6 @@ export const FAR_RADIUS_M = FAR_STEPS_M[FAR_STEPS_M.length - 1]
 // Als Vorschlag beim Start höchstens 12 Stunden alt (danach ist man oft woanders); zum Wiederverwenden am gleichen Ort 7 Tage.
 const CACHE_MS = 12 * 60 * 60 * 1000
 const REUSE_MS = 7 * 24 * 60 * 60 * 1000
-/** Ab dieser Strecke gilt man als „woanders“ (mindestens aber die GPS-Ungenauigkeit) */
-const MOVED_M = 300
-/** War man in einem Laden, reicht eine kürzere Strecke */
-const MOVED_INSIDE_M = 150
 export type NearbyResult = { shops: Shop[]; inside: boolean; accuracy?: number }
 type LastResult = { at: number; lat: number; lon: number; accuracy?: number; result: NearbyResult }
 
@@ -222,12 +219,8 @@ export async function findNearbyShops(force = false, precise = false): Promise<N
 
   // Nicht wirklich bewegt (GPS-Sprünge in Gebäuden eingerechnet): letztes Ergebnis wiederverwenden, keine Anfrage
   const lastResult = readLast()
-  if (!force && lastResult && Date.now() - lastResult.at < REUSE_MS) {
-    const moved = meters(lat, lon, lastResult.lat, lastResult.lon)
-    const base = precise ? 75 : lastResult.result.inside ? MOVED_INSIDE_M : MOVED_M
-    const limit = Math.max(base, accuracy, precise ? 0 : (lastResult.accuracy ?? 0))
-    if (moved <= limit) return { ...relocate(lastResult.result, lat, lon), accuracy, lat, lon, fresh: false }
-  }
+  if (!force && lastResult && canReuse({ ...lastResult, inside: lastResult.result.inside }, { lat, lon, accuracy }, { precise, maxAgeMs: REUSE_MS }))
+    return { ...relocate(lastResult.result, lat, lon), accuracy, lat, lon, fresh: false }
 
   // GPS ist in Gebäuden ungenau: Radius an die Genauigkeit anpassen (mind. 75 m, höchstens 400 m)
   const radius = Math.min(400, Math.max(75, Math.round(accuracy * 1.5)))
