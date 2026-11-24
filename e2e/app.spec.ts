@@ -532,10 +532,31 @@ test.describe('Ladensuche: Fehler nur im Auswahlblatt (D-086)', () => {
     await page.getByRole('button', { name: 'Laden ändern' }).click()
     await expect(page.locator('.sheet')).toContainText('Neuer Versuch in')
     fail = false
-    await page.clock.runFor(20_000)
+    await page.clock.runFor(35_000)
     await expect(page.locator('.sheet')).toContainText('Suche')
     await expect(page.locator('.sheet')).not.toContainText('Neuer Versuch')
     await expect(page.locator('.sheet')).not.toContainText('nicht erreichbar')
+  })
+})
+
+test.describe('Weitsuche nur ohne Laden in der Nähe (D-100)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
+  test('bis 1 km nichts: zweite Anfrage bis 20 km, ohne Namenssuche', async ({ page, problems }) => {
+    void problems
+    const json = (b: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(b) })
+    const queries: string[] = []
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
+    await page.route(/interpreter/, (r) => {
+      const q = decodeURIComponent(r.request().postData() ?? '')
+      queries.push(q)
+      return r.fulfill(json({ elements: q.includes('around:20000') ? [{ type: 'node', id: 9, lat: 41.44, lon: 2.17, tags: { shop: 'supermarket', name: 'Bonpreu' } }] : [] }))
+    })
+    await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+    await seed(page, [item(1, 'Milch', 'milch')])
+    await page.goto(`/#/l/${LIST}`)
+    await expect(page.locator('.shop-current')).toContainText('Bonpreu')
+    expect(queries).toHaveLength(2)
+    expect(queries[1]).not.toContain('"name"~')
   })
 })
 
@@ -821,8 +842,9 @@ test.describe('Kleine Läden einer Kette (D-100)', () => {
     await expect(page.locator('.shop-current')).toContainText('Denner Express')
     expect(query).toContain('["shop"="convenience"]["brand"]')
     expect(query).toContain('["shop"="convenience"]["name"~"^(Denner|')
-    // Namenssuche nur bis 3 km, sonst läuft die Abfrage in die Zeitgrenze
-    expect(query.split('\n').find((l) => l.includes('around:20000'))).not.toContain('"name"~')
+    // Kleine erste Anfrage (D-100): kurze Zeit- und Speichergrenze, keine Weitsuche, weil bis 1 km ein Laden liegt
+    expect(query).toMatch(/\[timeout:10\]\[maxsize:\d+\]/)
+    expect(query).not.toContain('around:20000')
     await page.getByRole('button', { name: 'Laden ändern' }).click()
     await expect(page.locator('.shop-options')).not.toContainText('Kiosk am Eck')
   })

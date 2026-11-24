@@ -99,35 +99,59 @@ const ENDPOINTS = [
 
 type OsmElement = { type: string; id: number; lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }
 
-async function runQuery(query: string): Promise<OsmElement[]> {
+/**
+ * Rücksicht auf die öffentlichen Server (D-086): Overpass ist ausgelastet und sperrt Apps, die nach einer Abweisung
+ * schnell wieder fragen. Nach „ausgelastet“ oder „nicht erreichbar“ fragt die App mindestens 30 s lang gar nicht.
+ */
+const COOLDOWN_MS = 30_000
+let blockedUntil = 0
+/** Sekunden, bis wieder bei Overpass gefragt werden darf (0 = jetzt) */
+export function osmCooldownS(): number {
+  return Math.max(0, Math.ceil((blockedUntil - Date.now()) / 1000))
+}
+
+/**
+ * Overpass-Abfrage mit kleiner Zeit- und Speichergrenze. Der Server lässt kleine Anfragen bevorzugt zu und hält grosse bei
+ * Last bis 15 s zurück, um sie dann abzulehnen (504). Reicht der Speicher nicht, einmal mit dem Vierfachen.
+ */
+async function runQuery(body: string, timeoutS: number, maxsizeMiB: number): Promise<OsmElement[]> {
+  if (osmCooldownS() > 0) throw new NearbyError(t('errOsmBusy'), true)
   let lastError = t('errOsmUnreachable')
-  for (const url of ENDPOINTS) {
+  let size = maxsizeMiB
+  for (let i = 0; i < ENDPOINTS.length; i++) {
+    const url = ENDPOINTS[i]
     try {
-      // Zeitlimit: Die Abfrage selbst darf 25 s dauern (D-094)
-      const res = await fetch(url, { method: 'POST', body: new URLSearchParams({ data: query }), signal: timeout(35_000) })
+      const query = `[out:json][timeout:${timeoutS}][maxsize:${size * 1024 * 1024}];\n${body}`
+      // Abbruch nach Laufzeit + 15 s Warteschlange beim Server + Reserve
+      const res = await fetch(url, { method: 'POST', body: new URLSearchParams({ data: query }), signal: timeout((timeoutS + 20) * 1000) })
       if (res.ok) {
-        const body = (await res.json()) as { elements: OsmElement[]; remark?: string }
-        // Zeitgrenze oder Speicher überschritten: Overpass antwortet trotzdem mit 200, aber unvollständig → nächsten Server versuchen
-        if (body.remark && /runtime error|timed out|out of memory/i.test(body.remark)) {
+        const data = (await res.json()) as { elements: OsmElement[]; remark?: string }
+        if (data.remark && /out of memory|maxsize/i.test(data.remark) && size === maxsizeMiB) {
+          size *= 4
+          i-- // gleicher Server, mehr Speicher
+          continue
+        }
+        // Zeitgrenze überschritten: Overpass antwortet trotzdem mit 200, aber unvollständig → nächsten Server versuchen
+        if (data.remark && /runtime error|timed out|out of memory/i.test(data.remark)) {
           lastError = t('errOsmBusy')
           continue
         }
-        return body.elements
+        return data.elements
       }
-      lastError =
-        res.status === 429 || res.status === 504
-          ? t('errOsmBusy')
-          : t('errOsmStatus', { status: res.status })
+      lastError = res.status === 429 || res.status === 504 ? t('errOsmBusy') : t('errOsmStatus', { status: res.status })
     } catch {
       // Netzwerkfehler – oder Überlastung: Overpass schickt bei 429 keine CORS-Header, der Browser meldet dann nur „failed to fetch“
       lastError = t('errOsmUnreachable')
     }
   }
+  blockedUntil = Date.now() + COOLDOWN_MS
   throw new NearbyError(lastError, true)
 }
 
 /** Suchstufen ausserhalb eines Ladens: der nächste Supermarkt wird bis FAR_RADIUS_M gesucht. */
 export const FAR_STEPS_M = [1_000, 3_000, 10_000, 20_000]
+/** Erste, kleine Anfrage bis hier; die weiteren Stufen nur, wenn darin kein Supermarkt liegt (D-100) */
+const NEAR_M = FAR_STEPS_M[0]
 export const FAR_RADIUS_M = FAR_STEPS_M[FAR_STEPS_M.length - 1]
 
 // Läden ziehen nicht um: ein Ergebnis gilt, bis man sich wirklich bewegt hat (D-033, D-102).
@@ -191,11 +215,6 @@ function relocate(result: NearbyResult, lat: number, lon: number): NearbyResult 
 const CHAIN_NAMES =
   '^(Denner|Coop|Migros|Migrolino|Volg|Spar|Avec|Aldi|Lidl|Carrefour|Mercadona|Dia|Billa|Rewe|Edeka|Penny|Netto|Albert Heijn|Jumbo|Tesco|Sainsbury|Monoprix|Franprix|Intermarché|Auchan|Conad|Pam|Despar|Eurospin|Konzum|Tommy|Pingo Doce|Continente|Sklavenitis|AB)( |-|$)'
 const CHAIN_RE = new RegExp(CHAIN_NAMES, 'i')
-/**
- * Namenssuche nur im Nahbereich: Ein Ausdruck über den Namen ist für Overpass teuer, über 10 und 20 km lief die Abfrage
- * in die Zeitgrenze (Ladensuche „geht nicht mehr“). Weiter weg genügen Supermärkte und Läden mit Marke.
- */
-const CHAIN_NAME_MAX_M = 3_000
 
 export async function findNearbyShops(force = false, precise = false): Promise<NearbyResult & { fresh: boolean; lat: number; lon: number }> {
   const pos = await getPosition(precise ? 10_000 : undefined)
@@ -213,34 +232,42 @@ export async function findNearbyShops(force = false, precise = false): Promise<N
   // GPS ist in Gebäuden ungenau: Radius an die Genauigkeit anpassen (mind. 75 m, höchstens 400 m)
   const radius = Math.min(400, Math.max(75, Math.round(accuracy * 1.5)))
   const at = `${lat},${lon}`
-  const query = `[out:json][timeout:25];
-nwr(around:${radius},${at})["shop"~"^(supermarket|convenience|greengrocer|chemist)$"];out center tags 30;
-${FAR_STEPS_M.map((r) => `(nwr(around:${r},${at})["shop"="supermarket"];nwr(around:${r},${at})["shop"="convenience"]["brand"];${r <= CHAIN_NAME_MAX_M ? `nwr(around:${r},${at})["shop"="convenience"]["name"~"${CHAIN_NAMES}",i];` : ''});out center tags 40;`).join('\n')}`
+  // Zwei Stufen (D-100): zuerst klein und schnell – Läden am Standort und Supermärkte, Ketten mit Marke oder Ketten-Namen
+  // bis 1 km. Nur wenn dort kein Supermarkt liegt, die Weitsuche bis 3, 10 und 20 km (ohne Namenssuche, die ist teuer).
+  const near = `nwr(around:${radius},${at})["shop"~"^(supermarket|convenience|greengrocer|chemist)$"];out center tags 30;
+(nwr(around:${NEAR_M},${at})["shop"="supermarket"];nwr(around:${NEAR_M},${at})["shop"="convenience"]["brand"];nwr(around:${NEAR_M},${at})["shop"="convenience"]["name"~"${CHAIN_NAMES}",i];);out center tags 40;`
+  const far = FAR_STEPS_M.slice(1)
+    .map((r) => `(nwr(around:${r},${at})["shop"="supermarket"];nwr(around:${r},${at})["shop"="convenience"]["brand"];);out center tags 40;`)
+    .join('\n')
 
   const seen = new Set<string>()
-  const all = (await runQuery(query))
-    .map((el): (Shop & { rank: number }) | null => {
-      const id = `${el.type}/${el.id}`
-      const p = el.center ?? (el.lat != null && el.lon != null ? { lat: el.lat, lon: el.lon } : null)
-      const tags = el.tags ?? {}
-      const name: string | undefined = tags.name ?? tags.brand
-      if (!p || !name || seen.has(id)) return null
-      seen.add(id)
-      return {
-        id,
-        name,
-        brand: (tags.brand as string | undefined) ?? null,
-        distance: meters(lat, lon, p.lat, p.lon),
-        lat: p.lat,
-        lon: p.lon,
-        ...(tags.opening_hours ? { hours: tags.opening_hours } : {}),
-        ...(tags.branch ? { branch: tags.branch } : {}),
-        ...(tags['addr:street'] ? { street: `${tags['addr:street']}${tags['addr:housenumber'] ? ' ' + tags['addr:housenumber'] : ''}` } : {}),
-        // Supermärkte und kleine Läden einer Kette (Denner Express, Coop Pronto, Migrolino …, D-100) vor Kiosken, Drogerien usw.
-        rank: tags.shop === 'supermarket' || (tags.shop === 'convenience' && (!!tags.brand || CHAIN_RE.test(name))) ? 0 : 1,
-      }
-    })
-    .filter((s): s is Shop & { rank: number } => !!s)
+  const toShops = (elements: OsmElement[]) =>
+    elements
+      .map((el): (Shop & { rank: number }) | null => {
+        const id = `${el.type}/${el.id}`
+        const p = el.center ?? (el.lat != null && el.lon != null ? { lat: el.lat, lon: el.lon } : null)
+        const tags = el.tags ?? {}
+        const name: string | undefined = tags.name ?? tags.brand
+        if (!p || !name || seen.has(id)) return null
+        seen.add(id)
+        return {
+          id,
+          name,
+          brand: (tags.brand as string | undefined) ?? null,
+          distance: meters(lat, lon, p.lat, p.lon),
+          lat: p.lat,
+          lon: p.lon,
+          ...(tags.opening_hours ? { hours: tags.opening_hours } : {}),
+          ...(tags.branch ? { branch: tags.branch } : {}),
+          ...(tags['addr:street'] ? { street: `${tags['addr:street']}${tags['addr:housenumber'] ? ' ' + tags['addr:housenumber'] : ''}` } : {}),
+          // Supermärkte und kleine Läden einer Kette (Denner Express, Coop Pronto, Migrolino …, D-100) vor Kiosken, Drogerien usw.
+          rank: tags.shop === 'supermarket' || (tags.shop === 'convenience' && (!!tags.brand || CHAIN_RE.test(name))) ? 0 : 1,
+        }
+      })
+      .filter((s): s is Shop & { rank: number } => !!s)
+
+  let all = toShops(await runQuery(near, 10, 32))
+  if (!all.some((s) => s.distance <= radius || s.rank === 0)) all = [...all, ...toShops(await runQuery(far, 20, 128))]
 
   const strip = ({ rank, ...shop }: Shop & { rank: number }): Shop => ({ ...shop, supermarket: rank === 0 })
   const close = all.filter((s) => s.distance <= radius).sort((a, b) => a.rank - b.rank || a.distance - b.distance)
@@ -365,10 +392,10 @@ export async function lookupStreets(shops: Shop[]): Promise<Record<string, strin
   const saved = readStreets()
   const todo = shops.filter((s) => !s.street && saved[s.id] === undefined && s.lat != null && s.lon != null).slice(0, 8)
   if (!todo.length) return saved
-  const query = `[out:json][timeout:15];(${todo
+  const query = `(${todo
     .map((s) => `nwr(around:${STREET_RADIUS_M},${s.lat},${s.lon})["addr:street"]["addr:housenumber"];`)
     .join('')});out center tags 80;`
-  const found = await runQuery(query)
+  const found = await runQuery(query, 10, 32)
   for (const s of todo) {
     let best: { d: number; street: string } | null = null
     for (const el of found) {

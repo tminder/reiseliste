@@ -5,7 +5,7 @@ import { isIos, mapApp, mapLink, needsMapChoice, setMapApp } from '../../lib/lin
 import { knownStreet, lookupStreets, shopTitle } from '../../lib/nearby'
 import { t, uiLang } from '../../i18n'
 import { describeHours } from '../../lib/openingHours'
-import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, looksInside, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
+import { CHOSEN_GRACE_MS, FAR_RADIUS_M, findNearbyShops, getPosition, isInsideSupermarket, formatDistance, looksInside, osmCooldownS, setLocationConsent, LEFT_SHOP_M, meters, NearbyError, recentSuggestion, type Shop } from '../../lib/nearby'
 import { RETRY_S } from './helpers'
 import { useCountdown } from '../useCountdown'
 import { cachedCountry, detectCountry } from '../../lib/country'
@@ -344,9 +344,12 @@ export function ShopBar({
               <p className="muted small-text shop-error">
                 {state.error}
                 {retryIn != null && <> {t('retryIn', { s: retryIn })}</>}{' '}
-                <button className="link" onClick={() => void detect(true)}>
-                  {t('now')}
-                </button>
+                {/* „jetzt“ erst nach der Pause von 30 s, die Overpass verlangt (D-086) */}
+                {osmCooldownS() === 0 && (
+                  <button className="link" onClick={() => void detect(true)}>
+                    {t('now')}
+                  </button>
+                )}
               </p>
             )}
             {!options.length && !state.error && !state.loading && state.shops && (

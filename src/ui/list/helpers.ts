@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { type Item } from '../../lib/store'
 
 // Wartezeiten zwischen automatischen neuen Versuchen, wenn OpenStreetMap ausgelastet ist (danach alle 5 Min.)
-// Neuer Versuch bei überlastetem Server: am Anfang häufiger (D-086), dann seltener, um die Server zu schonen
-export const RETRY_S = [5, 10, 20, 30, 60, 120, 300]
+// Frühestens nach 30 s (Regel der Overpass-Betreiber, sonst droht eine Sperre der App, D-086), dann seltener
+export const RETRY_S = [30, 60, 120, 300]
 
 export const DAY_MS = 24 * 60 * 60 * 1000
 
