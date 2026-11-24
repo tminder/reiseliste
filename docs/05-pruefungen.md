@@ -1,7 +1,11 @@
 # Regelmässige Prüfungen
 
-Stand: 2026-11-22 · Was von Hand wiederkehrend geprüft oder erneuert werden muss. Wann zuletzt, zeigt Git (Commit „Prüfung: R-…“).
+Stand: 2026-11-24 · Was von Hand wiederkehrend geprüft oder erneuert werden muss. „Zuletzt“ ist das Datum des letzten Durchgangs (– = noch nie); der Commit dazu heisst „Prüfung: R-…“.
 
-| ID | Was | Wann | Wie |
-| --- | --- | --- | --- |
-| R-001 | Bildschirmfotos der Landingpages (`public/landing/de-1…3.webp`, `en-1…3.webp`) zeigen den aktuellen Stand der App. | Nach sichtbaren Änderungen an der Liste, den Vorschlägen oder der Karte „Dem Personal zeigen“, spätestens alle 3 Monate. | `npm run landing:shots` (Playwright, Beispieldaten „Barcelona“, danach Umwandlung in WebP). Fotos ansehen, Alt-Texte in `public/de/index.html` und `public/en/index.html` anpassen, falls sich der Inhalt geändert hat. |
+| ID | Was | Wann | Wie | Zuletzt |
+| --- | --- | --- | --- | --- |
+| R-001 | Bildschirmfotos der Landingpages (`public/landing/de-1…3.webp`, `en-1…3.webp`) zeigen den aktuellen Stand der App. | Nach sichtbaren Änderungen an der Liste, den Vorschlägen oder der Karte „Dem Personal zeigen“, spätestens alle 3 Monate. | `npm run landing:shots` (Playwright, Beispieldaten „Barcelona“, danach Umwandlung in WebP). Fotos ansehen, Alt-Texte in `public/de/index.html` und `public/en/index.html` anpassen, falls sich der Inhalt geändert hat. | 2026-11-22 |
+| R-002 | Nutzungsregeln der öffentlichen Dienste: Overpass (Ladensuche), Open Food Facts (Fotos), Nominatim (Land), Frankfurter (Kurse). Hält sich die App an Limits, Pausen und Kennzeichnung? | Alle 3 Monate und wenn ein Dienst auffällig oft „ausgelastet“ meldet. | Claude liest Dokumentation und Ankündigungen der Betreiber (z. B. Overpass-Thread „performance issues“ im OSM-Forum, API-Doku von Open Food Facts) und vergleicht mit `src/lib/nearby.ts`, `photos.ts`, `country.ts`, `currency.ts` (D-086, D-094, D-100). | 2026-11-24 (nur Overpass und Open Food Facts) |
+| R-003 | Gerätetest unterwegs: was nur mit echten Diensten und Geräten prüfbar ist. | Vor jeder grösseren Reise, sonst alle 3 Monate. | Auf dem Handy (iPhone als Home-Bildschirm-App, wenn möglich auch Android): Ladensuche in der Stadt und auf dem Land, Fotos bei drei Artikeln, „Umrechnen“ in einer Euro-Liste (D-093), „Vorlesen“ in einer Griechenland- oder Taiwan-Liste (D-092), Karten-Link aus der Ladenauswahl mit Apple Karten und Google Maps (D-101). Auffälligkeiten Claude melden. | – |
+| R-004 | Wörterbuch-Feedback auswerten: fehlende und falsche Begriffe aus den Rückmeldungen ins Wörterbuch übernehmen. | Monatlich, solange Rückmeldungen kommen. | Inhaber sagt „Wörterbuch-Feedback auswerten“; Ablauf in `docs/woerterbuch-feedback.md` (D-059). | – |
+| R-005 | Datensicherung: Läuft der Sicherungs-Job, und lässt sich eine Sicherung zurückspielen? Solange er ausgeschaltet ist (S-035): entscheiden, ob er eingeschaltet werden soll. | Alle 3 Monate. | Letzten Lauf des Workflows „Datenbank sichern“ auf GitHub ansehen; eine Sicherung in eine leere Test-Datenbank einspielen (z. B. lokal mit PGlite) und Stichproben vergleichen. | – |

@@ -18,11 +18,12 @@ Nach jeder Aufgabe prüfst du:
 | du eine Abkürzung nimmst, etwas ungetestet lässt oder eine Schwäche entdeckst | neue `S-` eintragen |
 | eine Schuld behoben ist | `S-` löschen |
 | etwas regelmässig von Hand geprüft oder erneuert werden muss | neue `R-` eintragen; fällt es weg, `R-` löschen |
+| eine Prüfung `R-` durchgeführt wurde | Spalte „Zuletzt“ auf das heutige Datum setzen, Commit „Prüfung: R-…“ |
 | sich Ziele oder Zielgruppen ändern | `01-ziele.md` anpassen |
 
 Regeln (Details in `docs/README.md`):
 
-- Keine Historie, keine Status-Spalten, keine Einträge wie „erledigt“ oder „ersetzt“. Die Historie steckt in Git.
+- Keine Historie, keine Status-Spalten, keine Einträge wie „erledigt“ oder „ersetzt“. Die Historie steckt in Git. Einzige Ausnahme: „Zuletzt“ bei den Prüfungen `R-`.
 - IDs nie wiederverwenden. Neue Einträge bekommen die nächsthöhere Nummer, die es je gab. Die höchste vergebene Nummer findest du per `git log -p -- docs/`.
 - Verweise auf gelöschte IDs in allen Dateien entfernen oder anpassen.
 - „Stand: JJJJ-MM-TT“ oben in jeder geänderten Datei auf das heutige Datum setzen.
