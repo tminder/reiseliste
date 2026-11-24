@@ -105,7 +105,15 @@ async function runQuery(query: string): Promise<OsmElement[]> {
     try {
       // Zeitlimit: Die Abfrage selbst darf 25 s dauern (D-094)
       const res = await fetch(url, { method: 'POST', body: new URLSearchParams({ data: query }), signal: timeout(35_000) })
-      if (res.ok) return ((await res.json()) as { elements: OsmElement[] }).elements
+      if (res.ok) {
+        const body = (await res.json()) as { elements: OsmElement[]; remark?: string }
+        // Zeitgrenze oder Speicher überschritten: Overpass antwortet trotzdem mit 200, aber unvollständig → nächsten Server versuchen
+        if (body.remark && /runtime error|timed out|out of memory/i.test(body.remark)) {
+          lastError = t('errOsmBusy')
+          continue
+        }
+        return body.elements
+      }
       lastError =
         res.status === 429 || res.status === 504
           ? t('errOsmBusy')
@@ -183,6 +191,11 @@ function relocate(result: NearbyResult, lat: number, lon: number): NearbyResult 
 const CHAIN_NAMES =
   '^(Denner|Coop|Migros|Migrolino|Volg|Spar|Avec|Aldi|Lidl|Carrefour|Mercadona|Dia|Billa|Rewe|Edeka|Penny|Netto|Albert Heijn|Jumbo|Tesco|Sainsbury|Monoprix|Franprix|Intermarché|Auchan|Conad|Pam|Despar|Eurospin|Konzum|Tommy|Pingo Doce|Continente|Sklavenitis|AB)( |-|$)'
 const CHAIN_RE = new RegExp(CHAIN_NAMES, 'i')
+/**
+ * Namenssuche nur im Nahbereich: Ein Ausdruck über den Namen ist für Overpass teuer, über 10 und 20 km lief die Abfrage
+ * in die Zeitgrenze (Ladensuche „geht nicht mehr“). Weiter weg genügen Supermärkte und Läden mit Marke.
+ */
+const CHAIN_NAME_MAX_M = 3_000
 
 export async function findNearbyShops(force = false, precise = false): Promise<NearbyResult & { fresh: boolean; lat: number; lon: number }> {
   const pos = await getPosition(precise ? 10_000 : undefined)
@@ -202,7 +215,7 @@ export async function findNearbyShops(force = false, precise = false): Promise<N
   const at = `${lat},${lon}`
   const query = `[out:json][timeout:25];
 nwr(around:${radius},${at})["shop"~"^(supermarket|convenience|greengrocer|chemist)$"];out center tags 30;
-${FAR_STEPS_M.map((r) => `(nwr(around:${r},${at})["shop"="supermarket"];nwr(around:${r},${at})["shop"="convenience"]["brand"];nwr(around:${r},${at})["shop"="convenience"]["name"~"${CHAIN_NAMES}",i];);out center tags 40;`).join('\n')}`
+${FAR_STEPS_M.map((r) => `(nwr(around:${r},${at})["shop"="supermarket"];nwr(around:${r},${at})["shop"="convenience"]["brand"];${r <= CHAIN_NAME_MAX_M ? `nwr(around:${r},${at})["shop"="convenience"]["name"~"${CHAIN_NAMES}",i];` : ''});out center tags 40;`).join('\n')}`
 
   const seen = new Set<string>()
   const all = (await runQuery(query))

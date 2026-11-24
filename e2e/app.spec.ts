@@ -539,6 +539,21 @@ test.describe('Ladensuche: Fehler nur im Auswahlblatt (D-086)', () => {
   })
 })
 
+test.describe('Overpass mit Zeitüberschreitung (D-100)', () => {
+  test.use({ permissions: ['geolocation'], geolocation: { latitude: 41.39, longitude: 2.17, accuracy: 20 } })
+  test('Antwort mit „runtime error“ gilt als Fehler, der zweite Server wird gefragt', async ({ page, problems }) => {
+    void problems
+    const json = (b: unknown) => ({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(b) })
+    await page.route(/nominatim/, (r) => r.fulfill(json({ address: { country_code: 'es' } })))
+    await page.route(/overpass-api\.de/, (r) => r.fulfill(json({ elements: [], remark: 'runtime error: Query timed out in "query" at line 3 after 26 seconds.' })))
+    await page.route(/private\.coffee/, (r) => r.fulfill(json({ elements: [{ type: 'node', id: 1, lat: 41.392, lon: 2.17, tags: { shop: 'supermarket', name: 'Mercadona' } }] })))
+    await page.addInitScript(() => localStorage.setItem('rl:locConsent', 'yes'))
+    await seed(page, [item(1, 'Milch', 'milch')])
+    await page.goto(`/#/l/${LIST}`)
+    await expect(page.locator('.shop-current')).toContainText('Mercadona')
+  })
+})
+
 test.describe('Neue Liste zu Hause in der Schweiz (D-087)', () => {
   test.use({ permissions: ['geolocation'], geolocation: { latitude: 47.37, longitude: 8.54, accuracy: 20 } })
 
@@ -806,6 +821,8 @@ test.describe('Kleine Läden einer Kette (D-100)', () => {
     await expect(page.locator('.shop-current')).toContainText('Denner Express')
     expect(query).toContain('["shop"="convenience"]["brand"]')
     expect(query).toContain('["shop"="convenience"]["name"~"^(Denner|')
+    // Namenssuche nur bis 3 km, sonst läuft die Abfrage in die Zeitgrenze
+    expect(query.split('\n').find((l) => l.includes('around:20000'))).not.toContain('"name"~')
     await page.getByRole('button', { name: 'Laden ändern' }).click()
     await expect(page.locator('.shop-options')).not.toContainText('Kiosk am Eck')
   })

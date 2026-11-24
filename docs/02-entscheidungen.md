@@ -1,6 +1,6 @@
 # Entscheidungen
 
-Stand: 2026-11-22 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
+Stand: 2026-11-24 · Nur aktuell gültige Entscheidungen. Format: Entscheidung · Begründung · Folgen.
 
 ---
 
@@ -618,7 +618,7 @@ Stand: 2026-11-22 · Nur aktuell gültige Entscheidungen. Format: Entscheidung �
 
 ## D-100 · Kleine Läden einer Kette wie Supermärkte behandeln
 
-- **Entscheidung:** Kleine Läden (`shop=convenience`), die in OpenStreetMap eine Marke haben (`brand`) oder deren Name mit einer bekannten Kette beginnt (Denner, Coop, Migros, Volg, Spar, Lidl, Carrefour … ; Liste in `src/lib/nearby.ts`), zählen wie Supermärkte: Sie werden auch weiter weg vorgeschlagen (Suche in Stufen bis 20 km), stehen bei der Auswahl vorne und gelten für „Einkauf beginnt“ (D-020). Beispiele: Denner Express, Coop Pronto, Migrolino, Spar Express, Carrefour Express. Kleine Läden ohne Marke (Kioske, Tankstellenshops) erscheinen weiterhin nur, wenn man praktisch davorsteht.
+- **Entscheidung:** Kleine Läden (`shop=convenience`), die in OpenStreetMap eine Marke haben (`brand`) oder deren Name mit einer bekannten Kette beginnt (Denner, Coop, Migros, Volg, Spar, Lidl, Carrefour … ; Liste in `src/lib/nearby.ts`; am Namen nur im Umkreis bis 3 km, weiter weg war die Abfrage für Overpass zu teuer und lief in die Zeitgrenze), zählen wie Supermärkte: Sie werden auch weiter weg vorgeschlagen (Suche in Stufen bis 20 km), stehen bei der Auswahl vorne und gelten für „Einkauf beginnt“ (D-020). Beispiele: Denner Express, Coop Pronto, Migrolino, Spar Express, Carrefour Express. Kleine Läden ohne Marke (Kioske, Tankstellenshops) erscheinen weiterhin nur, wenn man praktisch davorsteht.
 - **Begründung:** Rückmeldung des Inhabers: Ein Denner Express in der Nähe wurde nicht gefunden, obwohl er in OpenStreetMap eingetragen ist. Solche Läden sind meist als `convenience` eingetragen, die Suche ausserhalb des Ladens kannte aber nur `supermarket`. Ein zweiter Denner Express (Landenbergstrasse, Zürich) hatte keine Marke eingetragen, nur den Namen.
 - **Folgen:** Etwas grössere Antworten von Overpass. Ketten-Kioske mit Marke (z. B. k kiosk) erscheinen nun auch als Vorschlag; bei Bedarf eine Ausschlussliste ergänzen. Die Namensliste muss von Hand gepflegt werden; Ketten, die fehlen, erscheinen ohne Marke nur aus nächster Nähe.
 
