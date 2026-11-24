@@ -688,17 +688,24 @@ test.describe('Fotos mit Laden (D-094)', () => {
       status: 200,
       contentType: 'application/json',
       headers: { 'access-control-allow-origin': '*' },
-      body: JSON.stringify({ products: [{ code: '1', product_name: 'Leche entera', brands: 'Hacendado', image_front_small_url: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=' }] }),
+      body: JSON.stringify({
+        products: [
+          { code: '2', product_name: 'Leche Pascual', brands: 'Pascual', image_front_small_url: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=', stores_tags: ['carrefour'] },
+          { code: '1', product_name: 'Leche entera', brands: 'Hacendado', image_front_small_url: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=', stores_tags: ['mercadona'] },
+        ],
+      }),
     })
   })
   await seed(page, [item(1, 'Milch', 'milch')])
   await page.goto(`/#/l/${LIST}`)
   await page.locator('.item', { hasText: 'Milch' }).getByRole('button', { name: 'Produktfotos' }).click()
-  await expect(page.locator('.photos-note')).toContainText(/Neuer Versuch in 1[45] s/)
+  await expect(page.locator('.photos-note')).toContainText(/Neuer Versuch in (59|60) s/) // Limit pro Minute: frühestens nach 60 s
   await page.clock.fastForward(5_000)
-  await expect(page.locator('.photos-note')).toContainText(/Neuer Versuch in (9|10) s/)
-  await page.clock.fastForward(11_000)
+  await expect(page.locator('.photos-note')).toContainText(/Neuer Versuch in (54|55) s/)
+  await page.clock.fastForward(56_000)
   await expect(page.locator('.photos')).toContainText('Leche entera')
+  // Eine Anfrage pro Artikel: Produkte der Kette werden aus dem Landesergebnis vorgezogen (D-094)
+  await expect(page.locator('.photos')).not.toContainText('Pascual')
   expect(calls).toBe(2)
   })
 })

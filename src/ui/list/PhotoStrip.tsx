@@ -4,8 +4,8 @@ import { t } from '../../i18n'
 import { loadPhotos, PhotoError, type Photo } from '../../lib/photos'
 import { useCountdown } from '../useCountdown'
 
-/** Wartezeiten bei Fehlern von Open Food Facts (Sekunden), danach alle 5 Minuten */
-const PHOTO_RETRY_S = [15, 30, 60, 120, 300]
+/** Wartezeiten bei Fehlern von Open Food Facts (Sekunden), danach alle 5 Minuten. Das Limit gilt pro Minute: frühestens nach 60 s */
+const PHOTO_RETRY_S = [60, 120, 300]
 
 export function PhotoStrip({
   country,
