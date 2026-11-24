@@ -12,7 +12,7 @@
 import { t } from '../i18n'
 import { normalize } from './translate'
 import { timeout } from './net'
-import { CONCEPTS } from '../data/dictionary'
+import { CONCEPT_BY_ID, CONCEPTS } from '../data/dictionary'
 
 export interface Photo {
   code: string
@@ -68,7 +68,7 @@ export const OFF_COUNTRY: Record<string, string> = {
 
 const TTL = 90 * 24 * 60 * 60 * 1000
 const MAX = 4
-const FIELDS = 'code,product_name,brands,image_front_small_url,stores_tags'
+const FIELDS = 'code,product_name,brands,image_front_small_url,stores_tags,categories_tags'
 
 export type PhotoResult = { photos: Photo[]; fromStore: boolean }
 
@@ -121,7 +121,7 @@ export class PhotoError extends Error {
   }
 }
 
-type OffProduct = { code: string; product_name?: string; brands?: string; image_front_small_url?: string; stores_tags?: string[] }
+type OffProduct = { code: string; product_name?: string; brands?: string; image_front_small_url?: string; stores_tags?: string[]; categories_tags?: string[] }
 
 // Eigene Bremse: höchstens 8 Suchen pro gleitender Minute (Open Food Facts erlaubt 10). Weitere warten.
 const SEARCHES_PER_MIN = 8
@@ -157,9 +157,10 @@ async function fetchJson(url: string): Promise<OffProduct[]> {
   }
 }
 
-function toPhotos(products: OffProduct[]): Photo[] {
+/** not: Unterkategorien, die nicht passen (Ketchup ist in Open Food Facts eine Tomatensauce, D-010) */
+export function toPhotos(products: OffProduct[], not: string[] = []): Photo[] {
   return products
-    .filter((p) => p.image_front_small_url)
+    .filter((p) => p.image_front_small_url && !p.categories_tags?.some((c) => not.includes(c)))
     .map((p) => ({
       code: p.code,
       name: p.product_name ?? '',
@@ -171,7 +172,7 @@ function toPhotos(products: OffProduct[]): Photo[] {
 }
 
 /** Kategorie-Suche (API v2): meistgescannte Produkte der Kategorie im Land, mit ihren Läden */
-async function byCategory(country: string, category: string): Promise<Photo[]> {
+async function byCategory(country: string, category: string, not: string[]): Promise<Photo[]> {
   const params = new URLSearchParams({
     categories_tags: category,
     sort_by: 'unique_scans_n',
@@ -181,7 +182,7 @@ async function byCategory(country: string, category: string): Promise<Photo[]> {
   })
   // Unbekanntes Land: ohne Länderfilter („en:world“ gibt es als Tag nicht und lieferte 0 Treffer)
   if (OFF_COUNTRY[country]) params.set('countries_tags', OFF_COUNTRY[country])
-  return toPhotos(await fetchJson(`https://world.openfoodfacts.org/api/v2/search?${params}`))
+  return toPhotos(await fetchJson(`https://world.openfoodfacts.org/api/v2/search?${params}`), not)
 }
 
 /** Freitext (nur für eigene Begriffe): nur Produkte, deren Name mit dem Begriff beginnt oder ihn als Wort enthält */
@@ -225,7 +226,9 @@ export function loadPhotos(opts: { country: string; conceptId: string | null; te
   const { country, conceptId, term, store } = opts
   cleanOldCache()
   const category = conceptId ? OFF_CATEGORY[conceptId] : undefined
-  const what = category ?? `text:${normalize(term)}`
+  const not = (conceptId && CONCEPT_BY_ID.get(conceptId)?.offNot) || []
+  // Ausschlüsse gehören zum Schlüssel: Ändern sie sich, wird neu gesucht
+  const what = category ? [category, ...not.map((n) => `-${n}`)].join('') : `text:${normalize(term)}`
   const key = cacheKey(country, what)
   const cached = readCache(key)
   if (cached) return Promise.resolve(pick(cached, store))
@@ -233,7 +236,7 @@ export function loadPhotos(opts: { country: string; conceptId: string | null; te
   const run = async (): Promise<PhotoResult> => {
     const again = readCache(key)
     if (again) return pick(again, store)
-    const all = category ? await byCategory(country, category) : await byText(country, term)
+    const all = category ? await byCategory(country, category, not) : await byText(country, term)
     writeCache(key, all)
     return pick(all, store)
   }

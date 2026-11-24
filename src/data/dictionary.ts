@@ -28,6 +28,8 @@ export interface Concept {
   category: Category
   /** Kategorie in Open Food Facts; ohne Eintrag kein Foto-Knopf */
   off?: string
+  /** Unterkategorien, die nicht passen (z. B. Ketchup unter Tomatensaucen) */
+  offNot?: string[]
   /** Tipp zum Artikel (💡); fehlt die Sprache des Betrachters, gilt Englisch */
   hint?: Partial<Record<Lang, string>>
 }
